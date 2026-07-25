@@ -4,6 +4,8 @@ Ein vollwertiges **Kanban-Board als eigener ioBroker-Adapter**. Der Adapter brin
 
 > **Für wen?** Für alle, die im Smart-Home eine gemeinsame Aufgabenverwaltung wollen – Familie, WG, Haustechnik-Wartung – und diese eng mit ioBroker (Skripte, Lovelace, Node-RED) verzahnen möchten.
 
+> **Version 0.2.1** – Express 5, Avatar-Upload repariert (CSP blockierte `blob:`-URLs), Node.js 20+ und Admin 7.8.23+, fertiger Deep-Link im Ereignis, Benachrichtigungs-Routing per Skript (Telegram/Pushover, siehe unten), aktualisierte Abhängigkeiten und Repository-Konformität.
+
 > **Version 0.2.0** – Mobil (Akkordeon-Spalten, vollflächige Dialoge mit fester Aktionsleiste), Benutzer je Board zuweisbar, Kopf-Chips als je Board gespeicherter Filter, Benutzerfarben in der Weboberfläche (ohne Neustart), automatische Schrift-Kontrastfarbe auf Labels/Avataren, Benachrichtigungs-Link je Board, Datums- und Uhrzeitformat pro Instanz konfigurierbar (moment-/Day.js-Tokens inkl. lokalisierter Monats- und Wochentagsnamen), mindestens ein Zuständiger je Karte Pflicht, Anzeige-Limit je Spalte, durchgängig MDI-Icons.
 
 > **Version 0.1.3** – Fix: Der Aufgaben-Zähler in der Spaltenkopfzeile berücksichtigt den aktiven Personen-/Label-Filter (zeigte vorher die Gesamtzahl der Spalte).
@@ -29,6 +31,7 @@ Ein vollwertiges **Kanban-Board als eigener ioBroker-Adapter**. Der Adapter brin
   - [Kopfleiste](#kopfleiste)
   - [Boards, Spalten & Labels](#boards-spalten--labels)
   - [Karten – alle Felder](#karten--alle-felder)
+  - [Sortierung & Reihenfolge](#sortierung--reihenfolge)
   - [Wiederholungen](#wiederholungen)
   - [Feiertage](#feiertage)
   - [Benutzer im Board](#benutzer-im-board)
@@ -287,6 +290,12 @@ Aus der eingetragenen Adresse leitet das Board automatisch ein passendes Icon ab
 
 Anklickbar sind nur die sicheren Schemata `http(s)`, `mailto:`, `tel:` und `geo:` – siehe [Sicherheit & Zugriffsschutz](#sicherheit--zugriffsschutz).
 
+### Sortierung & Reihenfolge
+
+Kanban kennt bewusst **keine automatische Sortierung**. Die Reihenfolge der Karten innerhalb einer Spalte bestimmst du selbst: Karte anklicken, gedrückt halten und nach oben oder unten ziehen (funktioniert auch per Touch am Smartphone). Genauso ziehst du eine Karte per Drag & Drop in eine andere Spalte, um ihren Status zu ändern. Die gewählte Reihenfolge bleibt erhalten und wird live auf alle offenen Ansichten synchronisiert.
+
+Eine automatische Sortierung (etwa nach Fälligkeit oder Priorität) ist absichtlich nicht der Standard, weil die passende Regel vom Anwendungsfall abhängt. Überfällige und bald fällige Karten werden stattdessen farblich hervorgehoben, sodass Dringendes auffällt, egal an welcher Position es steht.
+
 ### Wiederholungen
 
 Wiederkehrende Aufgaben funktionieren **beim Erledigen** (Kanban-typisch): Sobald eine wiederkehrende Karte in die „Erledigt"-Spalte wandert, wird automatisch eine **frische Karte** mit dem nächsten passenden Fälligkeitsdatum in der ersten Nicht-Erledigt-Spalte angelegt (Checklisten-Haken zurückgesetzt). Karten mit Wiederholung tragen ein Wiederholungs-Badge (Kreispfeil-Symbol).
@@ -512,6 +521,145 @@ Ziel-URLs und Ereignisfilter werden in den Instanzeinstellungen gepflegt ([Tab �
 ```
 
 Jedes Event hat die Struktur `{ event, ts, board:{id,title}, card:{…}, detail:{…} }`. Das Feld `detail` variiert je Ereignistyp (z. B. `assignee` bei `cardAssigned`, `fromColumn`/`toColumn` bei `cardMoved`).
+
+### Benachrichtigungen an beliebige Dienste (Telegram, Pushover, ...)
+
+Neben der eingebauten E-Mail-Benachrichtigung laesst sich **jeder** Dienst anbinden, ohne dass er fest im Adapter integriert sein muss. Bei jedem Ereignis schreibt der Adapter den State `kanban.0.lastEvent` und sendet - falls konfiguriert - einen [ausgehenden Webhook](#webhooks--ausgehend). Ein kurzes Skript (JavaScript-Adapter) oder ein Node-RED-Flow greift das ab und leitet es an Telegram, Pushover, Signal, Pushbullet o. AE. weiter.
+
+**Aufbau eines Ereignisses** (Inhalt von `lastEvent` bzw. Webhook-Body):
+
+```json
+{
+  "event": "cardAssigned",
+  "ts": "2026-07-25T09:00:00.000Z",
+  "board": { "id": "familie", "title": "Familie" },
+  "card": { "id": "c_abc", "title": "Muelltonne rausstellen", "due": "2026-07-27", "assignees": ["user1"], "priority": 1, "labels": ["haushalt"] },
+  "detail": { "assignee": "user1", "by": "user2" },
+  "link": "http://<host>:8095/?board=familie&card=c_abc"
+}
+```
+
+- `event` - Ereignistyp: `cardCreated`, `cardAssigned`, `cardUpdated`, `cardMoved`, `cardDone`, `cardDeleted`, `cardDue`.
+- `card.assignees` - die Zustaendigen (Benutzer-**IDs**, nicht Anzeigenamen); an sie richtet sich die Benachrichtigung.
+- `link` - fertiger Deep-Link zur Karte (ab 0.2.1; nutzt die Basis-URL aus den Instanzeinstellungen).
+- `detail.by` - **wer die Aenderung ausgeloest hat.** Wichtig: Das Board arbeitet **ohne Login** - die Weboberflaeche kennt den Verursacher nicht und laesst `by` leer bzw. `api`. Gefuellt ist es nur bei Aenderungen ueber API, Webhook oder Skript, die ein `by` mitgeben (z. B. eigene Agenten). Ein "nicht den Ausloeser benachrichtigen"-Filter greift daher nur bei solchen Quellen.
+
+> **Voraussetzung je Dienst:** Der Empfaenger muss dem Dienst bekannt sein. Bei **Telegram** z. B. muss die Person dem Bot einmalig `/start` (ggf. + Passwort) senden; danach steht sie mit ihrer numerischen **chatId** im State `telegram.0.communicate.users`. Diese chatId traegst du unten in `USERS` als Wert ein - der **Schluessel** ist die Kanban-Benutzer-ID (z. B. `user1`), nicht der Anzeigename.
+
+**Beispiel: Telegram** (im JavaScript-Adapter als Skript anlegen). Oben `USERS` (Kanban-ID -> Telegram-**chatId**) und ggf. `BASE_URL` anpassen. Fuer einen anderen Dienst nur die `sendTo`-Zeile tauschen (siehe darunter):
+
+```javascript
+// ============================================================
+//  Kanban  ->  messenger notifications (Telegram example)
+//  Runs in the ioBroker JavaScript adapter.
+//  Reacts to kanban.0.lastEvent and sends the assigned users a
+//  message. The same pattern works with Pushover, Signal,
+//  Pushbullet, WhatsApp ... - just swap the sendTo line.
+// ============================================================
+
+// ---- Configuration -----------------------------------------
+const KANBAN    = 'kanban.0';                 // Kanban instance
+const MESSENGER = 'telegram.0';               // messenger instance (Telegram here)
+const BASE_URL  = 'http://192.168.1.10:8095'; // board base URL (fallback if the event has no link)
+
+// Mapping: Kanban user id  ->  messenger chat id
+// Key   = the Kanban user id (lowercase "name" as in card.assignees, e.g. "user1"), NOT the display name.
+// Value = the recipient id (Telegram: the numeric "ID" column of telegram.0.communicate.users).
+const USERS = {
+    user1: '123456789',
+    // user2: '234567890',
+};
+
+// Which events should trigger a message?
+// Available: cardCreated, cardAssigned, cardUpdated, cardMoved, cardDone, cardDeleted, cardDue
+// Tip: 'cardAssigned' + 'cardDue' is enough for most setups. Adding 'cardCreated'
+//      sends an extra message when a card is created.
+const EVENTS = ['cardAssigned', 'cardDue'];
+
+// Skip the person who triggered the change? Uses ev.detail.by (the actor).
+// Note: the board has NO login, so the web UI does not identify the actor -
+// "by" is only filled for changes made via API / webhooks / scripts that pass
+// a "by" field (e.g. your own agents). For plain clicks in the board UI this
+// option therefore has no effect.
+const SKIP_SELF = true;
+
+// If a person has no messenger mapping: send to everyone? (false = skip)
+const BROADCAST_IF_UNMAPPED = false;
+// ------------------------------------------------------------
+
+const HEADER = {
+    cardAssigned: 'Assigned to you',
+    cardDue:      'Due',
+    cardCreated:  'New card',
+    cardMoved:    'Moved',
+    cardDone:     'Done',
+    cardUpdated:  'Updated',
+};
+const PRIO = ['', 'Priority: High', 'Priority: Urgent'];
+
+function buildText(ev) {
+    const c = ev.card || {};
+    const b = ev.board || {};
+    const lines = ['[Kanban] ' + (HEADER[ev.event] || ev.event), ''];
+    lines.push(c.title || '(no title)');
+    lines.push('Board: ' + (b.title || b.id || '?'));
+    if (c.due)      lines.push('Due: ' + c.due + (c.dueTime ? ' ' + c.dueTime : ''));
+    if (c.priority) lines.push(PRIO[c.priority]);
+    // The adapter adds a ready-to-use deep link as ev.link; fall back to building one
+    const link = ev.link || (c.id && b.id
+        ? BASE_URL + '/?board=' + encodeURIComponent(b.id) + '&card=' + encodeURIComponent(c.id)
+        : '');
+    if (link) { lines.push(''); lines.push(link); }
+    return lines.join('\n');
+}
+
+on({ id: KANBAN + '.lastEvent', change: 'any' }, (obj) => {
+    let ev;
+    try { ev = JSON.parse(obj.state.val); } catch (e) { return; }
+    if (!ev || !EVENTS.includes(ev.event)) return;
+
+    // Determine recipients
+    let recipients;
+    if (ev.event === 'cardAssigned' && ev.detail && ev.detail.assignee) {
+        recipients = [ev.detail.assignee];                 // only the newly assigned person
+    } else {
+        recipients = (ev.card && ev.card.assignees) || []; // all assignees
+    }
+
+    // Optionally drop the person who triggered the change (no self-notification)
+    const by = ev.detail && ev.detail.by;
+    if (SKIP_SELF && by) recipients = recipients.filter(u => u !== by);
+    if (!recipients.length) return;
+
+    const text = buildText(ev);
+
+    const already = new Set();
+    for (const uid of recipients) {
+        const chatId = USERS[uid];
+        if (chatId) {
+            if (already.has(chatId)) continue;
+            already.add(chatId);
+            sendTo(MESSENGER, { chatId: chatId, text: text }); // adjust to your messenger's sendTo parameters if needed
+        } else if (BROADCAST_IF_UNMAPPED) {
+            sendTo(MESSENGER, { text: text }); // adjust to your messenger's broadcast parameters if needed
+        }
+        // otherwise: no mapping -> skipped
+    }
+});
+```
+
+**Andere Dienste** - nur die Sende-Zeile tauschen:
+
+```javascript
+// Pushover  (message ist Pflicht; title/sound/priority/device optional)
+sendTo('pushover.0', { title: 'Kanban', message: text });
+
+// Pushbullet
+sendTo('pushbullet.0', { type: 'note', title: 'Kanban', message: text });
+
+// WhatsApp (whatsapp-cmb) - phone optional = Standardnummer
+sendTo('whatsapp-cmb.0', 'send', { text: text, phone: '+49170...' });
+```
 
 ### sendTo & action-State
 

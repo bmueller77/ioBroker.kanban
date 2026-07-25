@@ -1,10 +1,19 @@
 {
   "common": {
     "name": "kanban",
-    "version": "0.2.0",
+    "version": "0.2.1",
     "titleLang": {
       "en": "Kanban Board",
-      "de": "Kanban Board"
+      "de": "Kanban Board",
+      "ru": "Kanban Board",
+      "pt": "Kanban Board",
+      "nl": "Kanban Board",
+      "fr": "Kanban Board",
+      "it": "Kanban Board",
+      "es": "Kanban Board",
+      "pl": "Kanban Board",
+      "uk": "Kanban Board",
+      "zh-cn": "Kanban Board"
     },
     "keywords": [
       "kanban",
@@ -22,7 +31,16 @@
     "tier": 3,
     "desc": {
       "en": "Kanban board with own web server, webhooks, multi-user support and email notifications",
-      "de": "Kanban-Board mit eigenem Webserver, Webhooks, Multiuser-Support und E-Mail-Benachrichtigungen"
+      "de": "Kanban-Board mit eigenem Webserver, Webhooks, Multiuser-Support und E-Mail-Benachrichtigungen",
+      "ru": "Канбан-доска с собственным веб-сервером, вебхуками, поддержкой нескольких пользователей и уведомлениями по электронной почте",
+      "pt": "Quadro Kanban com servidor web próprio, webhooks, suporte multiusuário e notificações por e-mail",
+      "nl": "Kanban-bord met eigen webserver, webhooks, ondersteuning voor meerdere gebruikers en e-mailmeldingen",
+      "fr": "Tableau Kanban avec serveur web intégré, webhooks, support multi-utilisateurs et notifications par e-mail",
+      "it": "Bacheca Kanban con web server integrato, webhook, supporto multiutente e notifiche via e-mail",
+      "es": "Tablero Kanban con servidor web propio, webhooks, soporte multiusuario y notificaciones por correo electrónico",
+      "pl": "Tablica Kanban z własnym serwerem WWW, webhookami, obsługą wielu użytkowników i powiadomieniami e-mail",
+      "uk": "Канбан-дошка з власним вебсервером, вебхуками, підтримкою кількох користувачів і сповіщеннями електронною поштою",
+      "zh-cn": "带有独立 Web 服务器、Webhook、多用户支持和电子邮件通知的看板"
     },
     "authors": [
       "Björn Müller"
@@ -56,6 +74,10 @@
       "license": "MIT"
     },
     "news": {
+      "0.2.1": {
+        "en": "Express 5; fixed avatar upload (Content-Security-Policy blocked blob: URLs); requires Node.js 20+ and admin 7.8.23+; updated dependencies; adapter metadata for the ioBroker repository; docs with Telegram/Pushover notification examples.",
+        "de": "Express 5; Avatar-Upload repariert (Content-Security-Policy blockierte blob:-URLs); benötigt Node.js 20+ und Admin 7.8.23+; aktualisierte Abhängigkeiten; Adapter-Metadaten für das ioBroker-Repository; Doku mit Telegram-/Pushover-Beispielen."
+      },
       "0.2.0": {
         "en": "Mobile: columns stack & collapse (accordion), full-screen dialogs with a fixed action bar. Assignable users per board (Settings > Boards). Header chips are now a saved per-board filter. User colours set in the web UI (Settings > Users), applied without a restart. Colour rings on avatars and automatic black/white text on labels and avatars for readability. Per-board notification link target (board view, card editor or custom URL). New icons for the description badge and the done-column toggle. Per-instance date format is now freely configurable: moment/Day.js tokens incl. localised month/weekday names (e.g. DD. MMMM gives 20 July).",
         "de": "Mobil: Spalten untereinander & einklappbar (Akkordeon), vollflächige Dialoge mit fester Aktionsleiste. Benutzer je Board zuweisbar (Einstellungen > Boards). Kopf-Chips sind jetzt ein je Board gespeicherter Filter. Benutzerfarben in der Weboberfläche (Einstellungen > Users), ohne Neustart. Farbringe an Avataren und automatische Schwarz/Weiß-Schrift auf Labels und Avataren für Lesbarkeit. Benachrichtigungs-Link je Board (Board-Ansicht, Karten-Editor oder eigene URL). Neue Icons für Beschreibungs-Badge und Erledigt-Umschalter. Datumsformat pro Instanz frei konfigurierbar: moment/Day.js-Tokens inkl. lokalisierter Monats-/Wochentagsnamen (z. B. DD. MMMM ergibt 20. Juli)."

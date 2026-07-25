@@ -122,9 +122,13 @@ From **0.1.1**: token-secured write API, Markdown preview sanitized with DOMPuri
 
 ## Changelog
 
-### **WORK IN PROGRESS**
-- (ioBroker-Bot) Adapter requires admin >= 7.8.23 now.
-
+- **0.2.1**
+  - Now runs on **Express 5** (updated dependency)
+  - Fixed the **user avatar upload** ("image could not be read"): the Content-Security-Policy blocked the `blob:` URL used to read the file; the image is now loaded without a `blob:` URL, so the CSP stays strict
+  - Requires **Node.js 20+** (Node.js 18 reached end-of-life) and **admin 7.8.23+**
+  - Updated dependencies (`@iobroker/adapter-core`, `ws`)
+  - Adapter metadata (type, connection type, keywords) and repository housekeeping for the ioBroker repository (adapter checker)
+  - Every notification event now carries a ready-to-use deep **link** to the card; the docs gained copy-paste **Telegram/Pushover** notification-routing examples
 
 - **0.2.0**
   - Mobile: columns stack & collapse (accordion); full-screen dialogs with a fixed action bar (equal-width buttons), no sideways scrolling

@@ -35,19 +35,31 @@ function initials(name) {
 
 // Bilddatei quadratisch zuschneiden + auf `size` px verkleinern → PNG-Data-URL
 function fileToSquareDataUrl(file, size) {
-    return new Promise((resolve, reject) => {
-        const img = new Image();
-        img.onload = () => {
-            URL.revokeObjectURL(img.src);
-            const c = document.createElement('canvas');
-            c.width = c.height = size;
-            const ctx = c.getContext('2d');
-            const s = Math.min(img.width, img.height);
-            ctx.drawImage(img, (img.width - s) / 2, (img.height - s) / 2, s, s, 0, 0, size, size);
-            resolve(c.toDataURL('image/png'));
+    return loadImageSource(file).then(src => {
+        const c = document.createElement('canvas');
+        c.width = c.height = size;
+        const ctx = c.getContext('2d');
+        const dim = Math.min(src.width, src.height);
+        ctx.drawImage(src, (src.width - dim) / 2, (src.height - dim) / 2, dim, dim, 0, 0, size, size);
+        if (src.close) src.close();
+        return c.toDataURL('image/png');
+    });
+}
+
+// Laedt eine Bilddatei OHNE blob:-URL (CSP-konform): bevorzugt createImageBitmap,
+// Fallback ueber eine data:-URL (von der CSP erlaubt), da img-src kein blob: zulaesst.
+function loadImageSource(file) {
+    if (window.createImageBitmap) return createImageBitmap(file);
+    return new Promise(function (resolve, reject) {
+        var fr = new FileReader();
+        fr.onload = function () {
+            var img = new Image();
+            img.onload = function () { resolve(img); };
+            img.onerror = function () { reject(new Error('Bild konnte nicht gelesen werden')); };
+            img.src = fr.result;
         };
-        img.onerror = () => reject(new Error('Bild konnte nicht gelesen werden'));
-        img.src = URL.createObjectURL(file);
+        fr.onerror = function () { reject(new Error('Datei konnte nicht gelesen werden')); };
+        fr.readAsDataURL(file);
     });
 }
 

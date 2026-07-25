@@ -1,14 +1,15 @@
 {
   "name": "iobroker.kanban",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Kanban board for ioBroker with webhooks, multi-user support and email notifications",
   "author": {
-    "name": "Björn Müller"
+    "name": "Björn Müller",
+    "email": "bjoern@mueller.family"
   },
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/bmueller77/iobroker.kanban.git"
+    "url": "https://github.com/bmueller77/iobroker.kanban.git"
   },
   "bugs": {
     "url": "https://github.com/bmueller77/iobroker.kanban/issues"
@@ -25,7 +26,7 @@
   },
   "dependencies": {
     "@iobroker/adapter-core": "^3.4.3",
-    "express": "^4.21.2",
+    "express": "^5.2.1",
     "ws": "^8.21.1"
   },
   "main": "main.js",
@@ -38,6 +39,16 @@
     "LICENSE"
   ],
   "scripts": {
-    "start": "node main.js"
+    "start": "node main.js",
+    "test:package": "mocha test/package --exit",
+    "test:integration": "mocha test/integration --exit",
+    "test": "npm run test:package",
+    "lint": "eslint ."
+  },
+  "devDependencies": {
+    "@iobroker/adapter-dev": "^1.3.0",
+    "@iobroker/eslint-config": "^1.0.0",
+    "@iobroker/testing": "^5.0.4",
+    "@types/node": "^22.0.0"
   }
 }
