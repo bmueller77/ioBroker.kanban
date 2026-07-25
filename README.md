@@ -116,7 +116,7 @@ From **0.1.1**: token-secured write API, Markdown preview sanitized with DOMPuri
 
 ## Requirements
 
-- js-controller ≥ 6.0.11, Node.js ≥ 18
+- js-controller ≥ 6.0.11, Node.js ≥ 20
 - For e-mail notifications: a configured `iobroker.email` instance
 - Optional: `iobroker.feiertage` for region-accurate public-holiday calculation of the working-day recurrences
 
