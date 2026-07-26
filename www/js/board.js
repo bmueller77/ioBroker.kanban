@@ -273,7 +273,11 @@ function renderCard(state, board, card, actions, opts = {}) {
     const col = (board.columns || []).find(x => x.id === card.columnId);
     const isDone = !!(col && col.isDone);
 
-    c.appendChild(el('div', 'title' + (isDone && !inTrash ? ' title-done' : ''), card.title));
+    // Titel als eigener Textknoten, damit Zusatz-Buttons (Kopieren) daneben passen
+    // und die Durchstreichung nur den Text trifft.
+    const titleEl = el('div', 'title' + (isDone && !inTrash ? ' title-done' : ''));
+    titleEl.appendChild(el('span', 'title-text', card.title));
+    c.appendChild(titleEl);
 
     // Erledigt-Zeitstempel unter dem Titel (Feature 4), im eingestellten Datums-/Zeitformat
     if (isDone && !inTrash && card.doneAt) {
@@ -383,16 +387,19 @@ function renderCard(state, board, card, actions, opts = {}) {
 
     const stopDrag = (b) => { for (const ev of ['pointerdown', 'mousedown', 'touchstart']) b.addEventListener(ev, e => e.stopPropagation()); };
 
-    // Kopieren erledigter Karten (Feature 3)
+    // Kopieren erledigter Karten (Feature 3) - kleines Icon direkt hinter dem Titel
     if (isDone && !inTrash) {
         const cp = el('button', 'card-action card-copy');
         cp.type = 'button';
         cp.title = t('card.copy');
         cp.setAttribute('aria-label', cp.title);
-        cp.appendChild(mdiIcon(MDI.contentCopy));
+        const ic = mdiIcon(MDI.contentCopy);
+        ic.setAttribute('width', '14');
+        ic.setAttribute('height', '14');
+        cp.appendChild(ic);
         cp.addEventListener('click', e => { e.stopPropagation(); actions.copyCard(card.id); });
         stopDrag(cp);
-        c.appendChild(cp);
+        titleEl.appendChild(cp);
     }
 
     // Papierkorb: Resthinweis + Wiederherstellen/Endgültig-löschen (Feature 5)
