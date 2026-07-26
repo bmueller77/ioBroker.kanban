@@ -172,6 +172,7 @@
   "sort.gripTitle": "Drag to reorder",
   "sort.due": "Due date",
   "sort.priority": "Priority",
+  "sort.age": "Time in column",
   "card.doneLabel": "Done",
   "card.copy": "Copy card",
   "trash.daysLeft": "{n} days left",

@@ -172,6 +172,7 @@
   "sort.gripTitle": "Zum Verschieben ziehen",
   "sort.due": "Fälligkeit",
   "sort.priority": "Priorität",
+  "sort.age": "Dauer in Spalte",
   "card.doneLabel": "Erledigt",
   "card.copy": "Karte kopieren",
   "trash.daysLeft": "noch {n} Tage",

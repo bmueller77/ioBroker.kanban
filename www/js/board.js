@@ -34,6 +34,7 @@ const MDI = {
     sortGrid: 'M9,3H11V5H9V3M13,3H15V5H13V3M9,7H11V9H9V7M13,7H15V9H13V7M9,11H11V13H9V11M13,11H15V13H13V11M9,15H11V17H9V15M13,15H15V17H13V15M9,19H11V21H9V19M13,19H15V21H13V19Z',
     sortDue: 'M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M16.2,16.2L11,13V7H12.5V12.2L17,14.9L16.2,16.2Z',
     sortPrio: 'M14.4,6L14,4H5V21H7V14H12.6L13,16H20V6H14.4Z',
+    sortAge: 'M6,2H18V8H18V8L14,12L18,16V16H18V22H6V16H6V16L10,12L6,8V8H6V2M16,16.5L12,12.5L8,16.5V20H16V16.5M12,11.5L16,7.5V4H8V7.5L12,11.5M10,6H14V6.75L12,8.75L10,6.75V6Z',
     // Papierkorb-Aktionen (Feature 5)
     restore: 'M13,3A9,9 0 0,0 4,12H1L4.89,15.89L4.96,16.03L9,12H6A7,7 0 0,1 13,5A7,7 0 0,1 20,12A7,7 0 0,1 13,19C11.07,19 9.32,18.21 8.06,16.94L6.64,18.36C8.27,20 10.5,21 13,21A9,9 0 0,0 22,12A9,9 0 0,0 13,3Z',
     deleteForever: 'M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19M8.46,11.88L9.87,10.47L12,12.59L14.12,10.47L15.53,11.88L13.41,14L15.53,16.12L14.12,17.53L12,15.41L9.88,17.53L8.47,16.12L10.59,14L8.46,11.88M15.5,4L14.5,3H9.5L8.5,4H5V6H19V4H15.5Z',
@@ -163,9 +164,10 @@ function isoLocalParts(iso) {
 }
 
 // ---- Sortiermodi je Spalte (Feature 1) ----
-const SORT_MODES = ['manual', 'grid', 'due', 'priority'];
+const SORT_MODES = ['manual', 'grid', 'due', 'priority', 'age'];
+const AUTO_SORT_MODES = ['due', 'priority', 'age'];   // eigenes Umsortieren wirkungslos
 function sortModeIcon(mode) {
-    return ({ manual: MDI.sortManual, grid: MDI.sortGrid, due: MDI.sortDue, priority: MDI.sortPrio })[mode] || MDI.sortManual;
+    return ({ manual: MDI.sortManual, grid: MDI.sortGrid, due: MDI.sortDue, priority: MDI.sortPrio, age: MDI.sortAge })[mode] || MDI.sortManual;
 }
 function cardDueKey(c) { return c.due ? c.due + 'T' + (c.dueTime || '00:00') : ''; }
 function byTitle(a, b) { return String(a.title || '').localeCompare(String(b.title || '')); }
@@ -182,9 +184,21 @@ function cmpPrio(a, b) {
     if (pa !== pb) return pb - pa;   // höhere Priorität zuerst
     return cmpDue(a, b);
 }
+// Seit wann liegt die Karte in ihrer Spalte? movedAt wird nur bei echtem
+// Spaltenwechsel gesetzt; nie verschobene Karten liegen seit ihrer Erstellung dort.
+function inColumnSince(c) { return c.movedAt || c.createdAt || ''; }
+function cmpAge(a, b) {
+    const ka = inColumnSince(a), kb = inColumnSince(b);
+    if (!ka && !kb) return byTitle(a, b);
+    if (!ka) return 1;              // ohne Zeitstempel nach unten
+    if (!kb) return -1;
+    if (ka !== kb) return ka < kb ? -1 : 1;   // aeltester Eintritt zuerst = laengste Liegezeit oben
+    return byTitle(a, b);
+}
 function applySort(cards, mode) {
     if (mode === 'due') return cards.slice().sort(cmpDue);
     if (mode === 'priority') return cards.slice().sort(cmpPrio);
+    if (mode === 'age') return cards.slice().sort(cmpAge);
     return cards.slice().sort((a, b) => a.order - b.order);   // manual + grid: eigene Reihenfolge
 }
 function colSortKey(board, col) { return `${board.id}:${col.id}`; }
@@ -212,7 +226,7 @@ function openSortMenu(btn, state, board, col, actions) {
     const menu = el('div', 'sort-menu');
     menu.appendChild(el('div', 'sort-menu-title', t('sort.mode')));
     const cur = getSortMode(state, board, col);
-    const labels = { manual: t('sort.manual'), grid: t('sort.grid'), due: t('sort.due'), priority: t('sort.priority') };
+    const labels = { manual: t('sort.manual'), grid: t('sort.grid'), due: t('sort.due'), priority: t('sort.priority'), age: t('sort.age') };
     for (const mode of SORT_MODES) {
         const item = el('button', 'sort-item' + (mode === cur ? ' active' : ''));
         item.type = 'button';
@@ -606,7 +620,7 @@ export function renderBoard(container, state, actions) {
             ...(withGrip ? { handle: '.card-grip' } : {}),
             // Automatische Modi: eigenes Umsortieren waere wirkungslos, Verschieben
             // in andere Spalten bleibt moeglich
-            ...(sortMode === 'due' || sortMode === 'priority' ? { sort: false } : {}),
+            ...(AUTO_SORT_MODES.includes(sortMode) ? { sort: false } : {}),
             ghostClass: 'sortable-ghost',
             filter: '.link-badge, .card-check-toggle, .card-checklist, .card-action',   // lösen kein Ziehen aus
             preventOnFilter: false,              // damit deren Klick normal durchkommt

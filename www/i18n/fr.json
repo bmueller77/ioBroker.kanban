@@ -172,6 +172,7 @@
   "sort.gripTitle": "Faire glisser pour réordonner",
   "sort.due": "Échéance",
   "sort.priority": "Priorité",
+  "sort.age": "Temps dans la colonne",
   "card.doneLabel": "Terminé",
   "card.copy": "Copier la carte",
   "trash.daysLeft": "encore {n} jours",
