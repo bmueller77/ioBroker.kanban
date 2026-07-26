@@ -308,9 +308,11 @@ async function init() {
     // Per URL ausblendbare Bedienelemente (geteilte Ansichten)
     if (state.hideSettings) document.getElementById('settingsBtn').hidden = true;
     document.getElementById('themeBtn').addEventListener('click', () => {
-        const order = ['auto', 'light', 'dark'];
-        const cur = state.theme || state.cfg.themeDefault || 'auto';
-        state.theme = order[(order.indexOf(cur) + 1) % order.length];
+        // Immer sichtbar umschalten: der Zwischenschritt 'auto' wirkte wie ein
+        // wirkungsloser Klick, wenn das System ohnehin dasselbe Theme liefert.
+        // 'auto' bleibt die Vorgabe, solange hier nie geklickt wurde.
+        const resolved = document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light';
+        state.theme = resolved === 'dark' ? 'light' : 'dark';
         localStorage.setItem('kanban.theme', state.theme);
         applyTheme(state.cfg);
     });
