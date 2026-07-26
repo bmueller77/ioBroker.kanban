@@ -761,9 +761,10 @@ button.mini {
 .card-copy { display: block; margin-left: auto; margin-top: 4px; }
 
 /* ---- 0.3.0: Papierkorb-Spalte (Feature 5), feste graue Optik ---- */
-.column.trash-col { --trash-bg: #4b4b52; --trash-card: #5c5c64; --trash-fg: #f0f0f3; background: var(--trash-bg); }
-[data-theme="dark"] .column.trash-col { --trash-bg: #cfcfd6; --trash-card: #e4e4ea; --trash-fg: #1c1c1e; }
-.column.trash-col .column-head, .column.trash-col .column-head .count, .column.trash-col .col-toggle { color: var(--trash-fg); }
+.column.trash-col { --trash-bg: #56565e; --trash-card: #676770; --trash-fg: #f0f0f3; background: var(--trash-bg); }
+[data-theme="dark"] .column.trash-col { --trash-bg: #43434b; --trash-card: #53535c; --trash-fg: #e8e8ee; }
+.column.trash-col .column-head, .column.trash-col .col-toggle { color: var(--trash-fg); }
+.column.trash-col .column-head .count { color: var(--trash-fg); background: rgba(255, 255, 255, 0.16); }
 .card.card-trash { background: var(--trash-card); color: var(--trash-fg); border-color: rgba(0, 0, 0, 0.18); }
 .card.card-trash .title { color: var(--trash-fg); }
 .card.card-trash .trash-info { font-size: 12px; margin-top: 4px; color: var(--trash-fg); opacity: 0.85; }
@@ -782,6 +783,7 @@ dialog label.inline-num input { width: 80px; }
 .transfer-mode { display: flex; gap: 8px; }
 .transfer-mode-btn { flex: 1; }
 .transfer-mode-btn.active { background: var(--accent); border-color: var(--accent); color: var(--accent-text, #fff); }
+dialog button:disabled { opacity: 0.45; cursor: default; filter: grayscale(0.6); }
 .transfer-note { font-size: 12px; color: var(--muted); background: var(--surface2); border-radius: 6px; padding: 8px 10px; }
 
 /* ---- 0.3.0: Kopfzeile der Board-Einstellungen (Feature 64) ---- */

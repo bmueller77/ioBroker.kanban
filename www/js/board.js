@@ -195,7 +195,10 @@ function getSortMode(state, board, col) {
 function trashDaysLeft(card, retention) {
     const ts = Date.parse(card.trashedAt || '');
     if (!ts) return retention;
-    return Math.max(0, Math.ceil((ts + retention * 86400000 - Date.now()) / 86400000));
+    // Auf [0, retention] begrenzen: geht die Serveruhr minimal vor, ergaebe das
+    // Aufrunden sonst retention+1 Tage.
+    const left = Math.ceil((ts + retention * 86400000 - Date.now()) / 86400000);
+    return Math.max(0, Math.min(retention, left));
 }
 
 // Kontextmenü des Sortier-Umschalters

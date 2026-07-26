@@ -35,8 +35,10 @@ class Kanban extends utils.Adapter {
             native: {},
         });
 
-        await this.store.load();
+        // Sprache zuerst: die Papierkorb-Systemspalte wird beim Laden/Migrieren
+        // angelegt und braucht dafür den lokalisierten Namen.
         await this._resolveLanguage();
+        await this.store.load();
         await this._resolveTimezone();
         await this._initHolidays();
         await this._initApiSecret();
