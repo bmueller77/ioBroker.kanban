@@ -2,9 +2,9 @@
 
 Ein vollwertiges **Kanban-Board als eigener ioBroker-Adapter**. Der Adapter bringt einen eigenen Webserver mit, serviert eine schlanke Single-Page-App (Vanilla-JS, ohne Framework) und hält alle Ansichten per WebSocket live synchron. Karten lassen sich per Drag & Drop verschieben, Boards und Spalten frei konfigurieren, Aufgaben wiederkehrend planen, Benachrichtigungen per E-Mail verschicken (inkl. Kalender-Einladung) und das Ganze per REST/Webhook/`sendTo` in andere Automatisierungen einbinden.
 
-> **Für wen?** Für alle, die im Smart-Home eine gemeinsame Aufgabenverwaltung wollen – Familie, WG, Haustechnik-Wartung – und diese eng mit ioBroker (Skripte, Lovelace, Node-RED) verzahnen möchten.
+> **Für wen?** Für alle, die im Smart-Home eine gemeinsame Aufgabenverwaltung wollen, Familie, WG, Haustechnik-Wartung, und diese eng mit ioBroker (Skripte, Lovelace, Node-RED) verzahnen möchten.
 
-> **Version 0.3.0** – Papierkorb je Board (30 Tage wiederherstellbar), automatisches Aufräumen alter erledigter Karten, Sortierung je Spalte (manuell/Grid/Fälligkeit/Priorität), erledigte Karten durchgestrichen mit Zeitstempel und Kopier-Button, Karten zwischen Boards verschieben oder kopieren, neue Ereignisse `cardRestored`/`cardPurged` und `dueAt` (Fälligkeit inkl. Uhrzeit) in jedem Ereignis, überarbeitete Board-Einstellungen und Karten-Editor.
+> **Version 0.3.0**, Papierkorb je Board (30 Tage wiederherstellbar), automatisches Aufräumen alter erledigter Karten, Sortierung je Spalte in fünf Modi mit Richtungsumschalter, erledigte Karten durchgestrichen mit Zeitstempel und Kopier-Button, Karten zwischen Boards verschieben oder kopieren, neue Ereignisse `cardRestored`/`cardPurged` und `dueAt` (Fälligkeit inkl. Uhrzeit) in jedem Ereignis, überarbeitete Board-Einstellungen und Karten-Editor, Bestätigungsdialoge direkt in der Oberfläche.
 >
 > **Version 0.2.1** – Express 5, Avatar-Upload repariert (CSP blockierte `blob:`-URLs), Node.js 20+ und Admin 7.8.23+, fertiger Deep-Link im Ereignis, Benachrichtigungs-Routing per Skript (Telegram/Pushover, siehe unten), aktualisierte Abhängigkeiten und Repository-Konformität.
 
@@ -32,6 +32,8 @@ Ein vollwertiges **Kanban-Board als eigener ioBroker-Adapter**. Der Adapter brin
 - **[Teil B: Das Board (Weboberfläche)](#teil-b-das-board-weboberfläche)**
   - [Kopfleiste](#kopfleiste)
   - [Boards, Spalten & Labels](#boards-spalten--labels)
+    - [Papierkorb](#papierkorb)
+    - [Erledigte Karten in den Papierkorb](#erledigte-karten-in-den-papierkorb)
   - [Karten – alle Felder](#karten--alle-felder)
   - [Sortierung & Reihenfolge](#sortierung--reihenfolge)
   - [Wiederholungen](#wiederholungen)
@@ -72,7 +74,7 @@ Ein vollwertiges **Kanban-Board als eigener ioBroker-Adapter**. Der Adapter brin
 
 ## Teil A: Instanzeinstellungen (ioBroker-Admin)
 
-Diese Einstellungen liegen im **ioBroker-Admin** unter *Instanzen → `kanban.0` → Zahnrad*. Sie gelten für die **gesamte Instanz** und werden erst mit **Speichern** übernommen – der Adapter startet dabei neu. Die folgenden Abschnitte entsprechen den fünf Tabs der Konfigurationsseite.
+Diese Einstellungen liegen im **ioBroker-Admin** unter *Instanzen → `kanban.0` → Zahnrad*. Sie gelten für die **gesamte Instanz** und werden erst mit **Speichern** übernommen, der Adapter startet dabei neu. Die folgenden Abschnitte entsprechen den fünf Tabs der Konfigurationsseite.
 
 ### Tab „Allgemein"
 
@@ -88,7 +90,7 @@ Diese Einstellungen liegen im **ioBroker-Admin** unter *Instanzen → `kanban.0`
 | **Sprache** | Sprache der Oberfläche (`de`, `en`, `fr`, `nl`, `it`). Leer/automatisch = ioBroker-Systemsprache. Per URL mit `?lang=xx` übersteuerbar. |
 | **Datumsformat** | Anzeigeformat des Fälligkeitsdatums. **Leer = ioBroker-Systemformat.** Platzhalter siehe Tabelle unten (Standard `DD.MM.`). |
 | **Uhrzeit-Format** | `24-Stunden (14:00)` oder `12-Stunden (2:00 PM)`. Betrifft die optionale Uhrzeit auf Karten. |
-| **Eigenes CSS** | Wird als `/api/custom.css` eingebunden – für individuelle Anpassungen. |
+| **Eigenes CSS** | Wird als `/api/custom.css` eingebunden, für individuelle Anpassungen. |
 
 #### Platzhalter im Datumsformat
 
@@ -104,11 +106,11 @@ Es gilt die verbreitete moment-/Day.js-Schreibweise (Groß-/Kleinschreibung beac
 
 Monats- und Wochentagsnamen erscheinen in der Sprache des Boards. Beispiele: `DD.MM.` → `20.07.` · `DD. MMMM YYYY` → `20. Juli 2026` · `dddd, DD. MMM` → `Montag, 20. Jul` · `MM/DD/YYYY` → `07/20/2026`.
 
-> Hinweis: ioBroker selbst verwendet für Monatsnamen die Platzhalter `OO`/`O`. Diese werden hier **nicht** unterstützt – ein aus dem Systemformat kopierter String mit `OO` muss auf `MMMM` umgeschrieben werden.
+> Hinweis: ioBroker selbst verwendet für Monatsnamen die Platzhalter `OO`/`O`. Diese werden hier **nicht** unterstützt, ein aus dem Systemformat kopierter String mit `OO` muss auf `MMMM` umgeschrieben werden.
 
 ### Tab „Benutzer"
 
-Hier wird festgelegt, **welche Personen es gibt** – die Liste gilt für die gesamte Instanz. Im Board erscheinen sie als Chips in der Kopfleiste und lassen sich Karten als Zuständige zuweisen.
+Hier wird festgelegt, **welche Personen es gibt**, die Liste gilt für die gesamte Instanz. Im Board erscheinen sie als Chips in der Kopfleiste und lassen sich Karten als Zuständige zuweisen.
 
 ![Instanzeinstellungen – Benutzer](img/admin-users.png)
 
@@ -117,7 +119,7 @@ Hier wird festgelegt, **welche Personen es gibt** – die Liste gilt für die ge
 | **name** | Interne ID, klein geschrieben, ohne Umlaute (z. B. `bjoern`). Wird in URL-Parametern und Zuweisungen verwendet. |
 | **displayName** | Anzeigename (z. B. `Björn`). |
 | **email** | Optional. Zieladresse für E-Mail-Benachrichtigungen. |
-| **notify…** | Sechs Checkboxen je Benutzer für die Benachrichtigungssteuerung – siehe [Tab „E-Mail" – Benachrichtigungen](#tab-e-mail--benachrichtigungen). |
+| **notify…** | Neun Checkboxen je Benutzer für die Benachrichtigungssteuerung, siehe [Tab „E-Mail", Benachrichtigungen](#tab-e-mail--benachrichtigungen). |
 
 > **Nicht hier:** Benutzerfarbe, Avatarbild und die Zuordnung zu einzelnen Boards werden seit 0.2.0 direkt in der Weboberfläche gepflegt – siehe [Benutzer im Board](#benutzer-im-board).
 
@@ -131,26 +133,29 @@ Benachrichtigungen werden bei Karten-Ereignissen ausgelöst und per **E-Mail** (
 |---|---|
 | **email-Adapter-Instanz** | Welche `email.x`-Instanz für den Versand genutzt wird. |
 | **Absender** | Optionale Absenderadresse (leer = Standard des email-Adapters). |
-| **Erinnerungs-Uhrzeit** | `HH:MM` – wann fällige Karten geprüft werden (Standard `08:00`). |
+| **Erinnerungs-Uhrzeit** | `HH:MM`, wann fällige Karten geprüft werden (Standard `08:00`). |
 | **Erinnern X Tage vor Fälligkeit** | Vorlauf für `cardDue`-Erinnerungen. |
-| **Standard-Vorgabe** | Globale Fallback-Schalter je Ereignis – greifen, wenn ein Benutzer nichts Eigenes eingestellt hat (siehe unten). |
+| **Standard-Vorgabe** | Globale Fallback-Schalter je Ereignis, greifen, wenn ein Benutzer nichts Eigenes eingestellt hat (siehe unten). |
 
 #### Wer wird wann benachrichtigt?
 
-Im Tab **„Benutzer"** hat jeder Benutzer sechs Checkboxen – sie legen fest, bei welchen Ereignissen er eine E-Mail erhält:
+Im Tab **„Benutzer"** hat jeder Benutzer neun Checkboxen. Sie legen fest, bei welchen Ereignissen er eine E-Mail erhält:
 
 | Häkchen | Wann genau es feuert | Empfänger |
 |---|---|---|
-| **Zugew.** (`notifyAssigned`) | Sobald jemand als Zuständiger **hinzukommt** – beim Anlegen der Karte für jeden Ersteintrag und beim späteren Hinzufügen. Feuert **einmal je Person**. | **Nur die betroffene Person** |
+| **Zugew.** (`notifyAssigned`) | Sobald jemand als Zuständiger **hinzukommt**, beim Anlegen der Karte für jeden Ersteintrag und beim späteren Hinzufügen. Feuert **einmal je Person**. | **Nur die betroffene Person** |
 | **Fällig** (`notifyDue`) | Täglich zur Erinnerungszeit (Standard `08:00`) für Karten, die heute fällig sind oder innerhalb der Vorlauftage liegen. Ein durch Adapterstart verpasster Lauf wird nachgeholt. | Alle Zuständigen der Karte |
 | **Geänd.** (`notifyUpdated`) | Bei jeder Bearbeitung einer Karte (Titel, Datum, Labels, Checkliste …). | Alle Zuständigen der Karte |
 | **Versch.** (`notifyMoved`) | Beim Verschieben in eine **andere** Spalte. | Alle Zuständigen der Karte |
 | **Erled.** (`notifyDone`) | **Zusätzlich** zu „Versch.", wenn die Zielspalte als *Erledigt* markiert ist. | Alle Zuständigen der Karte |
 | **Neu** (`notifyCreated`) | **Einmal** beim Anlegen einer Karte; ebenso, wenn eine Wiederholung die nächste Karte erzeugt. | Alle Zuständigen der Karte |
+| **Papier.** (`notifyDeleted`) | Wenn eine Karte in den **Papierkorb** wandert, egal ob von Hand gelöscht oder durch das automatische Aufräumen. Standard: aus. | Alle Zuständigen der Karte |
+| **Wiederh.** (`notifyRestored`) | Wenn eine Karte aus dem Papierkorb **wiederhergestellt** wird. Standard: aus. | Alle Zuständigen der Karte |
+| **Endg.** (`notifyPurged`) | Wenn eine Karte **endgültig** entfernt wird, also nach 30 Tagen im Papierkorb oder von Hand. Standard: aus. | Alle Zuständigen der Karte |
 
 Der Kern-Unterschied zwischen **Zugew.** und **Neu**: „Zugew." ist die **persönliche** Nachricht („*du* bist jetzt dran") und geht nur an die eine Person. „Neu" ist die **Bestandsmeldung** an alle Zuständigen der Karte.
 
-**Achtung – Ereignisse überlagern sich.** Manche Aktionen lösen mehrere Ereignisse gleichzeitig aus. Wer beide Häkchen gesetzt hat, bekommt dann auch **mehrere E-Mails** – eine Zusammenfassung findet nicht statt:
+**Achtung, Ereignisse überlagern sich.** Manche Aktionen lösen mehrere Ereignisse gleichzeitig aus. Wer beide Häkchen gesetzt hat, bekommt dann auch **mehrere E-Mails**, eine Zusammenfassung findet nicht statt:
 
 | Aktion | Ausgelöste Ereignisse |
 |---|---|
@@ -166,7 +171,7 @@ Für die meisten Setups genügt daher **„Zugew." allein**. „Neu" lohnt sich,
 
 **Voraussetzung:** Nur Benutzer **mit hinterlegter E-Mail-Adresse** erhalten Mails; alle anderen werden übersprungen.
 
-> **Gelöschte Karten** lösen **keine** E-Mail aus – dafür gibt es bewusst kein Häkchen. Das Ereignis `cardDeleted` erscheint nur im State `lastEvent` und in ausgehenden Webhooks.
+> **Papierkorb-Ereignisse** (seit 0.3.0): Für „in den Papierkorb", „wiederhergestellt" und „endgültig gelöscht" gibt es eigene Häkchen, die standardmäßig **aus** sind. Ein **automatischer Aufräumlauf** verschickt keine Einzelmails, sondern **eine Sammelmail je Benutzer** mit allen betroffenen Karten. Löschst du eine einzelne Karte von Hand, kommt wie gewohnt eine Einzelmail.
 
 #### Kalender-Einladung (.ics)
 
@@ -175,9 +180,9 @@ Ist an einer Karte **„Kalender-Einladung"** aktiviert und ein Datum gesetzt, h
 - **Ohne Uhrzeit** → Ganztagestermin am Fälligkeitstag.
 - **Mit Uhrzeit** → Termin mit Start und einer Stunde Dauer.
 - Übernommen werden Titel (`SUMMARY`), Beschreibung, **Ort** (`LOCATION`) und Link (`URL`).
-- **Zeitzone:** Uhrzeit-Termine werden eindeutig in UTC ausgegeben; die zugrunde liegende Zeitzone wird aus dem System ermittelt (bzw. `system.config`) – Sommer-/Winterzeit inklusive. Ganztägige Termine sind bewusst zeitzonenlos.
+- **Zeitzone:** Uhrzeit-Termine werden eindeutig in UTC ausgegeben; die zugrunde liegende Zeitzone wird aus dem System ermittelt (bzw. `system.config`), Sommer-/Winterzeit inklusive. Ganztägige Termine sind bewusst zeitzonenlos.
 
-Der Anhang wird bei **jeder** Benachrichtigung zur Karte mitgeschickt – aktivierst du die Einladung z. B. erst nachträglich, kommt sie mit der nächsten „Karte geändert"-Mail.
+Der Anhang wird bei **jeder** Benachrichtigung zur Karte mitgeschickt, aktivierst du die Einladung z. B. erst nachträglich, kommt sie mit der nächsten „Karte geändert"-Mail.
 
 ### Tab „Webhooks (eingehend)"
 
@@ -190,13 +195,13 @@ Andere Systeme (oder ioBroker selbst) können Karten und Boards per HTTP veränd
 | **allowedBoards** | `*` = alle Boards, oder eine Liste erlaubter Board-IDs (durch Leerzeichen/Komma getrennt). |
 | **enabled** | Token aktiv/inaktiv. |
 
-Mit dem Button **„Neuen Token generieren"** (über der Tabelle) wird automatisch eine neue Zeile mit einem sicheren Zufallstoken (32 Hex-Zeichen) und dem Namen `agent`/`agent1`/… angelegt. Danach den Namen anpassen, ggf. `allowedBoards` einschränken und **Speichern**. Alternativ das Token-Feld von Hand ausfüllen (z. B. `openssl rand -hex 16`). **Empfehlung:** für jede Integration (jeder Agent, jedes Skript) einen eigenen Token – so lässt sich jeder einzeln per `enabled`-Häkchen sperren oder ersetzen.
+Mit dem Button **„Neuen Token generieren"** (über der Tabelle) wird automatisch eine neue Zeile mit einem sicheren Zufallstoken (32 Hex-Zeichen) und dem Namen `agent`/`agent1`/… angelegt. Danach den Namen anpassen, ggf. `allowedBoards` einschränken und **Speichern**. Alternativ das Token-Feld von Hand ausfüllen (z. B. `openssl rand -hex 16`). **Empfehlung:** für jede Integration (jeder Agent, jedes Skript) einen eigenen Token, so lässt sich jeder einzeln per `enabled`-Häkchen sperren oder ersetzen.
 
 Ungültiges Token → HTTP `401`. Board nicht erlaubt → HTTP `403`.
 
 ### Tab „Webhooks (ausgehend)"
 
-Der Adapter kann bei jedem Ereignis einen **HTTP-POST** an beliebige URLs senden – z. B. an Node-RED, IFTTT, einen Chat-Dienst oder eigene Skripte.
+Der Adapter kann bei jedem Ereignis einen **HTTP-POST** an beliebige URLs senden, z. B. an Node-RED, IFTTT, einen Chat-Dienst oder eigene Skripte.
 
 | Feld | Bedeutung |
 |---|---|
@@ -205,7 +210,7 @@ Der Adapter kann bei jedem Ereignis einen **HTTP-POST** an beliebige URLs senden
 | **events** | `*` = alle Ereignisse, oder eine Liste von Ereignistypen (durch Komma/Semikolon/Leerzeichen getrennt). |
 | **enabled** | Aktiv/inaktiv. |
 
-**Ereignistypen:** `cardCreated`, `cardUpdated`, `cardMoved`, `cardAssigned`, `cardDone`, `cardDeleted`, `cardDue`.
+**Ereignistypen:** `cardCreated`, `cardUpdated`, `cardMoved`, `cardAssigned`, `cardDone`, `cardDeleted`, `cardRestored`, `cardPurged`, `cardDue`.
 
 Aufbau des gesendeten JSON-Payloads und Details zur Zustellung: [Teil C](#webhooks--ausgehend).
 
@@ -213,7 +218,7 @@ Aufbau des gesendeten JSON-Payloads und Details zur Zustellung: [Teil C](#webhoo
 
 ## Teil B: Das Board (Weboberfläche)
 
-Die Weboberfläche unter **`http://<host>:8095/`** ist der eigentliche Arbeitsbereich. Alles in diesem Teil wird **direkt im Browser** eingestellt und wirkt sofort – ohne Adapter-Neustart. Dank Live-Sync sind Änderungen auf allen offenen Geräten unmittelbar sichtbar.
+Die Weboberfläche unter **`http://<host>:8095/`** ist der eigentliche Arbeitsbereich. Alles in diesem Teil wird **direkt im Browser** eingestellt und wirkt sofort, ohne Adapter-Neustart. Dank Live-Sync sind Änderungen auf allen offenen Geräten unmittelbar sichtbar.
 
 ### Kopfleiste
 
@@ -223,22 +228,63 @@ Das Zahnrad öffnet den **Board-Manager**, der die folgenden Abschnitte abdeckt.
 
 ### Boards, Spalten & Labels
 
-Das **Zahnrad (⚙)** öffnet den Board-Manager mit drei Tabs: **Board** (Titel, Spalten, Labels und Link-Ziel des aktuellen Boards), **Benutzer** (Farben und Avatare, siehe [Benutzer im Board](#benutzer-im-board)) und **Boards** (Boards anlegen, löschen und Mitglieder zuweisen). Änderungen werden erst mit **Speichern** übernommen.
+Das **Zahnrad (⚙)** öffnet den Board-Manager. Seit 0.3.0 hat er nur noch **zwei Tabs**: **Board** und **Benutzer** (Farben und Avatare, siehe [Benutzer im Board](#benutzer-im-board)). Der frühere dritte Tab „Boards" ist im Board-Tab aufgegangen. Änderungen werden erst mit **Speichern** übernommen.
+
+Ganz oben im Board-Tab steht eine Zeile mit vier Elementen:
+
+| Element | Wirkung |
+|---|---|
+| **Board-Auswahl** | Legt fest, welches Board du gerade **bearbeitest**. Das aktive Board im Hintergrund wechselt dadurch nicht. Hast du ungespeicherte Änderungen, fragt der Dialog vorher nach (Speichern, Verwerfen, Abbrechen). |
+| **Pfeil-Button** | Wechselt das **angezeigte** Board auf das gerade bearbeitete. Der Dialog bleibt dabei offen. Ist bereits das aktive Board gewählt, ist der Button ausgegraut. |
+| **Namensfeld + „Anlegen"** | Legt ein neues Board an. Es wird sofort zum bearbeiteten Board und bekommt automatisch alle bekannten Benutzer als Mitglieder sowie einen Papierkorb. |
+| **„Board löschen"** (ganz unten) | Löscht das bearbeitete Board nach Rückfrage. Das letzte verbleibende Board lässt sich nicht löschen. |
+
+Darunter folgen Board-Titel, die Mitgliederauswahl (siehe [Benutzer im Board](#benutzer-im-board)), Spalten, Labels, das Link-Ziel für Benachrichtigungen sowie der Abschnitt [Erledigte Karten in den Papierkorb](#papierkorb).
 
 #### Spalten
 
-Spalten lassen sich anlegen, per Drag & Drop sortieren, umbenennen und löschen. **Beim Löschen einer Spalte gehen keine Karten verloren** – sie werden automatisch in die erste Spalte des Boards verschoben.
+Spalten lassen sich anlegen, per Drag & Drop sortieren, umbenennen und löschen. **Beim Löschen einer Spalte gehen keine Karten verloren**, sie werden automatisch in die erste Spalte des Boards verschoben. Der [Papierkorb](#papierkorb) ist eine Systemspalte und taucht in dieser Liste nicht auf.
+
+> Alle Aktionen, die sich nicht rückgängig machen lassen (Karte oder Board löschen, Papierkorb leeren, endgültig löschen), fragen seit 0.3.0 über einen Dialog **innerhalb der Oberfläche** nach, passend zum Design und in der eingestellten Sprache.
 
 ![Einstellungen: Board, Spalten, Labels](img/settings.png)
 
 Über der Spaltenliste steht eine Kopfzeile mit den Feldbezeichnungen (**Titel · Max · WIP · Neu · Erledigt**). Jede Überschrift hat einen Tooltip mit der ausführlichen Erklärung.
 
 - **Anzeige-Limit (Max):** Zahl > 0 zeigt in dieser Spalte nur die ersten N Karten; darunter erscheint der dezente Hinweis `+X weitere`. `0` = alle anzeigen. Praktisch, damit lange Rückstände das Board nicht sprengen. Der Zähler in der Spaltenkopfzeile zählt weiterhin **alle** Karten der Spalte.
-- **WIP-Limit** (Work-in-Progress): Zahl > 0 begrenzt die empfohlene Kartenanzahl. Wird sie überschritten, warnt die Spalte optisch (Zähler & Kopf werden hervorgehoben). `0` = kein Limit. Das Limit ist eine **Warnung**, keine harte Sperre. Sie bezieht sich immer auf die **Gesamtzahl** der Spalte – auch wenn der Personen-/Label-Filter gerade weniger Karten anzeigt.
+- **WIP-Limit** (Work-in-Progress): Zahl > 0 begrenzt die empfohlene Kartenanzahl. Wird sie überschritten, warnt die Spalte optisch (Zähler & Kopf werden hervorgehoben). `0` = kein Limit. Das Limit ist eine **Warnung**, keine harte Sperre. Sie bezieht sich immer auf die **Gesamtzahl** der Spalte, auch wenn der Personen-/Label-Filter gerade weniger Karten anzeigt.
 - **„Neu"** (`allowAdd`): legt fest, in welchen Spalten der Link „+ Karte hinzufügen" erscheint.
-- **„Erledigt"-Spalte** (`isDone`): Karten, die hierher verschoben werden, gelten als erledigt (`doneAt` wird gesetzt, Wiederholungen werden ausgelöst).
+- **„Erledigt"-Spalte** (`isDone`): Karten, die hierher verschoben werden, gelten als erledigt (`doneAt` wird gesetzt, Wiederholungen werden ausgelöst). Ihr Titel wird **durchgestrichen** dargestellt, darunter steht der Zeitpunkt des Erledigens in Klammern, zum Beispiel `(Erledigt: 26.07.2026 20:09)`, im Datums- und Zeitformat der Instanz.
 - **Erledigt ein-/ausblenden (Augen-Symbol):** Jede Erledigt-Spalte hat oben rechts einen Augen-Umschalter, der die erledigten Karten ein- oder ausblendet (pro Gerät gespeichert).
 - **Limit sichtbarer erledigter Karten:** Per URL-Parameter `doneLimit=N` (siehe [Ansichten teilen / URL-Parameter](#ansichten-teilen--url-parameter)) lassen sich nur die N zuletzt erledigten Karten anzeigen – praktisch für kompakte, geteilte Ansichten.
+- **Erledigte Karte kopieren:** Neben dem Titel einer erledigten Karte sitzt ein kleines Kopier-Symbol. Es öffnet den Editor mit denselben Inhalten als **neue** Karte. Sie landet beim Speichern in der ersten Spalte mit „Neu"-Häkchen, Checklisten-Punkte starten unerledigt, und als Fälligkeit wird das **heutige Datum** vorgeschlagen, sofern das Original überhaupt eines hatte (eine gesetzte Uhrzeit bleibt erhalten). Gedacht für wiederkehrende Aufgaben, die keine feste Wiederholung haben.
+
+<a id="papierkorb"></a>
+#### Papierkorb (ab 0.3.0)
+
+Jedes Board hat eine **Systemspalte „Papierkorb"**. Gelöschte Karten verschwinden nicht mehr sofort, sondern liegen dort **30 Tage** und lassen sich jederzeit zurückholen. Erst danach werden sie endgültig entfernt.
+
+- **Sichtbarkeit:** Der Papierkorb ist **standardmäßig ausgeblendet**. Einblenden lässt er sich unten in den Board-Einstellungen über **„Papierkorb einblenden"**. Diese Einstellung gilt **nur für das jeweilige Gerät**, andere Nutzer sehen ihr Board unverändert.
+- **Was dort landet:** alles, was du über den **Löschen**-Button im Karten-Editor entfernst, Karten, die du **per Drag & Drop** in den Papierkorb ziehst, sowie die Karten aus dem [automatischen Aufräumen](#erledigte-karten-in-den-papierkorb).
+- **Zurückholen:** Karte aus dem Papierkorb herausziehen oder das **Wiederherstellen**-Symbol auf der Karte antippen. Sie landet dann in der ersten offenen Spalte.
+- **Sofort endgültig löschen:** Das zweite Symbol auf der Karte entfernt sie unwiderruflich. Am Spaltenkopf leert der Besen-Button den **kompletten** Papierkorb. Beides fragt vorher nach.
+- **Restlaufzeit:** Jede Karte zeigt an, wie lange sie noch aufbewahrt wird, zum Beispiel „noch 30 Tage".
+- **Eigene Optik:** Die Spalte ist bewusst neutral grau gehalten, unabhängig von Theme und Akzentfarbe, damit sie sich von den Arbeitsspalten abhebt.
+- **Sonderstellung:** Der Papierkorb steht immer ganz rechts, lässt sich nicht umbenennen, verschieben oder löschen und taucht in der Spalten-Konfiguration nicht auf. Er kennt kein WIP-Limit, keinen „Neu"-Button und keinen Sortier-Umschalter, sondern ist fest nach Löschzeitpunkt sortiert (die Karte, deren Frist zuerst abläuft, steht oben). Zum WIP-Limit und zum Zähler anderer Spalten trägt er nicht bei.
+- **Bestehende Boards:** Beim ersten Start von 0.3.0 bekommt jedes vorhandene Board automatisch einen Papierkorb. An bestehenden Karten ändert sich dabei nichts.
+
+<a id="erledigte-karten-in-den-papierkorb"></a>
+#### Erledigte Karten in den Papierkorb (ab 0.3.0)
+
+Damit sich die Erledigt-Spalte nicht endlos füllt, kann jedes Board alte erledigte Karten selbsttätig in den Papierkorb räumen. Die Einstellung steht unten im Board-Tab und ist **standardmäßig aus**.
+
+| Modus | Wirkung |
+|---|---|
+| **Aus** | Nichts wird automatisch verschoben (Standard). |
+| **Nach Alter** | Karten, deren Erledigung länger als *X* Tage zurückliegt, wandern in den Papierkorb. Voreinstellung: 90 Tage. |
+| **Nach Anzahl** | In jeder Erledigt-Spalte bleiben nur die *X* zuletzt erledigten Karten stehen, der Rest wandert in den Papierkorb. Voreinstellung: 100 Karten. |
+
+Der Lauf startet **einmal täglich** sowie **beim Adapterstart**. Grundlage ist der Erledigt-Zeitpunkt (`doneAt`); Karten ohne diesen Zeitstempel bleiben unangetastet. Weil die Karten nur in den Papierkorb wandern, hast du weitere 30 Tage Zeit, etwas zurückzuholen.
 
 #### Labels
 
@@ -248,11 +294,13 @@ Labels sind farbige Schlagworte und werden **pro Board** im Tab *Board* verwalte
 
 ![Board-Einstellungen – Labels und Link-Ziel](img/settings-labels.png)
 
-Je Board lässt sich festlegen, wohin der „Karte öffnen"-Link in den Benachrichtigungs-E-Mails führt: **Board-Ansicht** (Standard – öffnet das Board und hebt die Karte kurz hervor), **Karten-Editor** (öffnet direkt den Bearbeiten-Dialog) oder **eigene URL** (eine feste Adresse, z. B. dein Lovelace-Dashboard, in das das Board eingebettet ist).
+Je Board lässt sich festlegen, wohin der „Karte öffnen"-Link in den Benachrichtigungs-E-Mails führt: **Board-Ansicht** (Standard, öffnet das Board und hebt die Karte kurz hervor), **Karten-Editor** (öffnet direkt den Bearbeiten-Dialog) oder **eigene URL** (eine feste Adresse, z. B. dein Lovelace-Dashboard, in das das Board eingebettet ist).
 
 ### Karten – alle Felder
 
-Ein **Klick auf eine Karte** öffnet den Editor. Eine Karte hat folgende inhaltliche Felder (per API unter denselben Namen setzbar):
+Ein **Klick auf eine Karte** öffnet den Editor. Seit 0.3.0 sind die Felder so angeordnet: Titel, Beschreibung, dann die Zeile mit Fälligkeit, Uhrzeit, Priorität und Spalte, direkt darunter die Kalender-Einladung und der Ort (beide gehören inhaltlich zur Terminplanung), anschließend Zuständige und Labels nebeneinander, Kartenfarbe und Link nebeneinander, danach Wiederholung und Checkliste. Auf schmalen Bildschirmen rutschen die gepaarten Felder untereinander. In der Fußzeile stehen **Löschen**, der **Übertragen**-Button, **Abbrechen** und **Speichern**.
+
+Eine Karte hat folgende inhaltliche Felder (per API unter denselben Namen setzbar):
 
 ![Karten-Editor](img/card-editor.png)
 
@@ -272,11 +320,24 @@ Ein **Klick auf eine Karte** öffnet den Editor. Eine Karte hat folgende inhaltl
 | **calendarInvite** | Ja/Nein | Wenn aktiviert **und** ein Fälligkeitsdatum gesetzt ist, wird jeder Benachrichtigungs-E-Mail zu dieser Karte eine **`.ics`-Kalender-Einladung** angehängt. |
 | **recurrence** | Objekt | Wiederholungsregel – siehe [Wiederholungen](#wiederholungen). |
 
-Zusätzlich verwaltet der Adapter automatisch: `id`, `columnId`, `order`, `createdAt`, `createdBy`, `movedAt`, `doneAt`.
+Zusätzlich verwaltet der Adapter automatisch: `id`, `columnId`, `order`, `createdAt`, `createdBy`, `movedAt`, `doneAt`, `trashedAt`.
+
+`movedAt` hält fest, **seit wann eine Karte in ihrer aktuellen Spalte liegt**, und ist damit die Grundlage für den Sortiermodus „Alter in Spalte". Der Zeitstempel wird nur bei einem echten Spaltenwechsel neu gesetzt; das Umsortieren innerhalb derselben Spalte lässt ihn unverändert. `trashedAt` markiert den Zeitpunkt, zu dem eine Karte in den Papierkorb gewandert ist, und steuert die 30-Tage-Frist.
+
+#### Karte auf ein anderes Board übertragen (ab 0.3.0)
+
+In der Fußzeile des Karten-Editors sitzt rechts neben **Löschen** ein kleiner Button mit Transfer-Symbol. Er öffnet den Dialog **„Karte übertragen"**:
+
+- **Ziel-Board** und **Ziel-Spalte** wählen. Vorbelegt ist die erste Spalte mit „Neu"-Häkchen.
+- **Verschieben** nimmt die Karte mit (sie verlässt das aktuelle Board), **Kopieren** legt am Ziel eine neue Karte an und lässt das Original unangetastet.
+- **Labels** werden über den **Namen** abgeglichen. Gibt es im Ziel-Board ein gleichnamiges Label, wird es übernommen; Labels ohne Entsprechung fallen weg. Das Ziel-Board wird also nicht ungefragt um neue Labels ergänzt.
+- **Zuständige** bleiben nur erhalten, wenn sie im Ziel-Board **Mitglied** sind. Der Dialog zeigt vorher an, was wegfällt.
+- Bliebe **niemand** übrig, blendet der Dialog eine Auswahl der Ziel-Board-Mitglieder ein und lässt das Übertragen erst zu, wenn mindestens eine Person gewählt ist. So kann keine Karte ohne Zuständigen entstehen.
+- Beim Verschieben feuert `cardMoved` (mit Kennzeichnung des Board-Wechsels), beim Kopieren `cardCreated` mit neuer Karten-ID.
 
 #### Link-Typen
 
-Aus der eingetragenen Adresse leitet das Board automatisch ein passendes Icon ab (Material Design Icons). Geprüft wird von oben nach unten – die **erste zutreffende Regel gewinnt**.
+Aus der eingetragenen Adresse leitet das Board automatisch ein passendes Icon ab (Material Design Icons). Geprüft wird von oben nach unten, die **erste zutreffende Regel gewinnt**.
 
 | Icon | Erkennung | Beispiel |
 |:--:|---|---|
@@ -294,9 +355,25 @@ Anklickbar sind nur die sicheren Schemata `http(s)`, `mailto:`, `tel:` und `geo:
 
 ### Sortierung & Reihenfolge
 
-Kanban kennt bewusst **keine automatische Sortierung**. Die Reihenfolge der Karten innerhalb einer Spalte bestimmst du selbst: Karte anklicken, gedrückt halten und nach oben oder unten ziehen (funktioniert auch per Touch am Smartphone). Genauso ziehst du eine Karte per Drag & Drop in eine andere Spalte, um ihren Status zu ändern. Die gewählte Reihenfolge bleibt erhalten und wird live auf alle offenen Ansichten synchronisiert.
+Standardmäßig bestimmst du die Reihenfolge selbst: Karte anklicken, gedrückt halten und nach oben oder unten ziehen (funktioniert auch per Touch am Smartphone). Genauso ziehst du eine Karte per Drag & Drop in eine andere Spalte, um ihren Status zu ändern. Die gewählte Reihenfolge bleibt erhalten und wird live auf alle offenen Ansichten synchronisiert.
 
-Eine automatische Sortierung (etwa nach Fälligkeit oder Priorität) ist absichtlich nicht der Standard, weil die passende Regel vom Anwendungsfall abhängt. Überfällige und bald fällige Karten werden stattdessen farblich hervorgehoben, sodass Dringendes auffällt, egal an welcher Position es steht.
+Seit 0.3.0 kann **jede Spalte einzeln** stattdessen automatisch sortiert werden. Ein Klick auf das Sortier-Symbol im Spaltenkopf öffnet ein kleines Menü mit fünf Modi:
+
+| Modus | Verhalten |
+|---|---|
+| **Drag & Drop** | Deine eigene Reihenfolge. Karten werden direkt angefasst und gezogen (Standard). |
+| **Anfasser** | Ebenfalls deine eigene Reihenfolge, aber jede Karte bekommt links einen Anfasser. Gezogen wird nur darüber, was das Umsortieren auf dem Touchscreen erleichtert. |
+| **Fälligkeit** | Frühestes Datum zuerst, eine gesetzte Uhrzeit wird mitberücksichtigt. Karten ohne Datum stehen unten. |
+| **Priorität** | Höchste Priorität zuerst, bei gleicher Priorität entscheidet die Fälligkeit. |
+| **Alter in Spalte** | Die zuletzt in diese Spalte gekommene Karte steht oben. In der Erledigt-Spalte ist das also die zuletzt abgehakte Aufgabe. |
+
+Bei den drei automatischen Modi erscheint links daneben ein **Richtungsumschalter**. Ein Klick kehrt die Reihenfolge um, das Pfeil-Symbol zeigt die aktuelle Richtung dauerhaft an. So siehst du in „Alter in Spalte" wahlweise das zuletzt Erledigte oder die Karten, die am längsten liegen.
+
+Ein paar Feinheiten, damit das Umkehren berechenbar bleibt: Umgedreht wird immer nur das Hauptkriterium. Karten ohne Datum oder Zeitstempel bleiben unten, bei Gleichstand entscheidet der Titel, und innerhalb gleicher Priorität sortiert weiterhin die Fälligkeit aufsteigend.
+
+**Sortiermodus und Richtung werden pro Gerät gespeichert** (wie das Augen-Symbol), sie gelten also nur für dich. In den automatischen Modi ist das eigene Umsortieren innerhalb der Spalte deaktiviert, weil es wirkungslos wäre; das Verschieben in eine andere Spalte funktioniert weiterhin. Schaltest du zurück auf „Drag & Drop" oder „Anfasser", erscheint deine gespeicherte eigene Reihenfolge unverändert.
+
+Unabhängig davon werden überfällige und bald fällige Karten farblich hervorgehoben, sodass Dringendes auffällt, egal an welcher Position es steht.
 
 ### Wiederholungen
 
@@ -320,7 +397,7 @@ Wird eine wiederkehrende Karte **ohne** manuelles Datum angelegt, setzt der Adap
 
 Für die **Arbeitstag-Wiederholungen** ermittelt der Adapter die gesetzlichen Feiertage selbst (Osterformel + feste Tage + Buß- und Bettag), damit auch weit in der Zukunft liegende Termine korrekt berechnet werden.
 
-- Ist der ioBroker-Adapter **`feiertage`** installiert, übernimmt der Kanban-Adapter dessen **Bundesland-Konfiguration** (welche Feiertage gelten). Es zählen nur die tatsächlich gesetzlich arbeitsfreien Tage – reine Dekotage (z. B. Valentinstag) werden ignoriert.
+- Ist der ioBroker-Adapter **`feiertage`** installiert, übernimmt der Kanban-Adapter dessen **Bundesland-Konfiguration** (welche Feiertage gelten). Es zählen nur die tatsächlich gesetzlich arbeitsfreien Tage, reine Dekotage (z. B. Valentinstag) werden ignoriert.
 - Ohne `feiertage`-Adapter greift ein **Fallback** mit den bundesweit einheitlichen gesetzlichen Feiertagen.
 
 > Änderungen am `feiertage`-Adapter werden beim nächsten Start von `kanban.0` übernommen.
@@ -329,23 +406,23 @@ Für die **Arbeitstag-Wiederholungen** ermittelt der Adapter die gesetzlichen Fe
 
 Welche Personen es überhaupt gibt, kommt aus den Instanzeinstellungen ([Tab „Benutzer"](#tab-benutzer)). Aussehen und Board-Zuordnung werden dagegen direkt in der Weboberfläche gepflegt – ohne Adapter-Neustart.
 
-**Kopf-Chips als Filter:** Die Benutzer-Chips in der Kopfzeile sind zugleich ein **Mehrfach-Filter** – Antippen wählt Personen an oder ab. Bei einer Teilauswahl zeigt das Board nur Karten der gewählten Personen; sind **alle oder keine** Chips aktiv, werden alle Karten angezeigt. Die Auswahl wird **je Board im Browser gespeichert** und beim nächsten Aufruf wiederhergestellt.
+**Kopf-Chips als Filter:** Die Benutzer-Chips in der Kopfzeile sind zugleich ein **Mehrfach-Filter**, Antippen wählt Personen an oder ab. Bei einer Teilauswahl zeigt das Board nur Karten der gewählten Personen; sind **alle oder keine** Chips aktiv, werden alle Karten angezeigt. Die Auswahl wird **je Board im Browser gespeichert** und beim nächsten Aufruf wiederhergestellt.
 
 **Benutzerfarbe:** Die Farbe von Avatar-Ring und Chip wird seit 0.2.0 **in der Board-Oberfläche** gepflegt (⚙ → Benutzer) und greift sofort, ohne Neustart der Instanz.
 
-**Avatar-Bild (optional):** Standardmäßig zeigt der Avatar die Initialen (auf der Benutzerfarbe). In der Board-Oberfläche unter **⚙ → „Benutzer-Avatare"** kann man je Benutzer ein **PNG/JPG hochladen**, das dann rund als Avatar erscheint (mit Vorschau; das Bild wird automatisch quadratisch zugeschnitten, auf 128 px verkleinert und im ioBroker-Dateispeicher abgelegt – kein Config-Ballast). „Avatar entfernen" schaltet zurück auf die Initialen.
+**Avatar-Bild (optional):** Standardmäßig zeigt der Avatar die Initialen (auf der Benutzerfarbe). In der Board-Oberfläche unter **⚙ → „Benutzer-Avatare"** kann man je Benutzer ein **PNG/JPG hochladen**, das dann rund als Avatar erscheint (mit Vorschau; das Bild wird automatisch quadratisch zugeschnitten, auf 128 px verkleinert und im ioBroker-Dateispeicher abgelegt, kein Config-Ballast). „Avatar entfernen" schaltet zurück auf die Initialen.
 
 ![Board-Einstellungen – Benutzer-Avatare und -Farben](img/settings-users.png)
 
-**Mitglieder je Board:** Unter **⚙ → Boards** wird je Board festgelegt, welche Benutzer dort zuweisbar sind (Karten-Dialog, Kopf-Chips und Ansichten-Dialog zeigen nur Mitglieder). Jedes Board braucht **mindestens ein Mitglied**; neue Boards starten mit allen Benutzern.
+**Mitglieder je Board:** Im Board-Tab der Einstellungen (**⚙ → Board**) wird direkt unter dem Board-Titel festgelegt, welche Benutzer dort zuweisbar sind (Karten-Dialog, Kopf-Chips und Ansichten-Dialog zeigen nur Mitglieder). Jedes Board braucht **mindestens ein Mitglied**; neue Boards starten mit allen Benutzern. Über die Board-Auswahl ganz oben lassen sich auch die Mitglieder anderer Boards bearbeiten, ohne dorthin zu wechseln.
 
 ![Board-Einstellungen – Mitglieder je Board](img/settings-boards.png)
 
 ### Mobile Ansicht
 
-Auf schmalen Bildschirmen stapelt das Board die Spalten untereinander; jede Spalte lässt sich als Akkordeon ein-/ausklappen (Zustand wird je Gerät gemerkt). Karten-, Board- und Ansichten-Dialog öffnen im Vollbild mit fester Aktionsleiste unten. Zum Verschieben eine Karte kurz gedrückt halten – beim Ziehen erscheint ein Schnellmenü mit den Zielspalten.
+Auf schmalen Bildschirmen stapelt das Board die Spalten untereinander; jede Spalte lässt sich als Akkordeon ein-/ausklappen (Zustand wird je Gerät gemerkt). Karten-, Board- und Ansichten-Dialog öffnen im Vollbild mit fester Aktionsleiste unten. Zum Verschieben eine Karte kurz gedrückt halten, beim Ziehen erscheint ein Schnellmenü mit den Zielspalten.
 
-<img src="img/mobile.jpg" alt="Mobile Ansicht – gestapelte Spalten" width="330"> <img src="img/mobile-drag.png" alt="Mobile Ansicht – Schnellmenü beim Ziehen einer Karte" width="330">
+<img src="img/mobile.jpg" alt="Mobile Ansicht, gestapelte Spalten" width="330"> <img src="img/mobile-drag.png" alt="Mobile Ansicht, Schnellmenü beim Ziehen einer Karte" width="330">
 
 *Links: gestapelte Spalten als Akkordeon. Rechts: das Schnellmenü, das beim Ziehen einer Karte über den Zielspalten erscheint.*
 
@@ -361,7 +438,7 @@ Alle Parameter lassen sich auch direkt an die URL hängen:
 |---|---|
 | `board=<id>` | Öffnet dieses Board. |
 | `users=<name,name>` | **Personen-Filter**: zeigt nur Karten, die mindestens einem dieser Benutzer zugewiesen sind (setzt die Kopf-Chips entsprechend). `user=<name>` ist die Kurzform für einen einzelnen Benutzer. |
-| `label=<id,id>` | **Label-Blacklist** (mehrere möglich): blendet Karten mit einem dieser Labels aus – neue Labels bleiben automatisch sichtbar. |
+| `label=<id,id>` | **Label-Blacklist** (mehrere möglich): blendet Karten mit einem dieser Labels aus, neue Labels bleiben automatisch sichtbar. |
 | `columns=<id,id>` | Zeigt nur diese Spalten. Nicht genannte Spalten werden ausgeblendet. |
 | `doneLimit=N` | In Erledigt-Spalten nur die N zuletzt erledigten Karten anzeigen (`0` = keine, weglassen = alle). |
 | `hideSettings=1` | Blendet das Einstellungen-Zahnrad aus. |
@@ -383,13 +460,13 @@ http://192.168.1.10:8095/?board=familie&columns=doing,done&doneLimit=3&users=bjo
 http://192.168.1.10:8095/?board=familie&label=privat&hideSettings=1
 ```
 
-> **Lovelace/iframe:** Der Adapter setzt **keine** Frame-Header (`X-Frame-Options`/`frame-ancestors`). Die ab 0.1.1 gesetzte CSP steht als `<meta>` und schränkt die Einbettung **nicht** ein – die UI lässt sich also weiterhin direkt in eine Lovelace-Webpage-Card oder ein `<iframe>` einbetten.
+> **Lovelace/iframe:** Der Adapter setzt **keine** Frame-Header (`X-Frame-Options`/`frame-ancestors`). Die ab 0.1.1 gesetzte CSP steht als `<meta>` und schränkt die Einbettung **nicht** ein, die UI lässt sich also weiterhin direkt in eine Lovelace-Webpage-Card oder ein `<iframe>` einbetten.
 
 ---
 
 ## Teil C: Integration & Automatisierung
 
-Boards und Karten lassen sich vollständig von außen steuern – aus ioBroker-Skripten, Node-RED, Shell-Skripten oder LLM-Agenten.
+Boards und Karten lassen sich vollständig von außen steuern, aus ioBroker-Skripten, Node-RED, Shell-Skripten oder LLM-Agenten.
 
 ### REST-API
 
@@ -406,12 +483,16 @@ Für Integrationen im gleichen Netz steht eine REST-API bereit (dieselbe, die di
 | `GET /api/boards` | Alle Boards (Kurzform). |
 | `POST /api/boards` | Board anlegen (`{ id?, title }`). |
 | `GET /api/boards/<id>` | Board mit allen Karten. Mit `?rev=<n>` liefert es `{unchanged:true}`, falls unverändert (Polling). |
-| `PATCH /api/boards/<id>` | Board ändern (Titel, Spalten, Labels). |
+| `PATCH /api/boards/<id>` | Board ändern (Titel, Spalten, Labels, Mitglieder, Aufräum-Einstellung `cleanup: { mode, days, count }`). |
 | `DELETE /api/boards/<id>` | Board löschen. |
 | `POST /api/boards/<id>/cards` | Karte anlegen. |
 | `PATCH /api/boards/<id>/cards/<cardId>` | Karte ändern. |
 | `POST /api/boards/<id>/cards/<cardId>/move` | Karte verschieben (`{ columnId, order }`). |
-| `DELETE /api/boards/<id>/cards/<cardId>` | Karte löschen. |
+| `DELETE /api/boards/<id>/cards/<cardId>` | Karte **in den Papierkorb** verschieben (seit 0.3.0 kein endgültiges Löschen mehr). |
+| `POST /api/boards/<id>/cards/<cardId>/restore` | Karte aus dem Papierkorb zurückholen (`{ columnId? }`, sonst erste offene Spalte). |
+| `POST /api/boards/<id>/cards/<cardId>/purge` | Karte **endgültig** entfernen. |
+| `POST /api/boards/<id>/trash/empty` | Papierkorb des Boards komplett leeren. |
+| `POST /api/boards/<id>/cards/<cardId>/transfer` | Karte auf ein anderes Board übertragen (`{ toBoard, toColumn?, mode: "move"\|"copy", assignees? }`). |
 
 > **Schreibzugriffe** auf `/api` brauchen ab 0.1.1 einen Token (`X-Kanban-Token`; die Web-UI schickt ihn automatisch mit), **Lesen** bleibt im LAN offen. Details und Grenzen: [Sicherheit & Zugriffsschutz](#sicherheit--zugriffsschutz). Für Zugriffe von außen die tokenbasierten [Webhooks](#webhooks--eingehend) verwenden.
 
@@ -435,8 +516,12 @@ Der Body enthält `cmd` plus die passenden Felder. Es gilt dasselbe **Kommando-V
 | `addCard` | `board`, `title` | alle Kartenfelder (`due`, `assignees`, `labels`, `priority`, `location`, `recurrence`, …), `columnId` |
 | `updateCard` (Alias `editCard`) | `board`, `cardId`\|`id` | zu ändernde Kartenfelder |
 | `moveCard` | `board`, `cardId`\|`id`, `column`\|`columnId` | `order` |
-| `doneCard` | `board`, `cardId`\|`id` | – (verschiebt in die Erledigt-Spalte) |
-| `deleteCard` | `board`, `cardId`\|`id` | – |
+| `doneCard` | `board`, `cardId`\|`id` |, (verschiebt in die Erledigt-Spalte) |
+| `deleteCard` | `board`, `cardId`\|`id` |, (verschiebt seit 0.3.0 in den Papierkorb) |
+| `restoreCard` | `board`, `cardId`\|`id` | `column`\|`columnId` (Zielspalte; sonst erste offene Spalte) |
+| `purgeCard` | `board`, `cardId`\|`id` |, (entfernt endgültig) |
+| `emptyTrash` | `board` |, (leert den Papierkorb) |
+| `transferCard` | `board`, `cardId`\|`id`, `toBoard` | `toColumn`, `mode` (`move` oder `copy`, Standard `move`), `assignees` |
 | `listBoards` / `getBoards` | – | – |
 | `getBoard` | `board` | – |
 
@@ -479,9 +564,20 @@ curl -X POST "$BASE/webhook/$TOKEN/action" -H 'Content-Type: application/json' -
   "calendarInvite": true, "location": "Rathaus Musterstadt"
 }'
 
-# Karte löschen
+# Karte in den Papierkorb verschieben (30 Tage wiederherstellbar)
 curl -X POST "$BASE/webhook/$TOKEN/action" -H 'Content-Type: application/json' -d '{
   "cmd": "deleteCard", "board": "familie", "id": "c_abc123"
+}'
+
+# Karte aus dem Papierkorb zurückholen
+curl -X POST "$BASE/webhook/$TOKEN/action" -H 'Content-Type: application/json' -d '{
+  "cmd": "restoreCard", "board": "familie", "id": "c_abc123"
+}'
+
+# Karte auf ein anderes Board kopieren
+curl -X POST "$BASE/webhook/$TOKEN/action" -H 'Content-Type: application/json' -d '{
+  "cmd": "transferCard", "board": "familie", "id": "c_abc123",
+  "toBoard": "wohnung", "mode": "copy"
 }'
 ```
 
@@ -522,7 +618,7 @@ Ziel-URLs und Ereignisfilter werden in den Instanzeinstellungen gepflegt ([Tab �
 }
 ```
 
-Jedes Event hat die Struktur `{ event, ts, board:{id,title}, card:{…}, detail:{…} }`. Das Feld `detail` variiert je Ereignistyp (z. B. `assignee` bei `cardAssigned`, `fromColumn`/`toColumn` bei `cardMoved`).
+Jedes Event hat die Struktur `{ event, ts, board:{id,title}, card:{…}, detail:{…}, link, dueAt }`. Das Feld `detail` variiert je Ereignistyp (z. B. `assignee` bei `cardAssigned`, `fromColumn`/`toColumn` bei `cardMoved`, `auto`/`reason` beim automatischen Aufräumen). `dueAt` gibt es seit 0.3.0 und enthält die Fälligkeit inklusive Uhrzeit als ISO-Zeitstempel mit lokalem Offset.
 
 ### Benachrichtigungen an beliebige Dienste (Telegram, Pushover, ...)
 
@@ -535,9 +631,10 @@ Neben der eingebauten E-Mail-Benachrichtigung laesst sich **jeder** Dienst anbin
   "event": "cardAssigned",
   "ts": "2026-07-25T09:00:00.000Z",
   "board": { "id": "familie", "title": "Familie" },
-  "card": { "id": "c_abc", "title": "Muelltonne rausstellen", "due": "2026-07-27", "assignees": ["user1"], "priority": 1, "labels": ["haushalt"] },
+  "card": { "id": "c_abc", "title": "Muelltonne rausstellen", "due": "2026-07-27", "dueTime": "18:00", "assignees": ["user1"], "priority": 1, "labels": ["haushalt"] },
   "detail": { "assignee": "user1", "by": "user2" },
-  "link": "http://<host>:8095/?board=familie&card=c_abc"
+  "link": "http://<host>:8095/?board=familie&card=c_abc",
+  "dueAt": "2026-07-27T18:00:00+02:00"
 }
 ```
 
@@ -576,7 +673,8 @@ const USERS = {
 };
 
 // Which events should trigger a message?
-// Available: cardCreated, cardAssigned, cardUpdated, cardMoved, cardDone, cardDeleted, cardDue
+// Available: cardCreated, cardAssigned, cardUpdated, cardMoved, cardDone,
+//            cardDeleted (= in den Papierkorb), cardRestored, cardPurged, cardDue
 // Tip: 'cardAssigned' + 'cardDue' is enough for most setups. Adding 'cardCreated'
 //      sends an extra message when a card is created.
 const EVENTS = ['cardAssigned', 'cardDue'];
@@ -695,7 +793,7 @@ Der Adapter führt das Kommando aus und leert den State wieder.
 
 - **WebSocket `/ws`:** Bei jeder Änderung sendet der Server eine `dirty`-Nachricht an alle offenen Ansichten; diese laden das betroffene Board neu. So sehen alle Geräte Änderungen praktisch sofort.
 - **Polling-Fallback:** Ist der WebSocket nicht verfügbar, fragt die UI periodisch mit `?rev=` nach Änderungen.
-- **Deep-Link:** `…/?board=<id>&card=<id>` öffnet direkt die betreffende Karte – so verlinken auch die Benachrichtigungs-E-Mails („Karte im Board öffnen").
+- **Deep-Link:** `…/?board=<id>&card=<id>` öffnet direkt die betreffende Karte, so verlinken auch die Benachrichtigungs-E-Mails („Karte im Board öffnen").
 
 ### ioBroker-States & Objekte
 
@@ -704,11 +802,11 @@ Neben der Oberfläche legt der Adapter States an, die sich in Skripten, VIS/Love
 | State | Typ | Bedeutung |
 |---|---|---|
 | `kanban.0.info.connection` | bool | Webserver läuft. |
-| `kanban.0.lastEvent` | json | Zuletzt ausgelöstes Ereignis (`{event, ts, board, card, detail}`) – ideal als Skript-Trigger. |
+| `kanban.0.lastEvent` | json | Zuletzt ausgelöstes Ereignis (`{event, ts, board, card, detail, link, dueAt}`), ideal als Skript-Trigger. |
 | `kanban.0.action` | json (beschreibbar) | Kommando-Eingang, siehe [sendTo & action-State](#sendto--action-state). |
 | `kanban.0.info.apiSecret` | string | Interner Schreib-Token der REST-API (ab 0.1.1). |
 | `kanban.0.boards.<id>.data` | json | Vollständiges Board (Karten, Spalten, Labels). |
-| `kanban.0.boards.<id>.rev` | number | Revision (steigt bei jeder Änderung – für Polling). |
+| `kanban.0.boards.<id>.rev` | number | Revision (steigt bei jeder Änderung, für Polling). |
 | `kanban.0.boards.<id>.cardCount` | number | Anzahl Karten im Board. |
 | `kanban.0.boards.<id>.overdueCount` | number | Überfällige Karten im Board. |
 | `kanban.0.users.<name>.assignedCount` | number | Offene, dieser Person zugewiesene Karten. |
@@ -723,18 +821,18 @@ Die `boards.*`- und `users.*`-Spiegel-States eignen sich gut für Dashboards (�
 
 ### Sicherheit & Zugriffsschutz
 
-> **Neu in 0.1.1** – ergänzt nach einem Sicherheits-Review.
+> **Neu in 0.1.1**, ergänzt nach einem Sicherheits-Review.
 
 **Schreibschutz der REST-API (Token).** Lesende Zugriffe (`GET`) auf `/api` bleiben im LAN offen (Web-UI und einfache Dashboards brauchen keinen Token). **Schreibende** Zugriffe (`POST`/`PATCH`/`DELETE`) verlangen einen Token im Header `X-Kanban-Token`. Gültig sind:
 
-- das automatisch erzeugte **SPA-Secret** (State `kanban.0.info.apiSecret`), das der Server der eigenen Oberfläche als `<meta name="kanban-token">` mitgibt – die Web-UI schickt es transparent mit, du musst nichts einstellen;
+- das automatisch erzeugte **SPA-Secret** (State `kanban.0.info.apiSecret`), das der Server der eigenen Oberfläche als `<meta name="kanban-token">` mitgibt, die Web-UI schickt es transparent mit, du musst nichts einstellen;
 - jeder aktive **inboundToken** (Tab „Webhooks (eingehend)"), damit auch Skripte/Agenten `/api` schreibend nutzen können.
 
 Ohne gültigen Token → HTTP `401`. Über die native Einstellung `apiWriteProtection: false` lässt sich der Schutz abschalten (dann verhält sich `/api` wie in 0.1.0).
 
 > **Grenze dieses Schutzes (ehrlich):** Da die Oberfläche **ohne Login** arbeitet, kann ein Gerät im selben Netz, das die Seite lädt, das SPA-Secret mitlesen. Der Token wehrt damit zuverlässig **fremde Webseiten/CSRF** und naive Scanner ab, ist aber **kein** Ersatz für Netzisolation. Für harte Abschottung den Port nur ans LAN/`127.0.0.1` binden und einen Reverse-Proxy mit Authentifizierung davorsetzen.
 
-**Sichere Beschreibungs-Vorschau.** Die Markdown-Beschreibung wird vor der Anzeige mit einem HTML-Sanitizer (DOMPurify) bereinigt – eingebettetes `<script>`, `onerror` u. Ä. wird entfernt (Schutz vor gespeichertem XSS).
+**Sichere Beschreibungs-Vorschau.** Die Markdown-Beschreibung wird vor der Anzeige mit einem HTML-Sanitizer (DOMPurify) bereinigt, eingebettetes `<script>`, `onerror` u. Ä. wird entfernt (Schutz vor gespeichertem XSS).
 
 **Nur sichere Link-Schemata.** Das Link-Badge einer Karte ist nur bei `http(s)`, `mailto:`, `tel:` und `geo:` anklickbar; andere Schemata (z. B. `javascript:`) werden nicht als Link ausgeführt.
 
@@ -750,9 +848,9 @@ Die Übersetzungen liegen als **eine Datei pro Sprache** unter `www/i18n/` (z. B
 
 - **Es kommen keine E-Mails an.** Der Versand hängt vollständig vom konfigurierten `email`-Adapter ab. Prüfe dort die Zugangsdaten (moderne Postfächer benötigen häufig OAuth2 statt Passwort). Der Kanban-Adapter übergibt die Nachricht nur.
 - **Die `.ics` wird nicht angehängt.** Der Anhang entsteht nur, wenn an der Karte **„Kalender-Einladung"** aktiv **und** ein **Fälligkeitsdatum** gesetzt ist.
-- **Uhrzeit ohne Datum verschwindet.** Eine Uhrzeit ist immer an ein Fälligkeitsdatum gekoppelt – ohne Datum wird sie verworfen.
-- **Farbauswahl.** Der Adapter nutzt bewusst einen **eingebetteten** Colorpicker (nicht den nativen Systemdialog), damit auf allen Geräten – auch mobil – der volle Farbraum inklusive Hex-Eingabe verfügbar ist.
-- **Eigenes Design (Theming).** Über **Instanzeinstellungen → Allgemein → „Eigenes CSS"** lässt sich die Oberfläche anpassen. Sie basiert auf CSS-Variablen, die man überschreiben kann – z. B. für ein schwarz-oranges Design (angelehnt an Lovelace):
+- **Uhrzeit ohne Datum verschwindet.** Eine Uhrzeit ist immer an ein Fälligkeitsdatum gekoppelt, ohne Datum wird sie verworfen.
+- **Farbauswahl.** Der Adapter nutzt bewusst einen **eingebetteten** Colorpicker (nicht den nativen Systemdialog), damit auf allen Geräten, auch mobil, der volle Farbraum inklusive Hex-Eingabe verfügbar ist.
+- **Eigenes Design (Theming).** Über **Instanzeinstellungen → Allgemein → „Eigenes CSS"** lässt sich die Oberfläche anpassen. Sie basiert auf CSS-Variablen, die man überschreiben kann, z. B. für ein schwarz-oranges Design (angelehnt an Lovelace):
 
   ```css
   :root, html[data-theme="dark"] {
