@@ -178,7 +178,6 @@
   "trash.purge": "Delete permanently",
   "trash.empty": "Empty trash",
   "trash.showToggle": "Show trash",
-  "trash.showHint": "Shows the trash column on this device only.",
   "confirm.title": "Confirm",
   "confirm.ok": "OK",
   "confirm.cancel": "Cancel",

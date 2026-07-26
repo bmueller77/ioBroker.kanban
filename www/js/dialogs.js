@@ -798,7 +798,6 @@ export function initDialogs(state, actions) {
             trashChk.addEventListener('change', () => actions.toggleShowTrash());
             trashLbl.append(trashChk, document.createTextNode(' ' + t('trash.showToggle')));
             panel.appendChild(trashLbl);
-            panel.appendChild(el('div', 'hint', t('trash.showHint')));
 
             // ---- Board loeschen (ganz unten) ----
             const delBoard = el('button', 'danger', t('boards.deleteBoard'));
