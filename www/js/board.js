@@ -34,7 +34,8 @@ const MDI = {
     sortGrid: 'M9,3H11V5H9V3M13,3H15V5H13V3M9,7H11V9H9V7M13,7H15V9H13V7M9,11H11V13H9V11M13,11H15V13H13V11M9,15H11V17H9V15M13,15H15V17H13V15M9,19H11V21H9V19M13,19H15V21H13V19Z',
     sortDue: 'M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M16.2,16.2L11,13V7H12.5V12.2L17,14.9L16.2,16.2Z',
     sortPrio: 'M14.4,6L14,4H5V21H7V14H12.6L13,16H20V6H14.4Z',
-    sortAge: 'M6,2H18V8H18V8L14,12L18,16V16H18V22H6V16H6V16L10,12L6,8V8H6V2M16,16.5L12,12.5L8,16.5V20H16V16.5M12,11.5L16,7.5V4H8V7.5L12,11.5M10,6H14V6.75L12,8.75L10,6.75V6Z',
+    sortRecent: 'M18 7H15L19 3L23 7H20V21H18V7M8 5C4.14 5 1 8.13 1 12C1 15.87 4.13 19 8 19C11.86 19 15 15.87 15 12C15 8.13 11.87 5 8 5M8 7.15C10.67 7.15 12.85 9.32 12.85 12C12.85 14.68 10.68 16.85 8 16.85C5.32 16.85 3.15 14.68 3.15 12C3.15 9.32 5.32 7.15 8 7.15M7 9V12.69L10.19 14.53L10.94 13.23L8.5 11.82V9',
+    sortOldest: 'M20 17H23L19 21L15 17H18V3H20V17M8 5C4.14 5 1 8.13 1 12C1 15.87 4.13 19 8 19C11.86 19 15 15.87 15 12C15 8.13 11.87 5 8 5M8 7.15C10.67 7.15 12.85 9.32 12.85 12C12.85 14.68 10.68 16.85 8 16.85C5.32 16.85 3.15 14.68 3.15 12C3.15 9.32 5.32 7.15 8 7.15M7 9V12.69L10.19 14.53L10.94 13.23L8.5 11.82V9',
     // Papierkorb-Aktionen (Feature 5)
     restore: 'M13,3A9,9 0 0,0 4,12H1L4.89,15.89L4.96,16.03L9,12H6A7,7 0 0,1 13,5A7,7 0 0,1 20,12A7,7 0 0,1 13,19C11.07,19 9.32,18.21 8.06,16.94L6.64,18.36C8.27,20 10.5,21 13,21A9,9 0 0,0 22,12A9,9 0 0,0 13,3Z',
     deleteForever: 'M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19M8.46,11.88L9.87,10.47L12,12.59L14.12,10.47L15.53,11.88L13.41,14L15.53,16.12L14.12,17.53L12,15.41L9.88,17.53L8.47,16.12L10.59,14L8.46,11.88M15.5,4L14.5,3H9.5L8.5,4H5V6H19V4H15.5Z',
@@ -164,10 +165,13 @@ function isoLocalParts(iso) {
 }
 
 // ---- Sortiermodi je Spalte (Feature 1) ----
-const SORT_MODES = ['manual', 'grid', 'due', 'priority', 'age'];
-const AUTO_SORT_MODES = ['due', 'priority', 'age'];   // eigenes Umsortieren wirkungslos
+const SORT_MODES = ['manual', 'grid', 'due', 'priority', 'recent', 'oldest'];
+const AUTO_SORT_MODES = ['due', 'priority', 'recent', 'oldest'];   // eigenes Umsortieren wirkungslos
 function sortModeIcon(mode) {
-    return ({ manual: MDI.sortManual, grid: MDI.sortGrid, due: MDI.sortDue, priority: MDI.sortPrio, age: MDI.sortAge })[mode] || MDI.sortManual;
+    return ({
+        manual: MDI.sortManual, grid: MDI.sortGrid, due: MDI.sortDue,
+        priority: MDI.sortPrio, recent: MDI.sortRecent, oldest: MDI.sortOldest,
+    })[mode] || MDI.sortManual;
 }
 function cardDueKey(c) { return c.due ? c.due + 'T' + (c.dueTime || '00:00') : ''; }
 function byTitle(a, b) { return String(a.title || '').localeCompare(String(b.title || '')); }
@@ -184,21 +188,25 @@ function cmpPrio(a, b) {
     if (pa !== pb) return pb - pa;   // höhere Priorität zuerst
     return cmpDue(a, b);
 }
-// Seit wann liegt die Karte in ihrer Spalte? movedAt wird nur bei echtem
-// Spaltenwechsel gesetzt; nie verschobene Karten liegen seit ihrer Erstellung dort.
+// Wann kam die Karte in diese Spalte? movedAt wird nur bei echtem Spaltenwechsel
+// gesetzt; nie verschobene Karten liegen seit ihrer Erstellung dort. In einer
+// Erledigt-Spalte ist das also der Zeitpunkt des Erledigens.
 function inColumnSince(c) { return c.movedAt || c.createdAt || ''; }
-function cmpAge(a, b) {
+// newestFirst=true -> zuletzt hinzugekommene Karte oben (z.B. zuletzt erledigt),
+// sonst aelteste zuerst (laengste Liegezeit in der Spalte).
+function cmpInColumn(a, b, newestFirst) {
     const ka = inColumnSince(a), kb = inColumnSince(b);
     if (!ka && !kb) return byTitle(a, b);
     if (!ka) return 1;              // ohne Zeitstempel nach unten
     if (!kb) return -1;
-    if (ka !== kb) return ka < kb ? -1 : 1;   // aeltester Eintritt zuerst = laengste Liegezeit oben
+    if (ka !== kb) return (newestFirst ? (ka > kb) : (ka < kb)) ? -1 : 1;
     return byTitle(a, b);
 }
 function applySort(cards, mode) {
     if (mode === 'due') return cards.slice().sort(cmpDue);
     if (mode === 'priority') return cards.slice().sort(cmpPrio);
-    if (mode === 'age') return cards.slice().sort(cmpAge);
+    if (mode === 'recent') return cards.slice().sort((a, b) => cmpInColumn(a, b, true));
+    if (mode === 'oldest') return cards.slice().sort((a, b) => cmpInColumn(a, b, false));
     return cards.slice().sort((a, b) => a.order - b.order);   // manual + grid: eigene Reihenfolge
 }
 function colSortKey(board, col) { return `${board.id}:${col.id}`; }
@@ -226,7 +234,7 @@ function openSortMenu(btn, state, board, col, actions) {
     const menu = el('div', 'sort-menu');
     menu.appendChild(el('div', 'sort-menu-title', t('sort.mode')));
     const cur = getSortMode(state, board, col);
-    const labels = { manual: t('sort.manual'), grid: t('sort.grid'), due: t('sort.due'), priority: t('sort.priority'), age: t('sort.age') };
+    const labels = { manual: t('sort.manual'), grid: t('sort.grid'), due: t('sort.due'), priority: t('sort.priority'), recent: t('sort.recent'), oldest: t('sort.oldest') };
     for (const mode of SORT_MODES) {
         const item = el('button', 'sort-item' + (mode === cur ? ' active' : ''));
         item.type = 'button';
