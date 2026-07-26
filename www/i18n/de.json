@@ -169,6 +169,7 @@
   "sort.mode": "Sortierung",
   "sort.manual": "Manuell",
   "sort.grid": "Grid",
+  "sort.gripTitle": "Zum Verschieben ziehen",
   "sort.due": "Fälligkeit",
   "sort.priority": "Priorität",
   "card.doneLabel": "Erledigt",

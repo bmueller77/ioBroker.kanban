@@ -169,6 +169,7 @@
   "sort.mode": "Sorting",
   "sort.manual": "Manual",
   "sort.grid": "Grid",
+  "sort.gripTitle": "Drag to reorder",
   "sort.due": "Due date",
   "sort.priority": "Priority",
   "card.doneLabel": "Done",

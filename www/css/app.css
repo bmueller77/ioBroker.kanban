@@ -749,8 +749,21 @@ button.mini {
 .sort-item.active { color: var(--accent); }
 .sort-item svg { display: block; }
 
-/* ---- 0.3.0: Grid-Sortiermodus (dichtere Kacheln) ---- */
-.cards.cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; align-content: start; }
+/* ---- 0.3.0: Grid-Sortiermodus - Anfasser links an der Karte ---- */
+.card.has-grip { padding-left: 28px; }
+.card-grip {
+    position: absolute;
+    left: 5px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    color: var(--muted);
+    cursor: grab;
+    opacity: 0.75;
+}
+.card-grip:hover { opacity: 1; color: var(--accent); }
+.card-grip:active { cursor: grabbing; }
 
 /* ---- 0.3.0: erledigte Karten (Feature 3+4) ---- */
 /* Erledigte Karten treten zurueck: gedaempfter Titel (hell -> heller, dunkel -> dunkler) */

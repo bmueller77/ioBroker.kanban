@@ -266,9 +266,17 @@ function safeHref(url) {
 
 function renderCard(state, board, card, actions, opts = {}) {
     const inTrash = !!opts.inTrash;
-    const c = el('div', 'card' + (inTrash ? ' card-trash' : ''));
+    const c = el('div', 'card' + (inTrash ? ' card-trash' : '') + (opts.grip ? ' has-grip' : ''));
     c.dataset.cardId = card.id;
     if (card.color && !inTrash) c.style.setProperty('--card-color', card.color);
+
+    // Grid-Modus: Anfasser links an der Karte, nur darueber laesst sie sich ziehen
+    if (opts.grip) {
+        const grip = el('span', 'card-grip');
+        grip.appendChild(mdiIcon(MDI.sortGrid));
+        grip.title = t('sort.gripTitle');
+        c.appendChild(grip);
+    }
 
     const col = (board.columns || []).find(x => x.id === card.columnId);
     const isDone = !!(col && col.isDone);
@@ -561,10 +569,13 @@ export function renderBoard(container, state, actions) {
         colEl.appendChild(head);
 
         const list = el('div', 'cards');
-        if (!col.isTrash && getSortMode(state, board, col) === 'grid') list.classList.add('cards-grid');
+        const sortMode = col.isTrash ? 'manual' : getSortMode(state, board, col);
+        const withGrip = sortMode === 'grid';
         const hideCards = isDoneCol && !state.showDone;
         if (!hideCards) {
-            for (const card of cards) list.appendChild(renderCard(state, board, card, actions, { inTrash: !!col.isTrash }));
+            for (const card of cards) {
+                list.appendChild(renderCard(state, board, card, actions, { inTrash: !!col.isTrash, grip: withGrip }));
+            }
         }
         colEl.appendChild(list);
         if (hiddenByMax > 0 && !hideCards) {
@@ -590,6 +601,11 @@ export function renderBoard(container, state, actions) {
             animation: 150,
             delay: 150,               // Touch: kurz halten zum Ziehen, damit Scrollen möglich bleibt
             delayOnTouchOnly: true,
+            // Grid-Modus: nur ueber den Anfasser ziehen
+            ...(withGrip ? { handle: '.card-grip' } : {}),
+            // Automatische Modi: eigenes Umsortieren waere wirkungslos, Verschieben
+            // in andere Spalten bleibt moeglich
+            ...(sortMode === 'due' || sortMode === 'priority' ? { sort: false } : {}),
             ghostClass: 'sortable-ghost',
             filter: '.link-badge, .card-check-toggle, .card-checklist, .card-action',   // lösen kein Ziehen aus
             preventOnFilter: false,              // damit deren Klick normal durchkommt
