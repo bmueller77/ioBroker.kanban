@@ -753,7 +753,8 @@ button.mini {
 .cards.cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; align-content: start; }
 
 /* ---- 0.3.0: erledigte Karten (Feature 3+4) ---- */
-.card .title.title-done .title-text { text-decoration: line-through; }
+/* Erledigte Karten treten zurueck: gedaempfter Titel (hell -> heller, dunkel -> dunkler) */
+.card .title.title-done .title-text { text-decoration: line-through; color: var(--muted); }
 .card .done-stamp { font-size: 13px; font-weight: 400; color: var(--muted); margin: 2px 0 0; }
 .card-action { background: none; border: none; cursor: pointer; color: var(--muted); padding: 2px; opacity: 0.8; }
 .card-action:hover { opacity: 1; color: var(--accent); }
