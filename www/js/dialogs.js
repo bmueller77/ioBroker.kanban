@@ -591,6 +591,7 @@ export function initDialogs(state, actions) {
             }
             boardSel.value = editId;
             boardSel.title = t('boards.editingBoard');
+            boardSel.dataset.noDirty = '1';   // Board-Wechsel ist keine Aenderung am Board
             boardSel.addEventListener('change', () => switchEdit(boardSel.value));
 
             const showBtn = el('button', 'icon-btn');
@@ -611,6 +612,7 @@ export function initDialogs(state, actions) {
             newInput.type = 'text';
             newInput.placeholder = t('boards.newBoard');
             newInput.className = 'board-new-name';
+            newInput.dataset.noDirty = '1';   // Name fuer ein NEUES Board, keine Aenderung am aktuellen
             const newBtn = el('button', 'primary', t('boards.create'));
             newBtn.type = 'button';
             newBtn.addEventListener('click', async () => {
@@ -792,7 +794,7 @@ export function initDialogs(state, actions) {
             const trashLbl = el('label', 'inline');
             const trashChk = document.createElement('input');
             trashChk.type = 'checkbox'; trashChk.checked = !!state.showTrash;
-            trashChk.dataset.deviceOnly = '1';
+            trashChk.dataset.noDirty = '1';   // reine Geraete-Einstellung
             trashChk.addEventListener('change', () => actions.toggleShowTrash());
             trashLbl.append(trashChk, document.createTextNode(' ' + t('trash.showToggle')));
             panel.appendChild(trashLbl);
@@ -818,8 +820,13 @@ export function initDialogs(state, actions) {
             });
             panel.appendChild(delBoard);
 
-            // Aenderungen an Board-Feldern merken (Geraete-Einstellungen ausgenommen)
-            const touch = (ev) => { if (!(ev.target && ev.target.dataset && ev.target.dataset.deviceOnly)) dirty = true; };
+            // Aenderungen an Board-Feldern merken. Ausgenommen sind Bedienelemente,
+            // die nichts am Board aendern (Board-Auswahl, Neu-Feld, Geraete-Einstellungen).
+            const touch = (ev) => {
+                const el2 = ev.target;
+                if (el2 && el2.dataset && el2.dataset.noDirty) return;
+                dirty = true;
+            };
             panel.addEventListener('input', touch);
             panel.addEventListener('change', touch);
         }
