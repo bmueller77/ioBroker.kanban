@@ -714,11 +714,15 @@ button.mini {
     line-height: 1;
     cursor: pointer;
     opacity: 0.85;
-    color: inherit;
+    /* bewusst nicht 'inherit': sonst faerbt die WIP-Warnfarbe der Spalte die Icons rot */
+    color: var(--muted);
 }
 .col-sort:hover { opacity: 1; color: var(--accent); }
 .col-sort svg { display: block; }
-.col-toggle + .col-sort { margin-left: 6px; }   /* direkt neben dem Auge in Erledigt-Spalten */
+.col-toggle + .col-sort, .col-sort + .col-sort { margin-left: 6px; }
+.col-sort-dir + .col-sort { margin-left: 4px; }
+/* Auge in Erledigt-Spalten ebenfalls von der WIP-Warnfarbe entkoppeln */
+.column.over-wip .column-head .col-toggle { color: var(--muted); }
 
 .sort-menu {
     position: fixed;
