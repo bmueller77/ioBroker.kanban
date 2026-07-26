@@ -184,7 +184,7 @@
   "confirm.cancel": "Cancel",
   "confirm.purgeCard": "Permanently and irreversibly delete this card?",
   "confirm.emptyTrash": "Permanently delete all cards in the trash?",
-  "cleanup.title": "Clean up done cards",
+  "cleanup.title": "Move done cards to the trash",
   "cleanup.off": "Off",
   "cleanup.age": "By age",
   "cleanup.count": "By count",

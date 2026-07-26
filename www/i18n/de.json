@@ -184,7 +184,7 @@
   "confirm.cancel": "Abbrechen",
   "confirm.purgeCard": "Diese Karte endgültig und unwiderruflich löschen?",
   "confirm.emptyTrash": "Alle Karten im Papierkorb endgültig löschen?",
-  "cleanup.title": "Erledigte Karten aufräumen",
+  "cleanup.title": "Erledigte Karten in den Papierkorb",
   "cleanup.off": "Aus",
   "cleanup.age": "Nach Alter",
   "cleanup.count": "Nach Anzahl",
