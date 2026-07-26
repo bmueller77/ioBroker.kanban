@@ -210,6 +210,7 @@ function onDocClickSort(e) { if (sortMenuEl && !sortMenuEl.contains(e.target)) c
 function openSortMenu(btn, state, board, col, actions) {
     closeSortMenu();
     const menu = el('div', 'sort-menu');
+    menu.appendChild(el('div', 'sort-menu-title', t('sort.mode')));
     const cur = getSortMode(state, board, col);
     const labels = { manual: t('sort.manual'), grid: t('sort.grid'), due: t('sort.due'), priority: t('sort.priority') };
     for (const mode of SORT_MODES) {
