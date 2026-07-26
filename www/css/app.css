@@ -703,3 +703,93 @@ button.mini {
     color: #fff;
     border-style: solid;
 }
+.quick-target.quick-trash { border-color: var(--muted); }
+
+/* ---- 0.3.0: Sortier-Umschalter je Spalte (Feature 1) ---- */
+.col-sort {
+    margin-left: auto;
+    background: none;
+    border: none;
+    padding: 0 2px;
+    line-height: 1;
+    cursor: pointer;
+    opacity: 0.85;
+    color: inherit;
+}
+.col-sort:hover { opacity: 1; color: var(--accent); }
+.col-sort svg { display: block; }
+.col-toggle + .col-sort { margin-left: 6px; }   /* direkt neben dem Auge in Erledigt-Spalten */
+
+.sort-menu {
+    position: fixed;
+    z-index: 1000;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+    padding: 4px;
+    display: flex;
+    flex-direction: column;
+    min-width: 160px;
+}
+.sort-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: none;
+    border: none;
+    text-align: left;
+    padding: 7px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    color: var(--text);
+    font-size: 13px;
+}
+.sort-item:hover { background: var(--bg); }
+.sort-item.active { color: var(--accent); }
+.sort-item svg { display: block; }
+
+/* ---- 0.3.0: Grid-Sortiermodus (dichtere Kacheln) ---- */
+.cards.cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; align-content: start; }
+
+/* ---- 0.3.0: erledigte Karten (Feature 3+4) ---- */
+.card .title.title-done { text-decoration: line-through; }
+.card .done-stamp { font-size: 13px; font-weight: 400; color: var(--muted); margin: 2px 0 0; }
+.card-action { background: none; border: none; cursor: pointer; color: var(--muted); padding: 2px; opacity: 0.8; }
+.card-action:hover { opacity: 1; color: var(--accent); }
+.card-action svg { display: block; }
+.card-copy { display: block; margin-left: auto; margin-top: 4px; }
+
+/* ---- 0.3.0: Papierkorb-Spalte (Feature 5), feste graue Optik ---- */
+.column.trash-col { --trash-bg: #4b4b52; --trash-card: #5c5c64; --trash-fg: #f0f0f3; background: var(--trash-bg); }
+[data-theme="dark"] .column.trash-col { --trash-bg: #cfcfd6; --trash-card: #e4e4ea; --trash-fg: #1c1c1e; }
+.column.trash-col .column-head, .column.trash-col .column-head .count, .column.trash-col .col-toggle { color: var(--trash-fg); }
+.card.card-trash { background: var(--trash-card); color: var(--trash-fg); border-color: rgba(0, 0, 0, 0.18); }
+.card.card-trash .title { color: var(--trash-fg); }
+.card.card-trash .trash-info { font-size: 12px; margin-top: 4px; color: var(--trash-fg); opacity: 0.85; }
+.card.card-trash .trash-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 6px; }
+.card.card-trash .card-action { color: var(--trash-fg); }
+.card.card-trash .card-action:hover { color: var(--accent); }
+
+/* ---- 0.3.0: gepaarte Editor-Felder (Feature 62) ---- */
+dialog .row .field { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 8px; }
+dialog .icon-btn { padding: 5px 8px; line-height: 1; }
+dialog .icon-btn svg { display: block; }
+dialog label.inline-num { flex-direction: row; align-items: center; gap: 6px; }
+dialog label.inline-num input { width: 80px; }
+
+/* ---- 0.3.0: Übertragen-Dialog (Feature 6) ---- */
+.transfer-mode { display: flex; gap: 8px; }
+.transfer-mode-btn { flex: 1; }
+.transfer-mode-btn.active { background: var(--accent); border-color: var(--accent); color: var(--accent-text, #fff); }
+.transfer-note { font-size: 12px; color: var(--muted); background: var(--surface2); border-radius: 6px; padding: 8px 10px; }
+
+/* ---- 0.3.0: Kopfzeile der Board-Einstellungen (Feature 64) ---- */
+.board-toprow { align-items: center; gap: 8px; flex-wrap: wrap; }
+.board-toprow select { flex: 1 1 140px; min-width: 0; }
+.board-toprow .board-new-name { flex: 1 1 140px; min-width: 0; }
+.board-toprow .icon-btn { flex: 0 0 auto; }
+.board-toprow .icon-btn:disabled { opacity: 0.4; cursor: default; }
+@media (max-width: 600px) {
+    .board-toprow { flex-direction: row; }
+}

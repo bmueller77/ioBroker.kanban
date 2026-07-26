@@ -4,6 +4,8 @@ A full-featured **Kanban board as a dedicated ioBroker adapter**. The adapter sh
 
 > **Who is it for?** Anyone who wants shared task management in their smart home – family, flat-share, house maintenance – tightly integrated with ioBroker (scripts, Lovelace, Node-RED).
 
+> **Version 0.3.0** – Per-board trash (restorable for 30 days), automatic cleanup of old done cards, per-column sorting (manual/grid/due date/priority), done cards with strikethrough title, completion timestamp and copy button, moving or copying cards between boards, new events `cardRestored`/`cardPurged` and `dueAt` (due date incl. time) in every event, reworked board settings and card editor.
+>
 > **Version 0.2.1** – Express 5, fixed avatar upload (CSP blocked `blob:` URLs), Node.js 20+ and admin 7.8.23+, ready-to-use deep link in the event, notification routing via script (Telegram/Pushover, see below), updated dependencies and repository compliance.
 
 > **Version 0.2.0** – Mobile (accordion columns, full-screen dialogs with a fixed action bar), assignable users per board, header chips as a saved per-board filter, user colours in the web UI (no restart), automatic text contrast colour on labels/avatars, per-board notification link target, per-instance date and time format (moment/Day.js tokens incl. localised month and weekday names), at least one assignee required per card, per-column display limit, Material Design icons throughout.
@@ -539,9 +541,12 @@ Besides the built-in e-mail notification you can connect **any** service without
 }
 ```
 
-- `event` - event type: `cardCreated`, `cardAssigned`, `cardUpdated`, `cardMoved`, `cardDone`, `cardDeleted`, `cardDue`.
+- `event` - event type: `cardCreated`, `cardAssigned`, `cardUpdated`, `cardMoved`, `cardDone`, `cardDeleted`, `cardRestored`, `cardPurged`, `cardDue`.
 - `card.assignees` - the assignees (user **ids**, not display names); the notification is aimed at them.
 - `link` - ready-to-use deep link to the card (from 0.2.1; uses the base URL from the instance settings).
+- `dueAt` - from 0.3.0: the due date as an ISO timestamp with local offset, e.g. `2026-08-01T09:00:00+02:00`. Without a time set, `00:00` is sent; without a due date the value is `null`.
+
+**Trash events (from 0.3.0):** `cardDeleted` now means "moved to the trash" - the card can be restored for 30 days. `cardRestored` fires when it is brought back, `cardPurged` when it is removed permanently. During automatic cleanup, `detail` additionally carries `auto: true` and `reason` (`cleanup` or `retention`), so scripts can recognise bulk actions and bundle them. For automatic runs, e-mails are sent as **one summary per user** instead of one per card.
 - `detail.by` - **who triggered the change.** Important: the board runs **without a login** - the web UI does not know the actor and leaves `by` empty or `api`. It is only filled for changes made via API, webhook or script that pass a `by` (e.g. your own agents). A "do not notify the actor" filter therefore only works for such sources.
 
 > **Prerequisite per service:** the recipient must be known to the service. For **Telegram** the person has to send the bot `/start` (plus the password, if configured) once; afterwards they appear with their numeric **chatId** in state `telegram.0.communicate.users`. Put that chatId into `USERS` as the value - the **key** is the Kanban user id (e.g. `user1`), not the display name.

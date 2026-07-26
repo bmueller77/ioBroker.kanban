@@ -163,6 +163,17 @@ class Kanban extends utils.Adapter {
             }
             case 'deleteCard':
                 return this.store.deleteCard(boardId, cardId, source);
+            case 'restoreCard':
+                return this.store.restoreCard(boardId, cardId, payload.column || payload.columnId, source);
+            case 'purgeCard':
+                return this.store.purgeCard(boardId, cardId, source);
+            case 'emptyTrash':
+                return this.store.emptyTrash(boardId, source);
+            case 'transferCard':
+                return this.store.transferCard(boardId, cardId,
+                    payload.toBoard || payload.targetBoard, payload.toColumn || payload.targetColumn,
+                    payload.mode === 'copy' ? 'copy' : 'move',
+                    { assignees: payload.assignees }, source);
             default:
                 throw new Error(`Unbekanntes Kommando '${cmd}'`);
         }

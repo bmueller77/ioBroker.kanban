@@ -29,7 +29,22 @@ const MDI = {
     chevronUp: 'M7.41,15.41L12,10.83L16.59,15.41L18,14L12,8L6,14L7.41,15.41Z',
     chevronDown: 'M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z',
     chevronRight: 'M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z',
+    // Sortiermodi (Feature 1)
+    sortManual: 'M19.75 8C19.06 8 18.5 8.56 18.5 9.25V15H18C16.35 15 15 16.35 15 18H14C14 15.96 15.53 14.28 17.5 14.03V3.25C17.5 2.56 16.94 2 16.25 2C15.56 2 15 2.56 15 3.25V11H14V1.25C14 .56 13.44 0 12.75 0S11.5 .56 11.5 1.25V11H10.5V2.75C10.5 2.06 9.94 1.5 9.25 1.5S8 2.06 8 2.75V12H7V5.75C7 5.06 6.44 4.5 5.75 4.5S4.5 5.06 4.5 5.75V15.75C4.5 20.31 8.19 24 12.75 24S21 20.31 21 15.75V9.25C21 8.56 20.44 8 19.75 8Z',
+    sortGrid: 'M9,3H11V5H9V3M13,3H15V5H13V3M9,7H11V9H9V7M13,7H15V9H13V7M9,11H11V13H9V11M13,11H15V13H13V11M9,15H11V17H9V15M13,15H15V17H13V15M9,19H11V21H9V19M13,19H15V21H13V19Z',
+    sortDue: 'M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M16.2,16.2L11,13V7H12.5V12.2L17,14.9L16.2,16.2Z',
+    sortPrio: 'M14.4,6L14,4H5V21H7V14H12.6L13,16H20V6H14.4Z',
+    // Papierkorb-Aktionen (Feature 5)
+    restore: 'M13,3A9,9 0 0,0 4,12H1L4.89,15.89L4.96,16.03L9,12H6A7,7 0 0,1 13,5A7,7 0 0,1 20,12A7,7 0 0,1 13,19C11.07,19 9.32,18.21 8.06,16.94L6.64,18.36C8.27,20 10.5,21 13,21A9,9 0 0,0 22,12A9,9 0 0,0 13,3Z',
+    deleteForever: 'M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19M8.46,11.88L9.87,10.47L12,12.59L14.12,10.47L15.53,11.88L13.41,14L15.53,16.12L14.12,17.53L12,15.41L9.88,17.53L8.47,16.12L10.59,14L8.46,11.88M15.5,4L14.5,3H9.5L8.5,4H5V6H19V4H15.5Z',
+    broom: 'M19.36,2.72L20.78,4.14L15.06,9.85C16.13,11.39 16.28,13.24 15.38,14.44L9.06,8.12C10.26,7.22 12.11,7.37 13.65,8.44L19.36,2.72M5.93,17.57C3.92,15.56 2.69,13.16 2.35,10.92L7.23,8.83L14.67,16.27L12.58,21.15C10.34,20.81 7.94,19.58 5.93,17.57Z',
+    // Karten-Editor / Übertragen (Feature 3+6)
+    contentCopy: 'M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z',
+    transfer: 'M8 4A2 2 0 0 0 6 6V10H8V6H16V9H13.5L17 12.5L20.5 9H18V6A2 2 0 0 0 16 4H8M3 12V14H11V12H3M3 15V17H11V15H3M13 15V17H21V15H13M3 18V20H11V18H3M13 18V20H21V18H13Z',
+    arrowRightCircle: 'M22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2A10,10 0 0,1 22,12M6,13H14L10.5,16.5L11.92,17.92L17.84,12L11.92,6.08L10.5,7.5L14,11H6V13Z',
 };
+
+export { MDI };
 
 
 export function mdiIcon(pathData) {
@@ -71,9 +86,9 @@ function buildQuickMove(evt, sourceCol, board) {
     bar.style.width = rect.width + 'px';
 
     for (const c of others) {
-        const t = el('div', 'quick-target', c.title);
-        t.dataset.colId = c.id;
-        bar.appendChild(t);
+        const qt = el('div', 'quick-target' + (c.isTrash ? ' quick-trash' : ''), c.isTrash ? t('col.trash') : c.title);
+        qt.dataset.colId = c.id;
+        bar.appendChild(qt);
     }
     document.body.appendChild(bar);
 
@@ -139,6 +154,77 @@ function fmtTime(hhmm, fmt) {
     const ap = h < 12 ? 'AM' : 'PM'; h = h % 12 || 12;
     return `${h}:${m} ${ap}`;
 }
+function p2(n) { return String(n).padStart(2, '0'); }
+// ISO-Zeitstempel (z.B. doneAt/trashedAt) in lokale Datum-/Uhrzeit-Teile zerlegen.
+function isoLocalParts(iso) {
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) return null;
+    return { D: `${d.getFullYear()}-${p2(d.getMonth() + 1)}-${p2(d.getDate())}`, T: `${p2(d.getHours())}:${p2(d.getMinutes())}` };
+}
+
+// ---- Sortiermodi je Spalte (Feature 1) ----
+const SORT_MODES = ['manual', 'grid', 'due', 'priority'];
+function sortModeIcon(mode) {
+    return ({ manual: MDI.sortManual, grid: MDI.sortGrid, due: MDI.sortDue, priority: MDI.sortPrio })[mode] || MDI.sortManual;
+}
+function cardDueKey(c) { return c.due ? c.due + 'T' + (c.dueTime || '00:00') : ''; }
+function byTitle(a, b) { return String(a.title || '').localeCompare(String(b.title || '')); }
+function cmpDue(a, b) {
+    const ka = cardDueKey(a), kb = cardDueKey(b);
+    if (!ka && !kb) return byTitle(a, b);
+    if (!ka) return 1;
+    if (!kb) return -1;
+    if (ka !== kb) return ka < kb ? -1 : 1;
+    return byTitle(a, b);
+}
+function cmpPrio(a, b) {
+    const pa = Number(a.priority) || 0, pb = Number(b.priority) || 0;
+    if (pa !== pb) return pb - pa;   // höhere Priorität zuerst
+    return cmpDue(a, b);
+}
+function applySort(cards, mode) {
+    if (mode === 'due') return cards.slice().sort(cmpDue);
+    if (mode === 'priority') return cards.slice().sort(cmpPrio);
+    return cards.slice().sort((a, b) => a.order - b.order);   // manual + grid: eigene Reihenfolge
+}
+function colSortKey(board, col) { return `${board.id}:${col.id}`; }
+function getSortMode(state, board, col) {
+    const m = state.sortModes && state.sortModes[colSortKey(board, col)];
+    return SORT_MODES.includes(m) ? m : 'manual';
+}
+function trashDaysLeft(card, retention) {
+    const ts = Date.parse(card.trashedAt || '');
+    if (!ts) return retention;
+    return Math.max(0, Math.ceil((ts + retention * 86400000 - Date.now()) / 86400000));
+}
+
+// Kontextmenü des Sortier-Umschalters
+let sortMenuEl = null;
+function closeSortMenu() {
+    if (sortMenuEl) { sortMenuEl.remove(); sortMenuEl = null; document.removeEventListener('click', onDocClickSort, true); }
+}
+function onDocClickSort(e) { if (sortMenuEl && !sortMenuEl.contains(e.target)) closeSortMenu(); }
+function openSortMenu(btn, state, board, col, actions) {
+    closeSortMenu();
+    const menu = el('div', 'sort-menu');
+    const cur = getSortMode(state, board, col);
+    const labels = { manual: t('sort.manual'), grid: t('sort.grid'), due: t('sort.due'), priority: t('sort.priority') };
+    for (const mode of SORT_MODES) {
+        const item = el('button', 'sort-item' + (mode === cur ? ' active' : ''));
+        item.type = 'button';
+        item.appendChild(mdiIcon(sortModeIcon(mode)));
+        item.appendChild(el('span', null, labels[mode]));
+        item.addEventListener('click', (e) => { e.stopPropagation(); closeSortMenu(); actions.setSortMode(colSortKey(board, col), mode); });
+        menu.appendChild(item);
+    }
+    document.body.appendChild(menu);
+    const r = btn.getBoundingClientRect();
+    menu.style.top = (r.bottom + 4) + 'px';
+    menu.style.left = Math.max(4, Math.min(r.left, window.innerWidth - menu.offsetWidth - 4)) + 'px';
+    sortMenuEl = menu;
+    setTimeout(() => document.addEventListener('click', onDocClickSort, true), 0);
+}
+
 function dueBadge(due, dueTime, done, cfg) {
     const b = el('span', 'badge date-badge');
     b.appendChild(mdiIcon(MDI.calendar));
@@ -175,14 +261,25 @@ function safeHref(url) {
     return null;                                                          // z.B. javascript:, data:, file: verwerfen
 }
 
-function renderCard(state, board, card, actions) {
-    const c = el('div', 'card');
+function renderCard(state, board, card, actions, opts = {}) {
+    const inTrash = !!opts.inTrash;
+    const c = el('div', 'card' + (inTrash ? ' card-trash' : ''));
     c.dataset.cardId = card.id;
-    if (card.color) c.style.setProperty('--card-color', card.color);
-    c.appendChild(el('div', 'title', card.title));
+    if (card.color && !inTrash) c.style.setProperty('--card-color', card.color);
 
     const col = (board.columns || []).find(x => x.id === card.columnId);
     const isDone = !!(col && col.isDone);
+
+    c.appendChild(el('div', 'title' + (isDone && !inTrash ? ' title-done' : ''), card.title));
+
+    // Erledigt-Zeitstempel unter dem Titel (Feature 4), im eingestellten Datums-/Zeitformat
+    if (isDone && !inTrash && card.doneAt) {
+        const parts = isoLocalParts(card.doneAt);
+        if (parts) {
+            const stamp = `(${t('card.doneLabel')}: ${fmtDate(parts.D, state.cfg && state.cfg.dateFormat)} ${fmtTime(parts.T, state.cfg && state.cfg.timeFormat)})`;
+            c.appendChild(el('div', 'done-stamp', stamp));
+        }
+    }
 
     const badges = el('div', 'badges');
     if (card.priority > 0) {
@@ -281,7 +378,44 @@ function renderCard(state, board, card, actions) {
         c.appendChild(clist);
     }
 
-    c.addEventListener('click', () => actions.openCard(card.id));
+    const stopDrag = (b) => { for (const ev of ['pointerdown', 'mousedown', 'touchstart']) b.addEventListener(ev, e => e.stopPropagation()); };
+
+    // Kopieren erledigter Karten (Feature 3)
+    if (isDone && !inTrash) {
+        const cp = el('button', 'card-action card-copy');
+        cp.type = 'button';
+        cp.title = t('card.copy');
+        cp.setAttribute('aria-label', cp.title);
+        cp.appendChild(mdiIcon(MDI.contentCopy));
+        cp.addEventListener('click', e => { e.stopPropagation(); actions.copyCard(card.id); });
+        stopDrag(cp);
+        c.appendChild(cp);
+    }
+
+    // Papierkorb: Resthinweis + Wiederherstellen/Endgültig-löschen (Feature 5)
+    if (inTrash) {
+        const retention = (state.cfg && state.cfg.trashRetentionDays) || 30;
+        c.appendChild(el('div', 'trash-info', t('trash.daysLeft', { n: trashDaysLeft(card, retention) })));
+        const row = el('div', 'trash-actions');
+        const rb = el('button', 'card-action trash-restore');
+        rb.type = 'button'; rb.title = t('trash.restore'); rb.setAttribute('aria-label', rb.title);
+        rb.appendChild(mdiIcon(MDI.restore));
+        rb.addEventListener('click', e => { e.stopPropagation(); actions.restoreCard(card.id); });
+        const pb = el('button', 'card-action trash-purge');
+        pb.type = 'button'; pb.title = t('trash.purge'); pb.setAttribute('aria-label', pb.title);
+        pb.appendChild(mdiIcon(MDI.deleteForever));
+        pb.addEventListener('click', async e => {
+            e.stopPropagation();
+            if (await actions.confirm({ title: t('trash.purge'), message: t('confirm.purgeCard'), danger: true, ok: t('trash.purge') })) {
+                actions.purgeCard(card.id);
+            }
+        });
+        stopDrag(rb); stopDrag(pb);
+        row.append(rb, pb);
+        c.appendChild(row);
+    }
+
+    if (!inTrash) c.addEventListener('click', () => actions.openCard(card.id));
     return c;
 }
 
@@ -319,7 +453,8 @@ export function renderBoard(container, state, actions) {
 
     for (const col of board.columns) {
         if (state.columnsFilter && !state.columnsFilter.includes(col.id)) continue;
-        const colEl = el('div', 'column');
+        if (col.isTrash && !state.showTrash) continue;   // Papierkorb nur wenn eingeblendet (pro Gerät)
+        const colEl = el('div', 'column' + (col.isTrash ? ' trash-col' : ''));
         colEl.dataset.colId = col.id;
 
         let cards = board.cards
@@ -334,15 +469,21 @@ export function renderBoard(container, state, actions) {
         }
         // Zähler = sichtbare Karten des aktiven Filters (vor der doneLimit-Kürzung)
         const matchedCount = cards.length;
-        // In Erledigt-Spalten optional nur die zuletzt erledigten N Karten zeigen
-        if (col.isDone && state.doneLimit != null && cards.length > state.doneLimit) {
-            cards = cards.slice()
-                .sort((a, b) => (b.doneAt || b.movedAt || '').localeCompare(a.doneAt || a.movedAt || ''))
-                .slice(0, state.doneLimit);
+        if (col.isTrash) {
+            // Papierkorb: fest nach trashedAt (älteste zuerst = am nächsten zur endgültigen Löschung)
+            cards = cards.slice().sort((a, b) => String(a.trashedAt || '').localeCompare(String(b.trashedAt || '')));
+        } else {
+            // In Erledigt-Spalten optional nur die zuletzt erledigten N Karten zeigen
+            if (col.isDone && state.doneLimit != null && cards.length > state.doneLimit) {
+                cards = cards.slice()
+                    .sort((a, b) => (b.doneAt || b.movedAt || '').localeCompare(a.doneAt || a.movedAt || ''))
+                    .slice(0, state.doneLimit);
+            }
+            cards = applySort(cards, getSortMode(state, board, col));   // Sortiermodus je Spalte
         }
-        // Optionales Anzeige-Limit je Spalte (0 = alle)
+        // Optionales Anzeige-Limit je Spalte (0 = alle); im Papierkorb nicht anwenden
         let hiddenByMax = 0;
-        if (col.maxVisible > 0 && cards.length > col.maxVisible) {
+        if (!col.isTrash && col.maxVisible > 0 && cards.length > col.maxVisible) {
             hiddenByMax = cards.length - col.maxVisible;
             cards = cards.slice(0, col.maxVisible);
         }
@@ -354,7 +495,7 @@ export function renderBoard(container, state, actions) {
         const setChev = (c) => { chev.textContent = ''; chev.appendChild(mdiIcon(c ? MDI.chevronRight : MDI.chevronDown)); };
         setChev(collapsed);
         head.appendChild(chev);
-        head.appendChild(el('span', null, col.title));
+        head.appendChild(el('span', null, col.isTrash ? t('col.trash') : col.title));
         const allInCol = board.cards.filter(c => c.columnId === col.id).length;
         // Bei aktivem Personen-/Label-Filter zählt die Kopfzeile die gefilterten (sichtbaren) Karten
         const anyFilter = userSel || (state.labelFilter && state.labelFilter.length);
@@ -372,6 +513,30 @@ export function renderBoard(container, state, actions) {
             eye.addEventListener('click', () => actions.toggleShowDone());
             head.appendChild(eye);
         }
+        // Sortier-Umschalter (nicht im Papierkorb; in Erledigt-Spalten rechts vom Auge)
+        if (!col.isTrash) {
+            const sortBtn = el('button', 'col-sort');
+            sortBtn.appendChild(mdiIcon(sortModeIcon(getSortMode(state, board, col))));
+            sortBtn.title = t('sort.mode');
+            sortBtn.setAttribute('aria-label', sortBtn.title);
+            sortBtn.addEventListener('click', (e) => { e.stopPropagation(); openSortMenu(sortBtn, state, board, col, actions); });
+            head.appendChild(sortBtn);
+        }
+        // Papierkorb: Leeren-Button
+        if (col.isTrash) {
+            const empt = el('button', 'col-toggle');
+            empt.appendChild(mdiIcon(MDI.broom));
+            empt.title = t('trash.empty');
+            empt.setAttribute('aria-label', empt.title);
+            empt.addEventListener('click', async (e) => {
+                e.stopPropagation();
+                if (!board.cards.some(c => c.columnId === col.id)) return;
+                if (await actions.confirm({ title: t('trash.empty'), message: t('confirm.emptyTrash'), danger: true, ok: t('trash.empty') })) {
+                    actions.emptyTrash();
+                }
+            });
+            head.appendChild(empt);
+        }
         // Mobil: Spaltenkopf antippen klappt die Spalte ein/aus
         head.addEventListener('click', (e) => {
             if (!window.matchMedia('(max-width: 600px)').matches) return;   // nur bei gestapelten Spalten
@@ -386,9 +551,10 @@ export function renderBoard(container, state, actions) {
         colEl.appendChild(head);
 
         const list = el('div', 'cards');
+        if (!col.isTrash && getSortMode(state, board, col) === 'grid') list.classList.add('cards-grid');
         const hideCards = isDoneCol && !state.showDone;
         if (!hideCards) {
-            for (const card of cards) list.appendChild(renderCard(state, board, card, actions));
+            for (const card of cards) list.appendChild(renderCard(state, board, card, actions, { inTrash: !!col.isTrash }));
         }
         colEl.appendChild(list);
         if (hiddenByMax > 0 && !hideCards) {
@@ -397,7 +563,7 @@ export function renderBoard(container, state, actions) {
             colEl.appendChild(more);
         }
 
-        const canAdd = (typeof col.allowAdd === 'boolean') ? col.allowAdd : (board.columns[0] && board.columns[0].id === col.id);
+        const canAdd = !col.isTrash && ((typeof col.allowAdd === 'boolean') ? col.allowAdd : (board.columns[0] && board.columns[0].id === col.id));
         if (canAdd) {
             const foot = el('div', 'column-foot');
             const addBtn = el('button', 'linkbtn', t('board.addCard'));
@@ -415,7 +581,7 @@ export function renderBoard(container, state, actions) {
             delay: 150,               // Touch: kurz halten zum Ziehen, damit Scrollen möglich bleibt
             delayOnTouchOnly: true,
             ghostClass: 'sortable-ghost',
-            filter: '.link-badge, .card-check-toggle, .card-checklist',   // lösen kein Ziehen aus
+            filter: '.link-badge, .card-check-toggle, .card-checklist, .card-action',   // lösen kein Ziehen aus
             preventOnFilter: false,              // damit deren Klick normal durchkommt
 
             onStart: evt => {

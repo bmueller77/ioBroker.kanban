@@ -122,6 +122,18 @@ From **0.1.1**: token-secured write API, Markdown preview sanitized with DOMPuri
 
 ## Changelog
 
+- **0.3.0**
+  - **Trash**: deleting a card no longer removes it immediately — it moves to a per-board **Trash** column and can be restored for **30 days**, after which it is deleted permanently. The trash column is hidden by default and can be shown per device (board settings). It has its own fixed grey styling, is sorted by deletion time and shows the remaining days per card
+  - Optional **automatic cleanup** of old done cards per board — by **age** (default 90 days) or by **count** (default 100) — moving them into the trash daily and on adapter start
+  - **Per-column sorting**: a toggle in the column header opens a menu with four modes — manual, grid, due date (incl. time, cards without a date last) and priority. The mode is stored per device; returning to manual/grid restores your own order
+  - Done cards now show a **strikethrough title**, a **completion timestamp** in the configured date/time format, and a **copy button** that opens the editor with the same content
+  - Cards can be **moved or copied to another board**: labels are matched by name, assignees are limited to members of the target board, and if none remain you are asked to pick one
+  - New events **cardRestored** and **cardPurged**; `cardDeleted` now means "moved to trash" (automatic cleanup adds `detail.auto`). Per-user e-mail toggles for all three; automatic cleanup runs are bundled into one summary e-mail per user
+  - Every notification event now carries **dueAt** — the due date including time as an ISO timestamp with local offset (no time = 00:00)
+  - Reworked **board settings**: one Board tab with a board picker (edit any board without switching), a "show this board" button, create/delete board, member selection and the cleanup section
+  - Reworked **card editor layout**: calendar-invite checkbox and location moved up below the due date; assignees and labels sit side by side (stacked on narrow screens)
+  - All irreversible actions now use an **in-app confirmation dialog** instead of the browser's `confirm()`
+
 - **0.2.1**
   - Now runs on **Express 5** (updated dependency)
   - Fixed the **user avatar upload** ("image could not be read"): the Content-Security-Policy blocked the `blob:` URL used to read the file; the image is now loaded without a `blob:` URL, so the CSP stays strict

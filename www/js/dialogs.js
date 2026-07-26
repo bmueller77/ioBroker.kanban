@@ -3,7 +3,7 @@
 import { openColorPicker } from './colorpicker.js';
 import { api } from './api.js';
 import { t } from './i18n.js';
-import { boardUsers, contrastText } from './board.js';
+import { boardUsers, contrastText, mdiIcon, MDI } from './board.js';
 
 const CARD_COLORS = ['', '#e57373', '#ffb74d', '#fff176', '#aed581', '#4fc3f7', '#9575cd', '#f06292', '#a1887f'];
 const WEEKDAYS = [['Mo', 1], ['Di', 2], ['Mi', 3], ['Do', 4], ['Fr', 5], ['Sa', 6], ['So', 7]];
@@ -72,6 +72,9 @@ function slugify(text) {
 export function initDialogs(state, actions) {
     const dlg = document.getElementById('cardDialog');
     const form = document.getElementById('cardForm');
+    // Transfer-Button (Feature 6) im Editor-Footer mit MDI-Icon versehen
+    const _transferBtn = document.getElementById('transferCardBtn');
+    if (_transferBtn) { _transferBtn.textContent = ''; _transferBtn.appendChild(mdiIcon(MDI.transfer)); }
     // Monats-Select einmalig lokalisiert befüllen (defensiv: bricht nicht die
     // ganze App ab, falls veraltetes HTML gecacht wurde und das Feld fehlt)
     const recMonthSel = form && form.elements ? form.elements.recMonth : null;
@@ -226,6 +229,7 @@ export function initDialogs(state, actions) {
         const sel = form.elements.columnId;
         sel.textContent = '';
         for (const c of (state.board && state.board.columns) || []) {
+            if (c.isTrash) continue;   // Papierkorb ist kein wählbares Ziel
             const o = document.createElement('option');
             o.value = c.id;
             o.textContent = c.title;
@@ -234,11 +238,55 @@ export function initDialogs(state, actions) {
         if (selected) sel.value = selected;
     }
 
+    function isoTodayStr() {
+        const d = new Date();
+        return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    }
+
+    // Feature 3: erledigte Karte kopieren → Editor als NEUE Karte mit gleichen Inhalten.
+    function copyCard(cardId) {
+        const src = state.board && state.board.cards.find(c => c.id === cardId);
+        if (!src) return;
+        editingCardId = null;
+        document.getElementById('cardDialogTitle').textContent = t('card.titleNew');
+        document.getElementById('deleteCardBtn').hidden = true;
+        document.getElementById('transferCardBtn').hidden = true;
+        form.elements.title.value = src.title || '';
+        form.elements.description.value = src.description || '';
+        // Fälligkeit: heutiges Datum, wenn das Original eins hatte (Uhrzeit behalten), sonst leer
+        const hadDue = !!src.due;
+        form.elements.due.value = hadDue ? isoTodayStr() : '';
+        form.elements.dueTime.value = (hadDue && src.dueTime) ? src.dueTime : '';
+        form.elements.dueTimeEnabled.checked = !!(hadDue && src.dueTime);
+        updateDueTimeUI();
+        form.elements.priority.value = String(src.priority || 0);
+        form.elements.link.value = src.link || '';
+        form.elements.location.value = src.location || '';
+        form.elements.calendarInvite.checked = !!src.calendarInvite;
+        // Zielspalte: erste „Neu"-Spalte, sonst erste normale Spalte
+        const cols = (state.board.columns || []).filter(c => !c.isTrash);
+        const target = cols.find(c => c.allowAdd) || cols[0];
+        fillColumnSelect(target && target.id);
+        selAssignees = new Set(src.assignees || []);
+        selLabels = new Set(src.labels || []);
+        selColor = src.color || '';
+        renderAssigneePick();
+        renderLabelPick();
+        renderColorPick();
+        const box = document.getElementById('checklistEdit');
+        box.textContent = '';
+        for (const item of (src.checklist || [])) addCheckRow({ text: item.text, done: false });
+        loadRecurrence(src.recurrence);
+        updatePreview();
+        dlg.showModal();
+    }
+
     function openCard(cardId, defaultColumnId) {
         const card = cardId && state.board ? state.board.cards.find(c => c.id === cardId) : null;
         editingCardId = card ? card.id : null;
         document.getElementById('cardDialogTitle').textContent = card ? t('card.titleEdit') : t('card.titleNew');
         document.getElementById('deleteCardBtn').hidden = !card;
+        document.getElementById('transferCardBtn').hidden = !card || state.boards.length < 2;
         form.elements.title.value = card ? card.title : '';
         form.elements.description.value = card ? card.description : '';
         form.elements.due.value = (card && card.due) || '';
@@ -375,9 +423,12 @@ export function initDialogs(state, actions) {
     document.getElementById('cancelCardBtn').addEventListener('click', () => dlg.close());
     document.getElementById('deleteCardBtn').addEventListener('click', async () => {
         if (!editingCardId) return;
-        if (!confirm(t('confirm.deleteCard'))) return;
+        if (!await confirmDialog({ title: t('card.delete'), message: t('confirm.deleteCard'), danger: true, ok: t('card.delete') })) return;
         await actions.deleteCard(editingCardId);
         dlg.close();
+    });
+    document.getElementById('transferCardBtn').addEventListener('click', () => {
+        if (editingCardId) openTransfer(editingCardId);
     });
 
     // Titel-Pflichtmeldung in Board-Sprache statt Browser-Standardtext.
@@ -425,7 +476,7 @@ export function initDialogs(state, actions) {
 
     const bdlg = document.getElementById('boardDialog');
 
-    function openBoardManager() {
+    async function openBoardManager() {
         const body = document.getElementById('boardDialogBody');
         body.textContent = '';
         body.appendChild(el('h3', null, t('settings.title')));
@@ -446,137 +497,338 @@ export function initDialogs(state, actions) {
             tabs.push({ id, btn, panel });
         };
 
+        // Bearbeitetes Board (Dropdown) - unabhaengig vom aktiven Board
+        let editId = (state.board && state.board.id) || (state.boards[0] && state.boards[0].id) || '';
+        let editBoard = null;
+        let dirty = false;
         let titleInput = null, colBox = null, labelBox = null, linkTargetSel = null, linkUrlInput = null;
-        const memberBoxes = {};
-        let saveBtn = null;
+        let cleanupModeSel = null, cleanupDaysInp = null, cleanupCountInp = null, memberWrap = null;
+        let saveBtn = null, boardPanel = null, boardSel = null;
+
         const validateMembers = () => {
             if (!saveBtn) return;
-            const bad = state.boards.some(b => memberBoxes[b.id] && memberBoxes[b.id].querySelectorAll('input:checked').length === 0);
+            const bad = !!memberWrap && memberWrap.querySelectorAll('input:checked').length === 0;
             saveBtn.disabled = bad;
             saveBtn.title = bad ? t('boards.membersRequiredShort') : '';
         };
 
-        // ---- Tab: aktuelles Board (Titel, Spalten, Labels) ----
-        if (state.board) {
-            addTab('board', t('settings.tabBoard'), panel => {
-                const titleLabel = el('label', null, t('boards.boardTitle'));
-                titleInput = document.createElement('input');
-                titleInput.type = 'text';
-                titleInput.value = state.board.title;
-                titleLabel.appendChild(titleInput);
-                panel.appendChild(titleLabel);
-
-                panel.appendChild(el('label', null, t('boards.columns')));
-                const chead = el('div', 'col-head');
-                const hcell = (cls, label, tip) => { const s = el('span', cls, label); s.title = tip; return s; };
-                chead.append(
-                    el('span', 'h-drag'),
-                    hcell('h-name', t('boards.colTitle'), t('boards.legendTitle')),
-                    hcell('h-num', t('boards.colMax'), t('boards.legendMax')),
-                    hcell('h-num', t('boards.colWip'), t('boards.legendWip')),
-                    hcell('h-new', t('boards.allowAdd'), t('boards.legendAdd')),
-                    hcell('h-done', t('boards.done'), t('boards.legendDone')),
-                    el('span', 'h-rm'),
-                );
-                panel.appendChild(chead);
-                colBox = el('div');
-                colBox.style.cssText = 'display:flex;flex-direction:column;gap:6px';
-                const mkColRow = (col, i) => {
-                    const row = el('div', 'col-edit');
-                    row.dataset.colId = col.id || '';
-                    const drag = el('span', 'drag', '\u2833');
-                    const name = document.createElement('input');
-                    name.type = 'text';
-                    name.value = col.title;
-                    name.placeholder = t('boards.columnName');
-                    name.title = t('boards.legendTitle');
-                    const max = document.createElement('input');
-                    max.type = 'number';
-                    max.min = '0';
-                    max.value = String(col.maxVisible || 0);
-                    max.title = t('boards.maxTitle');
-                    max.className = 'col-max';
-                    const wip = document.createElement('input');
-                    wip.type = 'number';
-                    wip.min = '0';
-                    wip.value = String(col.wipLimit || 0);
-                    wip.title = t('boards.wipTitle');
-                    wip.className = 'col-wip';
-                    const doneLbl = el('label', 'col-chk c-done');
-                    const done = document.createElement('input');
-                    done.type = 'checkbox'; done.className = 'col-done';
-                    done.checked = !!col.isDone;
-                    done.title = t('boards.legendDone'); done.setAttribute('aria-label', t('boards.done'));
-                    doneLbl.appendChild(done);
-                    const addLbl = el('label', 'col-chk c-new');
-                    const addChk = document.createElement('input');
-                    addChk.type = 'checkbox'; addChk.className = 'col-add';
-                    addChk.checked = (typeof col.allowAdd === 'boolean') ? col.allowAdd : (i === 0);
-                    addChk.title = t('boards.legendAdd'); addChk.setAttribute('aria-label', t('boards.allowAdd'));
-                    addLbl.appendChild(addChk);
-                    const rm = el('button', 'rm', '\u00d7');
-                    rm.type = 'button';
-                    rm.title = t('boards.deleteColumnTitle');
-                    rm.addEventListener('click', () => row.remove());
-                    drag.title = t('boards.dragTitle');
-                    row.append(drag, name, max, wip, addLbl, doneLbl, rm);
-                    return row;
-                };
-                state.board.columns.forEach((col, i) => colBox.appendChild(mkColRow(col, i)));
-                panel.appendChild(colBox);
-                // eslint-disable-next-line no-undef
-                Sortable.create(colBox, { handle: '.drag', animation: 150 });
-                const addCol = el('button', 'linkbtn', t('boards.addColumn'));
-                addCol.addEventListener('click', () => colBox.appendChild(mkColRow({ title: '', maxVisible: 0, wipLimit: 0, isDone: false, allowAdd: false })));
-                panel.appendChild(addCol);
-
-                panel.appendChild(el('label', null, t('boards.labels')));
-                labelBox = el('div');
-                labelBox.style.cssText = 'display:flex;flex-direction:column;gap:6px';
-                const mkLabelRow = lab => {
-                    const row = el('div', 'label-edit');
-                    row.dataset.labelId = lab.id || '';
-                    const color = makeColorTrigger(lab.color || '#4CAF50');
-                    const name = document.createElement('input');
-                    name.type = 'text';
-                    name.value = lab.title || '';
-                    name.placeholder = t('label.namePlaceholder');
-                    const rm = el('button', 'rm', '\u00d7');
-                    rm.type = 'button';
-                    rm.title = t('boards.deleteLabelTitle');
-                    rm.addEventListener('click', () => row.remove());
-                    row.append(color, name, rm);
-                    return row;
-                };
-                for (const lab of state.board.labels || []) labelBox.appendChild(mkLabelRow(lab));
-                panel.appendChild(labelBox);
-                const addLabel = el('button', 'linkbtn', t('boards.addLabel'));
-                addLabel.addEventListener('click', () => labelBox.appendChild(mkLabelRow({ color: '#4CAF50' })));
-                panel.appendChild(addLabel);
-
-                // Link-Ziel für Benachrichtigungen (je Board)
-                panel.appendChild(el('label', null, t('boards.linkTarget')));
-                linkTargetSel = document.createElement('select');
-                for (const [val, key] of [['board', 'boards.linkBoard'], ['edit', 'boards.linkEdit'], ['url', 'boards.linkUrl']]) {
-                    const o = document.createElement('option');
-                    o.value = val; o.textContent = t(key);
-                    linkTargetSel.appendChild(o);
-                }
-                linkTargetSel.value = state.board.linkTarget || 'board';
-                panel.appendChild(linkTargetSel);
-                const linkUrlWrap = el('label', null, t('boards.linkUrlField'));
-                linkUrlInput = document.createElement('input');
-                linkUrlInput.type = 'url';
-                linkUrlInput.placeholder = 'https://\u2026';
-                linkUrlInput.value = state.board.linkUrl || '';
-                linkUrlWrap.appendChild(linkUrlInput);
-                linkUrlWrap.hidden = linkTargetSel.value !== 'url';
-                panel.appendChild(linkUrlWrap);
-                linkTargetSel.addEventListener('change', () => { linkUrlWrap.hidden = linkTargetSel.value !== 'url'; });
-            });
+        async function loadEdit(id) {
+            try { editBoard = await api(`api/boards/${encodeURIComponent(id)}`); }
+            catch (e) { editBoard = null; }
         }
 
-        // ---- Tab: Benutzer (Avatare) ----
+        // Aenderungen des bearbeiteten Boards einsammeln und speichern
+        async function saveEdit() {
+            if (!editBoard) return true;
+            const members = memberWrap ? [...memberWrap.querySelectorAll('input:checked')].map(i => i.dataset.val) : undefined;
+            if (memberWrap && !members.length) {
+                await confirmDialog({ title: t('boards.members'), message: t('boards.membersRequiredShort'), ok: t('confirm.ok') });
+                return false;
+            }
+            const columns = [...colBox.children].map(row => ({
+                id: row.dataset.colId || undefined,
+                title: row.querySelector('input[type=text]').value.trim() || '?',
+                maxVisible: Number(row.querySelector('.col-max').value) || 0,
+                wipLimit: Number(row.querySelector('.col-wip').value) || 0,
+                isDone: row.querySelector('.col-done').checked,
+                allowAdd: row.querySelector('.col-add').checked,
+            }));
+            const labels = [...labelBox.children].map(row => {
+                const title = row.querySelector('input[type=text]').value.trim();
+                if (!title) return null;
+                return {
+                    id: row.dataset.labelId || slugify(title),
+                    title,
+                    color: row.querySelector('.cp-trigger').dataset.color || '#4CAF50',
+                };
+            }).filter(Boolean);
+            await actions.patchBoardById(editBoard.id, {
+                title: titleInput.value.trim() || editBoard.title,
+                columns, labels,
+                linkTarget: linkTargetSel ? linkTargetSel.value : undefined,
+                linkUrl: linkUrlInput ? linkUrlInput.value.trim() : undefined,
+                cleanup: cleanupModeSel ? { mode: cleanupModeSel.value, days: Number(cleanupDaysInp.value) || 90, count: Number(cleanupCountInp.value) || 100 } : undefined,
+                members,
+            });
+            dirty = false;
+            return true;
+        }
+
+        // Beim Wechsel des bearbeiteten Boards nach ungespeicherten Aenderungen fragen
+        async function guardUnsaved() {
+            if (!dirty) return true;
+            const r = await confirmDialog({
+                title: t('boards.unsavedTitle'), message: t('boards.unsavedMsg'),
+                ok: t('boards.save'), extra: t('boards.discard'),
+            });
+            if (r === true) return await saveEdit();
+            if (r === 'extra') { dirty = false; return true; }
+            return false;
+        }
+
+        async function switchEdit(id) {
+            if (!await guardUnsaved()) { if (boardSel) boardSel.value = editId; return; }
+            editId = id;
+            await loadEdit(editId);
+            buildBoardPanel(boardPanel);
+            validateMembers();
+        }
+
+        function buildBoardPanel(panel) {
+            panel.textContent = '';
+            dirty = false;
+            titleInput = colBox = labelBox = linkTargetSel = linkUrlInput = null;
+            cleanupModeSel = cleanupDaysInp = cleanupCountInp = memberWrap = null;
+            if (!editBoard) { panel.appendChild(el('div', 'hint', t('board.empty'))); return; }
+
+            // ---- Kopfzeile: Board-Auswahl | Anzeigen | neues Board | Anlegen ----
+            const topRow = el('div', 'row board-toprow');
+            boardSel = document.createElement('select');
+            for (const b of state.boards) {
+                const o = document.createElement('option');
+                o.value = b.id; o.textContent = b.title;
+                boardSel.appendChild(o);
+            }
+            boardSel.value = editId;
+            boardSel.title = t('boards.editingBoard');
+            boardSel.addEventListener('change', () => switchEdit(boardSel.value));
+
+            const showBtn = el('button', 'icon-btn');
+            showBtn.type = 'button';
+            showBtn.appendChild(mdiIcon(MDI.arrowRightCircle));
+            showBtn.title = t('boards.showBoard');
+            showBtn.setAttribute('aria-label', showBtn.title);
+            showBtn.disabled = !!(state.board && state.board.id === editId);
+            showBtn.addEventListener('click', async () => {
+                if (state.board && state.board.id === editId) return;
+                const b = state.boards.find(x => x.id === editId);
+                if (!await confirmDialog({ title: t('boards.showBoard'), message: t('boards.showConfirm', { title: (b && b.title) || editId }), ok: t('boards.showBoard') })) return;
+                await actions.switchBoard(editId);
+                showBtn.disabled = true;
+            });
+
+            const newInput = document.createElement('input');
+            newInput.type = 'text';
+            newInput.placeholder = t('boards.newBoard');
+            newInput.className = 'board-new-name';
+            const newBtn = el('button', 'primary', t('boards.create'));
+            newBtn.type = 'button';
+            newBtn.addEventListener('click', async () => {
+                const title = newInput.value.trim();
+                if (!title) { newInput.focus(); return; }
+                if (!await guardUnsaved()) return;
+                const created = await actions.createBoardOnly(title);
+                newInput.value = '';
+                editId = created.id;
+                await loadEdit(editId);
+                buildBoardPanel(boardPanel);
+                validateMembers();
+            });
+            topRow.append(boardSel, showBtn, newInput, newBtn);
+            panel.appendChild(topRow);
+
+            // ---- Board-Titel ----
+            const titleLabel = el('label', null, t('boards.boardTitle'));
+            titleInput = document.createElement('input');
+            titleInput.type = 'text';
+            titleInput.value = editBoard.title;
+            titleLabel.appendChild(titleInput);
+            panel.appendChild(titleLabel);
+
+            // ---- Mitglieder (zuweisbare Benutzer) ----
+            if ((state.users || []).length) {
+                panel.appendChild(el('label', null, t('boards.members')));
+                panel.appendChild(el('div', 'hint', t('boards.membersHint')));
+                memberWrap = el('div', 'share-cols');
+                const cur = Array.isArray(editBoard.members) ? editBoard.members : [];
+                for (const u of state.users) {
+                    const lab = el('label', 'inline');
+                    const inp = document.createElement('input');
+                    inp.type = 'checkbox'; inp.dataset.val = u.name; inp.checked = cur.includes(u.name);
+                    inp.addEventListener('change', validateMembers);
+                    lab.append(inp, document.createTextNode(' ' + (u.displayName || u.name)));
+                    memberWrap.appendChild(lab);
+                }
+                panel.appendChild(memberWrap);
+            }
+
+            // ---- Spalten ----
+            panel.appendChild(el('label', null, t('boards.columns')));
+            const chead = el('div', 'col-head');
+            const hcell = (cls, label, tip) => { const s = el('span', cls, label); s.title = tip; return s; };
+            chead.append(
+                el('span', 'h-drag'),
+                hcell('h-name', t('boards.colTitle'), t('boards.legendTitle')),
+                hcell('h-num', t('boards.colMax'), t('boards.legendMax')),
+                hcell('h-num', t('boards.colWip'), t('boards.legendWip')),
+                hcell('h-new', t('boards.allowAdd'), t('boards.legendAdd')),
+                hcell('h-done', t('boards.done'), t('boards.legendDone')),
+                el('span', 'h-rm'),
+            );
+            panel.appendChild(chead);
+            colBox = el('div');
+            colBox.style.cssText = 'display:flex;flex-direction:column;gap:6px';
+            const mkColRow = (col, i) => {
+                const row = el('div', 'col-edit');
+                row.dataset.colId = col.id || '';
+                const drag = el('span', 'drag', '⠳');
+                const name = document.createElement('input');
+                name.type = 'text';
+                name.value = col.title;
+                name.placeholder = t('boards.columnName');
+                name.title = t('boards.legendTitle');
+                const max = document.createElement('input');
+                max.type = 'number'; max.min = '0';
+                max.value = String(col.maxVisible || 0);
+                max.title = t('boards.maxTitle');
+                max.className = 'col-max';
+                const wip = document.createElement('input');
+                wip.type = 'number'; wip.min = '0';
+                wip.value = String(col.wipLimit || 0);
+                wip.title = t('boards.wipTitle');
+                wip.className = 'col-wip';
+                const doneLbl = el('label', 'col-chk c-done');
+                const done = document.createElement('input');
+                done.type = 'checkbox'; done.className = 'col-done';
+                done.checked = !!col.isDone;
+                done.title = t('boards.legendDone'); done.setAttribute('aria-label', t('boards.done'));
+                doneLbl.appendChild(done);
+                const addLbl = el('label', 'col-chk c-new');
+                const addChk = document.createElement('input');
+                addChk.type = 'checkbox'; addChk.className = 'col-add';
+                addChk.checked = (typeof col.allowAdd === 'boolean') ? col.allowAdd : (i === 0);
+                addChk.title = t('boards.legendAdd'); addChk.setAttribute('aria-label', t('boards.allowAdd'));
+                addLbl.appendChild(addChk);
+                const rm = el('button', 'rm', '×');
+                rm.type = 'button';
+                rm.title = t('boards.deleteColumnTitle');
+                rm.addEventListener('click', () => { row.remove(); dirty = true; });
+                drag.title = t('boards.dragTitle');
+                row.append(drag, name, max, wip, addLbl, doneLbl, rm);
+                return row;
+            };
+            // Papierkorb ist eine Systemspalte und wird hier nicht bearbeitet
+            (editBoard.columns || []).filter(c => !c.isTrash).forEach((col, i) => colBox.appendChild(mkColRow(col, i)));
+            panel.appendChild(colBox);
+            // eslint-disable-next-line no-undef
+            Sortable.create(colBox, { handle: '.drag', animation: 150, onEnd: () => { dirty = true; } });
+            const addCol = el('button', 'linkbtn', t('boards.addColumn'));
+            addCol.addEventListener('click', () => { colBox.appendChild(mkColRow({ title: '', maxVisible: 0, wipLimit: 0, isDone: false, allowAdd: false })); dirty = true; });
+            panel.appendChild(addCol);
+
+            // ---- Labels ----
+            panel.appendChild(el('label', null, t('boards.labels')));
+            labelBox = el('div');
+            labelBox.style.cssText = 'display:flex;flex-direction:column;gap:6px';
+            const mkLabelRow = lab => {
+                const row = el('div', 'label-edit');
+                row.dataset.labelId = lab.id || '';
+                const color = makeColorTrigger(lab.color || '#4CAF50', () => { dirty = true; });
+                const name = document.createElement('input');
+                name.type = 'text';
+                name.value = lab.title || '';
+                name.placeholder = t('label.namePlaceholder');
+                const rm = el('button', 'rm', '×');
+                rm.type = 'button';
+                rm.title = t('boards.deleteLabelTitle');
+                rm.addEventListener('click', () => { row.remove(); dirty = true; });
+                row.append(color, name, rm);
+                return row;
+            };
+            for (const lab of editBoard.labels || []) labelBox.appendChild(mkLabelRow(lab));
+            panel.appendChild(labelBox);
+            const addLabel = el('button', 'linkbtn', t('boards.addLabel'));
+            addLabel.addEventListener('click', () => { labelBox.appendChild(mkLabelRow({ color: '#4CAF50' })); dirty = true; });
+            panel.appendChild(addLabel);
+
+            // ---- Link-Ziel fuer Benachrichtigungen ----
+            panel.appendChild(el('label', null, t('boards.linkTarget')));
+            linkTargetSel = document.createElement('select');
+            for (const [val, key] of [['board', 'boards.linkBoard'], ['edit', 'boards.linkEdit'], ['url', 'boards.linkUrl']]) {
+                const o = document.createElement('option');
+                o.value = val; o.textContent = t(key);
+                linkTargetSel.appendChild(o);
+            }
+            linkTargetSel.value = editBoard.linkTarget || 'board';
+            panel.appendChild(linkTargetSel);
+            const linkUrlWrap = el('label', null, t('boards.linkUrlField'));
+            linkUrlInput = document.createElement('input');
+            linkUrlInput.type = 'url';
+            linkUrlInput.placeholder = 'https://…';
+            linkUrlInput.value = editBoard.linkUrl || '';
+            linkUrlWrap.appendChild(linkUrlInput);
+            linkUrlWrap.hidden = linkTargetSel.value !== 'url';
+            panel.appendChild(linkUrlWrap);
+            linkTargetSel.addEventListener('change', () => { linkUrlWrap.hidden = linkTargetSel.value !== 'url'; });
+
+            // ---- Erledigte Karten aufraeumen ----
+            panel.appendChild(el('label', null, t('cleanup.title')));
+            const cl = editBoard.cleanup || { mode: 'off', days: 90, count: 100 };
+            const cleanupRow = el('div', 'row');
+            cleanupModeSel = document.createElement('select');
+            for (const [val, key] of [['off', 'cleanup.off'], ['age', 'cleanup.age'], ['count', 'cleanup.count']]) {
+                const o = document.createElement('option'); o.value = val; o.textContent = t(key); cleanupModeSel.appendChild(o);
+            }
+            cleanupModeSel.value = cl.mode || 'off';
+            const daysWrap = el('label', 'inline-num', t('cleanup.days'));
+            cleanupDaysInp = document.createElement('input');
+            cleanupDaysInp.type = 'number'; cleanupDaysInp.min = '1'; cleanupDaysInp.value = String(cl.days || 90);
+            daysWrap.appendChild(cleanupDaysInp);
+            const countWrap = el('label', 'inline-num', t('cleanup.countLabel'));
+            cleanupCountInp = document.createElement('input');
+            cleanupCountInp.type = 'number'; cleanupCountInp.min = '1'; cleanupCountInp.value = String(cl.count || 100);
+            countWrap.appendChild(cleanupCountInp);
+            cleanupRow.append(cleanupModeSel, daysWrap, countWrap);
+            panel.appendChild(cleanupRow);
+            panel.appendChild(el('div', 'hint', t('cleanup.hint')));
+            const syncCleanupUI = () => {
+                daysWrap.hidden = cleanupModeSel.value !== 'age';
+                countWrap.hidden = cleanupModeSel.value !== 'count';
+            };
+            cleanupModeSel.addEventListener('change', syncCleanupUI);
+            syncCleanupUI();
+
+            // ---- Papierkorb einblenden (pro Geraet, keine Board-Aenderung) ----
+            const trashLbl = el('label', 'inline');
+            const trashChk = document.createElement('input');
+            trashChk.type = 'checkbox'; trashChk.checked = !!state.showTrash;
+            trashChk.dataset.deviceOnly = '1';
+            trashChk.addEventListener('change', () => actions.toggleShowTrash());
+            trashLbl.append(trashChk, document.createTextNode(' ' + t('trash.showToggle')));
+            panel.appendChild(trashLbl);
+            panel.appendChild(el('div', 'hint', t('trash.showHint')));
+
+            // ---- Board loeschen (ganz unten) ----
+            const delBoard = el('button', 'danger', t('boards.deleteBoard'));
+            delBoard.type = 'button';
+            delBoard.style.marginTop = '18px';
+            delBoard.addEventListener('click', async () => {
+                if (state.boards.length < 2) {
+                    await confirmDialog({ title: t('boards.deleteBoard'), message: t('boards.lastBoard'), ok: t('confirm.ok') });
+                    return;
+                }
+                if (!await confirmDialog({ title: t('boards.deleteBoard'), message: t('confirm.deleteBoard', { title: editBoard.title }), danger: true, ok: t('boards.deleteBoard') })) return;
+                await actions.deleteBoard(editBoard.id);
+                dirty = false;
+                editId = (state.board && state.board.id) || (state.boards[0] && state.boards[0].id) || '';
+                if (!editId) { bdlg.close(); return; }
+                await loadEdit(editId);
+                buildBoardPanel(boardPanel);
+                validateMembers();
+            });
+            panel.appendChild(delBoard);
+
+            // Aenderungen an Board-Feldern merken (Geraete-Einstellungen ausgenommen)
+            const touch = (ev) => { if (!(ev.target && ev.target.dataset && ev.target.dataset.deviceOnly)) dirty = true; };
+            panel.addEventListener('input', touch);
+            panel.addEventListener('change', touch);
+        }
+
+        // ---- Tab: Board ----
+        await loadEdit(editId);
+        addTab('board', t('settings.tabBoard'), panel => { boardPanel = panel; buildBoardPanel(panel); });
+
+        // ---- Tab: Benutzer (Avatare/Farben) ----
         if ((state.users || []).length) {
             addTab('users', t('settings.tabUsers'), panel => {
                 panel.appendChild(el('label', null, t('boards.avatars')));
@@ -609,7 +861,7 @@ export function initDialogs(state, actions) {
                         } catch (e) { alert(t('avatar.failed', { msg: e.message })); }
                         file.value = '';
                     });
-                    const rm = el('button', 'rm', '\u00d7'); rm.type = 'button'; rm.title = t('avatar.remove');
+                    const rm = el('button', 'rm', '×'); rm.type = 'button'; rm.title = t('avatar.remove');
                     rm.hidden = !u.avatar;
                     rm.addEventListener('click', async () => {
                         await api(`api/users/${encodeURIComponent(u.name)}/avatar`, { method: 'DELETE' });
@@ -633,116 +885,23 @@ export function initDialogs(state, actions) {
             });
         }
 
-        // ---- Tab: Boards (neu anlegen / aktuelles löschen) ----
-        addTab('boards', t('settings.tabBoards'), panel => {
-            const newRow = el('div', 'row');
-            const newInput = document.createElement('input');
-            newInput.type = 'text';
-            newInput.placeholder = t('boards.newBoard');
-            newInput.style.flex = '1';
-            const newBtn = el('button', 'primary', t('boards.create'));
-            newBtn.type = 'button';
-            newBtn.addEventListener('click', async () => {
-                if (!newInput.value.trim()) return;
-                await actions.createBoard(newInput.value.trim());
-                bdlg.close();
-            });
-            newRow.append(newInput, newBtn);
-            panel.appendChild(newRow);
-
-            // Mitglieder je Board (wer ist zuweisbar) - zentral fuer alle Boards
-            if ((state.users || []).length && state.boards.length) {
-                panel.appendChild(el('label', null, t('boards.members')));
-                const mHint = el('div', 'hint'); mHint.textContent = t('boards.membersHint'); panel.appendChild(mHint);
-                for (const b of state.boards) {
-                    const grp = el('div', 'board-members');
-                    grp.appendChild(el('div', 'board-members-title', b.title));
-                    const wrap = el('div', 'share-cols');
-                    const cur = Array.isArray(b.members) ? b.members : [];
-                    for (const u of state.users) {
-                        const lab = el('label', 'inline');
-                        const inp = document.createElement('input');
-                        inp.type = 'checkbox'; inp.dataset.val = u.name; inp.checked = cur.includes(u.name);
-                        inp.addEventListener('change', validateMembers);
-                        lab.append(inp, document.createTextNode(' ' + (u.displayName || u.name)));
-                        wrap.appendChild(lab);
-                    }
-                    grp.appendChild(wrap);
-                    memberBoxes[b.id] = wrap;
-                    panel.appendChild(grp);
-                }
-            }
-
-            if (state.board) {
-                const delBoard = el('button', 'danger', t('boards.deleteBoard'));
-                delBoard.type = 'button';
-                delBoard.style.marginTop = '18px';
-                delBoard.addEventListener('click', async () => {
-                    if (!confirm(t('confirm.deleteBoard', { title: state.board.title }))) return;
-                    await actions.deleteBoard(state.board.id);
-                    bdlg.close();
-                });
-                panel.appendChild(delBoard);
-            }
-        });
-
-        // ---- Fester Footer: Schließen + Speichern ----
+        // ---- Fester Footer: Schliessen + Speichern ----
         const foot = el('footer');
         foot.appendChild(el('span', 'spacer'));
         const closeBtn = el('button', null, t('boards.close'));
         closeBtn.type = 'button';
-        closeBtn.addEventListener('click', () => bdlg.close());
+        closeBtn.addEventListener('click', async () => { if (await guardUnsaved()) bdlg.close(); });
         foot.appendChild(closeBtn);
-        if (state.board) {
-            saveBtn = el('button', 'primary', t('boards.save'));
-            saveBtn.type = 'button';
-            saveBtn.addEventListener('click', async () => {
-                // Mitglieder je Board einsammeln + validieren (jedes Board mind. 1)
-                const memberSel = {};
-                for (const b of state.boards) {
-                    if (memberBoxes[b.id]) memberSel[b.id] = [...memberBoxes[b.id].querySelectorAll('input:checked')].map(i => i.dataset.val);
-                }
-                const emptyB = state.boards.filter(b => memberBoxes[b.id] && memberSel[b.id].length === 0);
-                if (emptyB.length) { alert(t('boards.membersRequired', { boards: emptyB.map(b => b.title).join(', ') })); activate('boards'); return; }
-                const columns = [...colBox.children].map(row => ({
-                    id: row.dataset.colId || undefined,
-                    title: row.querySelector('input[type=text]').value.trim() || '?',
-                    maxVisible: Number(row.querySelector('.col-max').value) || 0,
-                    wipLimit: Number(row.querySelector('.col-wip').value) || 0,
-                    isDone: row.querySelector('.col-done').checked,
-                    allowAdd: row.querySelector('.col-add').checked,
-                }));
-                const labels = [...labelBox.children].map(row => {
-                    const title = row.querySelector('input[type=text]').value.trim();
-                    if (!title) return null;
-                    return {
-                        id: row.dataset.labelId || slugify(title),
-                        title,
-                        color: row.querySelector('.cp-trigger').dataset.color || '#4CAF50',
-                    };
-                }).filter(Boolean);
-                await actions.patchBoard({ title: titleInput.value.trim() || state.board.title, columns, labels,
-                    linkTarget: linkTargetSel ? linkTargetSel.value : undefined,
-                    linkUrl: linkUrlInput ? linkUrlInput.value.trim() : undefined,
-                    members: memberSel[state.board.id] });
-                // andere Boards: nur Mitglieder patchen, falls geaendert
-                for (const b of state.boards) {
-                    if (b.id === state.board.id || !memberBoxes[b.id]) continue;
-                    const before = (Array.isArray(b.members) ? b.members : []).slice().sort().join(',');
-                    const after = (memberSel[b.id] || []).slice().sort().join(',');
-                    if (before !== after) await actions.patchBoardById(b.id, { members: memberSel[b.id] });
-                }
-                bdlg.close();
-            });
-            foot.appendChild(saveBtn);
-            validateMembers();
-        }
+        saveBtn = el('button', 'primary', t('boards.save'));
+        saveBtn.type = 'button';
+        saveBtn.addEventListener('click', async () => { if (await saveEdit()) bdlg.close(); });
+        foot.appendChild(saveBtn);
         body.appendChild(foot);
+        validateMembers();
 
-        activate(state.board ? 'board' : 'boards');
+        activate('board');
         bdlg.showModal();
     }
-
     // ---------------------------------------------------------- Ansicht teilen
     async function openShareDialog() {
         const sdlg = document.getElementById('shareDialog');
@@ -818,6 +977,7 @@ export function initDialogs(state, actions) {
             curColumns = [];
             if (state.board && state.board.id === boardId) curColumns = state.board.columns || [];
             else if (boardId) { try { const b = await api(`api/boards/${encodeURIComponent(boardId)}`); curColumns = (b && b.columns) || []; } catch (e) { /* ignore */ } }
+            curColumns = curColumns.filter(c => !c.isTrash);
             for (const c of curColumns) {
                 const chk = mkCheck(c.title);
                 chk.inp.checked = true;
@@ -879,5 +1039,136 @@ export function initDialogs(state, actions) {
         sdlg.showModal();
     }
 
-    return { openCard, openBoardManager, openShareDialog };
+    // ---------------------------------------------------------- In-App-Bestätigung (Feature 61)
+    function confirmDialog(opts = {}) {
+        const cdlg = document.getElementById('confirmDialog');
+        const body = document.getElementById('confirmBody');
+        body.textContent = '';
+        body.appendChild(el('h3', null, opts.title || t('confirm.title')));
+        body.appendChild(el('p', null, opts.message || ''));
+        const foot = el('footer');
+        const cancel = el('button', null, opts.cancel || t('confirm.cancel')); cancel.type = 'button';
+        const ok = el('button', opts.danger ? 'danger' : 'primary', opts.ok || t('confirm.ok')); ok.type = 'button';
+        // Optionaler dritter Knopf (z.B. „Verwerfen") → löst mit 'extra' auf
+        let extraBtn = null;
+        if (opts.extra) { extraBtn = el('button', null, opts.extra); extraBtn.type = 'button'; }
+        foot.append(el('span', 'spacer'), cancel);
+        if (extraBtn) foot.appendChild(extraBtn);
+        foot.appendChild(ok);
+        body.appendChild(foot);
+        return new Promise(resolve => {
+            let done = false;
+            const finish = v => { if (done) return; done = true; try { cdlg.close(); } catch (e) { /* ignore */ } resolve(v); };
+            cancel.addEventListener('click', () => finish(false));
+            if (extraBtn) extraBtn.addEventListener('click', () => finish('extra'));
+            ok.addEventListener('click', () => finish(true));
+            cdlg.addEventListener('close', () => finish(false), { once: true });
+            cdlg.showModal();
+        });
+    }
+
+    // ---------------------------------------------------------- Karte übertragen (Feature 6)
+    async function openTransfer(cardId) {
+        const card = state.board && state.board.cards.find(c => c.id === cardId);
+        if (!card) return;
+        const tdlg = document.getElementById('transferDialog');
+        const body = document.getElementById('transferBody');
+        body.textContent = '';
+        body.appendChild(el('h3', null, t('transfer.title')));
+        const others = state.boards.filter(b => b.id !== state.board.id);
+        const foot = el('footer');
+        const cancel = el('button', null, t('boards.close')); cancel.type = 'button';
+        cancel.addEventListener('click', () => tdlg.close());
+        if (!others.length) {
+            body.appendChild(el('p', 'hint', t('transfer.noOtherBoards')));
+            foot.append(el('span', 'spacer'), cancel);
+            body.appendChild(foot);
+            tdlg.showModal();
+            return;
+        }
+
+        let mode = 'move';
+        let targetBoard = null;
+        const overrideSel = new Set();
+        const labelName = l => String((l && (l.title || l.name)) || '').trim().toLowerCase();
+
+        const boardLbl = el('label', null, t('transfer.targetBoard'));
+        const boardSel = document.createElement('select');
+        for (const b of others) { const o = document.createElement('option'); o.value = b.id; o.textContent = b.title; boardSel.appendChild(o); }
+        boardLbl.appendChild(boardSel);
+
+        const colLbl = el('label', null, t('transfer.targetColumn'));
+        const colSel = document.createElement('select');
+        colLbl.appendChild(colSel);
+
+        const modeWrap = el('div', 'transfer-mode');
+        const mkMode = (val, label) => {
+            const b = el('button', 'transfer-mode-btn' + (val === mode ? ' active' : ''), label);
+            b.type = 'button'; b.dataset.mode = val;
+            b.addEventListener('click', () => { mode = val; for (const x of modeWrap.children) x.classList.toggle('active', x.dataset.mode === mode); });
+            return b;
+        };
+        modeWrap.append(mkMode('move', t('transfer.move')), mkMode('copy', t('transfer.copy')));
+
+        const note = el('div', 'transfer-note'); note.hidden = true;
+        const assignLbl = el('label', null, t('transfer.pickAssignee')); assignLbl.hidden = true;
+        const assignWrap = el('div', 'share-cols'); assignWrap.hidden = true;
+        const ok = el('button', 'primary', t('transfer.submit')); ok.type = 'button';
+
+        function updateOk() { ok.disabled = !assignLbl.hidden && overrideSel.size === 0; }
+        function recompute() {
+            if (!targetBoard) return;
+            colSel.textContent = '';
+            const cols = (targetBoard.columns || []).filter(c => !c.isTrash);
+            for (const c of cols) { const o = document.createElement('option'); o.value = c.id; o.textContent = c.title; colSel.appendChild(o); }
+            const def = cols.find(c => c.allowAdd) || cols[0];
+            if (def) colSel.value = def.id;
+            const fromById = new Map((state.board.labels || []).map(l => [l.id, l]));
+            const toNames = new Set((targetBoard.labels || []).map(labelName));
+            const droppedLabels = (card.labels || []).filter(id => { const n = labelName(fromById.get(id)); return !(n && toNames.has(n)); });
+            const members = new Set(targetBoard.members || []);
+            const keptAssignees = (card.assignees || []).filter(a => members.has(a));
+            const droppedAssignees = (card.assignees || []).filter(a => !members.has(a));
+            const parts = [];
+            if (droppedLabels.length) parts.push(t('transfer.dropLabels', { n: droppedLabels.length }));
+            if (droppedAssignees.length) parts.push(t('transfer.dropAssignees', { n: droppedAssignees.length }));
+            note.textContent = parts.join(' ');
+            note.hidden = !parts.length;
+            const needPick = keptAssignees.length === 0;
+            assignLbl.hidden = !needPick; assignWrap.hidden = !needPick;
+            overrideSel.clear();
+            if (needPick) {
+                assignWrap.textContent = '';
+                for (const u of (state.users || []).filter(x => members.has(x.name))) {
+                    const lab = el('label', 'inline');
+                    const inp = document.createElement('input'); inp.type = 'checkbox'; inp.dataset.val = u.name;
+                    inp.addEventListener('change', () => { if (inp.checked) overrideSel.add(u.name); else overrideSel.delete(u.name); updateOk(); });
+                    lab.append(inp, document.createTextNode(' ' + (u.displayName || u.name)));
+                    assignWrap.appendChild(lab);
+                }
+            }
+            updateOk();
+        }
+        async function loadTarget(id) {
+            try { targetBoard = await api(`api/boards/${encodeURIComponent(id)}`); } catch (e) { targetBoard = null; }
+            recompute();
+        }
+        boardSel.addEventListener('change', () => loadTarget(boardSel.value));
+        ok.addEventListener('click', async () => {
+            try {
+                await actions.transferCard(cardId, boardSel.value, colSel.value, mode, [...overrideSel]);
+                tdlg.close();
+                dlg.close();
+            } catch (e) { alert(t('error.saveFailed', { msg: e.message })); }
+        });
+
+        body.append(boardLbl, colLbl, modeWrap, note, assignLbl, assignWrap);
+        foot.append(el('span', 'spacer'), cancel, ok);
+        body.appendChild(foot);
+        boardSel.value = others[0].id;
+        await loadTarget(others[0].id);
+        tdlg.showModal();
+    }
+
+    return { openCard, copyCard, openBoardManager, openShareDialog, confirm: confirmDialog };
 }

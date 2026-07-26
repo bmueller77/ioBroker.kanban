@@ -18,10 +18,12 @@ const state = {
     doneLimit: qs.has('doneLimit') ? Math.max(0, parseInt(qs.get('doneLimit'), 10) || 0) : null,   // null = alle, 0 = keine
     hideSettings: qs.get('hideSettings') === '1',
     showDone: localStorage.getItem('kanban.showDone') !== '0',   // erledigte Spalten ein-/ausblenden
+    showTrash: localStorage.getItem('kanban.showTrash') === '1', // Papierkorb-Spalte ein-/ausblenden (pro Gerät, Default aus)
     theme: qs.get('theme') || localStorage.getItem('kanban.theme') || '',
     accent: qs.get('accent') || '',
     embed: qs.get('embed') === '1',
     collapsedCols: new Set((localStorage.getItem('kanban.collapsedCols') || '').split(',').filter(Boolean)),
+    sortModes: (() => { try { return JSON.parse(localStorage.getItem('kanban.sortModes') || '{}') || {}; } catch (e) { return {}; } })(),
 };
 
 // ------------------------------------------------------------ Theme
@@ -134,6 +136,46 @@ actions = {
         render();
     },
 
+    toggleShowTrash() {
+        state.showTrash = !state.showTrash;
+        localStorage.setItem('kanban.showTrash', state.showTrash ? '1' : '0');
+        render();
+    },
+
+    // Sortiermodus je Board+Spalte (pro Gerät)
+    setSortMode(colKey, mode) {
+        state.sortModes[colKey] = mode;
+        try { localStorage.setItem('kanban.sortModes', JSON.stringify(state.sortModes)); } catch (e) { /* ignore */ }
+        render();
+    },
+
+    rerender() { render(); },
+
+    copyCard: null,   // wird nach initDialogs gesetzt (öffnet Editor mit Kopie)
+
+    async restoreCard(cardId, columnId) {
+        await api(`api/boards/${state.board.id}/cards/${cardId}/restore`, { method: 'POST', body: { columnId, by: '' } });
+        await refreshCurrent();
+    },
+
+    async purgeCard(cardId) {
+        await api(`api/boards/${state.board.id}/cards/${cardId}/purge`, { method: 'POST', body: { by: '' } });
+        await refreshCurrent();
+    },
+
+    async emptyTrash() {
+        await api(`api/boards/${state.board.id}/trash/empty`, { method: 'POST', body: { by: '' } });
+        await refreshCurrent();
+    },
+
+    async transferCard(cardId, toBoard, toColumn, mode, assignees) {
+        await api(`api/boards/${state.board.id}/cards/${cardId}/transfer`, {
+            method: 'POST', body: { toBoard, toColumn, mode, assignees, by: '' },
+        });
+        await loadBoards();
+        await refreshCurrent();
+    },
+
     async avatarsChanged() {
         state.avatarVer++;
         state.cfg = await api('api/config');
@@ -193,13 +235,36 @@ actions = {
     async patchBoardById(id, patch) {
         await api(`api/boards/${encodeURIComponent(id)}`, { method: 'PATCH', body: patch });
         await loadBoards();
+        if (state.board && state.board.id === id) await refreshCurrent();
+        else render();
+    },
+
+    // Board anlegen, ohne das aktive Board zu wechseln (Einstellungen-Dialog bleibt offen)
+    async createBoardOnly(title) {
+        const board = await api('api/boards', { method: 'POST', body: { title } });
+        if ((state.users || []).length) {
+            await api(`api/boards/${encodeURIComponent(board.id)}`, { method: 'PATCH', body: { members: state.users.map(u => u.name) } });
+        }
+        await loadBoards();
+        render();
+        return board;
+    },
+
+    // Aktives Board wechseln (aus dem Einstellungen-Dialog heraus, Dialog bleibt offen)
+    async switchBoard(id) {
+        await loadBoard(id, true);
     },
 
     async deleteBoard(id) {
+        const wasActive = !!(state.board && state.board.id === id);
         await api(`api/boards/${encodeURIComponent(id)}`, { method: 'DELETE' });
-        state.board = null;
         await loadBoards();
-        await loadBoard(state.boards[0] && state.boards[0].id, true);
+        if (wasActive) {
+            state.board = null;
+            await loadBoard(state.boards[0] && state.boards[0].id, true);
+        } else {
+            render();
+        }
     },
 };
 
@@ -229,10 +294,14 @@ async function init() {
 
     const dialogs = initDialogs(state, actions);
     actions.openCard = dialogs.openCard;
+    actions.copyCard = dialogs.copyCard;
+    actions.confirm = dialogs.confirm;
 
     document.getElementById('boardSelect').addEventListener('change', ev => loadBoard(ev.target.value, true));
     document.getElementById('addCardBtn').addEventListener('click', () => state.board && dialogs.openCard(null));
-    document.getElementById('settingsBtn').addEventListener('click', () => dialogs.openBoardManager());
+    document.getElementById('settingsBtn').addEventListener('click', () => {
+        Promise.resolve(dialogs.openBoardManager()).catch(e => alert(t('error.loadFailed') + ': ' + e.message));
+    });
     document.getElementById('shareBtn').addEventListener('click', () => dialogs.openShareDialog());
     // Der fruehere „nur meine Karten"-Button entfaellt – Filtern geschieht ueber die Kopf-Chips.
     document.getElementById('filterBtn').hidden = true;

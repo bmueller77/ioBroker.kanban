@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "kanban",
-    "version": "0.2.1",
+    "version": "0.3.0",
     "titleLang": {
       "en": "Kanban Board",
       "de": "Kanban Board",
@@ -74,6 +74,10 @@
       "license": "MIT"
     },
     "news": {
+      "0.3.0": {
+        "en": "Trash: deleting a card now moves it to a per-board Trash column (restore within 30 days, then permanent deletion); optional automatic cleanup of old done cards (by age or count) into the trash. Per-column sorting (manual, grid, due date, priority). Done cards get a strikethrough title, a completion timestamp and a copy button. Cards can be moved or copied between boards. New events cardRestored and cardPurged plus per-user e-mail toggles; every event now carries dueAt (due date incl. time with local offset). Reworked board settings (board picker, create/delete, cleanup) and card editor layout; in-app confirmation dialogs.",
+        "de": "Papierkorb: Gelöschte Karten wandern in eine Papierkorb-Spalte je Board (30 Tage wiederherstellbar, danach endgültig gelöscht); optionales automatisches Aufräumen alter erledigter Karten (nach Alter oder Anzahl) in den Papierkorb. Sortierung je Spalte (manuell, Grid, Fälligkeit, Priorität). Erledigte Karten mit durchgestrichenem Titel, Erledigt-Zeitstempel und Kopier-Button. Karten lassen sich zwischen Boards verschieben oder kopieren. Neue Ereignisse cardRestored und cardPurged samt E-Mail-Schaltern je Benutzer; jedes Ereignis enthält jetzt dueAt (Fälligkeit inkl. Uhrzeit mit lokalem Offset). Überarbeitete Board-Einstellungen (Board-Auswahl, Anlegen/Löschen, Aufräumen) und Editor-Layout; In-App-Bestätigungsdialoge."
+      },
       "0.2.1": {
         "en": "Express 5; fixed avatar upload (Content-Security-Policy blocked blob: URLs); requires Node.js 20+ and admin 7.8.23+; updated dependencies; adapter metadata for the ioBroker repository; docs with Telegram/Pushover notification examples.",
         "de": "Express 5; Avatar-Upload repariert (Content-Security-Policy blockierte blob:-URLs); benötigt Node.js 20+ und Admin 7.8.23+; aktualisierte Abhängigkeiten; Adapter-Metadaten für das ioBroker-Repository; Doku mit Telegram-/Pushover-Beispielen."
@@ -135,6 +139,9 @@
     "notifyCreated": false,
     "notifyMoved": false,
     "notifyDone": false,
+    "notifyDeleted": false,
+    "notifyRestored": false,
+    "notifyPurged": false,
     "reminderTime": "08:00",
     "reminderDaysBefore": 1,
     "publicUrl": "",

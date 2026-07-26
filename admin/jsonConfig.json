@@ -370,6 +370,51 @@
                             },
                             "filter": false,
                             "sort": false
+                        },
+                        {
+                            "type": "checkbox",
+                            "attr": "notifyDeleted",
+                            "width": "7%",
+                            "title": {
+                                "en": "→ trash",
+                                "de": "→ Papier."
+                            },
+                            "tooltip": {
+                                "en": "E-mail when a card of this user is moved to the trash (manually or by cleanup)",
+                                "de": "E-Mail, wenn eine Karte dieses Benutzers in den Papierkorb wandert (manuell oder durch Aufräumen)"
+                            },
+                            "filter": false,
+                            "sort": false
+                        },
+                        {
+                            "type": "checkbox",
+                            "attr": "notifyRestored",
+                            "width": "7%",
+                            "title": {
+                                "en": "→ restored",
+                                "de": "→ Wiederh."
+                            },
+                            "tooltip": {
+                                "en": "E-mail when a card of this user is restored from the trash",
+                                "de": "E-Mail, wenn eine Karte dieses Benutzers aus dem Papierkorb wiederhergestellt wird"
+                            },
+                            "filter": false,
+                            "sort": false
+                        },
+                        {
+                            "type": "checkbox",
+                            "attr": "notifyPurged",
+                            "width": "7%",
+                            "title": {
+                                "en": "→ purged",
+                                "de": "→ Endg."
+                            },
+                            "tooltip": {
+                                "en": "E-mail when a card of this user is permanently deleted",
+                                "de": "E-Mail, wenn eine Karte dieses Benutzers endgültig gelöscht wird"
+                            },
+                            "filter": false,
+                            "sort": false
                         }
                     ],
                     "xs": 12,
@@ -379,8 +424,8 @@
                 "_notifyInfo": {
                     "type": "staticText",
                     "text": {
-                        "en": "The six \"→\" columns control per user which card events trigger an e-mail to their address: assigned to them, due/overdue, changed, moved, done, newly created. Leave a box unchecked to use the global default (Email tab). An e-mail is only sent if the user has an address and the Email tab is configured.",
-                        "de": "Die sechs \"→\"-Spalten legen je Benutzer fest, bei welchen Karten-Ereignissen eine E-Mail an seine Adresse geht: ihm zugewiesen, fällig/überfällig, geändert, verschoben, erledigt, neu erstellt. Nicht angehakt = globale Vorgabe (Tab „E-Mail\"). Eine E-Mail wird nur gesendet, wenn beim Benutzer eine Adresse hinterlegt und der E-Mail-Tab konfiguriert ist."
+                        "en": "The \"→\" columns control per user which card events trigger an e-mail to their address: assigned, due/overdue, changed, moved, done, created, moved to trash, restored, permanently deleted. Leave a box unchecked to use the global default (Email tab). An e-mail is only sent if the user has an address and the Email tab is configured. Automatic cleanup runs are bundled into a single summary e-mail per user.",
+                        "de": "Die \"→\"-Spalten legen je Benutzer fest, bei welchen Karten-Ereignissen eine E-Mail an seine Adresse geht: zugewiesen, fällig/überfällig, geändert, verschoben, erledigt, neu, in den Papierkorb, wiederhergestellt, endgültig gelöscht. Nicht angehakt = globale Vorgabe (Tab „E-Mail\"). Eine E-Mail wird nur gesendet, wenn beim Benutzer eine Adresse hinterlegt und der E-Mail-Tab konfiguriert ist. Automatische Aufräumläufe werden zu einer Sammelmail je Benutzer gebündelt."
                     },
                     "sm": 12,
                     "xs": 12,
@@ -532,6 +577,42 @@
                     "xs": 12,
                     "lg": 2,
                     "xl": 2
+                },
+                "notifyDeleted": {
+                    "type": "checkbox",
+                    "label": {
+                        "en": "Moved to trash",
+                        "de": "In den Papierkorb"
+                    },
+                    "sm": 6,
+                    "md": 2,
+                    "xs": 12,
+                    "lg": 2,
+                    "xl": 2
+                },
+                "notifyRestored": {
+                    "type": "checkbox",
+                    "label": {
+                        "en": "Card restored",
+                        "de": "Karte wiederhergestellt"
+                    },
+                    "sm": 6,
+                    "md": 2,
+                    "xs": 12,
+                    "lg": 2,
+                    "xl": 2
+                },
+                "notifyPurged": {
+                    "type": "checkbox",
+                    "label": {
+                        "en": "Permanently deleted",
+                        "de": "Endgültig gelöscht"
+                    },
+                    "sm": 6,
+                    "md": 2,
+                    "xs": 12,
+                    "lg": 2,
+                    "xl": 2
                 }
             }
         },
@@ -637,8 +718,8 @@
                 "_info": {
                     "type": "staticText",
                     "text": {
-                        "en": "On events the adapter POSTs a JSON payload to these URLs. Events: cardCreated, cardUpdated, cardMoved, cardAssigned, cardDone, cardDeleted, cardDue — or * for all.",
-                        "de": "Bei Ereignissen sendet der Adapter einen JSON-POST an diese URLs. Ereignisse: cardCreated, cardUpdated, cardMoved, cardAssigned, cardDone, cardDeleted, cardDue — oder * für alle."
+                        "en": "On events the adapter POSTs a JSON payload to these URLs. Events: cardCreated, cardUpdated, cardMoved, cardAssigned, cardDone, cardDeleted, cardRestored, cardPurged, cardDue — or * for all. Each payload includes dueAt (due date + time with local offset).",
+                        "de": "Bei Ereignissen sendet der Adapter einen JSON-POST an diese URLs. Ereignisse: cardCreated, cardUpdated, cardMoved, cardAssigned, cardDone, cardDeleted, cardRestored, cardPurged, cardDue — oder * für alle. Jede Nachricht enthält dueAt (Fälligkeit mit Datum + Uhrzeit und lokalem Offset)."
                     },
                     "sm": 12,
                     "xs": 12,

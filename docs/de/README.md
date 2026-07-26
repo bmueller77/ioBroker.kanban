@@ -4,6 +4,8 @@ Ein vollwertiges **Kanban-Board als eigener ioBroker-Adapter**. Der Adapter brin
 
 > **Für wen?** Für alle, die im Smart-Home eine gemeinsame Aufgabenverwaltung wollen – Familie, WG, Haustechnik-Wartung – und diese eng mit ioBroker (Skripte, Lovelace, Node-RED) verzahnen möchten.
 
+> **Version 0.3.0** – Papierkorb je Board (30 Tage wiederherstellbar), automatisches Aufräumen alter erledigter Karten, Sortierung je Spalte (manuell/Grid/Fälligkeit/Priorität), erledigte Karten durchgestrichen mit Zeitstempel und Kopier-Button, Karten zwischen Boards verschieben oder kopieren, neue Ereignisse `cardRestored`/`cardPurged` und `dueAt` (Fälligkeit inkl. Uhrzeit) in jedem Ereignis, überarbeitete Board-Einstellungen und Karten-Editor.
+>
 > **Version 0.2.1** – Express 5, Avatar-Upload repariert (CSP blockierte `blob:`-URLs), Node.js 20+ und Admin 7.8.23+, fertiger Deep-Link im Ereignis, Benachrichtigungs-Routing per Skript (Telegram/Pushover, siehe unten), aktualisierte Abhängigkeiten und Repository-Konformität.
 
 > **Version 0.2.0** – Mobil (Akkordeon-Spalten, vollflächige Dialoge mit fester Aktionsleiste), Benutzer je Board zuweisbar, Kopf-Chips als je Board gespeicherter Filter, Benutzerfarben in der Weboberfläche (ohne Neustart), automatische Schrift-Kontrastfarbe auf Labels/Avataren, Benachrichtigungs-Link je Board, Datums- und Uhrzeitformat pro Instanz konfigurierbar (moment-/Day.js-Tokens inkl. lokalisierter Monats- und Wochentagsnamen), mindestens ein Zuständiger je Karte Pflicht, Anzeige-Limit je Spalte, durchgängig MDI-Icons.
@@ -539,9 +541,12 @@ Neben der eingebauten E-Mail-Benachrichtigung laesst sich **jeder** Dienst anbin
 }
 ```
 
-- `event` - Ereignistyp: `cardCreated`, `cardAssigned`, `cardUpdated`, `cardMoved`, `cardDone`, `cardDeleted`, `cardDue`.
+- `event` - Ereignistyp: `cardCreated`, `cardAssigned`, `cardUpdated`, `cardMoved`, `cardDone`, `cardDeleted`, `cardRestored`, `cardPurged`, `cardDue`.
 - `card.assignees` - die Zustaendigen (Benutzer-**IDs**, nicht Anzeigenamen); an sie richtet sich die Benachrichtigung.
 - `link` - fertiger Deep-Link zur Karte (ab 0.2.1; nutzt die Basis-URL aus den Instanzeinstellungen).
+- `dueAt` - ab 0.3.0: Faelligkeit als ISO-Zeitstempel mit lokalem Offset, z. B. `2026-08-01T09:00:00+02:00`. Ohne gesetzte Uhrzeit wird `00:00` uebermittelt; ohne Faelligkeitsdatum ist der Wert `null`.
+
+**Papierkorb-Ereignisse (ab 0.3.0):** `cardDeleted` bedeutet jetzt "in den Papierkorb verschoben" - die Karte ist 30 Tage lang wiederherstellbar. `cardRestored` feuert beim Zurueckholen, `cardPurged` beim endgueltigen Entfernen. Beim automatischen Aufraeumen enthaelt `detail` zusaetzlich `auto: true` und `reason` (`cleanup` bzw. `retention`), damit Skripte Massenaktionen erkennen und z. B. buendeln koennen. E-Mails werden bei automatischen Laeufen als **eine Sammelmail je Benutzer** verschickt statt einzeln pro Karte.
 - `detail.by` - **wer die Aenderung ausgeloest hat.** Wichtig: Das Board arbeitet **ohne Login** - die Weboberflaeche kennt den Verursacher nicht und laesst `by` leer bzw. `api`. Gefuellt ist es nur bei Aenderungen ueber API, Webhook oder Skript, die ein `by` mitgeben (z. B. eigene Agenten). Ein "nicht den Ausloeser benachrichtigen"-Filter greift daher nur bei solchen Quellen.
 
 > **Voraussetzung je Dienst:** Der Empfaenger muss dem Dienst bekannt sein. Bei **Telegram** z. B. muss die Person dem Bot einmalig `/start` (ggf. + Passwort) senden; danach steht sie mit ihrer numerischen **chatId** im State `telegram.0.communicate.users`. Diese chatId traegst du unten in `USERS` als Wert ein - der **Schluessel** ist die Kanban-Benutzer-ID (z. B. `user1`), nicht der Anzeigename.
