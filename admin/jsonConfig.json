@@ -262,7 +262,7 @@
                         {
                             "type": "text",
                             "attr": "displayName",
-                            "width": "15%",
+                            "width": "13%",
                             "title": {
                                 "en": "Display name",
                                 "de": "Anzeigename"
@@ -273,7 +273,7 @@
                         {
                             "type": "text",
                             "attr": "email",
-                            "width": "33%",
+                            "width": "22%",
                             "title": {
                                 "en": "Email",
                                 "de": "E-Mail"
@@ -284,7 +284,7 @@
                         {
                             "type": "checkbox",
                             "attr": "notifyAssigned",
-                            "width": "7%",
+                            "width": "6%",
                             "title": {
                                 "en": "→ assigned",
                                 "de": "→ Zugew."
@@ -299,7 +299,7 @@
                         {
                             "type": "checkbox",
                             "attr": "notifyDue",
-                            "width": "7%",
+                            "width": "6%",
                             "title": {
                                 "en": "→ due",
                                 "de": "→ Fällig"
@@ -314,7 +314,7 @@
                         {
                             "type": "checkbox",
                             "attr": "notifyUpdated",
-                            "width": "7%",
+                            "width": "6%",
                             "title": {
                                 "en": "→ changed",
                                 "de": "→ Geänd."
@@ -329,7 +329,7 @@
                         {
                             "type": "checkbox",
                             "attr": "notifyMoved",
-                            "width": "7%",
+                            "width": "6%",
                             "title": {
                                 "en": "→ moved",
                                 "de": "→ Versch."
@@ -344,7 +344,7 @@
                         {
                             "type": "checkbox",
                             "attr": "notifyDone",
-                            "width": "7%",
+                            "width": "6%",
                             "title": {
                                 "en": "→ done",
                                 "de": "→ Erled."
@@ -359,7 +359,7 @@
                         {
                             "type": "checkbox",
                             "attr": "notifyCreated",
-                            "width": "7%",
+                            "width": "6%",
                             "title": {
                                 "en": "→ created",
                                 "de": "→ Neu"
@@ -374,7 +374,7 @@
                         {
                             "type": "checkbox",
                             "attr": "notifyDeleted",
-                            "width": "7%",
+                            "width": "6%",
                             "title": {
                                 "en": "→ trash",
                                 "de": "→ Papier."
@@ -389,7 +389,7 @@
                         {
                             "type": "checkbox",
                             "attr": "notifyRestored",
-                            "width": "7%",
+                            "width": "6%",
                             "title": {
                                 "en": "→ restored",
                                 "de": "→ Wiederh."
@@ -404,7 +404,7 @@
                         {
                             "type": "checkbox",
                             "attr": "notifyPurged",
-                            "width": "7%",
+                            "width": "6%",
                             "title": {
                                 "en": "→ purged",
                                 "de": "→ Endg."
@@ -421,11 +421,23 @@
                     "lg": 12,
                     "xl": 12
                 },
+                "_notifyLegend": {
+                    "type": "staticText",
+                    "format": "html",
+                    "text": {
+                        "en": "<div style='font-size:0.85rem;line-height:1.5;opacity:0.85'><b>What the columns mean</b><table style='border-collapse:collapse'><tr><td style='padding:1px 12px 1px 0;white-space:nowrap'><b>→ assigned</b></td><td>a card is assigned to this user</td></tr><tr><td style='padding:1px 12px 1px 0;white-space:nowrap'><b>→ due</b></td><td>one of their cards is due or overdue</td></tr><tr><td style='padding:1px 12px 1px 0;white-space:nowrap'><b>→ changed</b></td><td>one of their cards is edited</td></tr><tr><td style='padding:1px 12px 1px 0;white-space:nowrap'><b>→ moved</b></td><td>one of their cards moves to another column</td></tr><tr><td style='padding:1px 12px 1px 0;white-space:nowrap'><b>→ done</b></td><td>one of their cards is marked done</td></tr><tr><td style='padding:1px 12px 1px 0;white-space:nowrap'><b>→ created</b></td><td>a new card is created for them</td></tr><tr><td style='padding:1px 12px 1px 0;white-space:nowrap'><b>→ trash</b></td><td>one of their cards goes to the trash, manually or through the automatic cleanup. It stays restorable for 30 days</td></tr><tr><td style='padding:1px 12px 1px 0;white-space:nowrap'><b>→ restored</b></td><td>one of their cards is brought back from the trash</td></tr><tr><td style='padding:1px 12px 1px 0;white-space:nowrap'><b>→ purged</b></td><td>one of their cards is deleted permanently after the 30 days</td></tr></table></div>",
+                        "de": "<div style='font-size:0.85rem;line-height:1.5;opacity:0.85'><b>Was die Spalten bedeuten</b><table style='border-collapse:collapse'><tr><td style='padding:1px 12px 1px 0;white-space:nowrap'><b>→ Zugew.</b></td><td>diesem Benutzer wird eine Karte zugewiesen</td></tr><tr><td style='padding:1px 12px 1px 0;white-space:nowrap'><b>→ Fällig</b></td><td>eine seiner Karten ist fällig oder überfällig</td></tr><tr><td style='padding:1px 12px 1px 0;white-space:nowrap'><b>→ Geänd.</b></td><td>eine seiner Karten wird bearbeitet</td></tr><tr><td style='padding:1px 12px 1px 0;white-space:nowrap'><b>→ Versch.</b></td><td>eine seiner Karten wandert in eine andere Spalte</td></tr><tr><td style='padding:1px 12px 1px 0;white-space:nowrap'><b>→ Erled.</b></td><td>eine seiner Karten wird als erledigt markiert</td></tr><tr><td style='padding:1px 12px 1px 0;white-space:nowrap'><b>→ Neu</b></td><td>für ihn wird eine neue Karte erstellt</td></tr><tr><td style='padding:1px 12px 1px 0;white-space:nowrap'><b>→ Papier.</b></td><td>eine seiner Karten landet im Papierkorb, manuell oder durch das automatische Aufräumen. Dort bleibt sie 30 Tage wiederherstellbar</td></tr><tr><td style='padding:1px 12px 1px 0;white-space:nowrap'><b>→ Wiederh.</b></td><td>eine seiner Karten wird aus dem Papierkorb zurückgeholt</td></tr><tr><td style='padding:1px 12px 1px 0;white-space:nowrap'><b>→ Endg.</b></td><td>eine seiner Karten wird nach den 30 Tagen endgültig gelöscht</td></tr></table></div>"
+                    },
+                    "sm": 12,
+                    "xs": 12,
+                    "lg": 12,
+                    "xl": 12
+                },
                 "_notifyInfo": {
                     "type": "staticText",
                     "text": {
-                        "en": "The \"→\" columns control per user which card events trigger an e-mail to their address: assigned, due/overdue, changed, moved, done, created, moved to trash, restored, permanently deleted. Leave a box unchecked to use the global default (Email tab). An e-mail is only sent if the user has an address and the Email tab is configured. Automatic cleanup runs are bundled into a single summary e-mail per user.",
-                        "de": "Die \"→\"-Spalten legen je Benutzer fest, bei welchen Karten-Ereignissen eine E-Mail an seine Adresse geht: zugewiesen, fällig/überfällig, geändert, verschoben, erledigt, neu, in den Papierkorb, wiederhergestellt, endgültig gelöscht. Nicht angehakt = globale Vorgabe (Tab „E-Mail\"). Eine E-Mail wird nur gesendet, wenn beim Benutzer eine Adresse hinterlegt und der E-Mail-Tab konfiguriert ist. Automatische Aufräumläufe werden zu einer Sammelmail je Benutzer gebündelt."
+                        "en": "Leave a box unchecked to use the global default (Email tab). An e-mail is only sent if the user has an address and the Email tab is configured. Automatic cleanup runs are bundled into a single summary e-mail per user.",
+                        "de": "Nicht angehakt = globale Vorgabe (Tab „E-Mail\"). Eine E-Mail wird nur gesendet, wenn beim Benutzer eine Adresse hinterlegt und der E-Mail-Tab konfiguriert ist. Automatische Aufräumläufe werden zu einer Sammelmail je Benutzer gebündelt."
                     },
                     "sm": 12,
                     "xs": 12,
