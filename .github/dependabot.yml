@@ -1,5 +1,4 @@
-# Dependabot configuration
-
+# Dependabot will run on day 11 of each month at 01:19 (Europe/Berlin timezone)
 version: 2
 updates:
 
