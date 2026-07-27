@@ -148,12 +148,12 @@ Im Tab **„Benutzer"** hat jeder Benutzer neun Checkboxen. Sie legen fest, bei 
 | **Geänd.** (`notifyUpdated`) | Bei jeder Bearbeitung einer Karte (Titel, Datum, Labels, Checkliste …). | Alle Zuständigen der Karte |
 | **Versch.** (`notifyMoved`) | Beim Verschieben in eine **andere** Spalte. | Alle Zuständigen der Karte |
 | **Erled.** (`notifyDone`) | **Zusätzlich** zu „Versch.", wenn die Zielspalte als *Erledigt* markiert ist. | Alle Zuständigen der Karte |
-| **Neu** (`notifyCreated`) | **Einmal** beim Anlegen einer Karte; ebenso, wenn eine Wiederholung die nächste Karte erzeugt. | Alle Zuständigen der Karte |
+| **Neu** (`notifyCreated`) | **Einmal** beim Anlegen einer Karte; ebenso beim Kopieren aus einem anderen Board und wenn eine Wiederholung die nächste Karte erzeugt. | **Alle Mitglieder des Boards**, unabhängig von der Zuständigkeit |
 | **Papier.** (`notifyDeleted`) | Wenn eine Karte in den **Papierkorb** wandert, egal ob von Hand gelöscht oder durch das automatische Aufräumen. Standard: aus. | Alle Zuständigen der Karte |
 | **Wiederh.** (`notifyRestored`) | Wenn eine Karte aus dem Papierkorb **wiederhergestellt** wird. Standard: aus. | Alle Zuständigen der Karte |
-| **Endg.** (`notifyPurged`) | Wenn eine Karte **endgültig** entfernt wird, also nach 30 Tagen im Papierkorb oder von Hand. Standard: aus. | Alle Zuständigen der Karte |
+| **Gelöscht** (`notifyPurged`) | Wenn eine Karte **endgültig** entfernt wird, also nach 30 Tagen im Papierkorb oder von Hand. Standard: aus. | Alle Zuständigen der Karte |
 
-Der Kern-Unterschied zwischen **Zugew.** und **Neu**: „Zugew." ist die **persönliche** Nachricht („*du* bist jetzt dran") und geht nur an die eine Person. „Neu" ist die **Bestandsmeldung** an alle Zuständigen der Karte.
+Der Kern-Unterschied zwischen **Zugew.** und **Neu**: „Zugew." ist die **persönliche** Nachricht („*du* bist jetzt dran") und geht nur an die eine Person. „Neu" ist die **Bestandsmeldung** an das ganze Team, also an alle Mitglieder des Boards, auch wenn die Karte jemand anderem gehört.
 
 **Achtung, Ereignisse überlagern sich.** Manche Aktionen lösen mehrere Ereignisse gleichzeitig aus. Wer beide Häkchen gesetzt hat, bekommt dann auch **mehrere E-Mails**, eine Zusammenfassung findet nicht statt:
 

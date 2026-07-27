@@ -148,12 +148,12 @@ In the **"Users"** tab every user has nine checkboxes. They decide which events 
 | **changed** (`notifyUpdated`) | On every edit of a card (title, date, labels, checklist …). | All assignees of the card |
 | **moved** (`notifyMoved`) | When moved to a **different** column. | All assignees of the card |
 | **done** (`notifyDone`) | **In addition** to "moved", if the target column is flagged as *done*. | All assignees of the card |
-| **created** (`notifyCreated`) | **Once** when a card is created; likewise when a recurrence spawns the next card. | All assignees of the card |
+| **created** (`notifyCreated`) | **Once** when a card is created; likewise when it is copied from another board and when a recurrence spawns the next card. | **All members of the board**, regardless of who it is assigned to |
 | **trash** (`notifyDeleted`) | When a card moves to the **trash**, whether deleted by hand or by the automatic cleanup. Default: off. | All assignees of the card |
 | **restored** (`notifyRestored`) | When a card is **restored** from the trash. Default: off. | All assignees of the card |
-| **purged** (`notifyPurged`) | When a card is removed **permanently**, either after 30 days in the trash or by hand. Default: off. | All assignees of the card |
+| **deleted** (`notifyPurged`) | When a card is removed **permanently**, either after 30 days in the trash or by hand. Default: off. | All assignees of the card |
 
-The core difference between **assigned** and **created**: "assigned" is the **personal** message ("*you* are up now") and goes to that one person only. "created" is the **status message** to all assignees of the card.
+The core difference between **assigned** and **created**: "assigned" is the **personal** message ("*you* are up now") and goes to that one person only. "created" is the **status message** to the whole team, every member of the board, even when the card belongs to someone else.
 
 **Careful, events overlap.** Some actions trigger several events at once. Anyone with both checkboxes set will receive **several e-mails**, there is no bundling:
 
