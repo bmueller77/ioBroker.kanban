@@ -644,6 +644,12 @@ Besides the built-in e-mail notification you can connect **any** service without
 - `dueAt` - from 0.3.0: the due date as an ISO timestamp with local offset, e.g. `2026-08-01T09:00:00+02:00`. Without a time set, `00:00` is sent; without a due date the value is `null`.
 
 **Trash events (from 0.3.0):** `cardDeleted` now means "moved to the trash" - the card can be restored for 30 days. `cardRestored` fires when it is brought back, `cardPurged` when it is removed permanently. During automatic cleanup, `detail` additionally carries `auto: true` and `reason` (`cleanup` or `retention`), so scripts can recognise bulk actions and bundle them. For automatic runs, e-mails are sent as **one summary per user** instead of one per card.
+**Recurrences (from 0.3.0):** completing a recurring card immediately creates the next instance. That fires `cardCreated` plus one `cardAssigned` per assignee, both carrying `detail.recurrence: true`. Without a filter your script therefore announces the follow-up card as "assigned to you" right after you tick the old one off. One line hides those events:
+
+```javascript
+if (ev.detail && ev.detail.recurrence) return;   // follow-up card of a recurrence
+```
+
 - `detail.by` - **who triggered the change.** Important: the board runs **without a login** - the web UI does not know the actor and leaves `by` empty or `api`. It is only filled for changes made via API, webhook or script that pass a `by` (e.g. your own agents). A "do not notify the actor" filter therefore only works for such sources.
 
 > **Prerequisite per service:** the recipient must be known to the service. For **Telegram** the person has to send the bot `/start` (plus the password, if configured) once; afterwards they appear with their numeric **chatId** in state `telegram.0.communicate.users`. Put that chatId into `USERS` as the value - the **key** is the Kanban user id (e.g. `user1`), not the display name.

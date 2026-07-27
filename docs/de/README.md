@@ -644,6 +644,12 @@ Neben der eingebauten E-Mail-Benachrichtigung laesst sich **jeder** Dienst anbin
 - `dueAt` - ab 0.3.0: Faelligkeit als ISO-Zeitstempel mit lokalem Offset, z. B. `2026-08-01T09:00:00+02:00`. Ohne gesetzte Uhrzeit wird `00:00` uebermittelt; ohne Faelligkeitsdatum ist der Wert `null`.
 
 **Papierkorb-Ereignisse (ab 0.3.0):** `cardDeleted` bedeutet jetzt "in den Papierkorb verschoben" - die Karte ist 30 Tage lang wiederherstellbar. `cardRestored` feuert beim Zurueckholen, `cardPurged` beim endgueltigen Entfernen. Beim automatischen Aufraeumen enthaelt `detail` zusaetzlich `auto: true` und `reason` (`cleanup` bzw. `retention`), damit Skripte Massenaktionen erkennen und z. B. buendeln koennen. E-Mails werden bei automatischen Laeufen als **eine Sammelmail je Benutzer** verschickt statt einzeln pro Karte.
+**Wiederholungen (ab 0.3.0):** Wird eine wiederkehrende Karte erledigt, legt der Adapter sofort die naechste Instanz an. Dabei feuern `cardCreated` und je Zustaendigem ein `cardAssigned`, beide mit `detail.recurrence: true`. Ohne Filter meldet ein Skript direkt nach dem Abhaken also die neue Karte als "dir zugewiesen". Wer das nicht moechte, blendet solche Ereignisse mit einer Zeile aus:
+
+```javascript
+if (ev.detail && ev.detail.recurrence) return;   // Folgekarte einer Wiederholung
+```
+
 - `detail.by` - **wer die Aenderung ausgeloest hat.** Wichtig: Das Board arbeitet **ohne Login** - die Weboberflaeche kennt den Verursacher nicht und laesst `by` leer bzw. `api`. Gefuellt ist es nur bei Aenderungen ueber API, Webhook oder Skript, die ein `by` mitgeben (z. B. eigene Agenten). Ein "nicht den Ausloeser benachrichtigen"-Filter greift daher nur bei solchen Quellen.
 
 > **Voraussetzung je Dienst:** Der Empfaenger muss dem Dienst bekannt sein. Bei **Telegram** z. B. muss die Person dem Bot einmalig `/start` (ggf. + Passwort) senden; danach steht sie mit ihrer numerischen **chatId** im State `telegram.0.communicate.users`. Diese chatId traegst du unten in `USERS` als Wert ein - der **Schluessel** ist die Kanban-Benutzer-ID (z. B. `user1`), nicht der Anzeigename.
