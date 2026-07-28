@@ -722,7 +722,7 @@ button.mini {
 .col-toggle + .col-sort, .col-sort + .col-sort { margin-left: 6px; }
 /* Richtungspfeil gehoert optisch zum Sortier-Button: eng zusammen */
 .col-sort-dir { padding-right: 0; }
-.col-sort-dir + .col-sort { margin-left: 0; padding-left: 0; }
+.col-sort-dir + .col-sort { margin-left: -3px; padding-left: 0; }
 /* Auge in Erledigt-Spalten ebenfalls von der WIP-Warnfarbe entkoppeln */
 .column.over-wip .column-head .col-toggle { color: var(--muted); }
 
