@@ -222,11 +222,19 @@ img.avatar, .avatar img { object-fit: cover; width: 100%; height: 100%; border-r
     pointer-events: none;
 }
 
-/* Checklisten-Aufklappbutton (Chevron) oben rechts in der Karte */
+/* Checklisten-Fusszeile: Zaehler links, Aufklapp-Chevron mittig, dicht am
+   unteren Kartenrand (negatives margin zieht sie in das Karten-Padding). */
+.card-check-bar {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    margin: 2px -2px -6px;
+}
+.card-check-bar .check-count { justify-self: start; }
+.card-check-bar .card-check-toggle { grid-column: 2; justify-self: center; }
+
+/* Checklisten-Aufklappbutton (Chevron) */
 .card-check-toggle {
-    position: absolute;
-    top: 2px;
-    right: 2px;
     background: none;
     border: none;
     border-radius: 6px;
@@ -238,9 +246,8 @@ img.avatar, .avatar img { object-fit: cover; width: 100%; height: 100%; border-r
     opacity: 0.8;
 }
 .card-check-toggle:hover { opacity: 1; color: var(--accent); background: var(--surface2); }
-.card.has-check .title { padding-right: 30px; }   /* Platz für den Chevron */
 
-/* Ausgeklappte Checkliste unter dem Karteninhalt */
+/* Ausgeklappte Checkliste, ueber der Fusszeile */
 .card-checklist { display: flex; flex-direction: column; gap: 2px; margin-top: 8px; }
 .card-checklist[hidden] { display: none; }   /* [hidden] muss das display:flex schlagen */
 .card-check-item {

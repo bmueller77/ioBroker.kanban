@@ -331,13 +331,6 @@ function renderCard(state, board, card, actions, opts = {}) {
         badges.appendChild(el('span', `badge prio-${card.priority}`, card.priority === 2 ? '!!' : '!'));
     }
     if (card.due) badges.appendChild(dueBadge(card.due, card.dueTime, isDone, state.cfg));
-    if (card.checklist && card.checklist.length) {
-        const done = card.checklist.filter(i => i.done).length;
-        const cb = el('span', 'badge');
-        cb.appendChild(mdiIcon(MDI.check));
-        cb.appendChild(document.createTextNode(` ${done}/${card.checklist.length}`));
-        badges.appendChild(cb);
-    }
     if (card.description) {
         const nb = el('span', 'badge');
         nb.appendChild(mdiIcon(MDI_NOTE));
@@ -388,7 +381,8 @@ function renderCard(state, board, card, actions, opts = {}) {
     }
     if (badges.children.length) c.appendChild(badges);
 
-    // Checkliste aufklappbar (nur wenn Punkte vorhanden), Chevron oben rechts
+    // Checkliste aufklappbar (nur wenn Punkte vorhanden): Fusszeile mit Zaehler
+    // links und Aufklapp-Chevron mittig, darunter die Punkte.
     if (card.checklist && card.checklist.length) {
         c.classList.add('has-check');
         const clist = el('div', 'card-checklist');
@@ -419,8 +413,15 @@ function renderCard(state, board, card, actions, opts = {}) {
             setChkIcon(expand);
             if (expand) checkExpanded.add(card.id); else checkExpanded.delete(card.id);
         });
-        c.appendChild(toggle);
+        const done = card.checklist.filter(i => i.done).length;
+        const count = el('span', 'badge check-count');
+        count.appendChild(mdiIcon(MDI.check));
+        count.appendChild(document.createTextNode(` ${done}/${card.checklist.length}`));
+
+        const bar = el('div', 'card-check-bar');
+        bar.append(count, toggle);
         c.appendChild(clist);
+        c.appendChild(bar);
     }
 
     const stopDrag = (b) => { for (const ev of ['pointerdown', 'mousedown', 'touchstart']) b.addEventListener(ev, e => e.stopPropagation()); };
