@@ -374,12 +374,18 @@ function renderCard(state, board, card, actions, opts = {}) {
         pill.style.color = contrastText(label.color || '#888');
         badges.appendChild(pill);
     }
+    if (badges.children.length) c.appendChild(badges);
+
+    // Avatare sitzen fest oben rechts, damit sie auf jeder Karte an derselben
+    // Stelle stehen. Breite als CSS-Variable, damit Titel und Zeitstempel
+    // genug Platz freihalten (30px je Avatar, 3px Ueberlappung).
     if (card.assignees && card.assignees.length) {
         const av = el('span', 'avatars');
         for (const a of card.assignees) av.appendChild(userAvatar(state, a));
-        badges.appendChild(av);
+        c.classList.add('has-avatars');
+        c.style.setProperty('--av-w', `${30 + (card.assignees.length - 1) * 27}px`);
+        c.appendChild(av);
     }
-    if (badges.children.length) c.appendChild(badges);
 
     // Checkliste aufklappbar (nur wenn Punkte vorhanden): Fusszeile mit Zaehler
     // links und Aufklapp-Chevron mittig, darunter die Punkte.

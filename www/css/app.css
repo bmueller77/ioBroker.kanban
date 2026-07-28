@@ -330,6 +330,10 @@ html[data-theme="dark"] a.link-badge:hover {
 }
 
 .card .avatars { display: inline-flex; margin-left: auto; }
+/* Zustaendige fest oben rechts, unabhaengig von Badges und Checkliste */
+.card > .avatars { position: absolute; top: 6px; right: 8px; margin-left: 0; }
+.card.has-avatars .title,
+.card.has-avatars .done-stamp { padding-right: calc(var(--av-w, 30px) + 6px); }
 .card .avatars .avatar { width: 30px; height: 30px; font-size: 15px; font-weight: 500; margin-left: -3px; box-shadow: 0 0 0 2px var(--uc, var(--surface)); }
 
 /* ------------------------------------------------------------ Dialoge */
