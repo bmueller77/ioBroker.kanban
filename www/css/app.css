@@ -295,6 +295,9 @@ img.avatar, .avatar img { object-fit: cover; width: 100%; height: 100%; border-r
     padding: 0;
 }
 .card-foot-icons .badge svg { width: 15px; height: 15px; vertical-align: 0; }
+/* Icons im Kartenfuss und der Checklisten-Zaehler brauchen keine eigene Flaeche;
+   im dunklen Theme wirkt sie wie eine Umrandung um das Symbol. */
+.card .card-foot-icons .badge, .card .check-count { background: none; }
 .card-desc-btn { cursor: pointer; }
 .card-desc-btn:hover { color: var(--accent); }
 
@@ -780,8 +783,7 @@ button.mini {
 .quick-target {
     pointer-events: auto;
     position: relative;
-    height: 76px;          /* feste Hoehe: die hineingezogene Karte darf sie nicht dehnen */
-    overflow: hidden;
+    min-height: 76px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -806,9 +808,9 @@ button.mini {
     text-align: center;
     pointer-events: none;
 }
-/* Die hineingezogene Karte tritt zurueck, behaelt aber ihre Box: SortableJS
-   misst sie, ohne Geometrie erkennt es die Zone nicht mehr als Ziel. */
-.quick-target > .card { opacity: 0.2; }
+/* Die hineingezogene Karte tritt zurueck und wird flach gehalten, behaelt aber
+   ihre Box: SortableJS misst sie, ohne Geometrie faellt die Zone als Ziel aus. */
+.quick-target > .card { opacity: 0.2; max-height: 36px; overflow: hidden; }
 
 .quick-target.sortable-over,
 .quick-target:hover {

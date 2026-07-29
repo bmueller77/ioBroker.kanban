@@ -105,7 +105,7 @@ function buildQuickMove(evt, sourceCol, board) {
     // eslint-disable-next-line no-undef
     for (const t of Array.from(bar.children)) {
         // eslint-disable-next-line no-undef
-        Sortable.create(t, { group: 'cards', sort: false });
+        Sortable.create(t, { group: 'cards', sort: false, emptyInsertThreshold: 40 });
     }
     quickMoveEl = bar;
 }
