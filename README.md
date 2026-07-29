@@ -138,6 +138,7 @@ From **0.1.1**: token-secured write API, Markdown preview sanitized with DOMPuri
     shadow to the bottom right, while columns, the card counter and chips of hidden users look recessed. Cards and
     columns also carry a faint top-to-bottom gradient. Every effect is a CSS variable and can be overridden or
     switched off in your own CSS
+  - The address bar now carries the **current board** (`?board=<id>`), updated whenever you switch boards, so the URL can be copied and shared as is
   - All irreversible actions now use an **in-app confirmation dialog** instead of the browser's `confirm()`
 
 - **0.2.1**

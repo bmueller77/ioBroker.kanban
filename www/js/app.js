@@ -107,10 +107,24 @@ function saveUserFilter(boardId, arr) {
     try { localStorage.setItem('kanban.userFilter.' + boardId, JSON.stringify(arr)); } catch (e) { /* ignore */ }
 }
 
+// Aktuelles Board in der Adresszeile mitfuehren (?board=…), damit die URL
+// kopier- und teilbar ist. replaceState: keine zusaetzlichen History-Eintraege,
+// alle uebrigen Parameter (Filter, Theme, card=…) bleiben erhalten.
+function syncUrlBoard(id) {
+    if (!window.history || !history.replaceState) return;
+    try {
+        const url = new URL(location.href);
+        if ((url.searchParams.get('board') || '') === (id || '')) return;
+        if (id) url.searchParams.set('board', id); else url.searchParams.delete('board');
+        history.replaceState(history.state, '', url);
+    } catch (e) { /* ignore */ }
+}
+
 async function loadBoard(id, force) {
-    if (!id) { state.board = null; render(); return; }
+    if (!id) { state.board = null; syncUrlBoard(''); render(); return; }
     if (!force && state.board && state.board.id === id) return;
     state.board = await api(`api/boards/${encodeURIComponent(id)}`);
+    syncUrlBoard(state.board.id);
     const savedFilter = loadUserFilter(id);
     state.usersFilter = savedFilter !== null ? savedFilter : boardUsers(state).map(u => u.name);
     render();

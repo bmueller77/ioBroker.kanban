@@ -438,7 +438,7 @@ All parameters can also be appended to the URL directly:
 
 | Parameter | Effect |
 |---|---|
-| `board=<id>` | Opens this board. |
+| `board=<id>` | Opens this board. Since 0.3.0 the address bar keeps track of the current board: switching via the board picker sets `?board=<id>` (no extra history entry, all other parameters are preserved), so the address can be copied and shared as is. |
 | `users=<name,name>` | **Person filter**: shows only cards assigned to at least one of these users (sets the header chips accordingly). `user=<name>` is the short form for a single user. |
 | `label=<id,id>` | **Label blacklist** (multiple possible): hides cards that have one of these labels, new labels stay visible automatically. |
 | `columns=<id,id>` | Shows only these columns. Others are hidden. |
