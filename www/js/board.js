@@ -449,6 +449,9 @@ function renderCard(state, board, card, actions, opts = {}) {
         footIcons.appendChild(rb);
     }
     if (footIcons.children.length) foot.appendChild(footIcons);
+    // Ohne Checkliste enthaelt der Fuss nur die Icons; die ruecken dann naeher
+    // an die Labels, damit keine Luecke entsteht.
+    if (!foot.querySelector('.check-count')) foot.classList.add('icons-only');
     if (foot.children.length) c.appendChild(foot);
 
     // Kopieren erledigter Karten (Feature 3) - kleines Icon direkt hinter dem Titel
