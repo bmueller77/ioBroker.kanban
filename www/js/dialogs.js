@@ -280,6 +280,12 @@ export function initDialogs(state, actions) {
         close.addEventListener('click', () => dd.close());
         foot.appendChild(close);
         body.appendChild(foot);
+        // Klick auf den Bereich ausserhalb (der Dialog selbst fuellt nur den
+        // Rahmen, der Inhalt liegt in #descDialogBody) schliesst das Fenster.
+        if (!dd.dataset.wired) {
+            dd.dataset.wired = '1';
+            dd.addEventListener('mousedown', ev => { if (ev.target === dd) dd.close(); });
+        }
         dd.showModal();
     }
 
