@@ -562,13 +562,28 @@ function alignCardTitles(root) {
 }
 
 let _clampTimer = null;
-window.addEventListener('resize', () => {
+function reflowTitles(delay = 150) {
     clearTimeout(_clampTimer);
     _clampTimer = setTimeout(() => {
         const b = document.getElementById('board');
         if (b) { clampCardTitles(b); alignCardTitles(b); }
-    }, 150);
-});
+    }, delay);
+}
+window.addEventListener('resize', () => reflowTitles());
+
+/* Spaltenbreite kann sich auch ohne Fensteraenderung aendern, z.B. wenn eine
+ * Spalte einen Scrollbalken bekommt. Dann muessen die Titel neu vermessen
+ * werden, sonst laufen sie ueber zwei Zeilen hinaus. Nur auf echte
+ * Breitenaenderungen reagieren, sonst loest das Kuerzen sich selbst aus. */
+const _lastWidth = new WeakMap();
+const _widthWatcher = typeof ResizeObserver === 'function' ? new ResizeObserver(entries => {
+    let changed = false;
+    for (const e of entries) {
+        const w = Math.round(e.contentRect.width);
+        if (_lastWidth.get(e.target) !== w) { _lastWidth.set(e.target, w); changed = true; }
+    }
+    if (changed) reflowTitles(60);
+}) : null;
 
 export function renderBoard(container, state, actions) {
     container.textContent = '';
@@ -723,6 +738,7 @@ export function renderBoard(container, state, actions) {
         }
 
         container.appendChild(colEl);
+        if (_widthWatcher) _widthWatcher.observe(list);
 
         // eslint-disable-next-line no-undef
         Sortable.create(list, {
