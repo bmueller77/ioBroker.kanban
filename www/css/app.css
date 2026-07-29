@@ -290,9 +290,10 @@ img.avatar, .avatar img { object-fit: cover; width: 100%; height: 100%; border-r
 .card.dragging, .sortable-ghost { opacity: .5; }
 
 .card .title { font-weight: 600; overflow-wrap: anywhere; display: flex; align-items: baseline; gap: 5px; line-height: 1.3; }
-/* Titelbereich immer zwei Zeilen hoch, damit Prioritaet, Faelligkeit und Ort
-   auf jeder Karte auf derselben Hoehe beginnen */
-.card .title { min-height: 2.6em; }
+/* Die Titelhoehe wird je Spalte angeglichen (siehe alignCardTitles in board.js):
+   alle Karten einer Spalte bekommen die Hoehe des laengsten Titels, damit
+   Prioritaet, Faelligkeit und Ort auf gleicher Hoehe beginnen, ohne dass bei
+   lauter einzeiligen Titeln eine leere Zeile entsteht. */
 
 .card .badges {
     display: flex;

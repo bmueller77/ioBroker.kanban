@@ -537,12 +537,27 @@ function clampCardTitles(root) {
     }
 }
 
+/**
+ * Titelhoehe je Spalte angleichen: alle Karten einer Spalte bekommen die Hoehe
+ * ihres laengsten Titels. Spalten mit lauter einzeiligen Titeln bleiben dadurch
+ * kompakt, gemischte Spalten fluchten trotzdem.
+ */
+function alignCardTitles(root) {
+    for (const col of root.querySelectorAll('.column')) {
+        const titles = [...col.querySelectorAll('.card .title')];
+        if (!titles.length) continue;
+        for (const t of titles) t.style.minHeight = '';
+        const max = Math.max(...titles.map(t => t.clientHeight));
+        for (const t of titles) t.style.minHeight = `${max}px`;
+    }
+}
+
 let _clampTimer = null;
 window.addEventListener('resize', () => {
     clearTimeout(_clampTimer);
     _clampTimer = setTimeout(() => {
         const b = document.getElementById('board');
-        if (b) clampCardTitles(b);
+        if (b) { clampCardTitles(b); alignCardTitles(b); }
     }, 150);
 });
 
@@ -738,9 +753,10 @@ export function renderBoard(container, state, actions) {
     }
 
     clampCardTitles(container);   // Titel erst messen, wenn die Karten im DOM haengen
+    alignCardTitles(container);
     // Nachmessen, sobald Schriften geladen sind: vorher koennen Zeilenhoehen
     // abweichen und Titel faelschlich gekuerzt werden.
     if (document.fonts && document.fonts.status !== 'loaded') {
-        document.fonts.ready.then(() => clampCardTitles(container)).catch(() => {});
+        document.fonts.ready.then(() => { clampCardTitles(container); alignCardTitles(container); }).catch(() => {});
     }
 }
