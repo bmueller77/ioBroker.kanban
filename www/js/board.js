@@ -506,6 +506,41 @@ export function boardUsers(state) {
     return m.length ? (state.users || []).filter(u => m.includes(u.name)) : (state.users || []);
 }
 
+/**
+ * Kartentitel auf zwei Zeilen kuerzen und mit "…" enden lassen.
+ * CSS line-clamp scheidet aus, weil der Titel die Avatare umfliesst (float) und
+ * ein -webkit-box das Umfliessen aufheben wuerde. Darum per Messung kuerzen.
+ */
+function clampCardTitles(root) {
+    for (const titleEl of root.querySelectorAll('.card .title')) {
+        const span = titleEl.querySelector('.title-text');
+        if (!span) continue;
+        const full = span.dataset.full || span.textContent;
+        span.dataset.full = full;
+        span.textContent = full;
+        const lh = parseFloat(getComputedStyle(titleEl).lineHeight) || 20;
+        const max = lh * 2 + 1;                      // zwei Zeilen plus Rundungsreserve
+        if (titleEl.clientHeight <= max) { titleEl.removeAttribute('title'); continue; }
+        let lo = 0, hi = full.length;                // binaere Suche nach der laengsten passenden Kuerzung
+        while (lo < hi) {
+            const mid = Math.ceil((lo + hi) / 2);
+            span.textContent = full.slice(0, mid).trimEnd() + '…';
+            if (titleEl.clientHeight <= max) lo = mid; else hi = mid - 1;
+        }
+        span.textContent = full.slice(0, lo).trimEnd() + '…';
+        titleEl.title = full;                        // voller Titel im Tooltip
+    }
+}
+
+let _clampTimer = null;
+window.addEventListener('resize', () => {
+    clearTimeout(_clampTimer);
+    _clampTimer = setTimeout(() => {
+        const b = document.getElementById('board');
+        if (b) clampCardTitles(b);
+    }, 150);
+});
+
 export function renderBoard(container, state, actions) {
     container.textContent = '';
     const board = state.board;
@@ -696,4 +731,6 @@ export function renderBoard(container, state, actions) {
             },
         });
     }
+
+    clampCardTitles(container);   // Titel erst messen, wenn die Karten im DOM haengen
 }
