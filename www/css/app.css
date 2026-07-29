@@ -12,6 +12,12 @@
     --warn: #ef6c00;
     --shadow: 0 1px 3px rgba(0, 0, 0, .12);
     --radius: 10px;
+    /* Plastik: Karten liegen auf, Spalten sind eingelassen, dazu ein Hauch Verlauf */
+    --card-shadow: 0 4px 5px rgba(0, 0, 0, .20);
+    --card-edge: inset 0 1px 0 rgba(255, 255, 255, .70);
+    --col-emboss: inset 0 1px 2px rgba(0, 0, 0, .18), inset 0 -1px 0 rgba(255, 255, 255, .70);
+    --avatar-shadow: 0 2px 3px rgba(0, 0, 0, .45);
+    --sheen: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, .10) 100%);
 }
 
 html[data-theme="dark"] {
@@ -22,6 +28,10 @@ html[data-theme="dark"] {
     --muted: #9d9da8;
     --border: #3c3c46;
     --shadow: 0 1px 3px rgba(0, 0, 0, .5);
+    --card-shadow: 0 4px 5px rgba(0, 0, 0, .45);
+    --card-edge: inset 0 1px 0 rgba(255, 255, 255, .06);
+    --col-emboss: inset 0 1px 2px rgba(0, 0, 0, .40), inset 0 -1px 0 rgba(255, 255, 255, .06);
+    --avatar-shadow: 0 2px 3px rgba(0, 0, 0, .85);
 }
 
 * { box-sizing: border-box; }
@@ -162,6 +172,8 @@ img.avatar, .avatar img { object-fit: cover; width: 100%; height: 100%; border-r
 
 .column {
     background: var(--surface2);
+    background-image: var(--sheen);
+    box-shadow: var(--col-emboss);
     border-radius: var(--radius);
     min-width: 280px;
     max-width: 640px;
@@ -204,8 +216,9 @@ img.avatar, .avatar img { object-fit: cover; width: 100%; height: 100%; border-r
 .card {
     position: relative;
     background: var(--surface);
+    background-image: var(--sheen);
     border-radius: 8px;
-    box-shadow: var(--shadow);
+    box-shadow: var(--card-shadow), var(--card-edge);
     padding: 8px 10px;
     cursor: grab;
     -webkit-tap-highlight-color: transparent;
@@ -357,7 +370,7 @@ html[data-theme="dark"] a.link-badge:hover {
 }
 
 .card .avatars { display: inline-flex; margin-left: auto; }
-.card .avatars .avatar { width: 30px; height: 30px; font-size: 15px; font-weight: 500; margin-left: -3px; box-shadow: 0 0 0 2px var(--uc, var(--surface)); }
+.card .avatars .avatar { width: 30px; height: 30px; font-size: 15px; font-weight: 500; margin-left: -3px; box-shadow: 0 0 0 2px var(--uc, var(--surface)), var(--avatar-shadow); }
 
 /* Zustaendige oben rechts im Titel, der Titeltext umfliesst sie. Eng gestapelt;
    Hover oder Klick faechert sie nach links auf. Bewegt wird nur per transform,

@@ -133,6 +133,8 @@ From **0.1.1**: token-secured write API, Markdown preview sanitized with DOMPuri
   - Every notification event now carries **dueAt**, the due date including time as an ISO timestamp with local offset (no time = 00:00)
   - Reworked **board settings**: one Board tab with a board picker (edit any board without switching), a "show this board" button, create/delete board, member selection and the cleanup section
   - Reworked **card editor layout**: calendar-invite checkbox and location moved up below the due date; assignees and labels sit side by side (stacked on narrow screens)
+  - Subtle depth for the board: cards sit on a soft drop shadow with a light top edge, columns look recessed,
+    both carry a faint top-to-bottom gradient, and the assignee avatars get a small, crisp shadow
   - All irreversible actions now use an **in-app confirmation dialog** instead of the browser's `confirm()`
 
 - **0.2.1**
