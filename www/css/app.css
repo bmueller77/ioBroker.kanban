@@ -334,6 +334,20 @@ html[data-theme="dark"] a.link-badge:hover {
 .card > .avatars { position: absolute; top: 6px; right: 8px; margin-left: 0; }
 .card.has-avatars .title,
 .card.has-avatars .done-stamp { padding-right: calc(var(--av-w, 30px) + 6px); }
+
+/* TEMPORAER: Layout-Varianten zur Auswahl, ueber Titel-Praefix [V1]/[V2]/[V3] */
+/* V1: Avatare stehen im Titel und werden vom Text umflossen */
+.card.av-v1 .title .avatars { float: right; margin: 0 0 2px 6px; }
+.card.av-v1.has-avatars .title,
+.card.av-v1.has-avatars .done-stamp { padding-right: 0; }
+.card.av-v1 .badges, .card.av-v1 .done-stamp { clear: right; }
+/* V2: kleinere Avatare, ab drei Personen als "+N" zusammengefasst */
+.card.av-v2 .avatars .avatar { width: 24px; height: 24px; font-size: 12px; }
+.card.av-v2 .avatars .av-more { background: var(--surface2); color: var(--text); font-size: 11px; font-weight: 600; }
+/* V3: eigene rechtsbuendige Zeile am Kartenfuss */
+.card.av-v3 > .avatars { position: static; display: flex; justify-content: flex-end; margin-top: 6px; }
+.card.av-v3.has-avatars .title,
+.card.av-v3.has-avatars .done-stamp { padding-right: 0; }
 .card .avatars .avatar { width: 30px; height: 30px; font-size: 15px; font-weight: 500; margin-left: -3px; box-shadow: 0 0 0 2px var(--uc, var(--surface)); }
 
 /* ------------------------------------------------------------ Dialoge */

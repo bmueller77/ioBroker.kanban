@@ -311,6 +311,11 @@ function renderCard(state, board, card, actions, opts = {}) {
     const col = (board.columns || []).find(x => x.id === card.columnId);
     const isDone = !!(col && col.isDone);
 
+    // TEMPORAER (Layout-Vorschau): ein Titel-Praefix [V1]/[V2]/[V3] schaltet die
+    // Avatar-Variante nur fuer diese Karte um. Nach der Entscheidung entfernen.
+    const demo = (/^\[V([123])\]/.exec(card.title || '') || [])[1] || null;
+    if (demo) c.classList.add(`av-v${demo}`);
+
     // Titel als eigener Textknoten, damit Zusatz-Buttons (Kopieren) daneben passen
     // und die Durchstreichung nur den Text trifft.
     const titleEl = el('div', 'title' + (isDone && !inTrash ? ' title-done' : ''));
@@ -381,10 +386,19 @@ function renderCard(state, board, card, actions, opts = {}) {
     // genug Platz freihalten (30px je Avatar, 3px Ueberlappung).
     if (card.assignees && card.assignees.length) {
         const av = el('span', 'avatars');
-        for (const a of card.assignees) av.appendChild(userAvatar(state, a));
+        // Variante 2 (kompakt): ab drei Zustaendigen nur zwei Gesichter + "+N"
+        const shown = demo === '2' && card.assignees.length > 2 ? card.assignees.slice(0, 2) : card.assignees;
+        for (const a of shown) av.appendChild(userAvatar(state, a));
+        if (shown.length < card.assignees.length) {
+            const more = el('span', 'avatar av-more', `+${card.assignees.length - shown.length}`);
+            more.title = card.assignees.slice(shown.length).join(', ');
+            av.appendChild(more);
+        }
         c.classList.add('has-avatars');
-        c.style.setProperty('--av-w', `${30 + (card.assignees.length - 1) * 27}px`);
-        c.appendChild(av);
+        const unit = demo === '2' ? 24 : 30;
+        c.style.setProperty('--av-w', `${unit + (shown.length + (shown.length < card.assignees.length ? 1 : 0) - 1) * (unit - 3)}px`);
+        if (demo === '1') titleEl.insertBefore(av, titleEl.firstChild);   // Titel umfliesst
+        else c.appendChild(av);                                          // oben rechts / Fusszeile (CSS)
     }
 
     // Checkliste aufklappbar (nur wenn Punkte vorhanden): Fusszeile mit Zaehler
