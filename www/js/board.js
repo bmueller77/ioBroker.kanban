@@ -531,6 +531,7 @@ function clampCardTitles(root) {
         const full = span.dataset.full || span.textContent;
         span.dataset.full = full;
         span.textContent = full;
+        titleEl.style.minHeight = '';   // Angleich-Hoehe darf die Messung nicht verfaelschen
         const lh = parseFloat(getComputedStyle(titleEl).lineHeight) || 20;
         const max = lh * 2 + 1;                      // zwei Zeilen plus Rundungsreserve
         if (titleEl.clientHeight <= max) { titleEl.removeAttribute('title'); continue; }
