@@ -334,6 +334,8 @@ img.avatar, .avatar img { object-fit: cover; width: 100%; height: 100%; border-r
 .card-check-item.done .card-check-text { text-decoration: line-through; color: var(--muted); }
 
 .card.dragging, .sortable-ghost { opacity: .5; }
+/* Aufgenommene Karte: doppelter Versatz und Radius, deutlich dunkler */
+.card.sortable-chosen, .card.sortable-drag { box-shadow: 4px 8px 10px rgba(0, 0, 0, .70), var(--card-edge); }
 
 .card .title { font-weight: 600; overflow-wrap: anywhere; display: flex; align-items: baseline; gap: 5px; line-height: 1.3; }
 /* Die Titelhoehe wird je Spalte angeglichen (siehe alignCardTitles in board.js):

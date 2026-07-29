@@ -83,13 +83,14 @@ function buildQuickMove(evt, sourceCol, board) {
     const others = board.columns.filter(c => c.id !== sourceCol.id);
     if (!others.length) return;
 
-    const rect = evt.item.getBoundingClientRect();
+    // Die Zonen liegen im rechten Drittel des Fensters. Dort verdecken sie die
+    // aufgenommene Karte nicht und sind mit dem Daumen gut erreichbar.
     const bar = el('div', 'quick-move');
-    const estH = others.length * 82 + 8;
-    const top = Math.min(rect.bottom + 6, window.innerHeight - estH - 8);
-    bar.style.left = Math.max(4, rect.left) + 'px';
-    bar.style.top = Math.max(4, top) + 'px';
-    bar.style.width = rect.width + 'px';
+    const width = Math.max(120, Math.round(window.innerWidth / 3) - 12);
+    const estH = others.length * 82 + (others.length - 1) * 6;
+    bar.style.right = '8px';
+    bar.style.width = width + 'px';
+    bar.style.top = Math.max(8, Math.round((window.innerHeight - estH) / 2)) + 'px';
 
     for (const c of others) {
         const qt = el('div', 'quick-target' + (c.isTrash ? ' quick-trash' : ''), c.isTrash ? t('col.trash') : c.title);
