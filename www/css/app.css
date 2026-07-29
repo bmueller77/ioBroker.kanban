@@ -234,6 +234,16 @@ img.avatar, .avatar img { object-fit: cover; width: 100%; height: 100%; border-r
 .card-foot .check-count { justify-self: start; }
 .card-foot .card-check-toggle { grid-column: 2; justify-self: center; align-self: end; margin-bottom: -8px; }
 .card-foot-icons { grid-column: 3; justify-self: end; display: flex; align-items: center; gap: 3px; }
+/* Icon-Badges ohne Text: quadratische Flaeche statt liegender Pille */
+.card-foot-icons .badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    padding: 0;
+}
+.card-foot-icons .badge svg { width: 15px; height: 15px; vertical-align: 0; }
 .card-desc-btn { cursor: pointer; }
 .card-desc-btn:hover { color: var(--accent); }
 
@@ -824,7 +834,7 @@ button.mini {
 .card-action:hover { opacity: 1; color: var(--accent); }
 .card-action svg { display: block; }
 /* Kopier-Icon sitzt direkt hinter dem Kartentitel */
-.card-copy { flex: 0 0 auto; padding: 0; line-height: 1; align-self: center; }
+.card-copy { flex: 0 0 auto; padding: 0; line-height: 1; align-self: center; margin-left: 5px; }
 
 /* ---- 0.3.0: Papierkorb-Spalte (Feature 5), feste graue Optik ---- */
 .column.trash-col { --trash-bg: #56565e; --trash-card: #676770; --trash-fg: #f0f0f3; background: var(--trash-bg); }
