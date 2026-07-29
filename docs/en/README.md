@@ -379,7 +379,7 @@ Independently of all this, overdue and soon-due cards are highlighted in colour,
 
 ### Recurrence
 
-Recurring tasks work **on completion** (the Kanban way): as soon as a recurring card is moved to the "Done" column, a **fresh card** with the next matching due date is created automatically in the first non-done column (checklist items reset). Cards with recurrence carry a recurrence badge (circular-arrows icon).
+Recurring tasks work **on completion** (the Kanban way): as soon as a recurring card is moved to the "Done" column, a **fresh card** with the next matching due date is created automatically in the first non-done column (checklist items reset). Every content field of the template is carried over: title, description, assignees, labels, card colour, priority, link, **time of day**, **location** and the **calendar invite** flag. Cards with recurrence carry a recurrence badge (circular-arrows icon).
 
 If a recurring card is created **without** a manual date, the adapter automatically sets the next matching date.
 

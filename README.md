@@ -139,6 +139,7 @@ From **0.1.1**: token-secured write API, Markdown preview sanitized with DOMPuri
     columns also carry a faint top-to-bottom gradient. Every effect is a CSS variable and can be overridden or
     switched off in your own CSS
   - The address bar now carries the **current board** (`?board=<id>`), updated whenever you switch boards, so the URL can be copied and shared as is
+  - Fix: a card spawned by a **recurrence** now inherits the **time of day**, the **location** and the **calendar invite** flag from its template (they were silently dropped, so `dueAt` of the new card was always 00:00)
   - All irreversible actions now use an **in-app confirmation dialog** instead of the browser's `confirm()`
 
 - **0.2.1**
