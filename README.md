@@ -140,6 +140,8 @@ From **0.1.1**: token-secured write API, Markdown preview sanitized with DOMPuri
     switched off in your own CSS
   - The address bar now carries the **current board** (`?board=<id>`), updated whenever you switch boards, so the URL can be copied and shared as is
   - Fix: a card spawned by a **recurrence** now inherits the **time of day**, the **location** and the **calendar invite** flag from its template (they were silently dropped, so `dueAt` of the new card was always 00:00)
+  - Every card returned by the **REST API** now carries the computed field **`dueAt`** (due date incl. time as an ISO timestamp with local offset) — the same value the events already had, so automations no longer need to combine `due` + `dueTime` + time zone themselves
+  - New instance option **"fire 'card due' at the card's time of day"** (off by default): cards with a time of day trigger `cardDue` exactly then, flagged `detail.exact: true`, next to the unchanged daily reminder — minute-precise triggers without polling
   - All irreversible actions now use an **in-app confirmation dialog** instead of the browser's `confirm()`
 
 - **0.2.1**

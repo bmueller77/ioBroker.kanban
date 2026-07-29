@@ -135,6 +135,7 @@ Notifications are triggered on card events and delivered via **e-mail** (through
 | **Sender** | Optional sender address (empty = email adapter default). |
 | **Reminder time** | `HH:MM`, when due cards are checked (default `08:00`). |
 | **Remind X days before due** | Lead time for `cardDue` reminders. |
+| **Fire "card due" at the card's time of day** | Since 0.3.0, **off** by default. In addition to the daily reminder, cards with a **time of day** fire `cardDue` exactly at that time (`detail.exact = true`), so automations can trigger to the minute without polling the API. **Note:** the event goes through the normal notification path, so a second "due" e-mail is also sent to everyone who has that notification enabled – if you only want to drive scripts/webhooks, turn the "due" e-mail off per user. |
 | **Default** | Global fallback switches per event, they apply when a user has nothing set of their own (see below). |
 
 #### Who gets notified, and when?
@@ -323,6 +324,8 @@ A card has the following content fields (settable via the API under the same nam
 | **recurrence** | object | Recurrence rule – see [Recurrence](#recurrence). |
 
 The adapter also manages automatically: `id`, `columnId`, `order`, `createdAt`, `createdBy`, `movedAt`, `doneAt`, `trashedAt`.
+
+Since 0.3.0 every card object of the **REST API** additionally carries the computed field **`dueAt`** – the due date including time as an ISO timestamp with local offset (e.g. `2026-08-01T13:30:00+02:00`; `00:00` without a time, `null` without a date). It is identical to the `dueAt` of the events, is **not stored** and is ignored on write – so automations do not have to combine `due` + `dueTime` + time zone themselves.
 
 `movedAt` records **since when a card has been sitting in its current column** and is the basis for the "age in column" sort mode. It is only refreshed on a real column change; reordering within the same column leaves it untouched. `trashedAt` marks when a card went to the trash and drives the 30-day deadline.
 
@@ -643,7 +646,8 @@ Besides the built-in e-mail notification you can connect **any** service without
 - `event` - event type: `cardCreated`, `cardAssigned`, `cardUpdated`, `cardMoved`, `cardDone`, `cardDeleted`, `cardRestored`, `cardPurged`, `cardDue`.
 - `card.assignees` - the assignees (user **ids**, not display names); the notification is aimed at them.
 - `link` - ready-to-use deep link to the card (from 0.2.1; uses the base URL from the instance settings).
-- `dueAt` - from 0.3.0: the due date as an ISO timestamp with local offset, e.g. `2026-08-01T09:00:00+02:00`. Without a time set, `00:00` is sent; without a due date the value is `null`.
+- `dueAt` - from 0.3.0: the due date as an ISO timestamp with local offset, e.g. `2026-08-01T09:00:00+02:00`. Without a time set, `00:00` is sent; without a due date the value is `null`. Every card object of the REST API carries the same field.
+- **`cardDue` comes in two flavours:** the **daily** reminder at the configured reminder time (day-based, including lead time and overdue cards, `detail.overdue` may be `true`) and – if the instance option "Fire 'card due' at the card's time of day" is enabled – a **card-precise** event at the card's time with `detail.exact: true` and `detail.dueTime`. The latter fires once per card and day; if the moment falls into a downtime, it is caught up on the next start on the same day. Scripts that only care about exact times filter on `ev.detail && ev.detail.exact`.
 
 **Trash events (from 0.3.0):** `cardDeleted` now means "moved to the trash" - the card can be restored for 30 days. `cardRestored` fires when it is brought back, `cardPurged` when it is removed permanently. During automatic cleanup, `detail` additionally carries `auto: true` and `reason` (`cleanup` or `retention`), so scripts can recognise bulk actions and bundle them. For automatic runs, e-mails are sent as **one summary per user** instead of one per card.
 **Recurrences (from 0.3.0):** completing a recurring card immediately creates the next instance. That fires `cardCreated` plus one `cardAssigned` per assignee, both carrying `detail.recurrence: true`. Without a filter your script therefore announces the follow-up card as "assigned to you" right after you tick the old one off. One line hides those events:

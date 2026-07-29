@@ -135,6 +135,7 @@ Benachrichtigungen werden bei Karten-Ereignissen ausgelöst und per **E-Mail** (
 | **Absender** | Optionale Absenderadresse (leer = Standard des email-Adapters). |
 | **Erinnerungs-Uhrzeit** | `HH:MM`, wann fällige Karten geprüft werden (Standard `08:00`). |
 | **Erinnern X Tage vor Fälligkeit** | Vorlauf für `cardDue`-Erinnerungen. |
+| **„Karte fällig" zur Uhrzeit der Karte auslösen** | Ab 0.3.0, Standard **aus**. Zusätzlich zur täglichen Erinnerung feuert `cardDue` bei Karten mit gesetzter **Uhrzeit** genau zu dieser Uhrzeit (`detail.exact = true`). Damit lassen sich Automatisierungen minutengenau auslösen, ohne die API abzufragen. **Achtung:** Das Ereignis läuft durch die normale Benachrichtigung, es geht also auch eine zweite „Fällig"-E-Mail an alle raus, die diese aktiviert haben – wer nur Skripte/Webhooks bedienen will, schaltet die E-Mail „Fällig" beim Benutzer ab. |
 | **Standard-Vorgabe** | Globale Fallback-Schalter je Ereignis, greifen, wenn ein Benutzer nichts Eigenes eingestellt hat (siehe unten). |
 
 #### Wer wird wann benachrichtigt?
@@ -323,6 +324,8 @@ Eine Karte hat folgende inhaltliche Felder (per API unter denselben Namen setzba
 | **recurrence** | Objekt | Wiederholungsregel – siehe [Wiederholungen](#wiederholungen). |
 
 Zusätzlich verwaltet der Adapter automatisch: `id`, `columnId`, `order`, `createdAt`, `createdBy`, `movedAt`, `doneAt`, `trashedAt`.
+
+Jedes Kartenobjekt der **REST-API** enthält ab 0.3.0 außerdem das berechnete Feld **`dueAt`** – die Fälligkeit inklusive Uhrzeit als ISO-Zeitstempel mit lokalem Offset (z. B. `2026-08-01T13:30:00+02:00`; ohne Uhrzeit `00:00`, ohne Datum `null`). Es ist identisch mit dem `dueAt` der Ereignisse, wird **nicht gespeichert** und beim Schreiben ignoriert – Automatisierungen müssen also nicht selbst aus `due` + `dueTime` + Zeitzone rechnen.
 
 `movedAt` hält fest, **seit wann eine Karte in ihrer aktuellen Spalte liegt**, und ist damit die Grundlage für den Sortiermodus „Alter in Spalte". Der Zeitstempel wird nur bei einem echten Spaltenwechsel neu gesetzt; das Umsortieren innerhalb derselben Spalte lässt ihn unverändert. `trashedAt` markiert den Zeitpunkt, zu dem eine Karte in den Papierkorb gewandert ist, und steuert die 30-Tage-Frist.
 
@@ -643,7 +646,8 @@ Neben der eingebauten E-Mail-Benachrichtigung laesst sich **jeder** Dienst anbin
 - `event` - Ereignistyp: `cardCreated`, `cardAssigned`, `cardUpdated`, `cardMoved`, `cardDone`, `cardDeleted`, `cardRestored`, `cardPurged`, `cardDue`.
 - `card.assignees` - die Zustaendigen (Benutzer-**IDs**, nicht Anzeigenamen); an sie richtet sich die Benachrichtigung.
 - `link` - fertiger Deep-Link zur Karte (ab 0.2.1; nutzt die Basis-URL aus den Instanzeinstellungen).
-- `dueAt` - ab 0.3.0: Faelligkeit als ISO-Zeitstempel mit lokalem Offset, z. B. `2026-08-01T09:00:00+02:00`. Ohne gesetzte Uhrzeit wird `00:00` uebermittelt; ohne Faelligkeitsdatum ist der Wert `null`.
+- `dueAt` - ab 0.3.0: Faelligkeit als ISO-Zeitstempel mit lokalem Offset, z. B. `2026-08-01T09:00:00+02:00`. Ohne gesetzte Uhrzeit wird `00:00` uebermittelt; ohne Faelligkeitsdatum ist der Wert `null`. Das gleiche Feld liefert auch jedes Kartenobjekt der REST-API.
+- **`cardDue` feuert in zwei Varianten:** die **tägliche** Erinnerung zur eingestellten Erinnerungs-Uhrzeit (tagesbasiert, inklusive Vorlauf und überfälliger Karten, `detail.overdue` kann `true` sein) und – wenn die Instanz-Option „‚Karte fällig' zur Uhrzeit der Karte auslösen" aktiv ist – ein **kartengenaues** Ereignis zur Uhrzeit der Karte mit `detail.exact: true` und `detail.dueTime`. Letzteres kommt einmal pro Karte und Tag; fällt der Zeitpunkt in eine Ausfallzeit, wird es beim nächsten Start desselben Tages nachgeholt. Skripte, die nur exakte Termine wollen, filtern auf `ev.detail && ev.detail.exact`.
 
 **Papierkorb-Ereignisse (ab 0.3.0):** `cardDeleted` bedeutet jetzt "in den Papierkorb verschoben" - die Karte ist 30 Tage lang wiederherstellbar. `cardRestored` feuert beim Zurueckholen, `cardPurged` beim endgueltigen Entfernen. Beim automatischen Aufraeumen enthaelt `detail` zusaetzlich `auto: true` und `reason` (`cleanup` bzw. `retention`), damit Skripte Massenaktionen erkennen und z. B. buendeln koennen. E-Mails werden bei automatischen Laeufen als **eine Sammelmail je Benutzer** verschickt statt einzeln pro Karte.
 **Wiederholungen (ab 0.3.0):** Wird eine wiederkehrende Karte erledigt, legt der Adapter sofort die naechste Instanz an. Dabei feuern `cardCreated` und je Zustaendigem ein `cardAssigned`, beide mit `detail.recurrence: true`. Ohne Filter meldet ein Skript direkt nach dem Abhaken also die neue Karte als "dir zugewiesen". Wer das nicht moechte, blendet solche Ereignisse mit einer Zeile aus:
