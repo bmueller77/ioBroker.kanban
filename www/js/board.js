@@ -731,15 +731,15 @@ export function renderBoard(container, state, actions) {
 
         const canAdd = !col.isTrash && ((typeof col.allowAdd === 'boolean') ? col.allowAdd : (board.columns[0] && board.columns[0].id === col.id));
         if (canAdd) {
-            const foot = el('div', 'column-foot');
+            // Der Button haengt in der Kartenliste, damit er exakt so breit ist
+            // wie die Karten (auch wenn die Spalte einen Scrollbalken hat).
             const addBtn = el('button', 'add-card-btn');
             addBtn.type = 'button';
             addBtn.appendChild(mdiIcon(MDI.plus));
             addBtn.title = t('board.addCard');
             addBtn.setAttribute('aria-label', t('board.addCard'));
             addBtn.addEventListener('click', () => actions.openCard(null, col.id));
-            foot.appendChild(addBtn);
-            colEl.appendChild(foot);
+            list.appendChild(addBtn);
         }
 
         container.appendChild(colEl);
@@ -748,6 +748,7 @@ export function renderBoard(container, state, actions) {
         // eslint-disable-next-line no-undef
         Sortable.create(list, {
             group: 'cards',
+            draggable: '.card',      // der Plus-Button bleibt liegen
             animation: 150,
             delay: 150,               // Touch: kurz halten zum Ziehen, damit Scrollen möglich bleibt
             delayOnTouchOnly: true,
