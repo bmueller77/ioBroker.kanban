@@ -448,10 +448,15 @@ function renderCard(state, board, card, actions, opts = {}) {
         rb.title = t('badge.recurring');
         footIcons.appendChild(rb);
     }
-    if (footIcons.children.length) foot.appendChild(footIcons);
-    // Ohne Checkliste enthaelt der Fuss nur die Icons; die ruecken dann naeher
-    // an die Labels, damit keine Luecke entsteht.
-    if (!foot.querySelector('.check-count')) foot.classList.add('icons-only');
+    // Ohne Checkliste braucht es keine eigene Fusszeile: die Icons setzen sich
+    // rechtsbuendig in die Label- bzw. Badge-Zeile, also auf gleiche Hoehe.
+    const inlineRow = labelRow.children.length ? labelRow : (badges.children.length ? badges : null);
+    if (footIcons.children.length && !foot.children.length && inlineRow) {
+        footIcons.classList.add('inline-icons');
+        inlineRow.appendChild(footIcons);
+    } else if (footIcons.children.length) {
+        foot.appendChild(footIcons);
+    }
     if (foot.children.length) c.appendChild(foot);
 
     // Kopieren erledigter Karten (Feature 3) - kleines Icon direkt hinter dem Titel
