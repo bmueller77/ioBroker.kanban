@@ -326,16 +326,17 @@ The adapter also manages automatically: `id`, `columnId`, `order`, `createdAt`, 
 
 `movedAt` records **since when a card has been sitting in its current column** and is the basis for the "age in column" sort mode. It is only refreshed on a real column change; reordering within the same column leaves it untouched. `trashedAt` marks when a card went to the trash and drives the 30-day deadline.
 
-#### Transfer a card to another board (since 0.3.0)
+#### Transfer or clone a card (since 0.3.0)
 
 In the footer of the card editor, right next to **Delete**, sits a small button with a transfer icon. It opens the **"Transfer card"** dialog:
 
 - Pick the **target board** and **target column**. The first column flagged "New" is preselected.
+- At the bottom of the board list sits the **current board**, marked "(this board)". Selecting it switches the dialog to **clone** mode: the move/copy toggle disappears (moving would be pointless), the button reads **Clone** and the column the card currently sits in is preselected. The clone carries over everything — checklist, labels, assignees, recurrence — and is inserted directly **below the original**. Handy for recurring tasks you keep around as a template.
 - **Move** takes the card with it (it leaves the current board), **copy** creates a new card on the target and leaves the original untouched.
 - **Labels** are matched by **name**. If the target board has a label with the same name it is kept; labels without a match are dropped. The target board is never silently extended with new labels.
 - **Assignees** are only kept if they are **members** of the target board. The dialog shows beforehand what will be dropped.
 - If **nobody** would be left, the dialog shows a picker of the target board's members and only allows the transfer once at least one person is selected. That way no card can end up without an assignee.
-- Moving fires `cardMoved` (flagged as a board change), copying fires `cardCreated` with a new card id.
+- Moving fires `cardMoved` (flagged as a board change), copying and cloning fire `cardCreated` with a new card id (a clone additionally carries `detail.clone = true`).
 
 #### Link types
 
@@ -494,7 +495,7 @@ For integrations on the same network there is a REST API (the same one the web U
 | `POST /api/boards/<id>/cards/<cardId>/restore` | Bring a card back from the trash (`{ columnId? }`, otherwise the first open column). |
 | `POST /api/boards/<id>/cards/<cardId>/purge` | Remove a card **permanently**. |
 | `POST /api/boards/<id>/trash/empty` | Empty the board's trash completely. |
-| `POST /api/boards/<id>/cards/<cardId>/transfer` | Transfer a card to another board (`{ toBoard, toColumn?, mode: "move"\|"copy", assignees? }`). |
+| `POST /api/boards/<id>/cards/<cardId>/transfer` | Transfer a card to another board (`{ toBoard, toColumn?, mode: "move"\|"copy", assignees? }`). With `toBoard` = the same board and `mode: "copy"` the card is cloned in place. |
 
 > **Write access** to `/api` requires a token from 0.1.1 (`X-Kanban-Token`; the web UI sends it automatically), **reading** stays open on the LAN. Details and limits: [Security & access control](#security--access-control). For external access use the token-based [webhooks](#webhooks--inbound).
 
@@ -523,7 +524,7 @@ The body contains `cmd` plus the appropriate fields. The same **command vocabula
 | `restoreCard` | `board`, `cardId`\|`id` | `column`\|`columnId` (target column; otherwise the first open one) |
 | `purgeCard` | `board`, `cardId`\|`id` |, (removes permanently) |
 | `emptyTrash` | `board` |, (empties the trash) |
-| `transferCard` | `board`, `cardId`\|`id`, `toBoard` | `toColumn`, `mode` (`move` or `copy`, default `move`), `assignees` |
+| `transferCard` | `board`, `cardId`\|`id`, `toBoard` | `toColumn`, `mode` (`move` or `copy`, default `move`), `assignees` – with `mode: "copy"`, `toBoard` may be the card's own board (clone) |
 | `listBoards` / `getBoards` | – | – |
 | `getBoard` | `board` | – |
 

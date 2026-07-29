@@ -326,16 +326,17 @@ Zusätzlich verwaltet der Adapter automatisch: `id`, `columnId`, `order`, `creat
 
 `movedAt` hält fest, **seit wann eine Karte in ihrer aktuellen Spalte liegt**, und ist damit die Grundlage für den Sortiermodus „Alter in Spalte". Der Zeitstempel wird nur bei einem echten Spaltenwechsel neu gesetzt; das Umsortieren innerhalb derselben Spalte lässt ihn unverändert. `trashedAt` markiert den Zeitpunkt, zu dem eine Karte in den Papierkorb gewandert ist, und steuert die 30-Tage-Frist.
 
-#### Karte auf ein anderes Board übertragen (ab 0.3.0)
+#### Karte übertragen oder klonen (ab 0.3.0)
 
 In der Fußzeile des Karten-Editors sitzt rechts neben **Löschen** ein kleiner Button mit Transfer-Symbol. Er öffnet den Dialog **„Karte übertragen"**:
 
 - **Ziel-Board** und **Ziel-Spalte** wählen. Vorbelegt ist die erste Spalte mit „Neu"-Häkchen.
+- Ganz unten in der Board-Liste steht das **aktuelle Board** mit dem Zusatz „(dieses Board)". Wird es gewählt, schaltet der Dialog auf **Klonen** um: Der Modus-Umschalter verschwindet (Verschieben wäre sinnlos), der Button heißt **Klonen** und vorbelegt ist die Spalte, in der die Karte gerade liegt. Der Klon übernimmt alle Inhalte inklusive Checkliste, Labels, Zuständigen und Wiederholung und wird direkt **unter dem Original** eingefügt. Praktisch für wiederkehrende Aufgaben, die man als Vorlage benutzt.
 - **Verschieben** nimmt die Karte mit (sie verlässt das aktuelle Board), **Kopieren** legt am Ziel eine neue Karte an und lässt das Original unangetastet.
 - **Labels** werden über den **Namen** abgeglichen. Gibt es im Ziel-Board ein gleichnamiges Label, wird es übernommen; Labels ohne Entsprechung fallen weg. Das Ziel-Board wird also nicht ungefragt um neue Labels ergänzt.
 - **Zuständige** bleiben nur erhalten, wenn sie im Ziel-Board **Mitglied** sind. Der Dialog zeigt vorher an, was wegfällt.
 - Bliebe **niemand** übrig, blendet der Dialog eine Auswahl der Ziel-Board-Mitglieder ein und lässt das Übertragen erst zu, wenn mindestens eine Person gewählt ist. So kann keine Karte ohne Zuständigen entstehen.
-- Beim Verschieben feuert `cardMoved` (mit Kennzeichnung des Board-Wechsels), beim Kopieren `cardCreated` mit neuer Karten-ID.
+- Beim Verschieben feuert `cardMoved` (mit Kennzeichnung des Board-Wechsels), beim Kopieren und Klonen `cardCreated` mit neuer Karten-ID (beim Klon zusätzlich `detail.clone = true`).
 
 #### Link-Typen
 
@@ -494,7 +495,7 @@ Für Integrationen im gleichen Netz steht eine REST-API bereit (dieselbe, die di
 | `POST /api/boards/<id>/cards/<cardId>/restore` | Karte aus dem Papierkorb zurückholen (`{ columnId? }`, sonst erste offene Spalte). |
 | `POST /api/boards/<id>/cards/<cardId>/purge` | Karte **endgültig** entfernen. |
 | `POST /api/boards/<id>/trash/empty` | Papierkorb des Boards komplett leeren. |
-| `POST /api/boards/<id>/cards/<cardId>/transfer` | Karte auf ein anderes Board übertragen (`{ toBoard, toColumn?, mode: "move"\|"copy", assignees? }`). |
+| `POST /api/boards/<id>/cards/<cardId>/transfer` | Karte auf ein anderes Board übertragen (`{ toBoard, toColumn?, mode: "move"\|"copy", assignees? }`). Mit `toBoard` = eigenes Board und `mode: "copy"` wird die Karte im selben Board geklont. |
 
 > **Schreibzugriffe** auf `/api` brauchen ab 0.1.1 einen Token (`X-Kanban-Token`; die Web-UI schickt ihn automatisch mit), **Lesen** bleibt im LAN offen. Details und Grenzen: [Sicherheit & Zugriffsschutz](#sicherheit--zugriffsschutz). Für Zugriffe von außen die tokenbasierten [Webhooks](#webhooks--eingehend) verwenden.
 
@@ -523,7 +524,7 @@ Der Body enthält `cmd` plus die passenden Felder. Es gilt dasselbe **Kommando-V
 | `restoreCard` | `board`, `cardId`\|`id` | `column`\|`columnId` (Zielspalte; sonst erste offene Spalte) |
 | `purgeCard` | `board`, `cardId`\|`id` |, (entfernt endgültig) |
 | `emptyTrash` | `board` |, (leert den Papierkorb) |
-| `transferCard` | `board`, `cardId`\|`id`, `toBoard` | `toColumn`, `mode` (`move` oder `copy`, Standard `move`), `assignees` |
+| `transferCard` | `board`, `cardId`\|`id`, `toBoard` | `toColumn`, `mode` (`move` oder `copy`, Standard `move`), `assignees` – `toBoard` darf mit `mode: "copy"` auch das eigene Board sein (Klon) |
 | `listBoards` / `getBoards` | – | – |
 | `getBoard` | `board` | – |
 

@@ -1121,27 +1121,30 @@ export function initDialogs(state, actions) {
         const tdlg = document.getElementById('transferDialog');
         const body = document.getElementById('transferBody');
         body.textContent = '';
-        body.appendChild(el('h3', null, t('transfer.title')));
+        const head = el('h3', null, t('transfer.title'));
+        body.appendChild(head);
+        // Ziel-Liste: erst die anderen Boards, zuletzt das aktuelle Board (= Klonen)
         const others = state.boards.filter(b => b.id !== state.board.id);
+        const self = state.boards.find(b => b.id === state.board.id) || { id: state.board.id, title: state.board.title };
+        const targets = [...others, self];
         const foot = el('footer');
         const cancel = el('button', null, t('boards.close')); cancel.type = 'button';
         cancel.addEventListener('click', () => tdlg.close());
-        if (!others.length) {
-            body.appendChild(el('p', 'hint', t('transfer.noOtherBoards')));
-            foot.append(el('span', 'spacer'), cancel);
-            body.appendChild(foot);
-            tdlg.showModal();
-            return;
-        }
 
-        let mode = 'move';
+        let mode = others.length ? 'move' : 'copy';
+        let crossMode = 'move';
         let targetBoard = null;
         const overrideSel = new Set();
         const labelName = l => String((l && (l.title || l.name)) || '').trim().toLowerCase();
 
         const boardLbl = el('label', null, t('transfer.targetBoard'));
         const boardSel = document.createElement('select');
-        for (const b of others) { const o = document.createElement('option'); o.value = b.id; o.textContent = b.title; boardSel.appendChild(o); }
+        for (const b of targets) {
+            const o = document.createElement('option');
+            o.value = b.id;
+            o.textContent = b.id === state.board.id ? `${b.title} ${t('transfer.sameBoard')}` : b.title;
+            boardSel.appendChild(o);
+        }
         boardLbl.appendChild(boardSel);
 
         const colLbl = el('label', null, t('transfer.targetColumn'));
@@ -1152,7 +1155,7 @@ export function initDialogs(state, actions) {
         const mkMode = (val, label) => {
             const b = el('button', 'transfer-mode-btn' + (val === mode ? ' active' : ''), label);
             b.type = 'button'; b.dataset.mode = val;
-            b.addEventListener('click', () => { mode = val; for (const x of modeWrap.children) x.classList.toggle('active', x.dataset.mode === mode); });
+            b.addEventListener('click', () => { mode = crossMode = val; for (const x of modeWrap.children) x.classList.toggle('active', x.dataset.mode === mode); });
             return b;
         };
         modeWrap.append(mkMode('move', t('transfer.move')), mkMode('copy', t('transfer.copy')));
@@ -1165,11 +1168,26 @@ export function initDialogs(state, actions) {
         function updateOk() { ok.disabled = !assignLbl.hidden && overrideSel.size === 0; }
         function recompute() {
             if (!targetBoard) return;
+            // Gleiches Board = Klon: nur Kopieren möglich, Modus-Umschalter entfällt
+            const sameBoard = targetBoard.id === state.board.id;
+            head.textContent = sameBoard ? t('transfer.cloneTitle') : t('transfer.title');
+            modeWrap.hidden = sameBoard;
+            mode = sameBoard ? 'copy' : crossMode;
+            for (const x of modeWrap.children) x.classList.toggle('active', x.dataset.mode === mode);
+            ok.textContent = sameBoard ? t('transfer.clone') : t('transfer.submit');
             colSel.textContent = '';
             const cols = (targetBoard.columns || []).filter(c => !c.isTrash);
             for (const c of cols) { const o = document.createElement('option'); o.value = c.id; o.textContent = c.title; colSel.appendChild(o); }
-            const def = cols.find(c => c.allowAdd) || cols[0];
+            const def = (sameBoard && cols.find(c => c.id === card.columnId)) || cols.find(c => c.allowAdd) || cols[0];
             if (def) colSel.value = def.id;
+            if (sameBoard) {
+                note.textContent = t('transfer.cloneHint');
+                note.hidden = false;
+                assignLbl.hidden = true; assignWrap.hidden = true;
+                overrideSel.clear();
+                updateOk();
+                return;
+            }
             const fromById = new Map((state.board.labels || []).map(l => [l.id, l]));
             const toNames = new Set((targetBoard.labels || []).map(labelName));
             const droppedLabels = (card.labels || []).filter(id => { const n = labelName(fromById.get(id)); return !(n && toNames.has(n)); });
@@ -1212,8 +1230,8 @@ export function initDialogs(state, actions) {
         body.append(boardLbl, colLbl, modeWrap, note, assignLbl, assignWrap);
         foot.append(el('span', 'spacer'), cancel, ok);
         body.appendChild(foot);
-        boardSel.value = others[0].id;
-        await loadTarget(others[0].id);
+        boardSel.value = targets[0].id;
+        await loadTarget(targets[0].id);
         tdlg.showModal();
     }
 
