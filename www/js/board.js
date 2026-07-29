@@ -298,7 +298,7 @@ function renderCard(state, board, card, actions, opts = {}) {
     const inTrash = !!opts.inTrash;
     const c = el('div', 'card' + (inTrash ? ' card-trash' : '') + (opts.grip ? ' has-grip' : ''));
     c.dataset.cardId = card.id;
-    if (card.color && !inTrash) c.style.setProperty('--card-color', card.color);
+    if (card.color && !inTrash) { c.style.setProperty('--card-color', card.color); c.classList.add('has-color'); }
 
     // Grid-Modus: Anfasser links an der Karte, nur darueber laesst sie sich ziehen
     if (opts.grip) {
