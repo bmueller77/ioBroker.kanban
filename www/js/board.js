@@ -738,4 +738,9 @@ export function renderBoard(container, state, actions) {
     }
 
     clampCardTitles(container);   // Titel erst messen, wenn die Karten im DOM haengen
+    // Nachmessen, sobald Schriften geladen sind: vorher koennen Zeilenhoehen
+    // abweichen und Titel faelschlich gekuerzt werden.
+    if (document.fonts && document.fonts.status !== 'loaded') {
+        document.fonts.ready.then(() => clampCardTitles(container)).catch(() => {});
+    }
 }
