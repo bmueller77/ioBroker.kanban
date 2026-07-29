@@ -298,6 +298,8 @@ Per board you can choose where the "open card" link in notification e-mails poin
 
 ### Cards – all fields
 
+**Card anatomy (since 0.3.0):** the **assignees** sit as a stack of avatars in the top right corner and the title text flows around them. Hovering or tapping the stack fans the faces out to the left without changing the line breaks. The **card footer** holds the checklist progress on the left, the expand chevron in the middle and the icons for **description, link and recurrence** on the right, in that order. Clicking the description icon opens the description in a **read-only window** with rendered Markdown; links inside always open in a new tab.
+
 **Clicking a card** opens the editor. Since 0.3.0 the fields are arranged like this: title, description, then the row with due date, time, priority and column, directly below it the calendar invite and the location (both belong to scheduling), then assignees and labels side by side, card colour and link side by side, followed by recurrence and checklist. On narrow screens the paired fields stack. The footer holds **Delete**, the **transfer** button, **Cancel** and **Save**.
 
 A card has the following content fields (settable via the API under the same names):
@@ -316,7 +318,7 @@ A card has the following content fields (settable via the API under the same nam
 | **color** | hex color | Colored bar on the left edge of the card. Chosen via an embedded color picker (color field + hue slider + hex input) or presets. |
 | **link** | URL | A link. The card shows a **type-dependent icon** – see [Link types](#link-types). |
 | **location** | text | Location. Shown as a location badge (pin icon) on the card and copied into the calendar invite as `LOCATION`. |
-| **checklist** | list | Sub-items with checkboxes; shown as progress `✓ 2/5` on the card. The **chevron (▾/▴)** at the top right expands/collapses the items directly on the card, where they can also be **ticked off** (saved immediately). |
+| **checklist** | list | Sub-items with checkboxes; shown as progress `✓ 2/5` in the bottom left on the card. The **chevron (▾/▴)** at the middle of the card footer expands/collapses the items directly on the card, where they can also be **ticked off** (saved immediately). |
 | **calendarInvite** | yes/no | If enabled **and** a due date is set, a **`.ics` calendar invite** is attached to every notification e-mail for this card. |
 | **recurrence** | object | Recurrence rule – see [Recurrence](#recurrence). |
 
