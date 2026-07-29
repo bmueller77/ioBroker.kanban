@@ -345,19 +345,16 @@ img.avatar, .avatar img { object-fit: cover; width: 100%; height: 100%; border-r
 .col-chevron svg { width: 13px; height: 13px; vertical-align: -2px; }
 .badge.date-badge { color: var(--text); font-weight: 500; }
 .badge.due-overdue { background: var(--danger); color: #fff; }
+/* Link-Symbol sieht aus wie die anderen Icons im Kartenfuss: keine Umrandung,
+   gleiche Flaeche und Farbe, beim Zeigen die Akzentfarbe */
 a.link-badge {
     text-decoration: none;
     cursor: pointer;
     border: none;
     background: var(--surface2);
     color: var(--muted);
-    color: inherit;
-    border: 1px solid rgba(127, 127, 127, 0.55);
 }
-a.link-badge:hover {
-    background: var(--accent, #7E57C2);
-    color: #fff;
-}
+a.link-badge:hover { color: var(--accent, #7E57C2); }
 /* Dark Mode: dunkle Emojis (z.B. Telefon) als helle Silhouette rendern,
    Badge-Rahmen deutlich sichtbar */
 html[data-theme="dark"] a.link-badge {
