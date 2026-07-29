@@ -209,5 +209,6 @@
   "transfer.noOtherBoards": "Non esiste un'altra bacheca verso cui trasferire.",
   "transfer.dropLabels": "{n} etichetta/e senza corrispondenza verranno rimosse.",
   "transfer.dropAssignees": "{n} assegnatario/i non sono membri della bacheca di destinazione e verranno rimossi.",
-  "transfer.pickAssignee": "Nessuno degli assegnatari attuali è membro di questa bacheca. Scegli almeno una persona responsabile."
+  "transfer.pickAssignee": "Nessuno degli assegnatari attuali è membro di questa bacheca. Scegli almeno una persona responsabile.",
+  "desc.close": "Chiudi"
 }

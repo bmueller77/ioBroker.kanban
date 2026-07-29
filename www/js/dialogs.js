@@ -243,6 +243,46 @@ export function initDialogs(state, actions) {
         return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
     }
 
+    /**
+     * Markdown rendern und sicher einfuegen. Links oeffnen immer in einem neuen
+     * Tab (target=_blank + rel), damit das Board nicht verlassen wird.
+     */
+    function renderMarkdownInto(target, text) {
+        const txt = String(text || '').trim();
+        if (!txt) { target.textContent = ''; return; }
+        // eslint-disable-next-line no-undef
+        const html = marked.parse(txt);
+        // Markdown darf rohes HTML enthalten → vor dem Einfügen säubern (verhindert gespeichertes XSS).
+        // eslint-disable-next-line no-undef
+        if (window.DOMPurify) target.innerHTML = DOMPurify.sanitize(html);
+        else { target.textContent = txt; return; }   // Fallback ohne Sanitizer: nur Text
+        for (const a of target.querySelectorAll('a[href]')) {
+            if (/^(mailto:|tel:)/i.test(a.getAttribute('href') || '')) continue;
+            a.target = '_blank';
+            a.rel = 'noopener noreferrer';
+        }
+    }
+
+    // Beschreibung nur lesend anzeigen (Klick auf das Notiz-Icon der Karte).
+    function openDescription(cardId) {
+        const card = state.board && state.board.cards.find(c => c.id === cardId);
+        if (!card || !card.description) return;
+        const dd = document.getElementById('descDialog');
+        const body = document.getElementById('descDialogBody');
+        body.textContent = '';
+        body.appendChild(el('h3', 'desc-title', card.title || ''));
+        const md = el('div', 'md-preview desc-body');
+        renderMarkdownInto(md, card.description);
+        body.appendChild(md);
+        const foot = el('div', 'desc-foot');
+        const close = el('button', null, t('desc.close'));
+        close.type = 'button';
+        close.addEventListener('click', () => dd.close());
+        foot.appendChild(close);
+        body.appendChild(foot);
+        dd.showModal();
+    }
+
     // Feature 3: erledigte Karte kopieren → Editor als NEUE Karte mit gleichen Inhalten.
     function copyCard(cardId) {
         const src = state.board && state.board.cards.find(c => c.id === cardId);
@@ -408,12 +448,7 @@ export function initDialogs(state, actions) {
         const txt = form.elements.description.value.trim();
         if (!txt) { prev.hidden = true; return; }
         prev.hidden = false;
-        // eslint-disable-next-line no-undef
-        const html = marked.parse(txt);
-        // Markdown darf rohes HTML enthalten → vor dem Einfügen säubern (verhindert gespeichertes XSS).
-        // eslint-disable-next-line no-undef
-        if (window.DOMPurify) prev.innerHTML = DOMPurify.sanitize(html);
-        else prev.textContent = txt;   // Fallback ohne Sanitizer: nur Text, niemals rohes HTML
+        renderMarkdownInto(prev, txt);
     }
 
     on('description', 'input', updatePreview);
@@ -1176,5 +1211,5 @@ export function initDialogs(state, actions) {
         tdlg.showModal();
     }
 
-    return { openCard, copyCard, openBoardManager, openShareDialog, confirm: confirmDialog };
+    return { openCard, copyCard, openDescription, openBoardManager, openShareDialog, confirm: confirmDialog };
 }

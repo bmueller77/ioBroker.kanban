@@ -152,6 +152,7 @@ actions = {
     rerender() { render(); },
 
     copyCard: null,   // wird nach initDialogs gesetzt (öffnet Editor mit Kopie)
+    openDescription: null,   // wird nach initDialogs gesetzt (Beschreibung nur lesend)
 
     async restoreCard(cardId, columnId) {
         await api(`api/boards/${state.board.id}/cards/${cardId}/restore`, { method: 'POST', body: { columnId, by: '' } });
@@ -295,6 +296,7 @@ async function init() {
     const dialogs = initDialogs(state, actions);
     actions.openCard = dialogs.openCard;
     actions.copyCard = dialogs.copyCard;
+    actions.openDescription = dialogs.openDescription;
     actions.confirm = dialogs.confirm;
 
     document.getElementById('boardSelect').addEventListener('change', ev => loadBoard(ev.target.value, true));

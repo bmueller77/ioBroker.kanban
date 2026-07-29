@@ -209,5 +209,6 @@
   "transfer.noOtherBoards": "Il n'y a aucun autre tableau vers lequel transférer.",
   "transfer.dropLabels": "{n} étiquette(s) sans correspondance seront supprimées.",
   "transfer.dropAssignees": "{n} assigné(s) ne sont pas membres du tableau cible et seront retirés.",
-  "transfer.pickAssignee": "Aucun des assignés actuels n'est membre de ce tableau. Veuillez choisir au moins une personne responsable."
+  "transfer.pickAssignee": "Aucun des assignés actuels n'est membre de ce tableau. Veuillez choisir au moins une personne responsable.",
+  "desc.close": "Fermer"
 }

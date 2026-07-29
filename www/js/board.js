@@ -311,11 +311,6 @@ function renderCard(state, board, card, actions, opts = {}) {
     const col = (board.columns || []).find(x => x.id === card.columnId);
     const isDone = !!(col && col.isDone);
 
-    // TEMPORAER (Layout-Vorschau): ein Titel-Praefix [V1]/[V2]/[V3] schaltet die
-    // Avatar-Variante nur fuer diese Karte um. Nach der Entscheidung entfernen.
-    const demo = (/^\[V([123])\]/.exec(card.title || '') || [])[1] || null;
-    if (demo) c.classList.add(`av-v${demo}`);
-
     // Titel als eigener Textknoten, damit Zusatz-Buttons (Kopieren) daneben passen
     // und die Durchstreichung nur den Text trifft.
     const titleEl = el('div', 'title' + (isDone && !inTrash ? ' title-done' : ''));
@@ -336,33 +331,6 @@ function renderCard(state, board, card, actions, opts = {}) {
         badges.appendChild(el('span', `badge prio-${card.priority}`, card.priority === 2 ? '!!' : '!'));
     }
     if (card.due) badges.appendChild(dueBadge(card.due, card.dueTime, isDone, state.cfg));
-    if (card.description) {
-        const nb = el('span', 'badge');
-        nb.appendChild(mdiIcon(MDI_NOTE));
-        nb.title = t('badge.description');
-        badges.appendChild(nb);
-    }
-    if (card.recurrence && card.recurrence.type && card.recurrence.type !== 'none') {
-        const rb = el('span', 'badge'); rb.appendChild(mdiIcon(MDI.sync));   // wiederkehrend
-        rb.title = t('badge.recurring');
-        badges.appendChild(rb);
-    }
-    if (card.link) {
-        const href = safeHref(card.link);
-        // klickbares Link-Badge nur bei sicherem Schema; sonst nicht-klickbarer Hinweis
-        const lb = href ? el('a', 'badge link-badge') : el('span', 'badge link-badge');
-        lb.appendChild(mdiIcon(linkIcon(card.link)));
-        if (href) {
-            lb.href = href;
-            if (!/^(mailto:|tel:)/i.test(href)) { lb.target = '_blank'; lb.rel = 'noopener'; }
-        }
-        lb.title = card.link;
-        lb.addEventListener('click', e => e.stopPropagation());
-        for (const ev of ['pointerdown', 'mousedown', 'touchstart']) {
-            lb.addEventListener(ev, e => e.stopPropagation());   // Drag nicht auslösen
-        }
-        badges.appendChild(lb);
-    }
     if (card.location) {
         const short = card.location.length > 24 ? card.location.slice(0, 23) + '…' : card.location;
         const loc = el('span', 'badge');
@@ -381,28 +349,32 @@ function renderCard(state, board, card, actions, opts = {}) {
     }
     if (badges.children.length) c.appendChild(badges);
 
-    // Avatare sitzen fest oben rechts, damit sie auf jeder Karte an derselben
-    // Stelle stehen. Breite als CSS-Variable, damit Titel und Zeitstempel
-    // genug Platz freihalten (30px je Avatar, 3px Ueberlappung).
+    // Zustaendige stehen oben rechts im Titel und werden vom Titeltext umflossen
+    // (float), damit sie auf jeder Karte an derselben Stelle sitzen, ohne dem
+    // Titel pauschal Breite wegzunehmen.
     if (card.assignees && card.assignees.length) {
         const av = el('span', 'avatars');
-        // Variante 2 (kompakt): ab drei Zustaendigen nur zwei Gesichter + "+N"
-        const shown = demo === '2' && card.assignees.length > 2 ? card.assignees.slice(0, 2) : card.assignees;
-        for (const a of shown) av.appendChild(userAvatar(state, a));
-        if (shown.length < card.assignees.length) {
-            const more = el('span', 'avatar av-more', `+${card.assignees.length - shown.length}`);
-            more.title = card.assignees.slice(shown.length).join(', ');
-            av.appendChild(more);
-        }
+        card.assignees.forEach((a, i) => {
+            const one = userAvatar(state, a);
+            one.style.setProperty('--i', i);   // Position im Stapel, fuer das Ausfahren
+            av.appendChild(one);
+        });
+        av.style.setProperty('--n', card.assignees.length);
+        // Eng gestapelt; Hover oder Klick faechert sie nach links auf (nur transform,
+        // damit sich der umflossene Bereich und der Titelumbruch nicht aendern).
+        av.addEventListener('mouseenter', () => av.classList.add('open'));
+        av.addEventListener('mouseleave', () => av.classList.remove('open'));
+        av.addEventListener('click', ev => { ev.stopPropagation(); av.classList.toggle('open'); });
         c.classList.add('has-avatars');
-        const unit = demo === '2' ? 24 : 30;
-        c.style.setProperty('--av-w', `${unit + (shown.length + (shown.length < card.assignees.length ? 1 : 0) - 1) * (unit - 3)}px`);
-        if (demo === '1') titleEl.insertBefore(av, titleEl.firstChild);   // Titel umfliesst
-        else c.appendChild(av);                                          // oben rechts / Fusszeile (CSS)
+        titleEl.insertBefore(av, titleEl.firstChild);
     }
 
-    // Checkliste aufklappbar (nur wenn Punkte vorhanden): Fusszeile mit Zaehler
-    // links und Aufklapp-Chevron mittig, darunter die Punkte.
+    const stopDrag = (b) => { for (const ev of ['pointerdown', 'mousedown', 'touchstart']) b.addEventListener(ev, e => e.stopPropagation()); };
+
+    // Kartenfuss: Checklisten-Zaehler links, Aufklapp-Chevron mittig, Icons fuer
+    // Beschreibung, Link und Wiederholung rechts (in dieser Reihenfolge).
+    const foot = el('div', 'card-foot');
+
     if (card.checklist && card.checklist.length) {
         c.classList.add('has-check');
         const clist = el('div', 'card-checklist');
@@ -438,13 +410,41 @@ function renderCard(state, board, card, actions, opts = {}) {
         count.appendChild(mdiIcon(MDI.check));
         count.appendChild(document.createTextNode(` ${done}/${card.checklist.length}`));
 
-        const bar = el('div', 'card-check-bar');
-        bar.append(count, toggle);
+        foot.append(count, toggle);
         c.appendChild(clist);
-        c.appendChild(bar);
     }
 
-    const stopDrag = (b) => { for (const ev of ['pointerdown', 'mousedown', 'touchstart']) b.addEventListener(ev, e => e.stopPropagation()); };
+    const footIcons = el('span', 'card-foot-icons');
+    if (card.description) {
+        const nb = el('span', 'badge card-desc-btn');
+        nb.appendChild(mdiIcon(MDI_NOTE));
+        nb.title = t('badge.description');
+        nb.addEventListener('click', ev => { ev.stopPropagation(); actions.openDescription(card.id); });
+        stopDrag(nb);
+        footIcons.appendChild(nb);
+    }
+    if (card.link) {
+        const href = safeHref(card.link);
+        // klickbares Link-Badge nur bei sicherem Schema; sonst nicht-klickbarer Hinweis
+        const lb = href ? el('a', 'badge link-badge') : el('span', 'badge link-badge');
+        lb.appendChild(mdiIcon(linkIcon(card.link)));
+        if (href) {
+            lb.href = href;
+            if (!/^(mailto:|tel:)/i.test(href)) { lb.target = '_blank'; lb.rel = 'noopener'; }
+        }
+        lb.title = card.link;
+        lb.addEventListener('click', e => e.stopPropagation());
+        stopDrag(lb);
+        footIcons.appendChild(lb);
+    }
+    if (card.recurrence && card.recurrence.type && card.recurrence.type !== 'none') {
+        const rb = el('span', 'badge');
+        rb.appendChild(mdiIcon(MDI.sync));
+        rb.title = t('badge.recurring');
+        footIcons.appendChild(rb);
+    }
+    if (footIcons.children.length) foot.appendChild(footIcons);
+    if (foot.children.length) c.appendChild(foot);
 
     // Kopieren erledigter Karten (Feature 3) - kleines Icon direkt hinter dem Titel
     if (isDone && !inTrash) {
@@ -672,7 +672,7 @@ export function renderBoard(container, state, actions) {
             // in andere Spalten bleibt moeglich
             ...(AUTO_SORT_MODES.includes(sortMode) ? { sort: false } : {}),
             ghostClass: 'sortable-ghost',
-            filter: '.link-badge, .card-check-toggle, .card-checklist, .card-action',   // lösen kein Ziehen aus
+            filter: '.link-badge, .card-check-toggle, .card-checklist, .card-action, .card-foot-icons, .title .avatars',   // lösen kein Ziehen aus
             preventOnFilter: false,              // damit deren Klick normal durchkommt
 
             onStart: evt => {

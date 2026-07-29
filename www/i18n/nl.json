@@ -209,5 +209,6 @@
   "transfer.noOtherBoards": "Er is geen ander bord om naartoe over te zetten.",
   "transfer.dropLabels": "{n} label(s) zonder overeenkomst worden verwijderd.",
   "transfer.dropAssignees": "{n} toegewezene(n) zijn geen lid van het doelbord en worden verwijderd.",
-  "transfer.pickAssignee": "Geen van de huidige toegewezenen is lid van dit bord. Kies ten minste één verantwoordelijke."
+  "transfer.pickAssignee": "Geen van de huidige toegewezenen is lid van dit bord. Kies ten minste één verantwoordelijke.",
+  "desc.close": "Sluiten"
 }

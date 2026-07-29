@@ -209,5 +209,6 @@
   "transfer.noOtherBoards": "There is no other board to transfer to.",
   "transfer.dropLabels": "{n} label(s) without a match will be removed.",
   "transfer.dropAssignees": "{n} assignee(s) are not members of the target board and will be removed.",
-  "transfer.pickAssignee": "None of the current assignees is a member of this board. Please choose at least one assignee."
+  "transfer.pickAssignee": "None of the current assignees is a member of this board. Please choose at least one assignee.",
+  "desc.close": "Close"
 }
