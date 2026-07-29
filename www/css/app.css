@@ -467,6 +467,8 @@ dialog input:focus, dialog textarea:focus, dialog select:focus { outline: 2px so
 dialog .row { display: flex; gap: 10px; flex-wrap: wrap; }
 
 dialog footer { display: flex; gap: 8px; margin-top: 8px; }
+/* Beschriftungen werden bei wenig Platz mit … gekuerzt statt umzubrechen */
+dialog footer > button { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 .hint { font-weight: 400; color: var(--muted); font-size: 13px; }
 
@@ -930,7 +932,7 @@ dialog label.inline-num input { width: 80px; }
 
 /* ---- 0.3.0: Übertragen-Dialog (Feature 6) ---- */
 .transfer-mode { display: flex; gap: 8px; }
-.transfer-mode-btn { flex: 1; }
+.transfer-mode-btn { flex: 1 1 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .transfer-mode-btn.active { background: var(--accent); border-color: var(--accent); color: var(--accent-text, #fff); }
 dialog button:disabled { opacity: 0.45; cursor: default; filter: grayscale(0.6); }
 .transfer-note { font-size: 12px; color: var(--muted); background: var(--surface2); border-radius: 6px; padding: 8px 10px; }

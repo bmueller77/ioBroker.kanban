@@ -1119,66 +1119,61 @@ export function initDialogs(state, actions) {
         const tdlg = document.getElementById('transferDialog');
         const body = document.getElementById('transferBody');
         body.textContent = '';
-        const head = el('h3', null, t('transfer.title'));
-        body.appendChild(head);
-        // Ziel-Liste: erst die anderen Boards, zuletzt das aktuelle Board (= Klonen)
+        body.appendChild(el('h3', null, t('transfer.title')));
         const others = state.boards.filter(b => b.id !== state.board.id);
-        const self = state.boards.find(b => b.id === state.board.id) || { id: state.board.id, title: state.board.title };
-        const targets = [...others, self];
         const foot = el('footer');
         const cancel = el('button', null, t('boards.close')); cancel.type = 'button';
         cancel.addEventListener('click', () => tdlg.close());
 
-        let mode = others.length ? 'move' : 'copy';
-        let crossMode = 'move';
+        // Klonen (im selben Board), Kopieren oder Verschieben (auf ein anderes Board)
+        let mode = 'clone';
         let targetBoard = null;
         const overrideSel = new Set();
         const labelName = l => String((l && (l.title || l.name)) || '').trim().toLowerCase();
 
+        const modeWrap = el('div', 'transfer-mode');
+        const mkMode = (val, label) => {
+            const b = el('button', 'transfer-mode-btn' + (val === mode ? ' active' : ''), label);
+            b.type = 'button'; b.dataset.mode = val; b.title = label;
+            if (val !== 'clone' && !others.length) { b.disabled = true; b.title = t('transfer.noOtherBoards'); }
+            b.addEventListener('click', () => setMode(val));
+            return b;
+        };
+        modeWrap.append(mkMode('clone', t('transfer.clone')), mkMode('copy', t('transfer.copy')), mkMode('move', t('transfer.move')));
+
         const boardLbl = el('label', null, t('transfer.targetBoard'));
         const boardSel = document.createElement('select');
-        for (const b of targets) {
-            const o = document.createElement('option');
-            o.value = b.id;
-            o.textContent = b.id === state.board.id ? `${b.title} ${t('transfer.sameBoard')}` : b.title;
-            boardSel.appendChild(o);
-        }
+        for (const b of others) { const o = document.createElement('option'); o.value = b.id; o.textContent = b.title; boardSel.appendChild(o); }
         boardLbl.appendChild(boardSel);
 
         const colLbl = el('label', null, t('transfer.targetColumn'));
         const colSel = document.createElement('select');
         colLbl.appendChild(colSel);
 
-        const modeWrap = el('div', 'transfer-mode');
-        const mkMode = (val, label) => {
-            const b = el('button', 'transfer-mode-btn' + (val === mode ? ' active' : ''), label);
-            b.type = 'button'; b.dataset.mode = val;
-            b.addEventListener('click', () => { mode = crossMode = val; for (const x of modeWrap.children) x.classList.toggle('active', x.dataset.mode === mode); });
-            return b;
-        };
-        modeWrap.append(mkMode('move', t('transfer.move')), mkMode('copy', t('transfer.copy')));
-
         const note = el('div', 'transfer-note'); note.hidden = true;
         const assignLbl = el('label', null, t('transfer.pickAssignee')); assignLbl.hidden = true;
         const assignWrap = el('div', 'share-cols'); assignWrap.hidden = true;
-        const ok = el('button', 'primary', t('transfer.submit')); ok.type = 'button';
+        const ok = el('button', 'primary', t('transfer.clone')); ok.type = 'button';
 
         function updateOk() { ok.disabled = !assignLbl.hidden && overrideSel.size === 0; }
+        // Modus wechseln: Ziel-Board nur bei Kopieren/Verschieben, Klonen bleibt im Board
+        function setMode(val) {
+            mode = val;
+            for (const x of modeWrap.children) x.classList.toggle('active', x.dataset.mode === mode);
+            const clone = mode === 'clone';
+            boardLbl.hidden = clone;
+            ok.textContent = clone ? t('transfer.clone') : (mode === 'copy' ? t('transfer.copy') : t('transfer.move'));
+            if (clone) { targetBoard = state.board; recompute(); } else loadTarget(boardSel.value);
+        }
         function recompute() {
             if (!targetBoard) return;
-            // Gleiches Board = Klon: nur Kopieren möglich, Modus-Umschalter entfällt
-            const sameBoard = targetBoard.id === state.board.id;
-            head.textContent = sameBoard ? t('transfer.cloneTitle') : t('transfer.title');
-            modeWrap.hidden = sameBoard;
-            mode = sameBoard ? 'copy' : crossMode;
-            for (const x of modeWrap.children) x.classList.toggle('active', x.dataset.mode === mode);
-            ok.textContent = sameBoard ? t('transfer.clone') : t('transfer.submit');
+            const clone = mode === 'clone';
             colSel.textContent = '';
             const cols = (targetBoard.columns || []).filter(c => !c.isTrash);
             for (const c of cols) { const o = document.createElement('option'); o.value = c.id; o.textContent = c.title; colSel.appendChild(o); }
-            const def = (sameBoard && cols.find(c => c.id === card.columnId)) || cols.find(c => c.allowAdd) || cols[0];
+            const def = (clone && cols.find(c => c.id === card.columnId)) || cols.find(c => c.allowAdd) || cols[0];
             if (def) colSel.value = def.id;
-            if (sameBoard) {
+            if (clone) {
                 note.textContent = t('transfer.cloneHint');
                 note.hidden = false;
                 assignLbl.hidden = true; assignWrap.hidden = true;
@@ -1219,17 +1214,18 @@ export function initDialogs(state, actions) {
         boardSel.addEventListener('change', () => loadTarget(boardSel.value));
         ok.addEventListener('click', async () => {
             try {
-                await actions.transferCard(cardId, boardSel.value, colSel.value, mode, [...overrideSel]);
+                const toBoard = mode === 'clone' ? state.board.id : boardSel.value;
+                await actions.transferCard(cardId, toBoard, colSel.value, mode === 'move' ? 'move' : 'copy', [...overrideSel]);
                 tdlg.close();
                 dlg.close();
             } catch (e) { alert(t('error.saveFailed', { msg: e.message })); }
         });
 
-        body.append(boardLbl, colLbl, modeWrap, note, assignLbl, assignWrap);
+        body.append(modeWrap, boardLbl, colLbl, note, assignLbl, assignWrap);
         foot.append(el('span', 'spacer'), cancel, ok);
         body.appendChild(foot);
-        boardSel.value = targets[0].id;
-        await loadTarget(targets[0].id);
+        if (others.length) boardSel.value = others[0].id;
+        setMode('clone');
         tdlg.showModal();
     }
 

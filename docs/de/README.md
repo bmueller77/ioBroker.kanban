@@ -328,11 +328,10 @@ Zusätzlich verwaltet der Adapter automatisch: `id`, `columnId`, `order`, `creat
 
 #### Karte übertragen oder klonen (ab 0.3.0)
 
-In der Fußzeile des Karten-Editors sitzt rechts neben **Löschen** der Button **Verwalten**. Er öffnet den Dialog **„Karte übertragen"**:
+In der Fußzeile des Karten-Editors sitzt rechts neben **Löschen** der Button **Verwalten**. Er öffnet den gleichnamigen Dialog, der oben drei Schaltflächen anbietet: **Klonen**, **Kopieren** und **Verschieben**. Die Auswahlfelder darunter richten sich nach der gewählten Schaltfläche.
 
-- **Ziel-Board** und **Ziel-Spalte** wählen. Vorbelegt ist die erste Spalte mit „Neu"-Häkchen.
-- Ganz unten in der Board-Liste steht das **aktuelle Board** mit dem Zusatz „(dieses Board)". Wird es gewählt, schaltet der Dialog auf **Klonen** um: Der Modus-Umschalter verschwindet (Verschieben wäre sinnlos), der Button heißt **Klonen** und vorbelegt ist die Spalte, in der die Karte gerade liegt. Der Klon übernimmt alle Inhalte inklusive Checkliste, Labels, Zuständigen und Wiederholung und wird direkt **unter dem Original** eingefügt. Praktisch für wiederkehrende Aufgaben, die man als Vorlage benutzt.
-- **Verschieben** nimmt die Karte mit (sie verlässt das aktuelle Board), **Kopieren** legt am Ziel eine neue Karte an und lässt das Original unangetastet.
+- **Klonen** dupliziert die Karte **im selben Board**. Es erscheint nur die **Ziel-Spalte**, vorbelegt mit der Spalte, in der die Karte gerade liegt. Der Klon übernimmt alle Inhalte inklusive Checkliste, Labels, Zuständigen und Wiederholung und wird direkt **unter dem Original** eingefügt. Praktisch für wiederkehrende Aufgaben, die man als Vorlage benutzt.
+- **Kopieren** und **Verschieben** blenden zusätzlich das **Ziel-Board** ein; vorbelegt ist dessen erste Spalte mit „Neu"-Häkchen. Verschieben nimmt die Karte mit (sie verlässt das aktuelle Board), Kopieren legt am Ziel eine neue Karte an und lässt das Original unangetastet. Existiert kein weiteres Board, sind beide Schaltflächen deaktiviert.
 - **Labels** werden über den **Namen** abgeglichen. Gibt es im Ziel-Board ein gleichnamiges Label, wird es übernommen; Labels ohne Entsprechung fallen weg. Das Ziel-Board wird also nicht ungefragt um neue Labels ergänzt.
 - **Zuständige** bleiben nur erhalten, wenn sie im Ziel-Board **Mitglied** sind. Der Dialog zeigt vorher an, was wegfällt.
 - Bliebe **niemand** übrig, blendet der Dialog eine Auswahl der Ziel-Board-Mitglieder ein und lässt das Übertragen erst zu, wenn mindestens eine Person gewählt ist. So kann keine Karte ohne Zuständigen entstehen.

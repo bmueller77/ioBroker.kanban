@@ -328,11 +328,10 @@ The adapter also manages automatically: `id`, `columnId`, `order`, `createdAt`, 
 
 #### Transfer or clone a card (since 0.3.0)
 
-In the footer of the card editor, right next to **Delete**, sits the **Manage** button. It opens the **"Transfer card"** dialog:
+In the footer of the card editor, right next to **Delete**, sits the **Manage** button. It opens the dialog of the same name, which offers three buttons at the top: **Clone**, **Copy** and **Move**. The selects below adapt to the chosen button.
 
-- Pick the **target board** and **target column**. The first column flagged "New" is preselected.
-- At the bottom of the board list sits the **current board**, marked "(this board)". Selecting it switches the dialog to **clone** mode: the move/copy toggle disappears (moving would be pointless), the button reads **Clone** and the column the card currently sits in is preselected. The clone carries over everything — checklist, labels, assignees, recurrence — and is inserted directly **below the original**. Handy for recurring tasks you keep around as a template.
-- **Move** takes the card with it (it leaves the current board), **copy** creates a new card on the target and leaves the original untouched.
+- **Clone** duplicates the card **within the same board**. Only the **target column** is shown, preselected with the column the card currently sits in. The clone carries over everything — checklist, labels, assignees, recurrence — and is inserted directly **below the original**. Handy for recurring tasks you keep around as a template.
+- **Copy** and **Move** additionally reveal the **target board**; its first column flagged "New" is preselected. Move takes the card with it (it leaves the current board), copy creates a new card on the target and leaves the original untouched. If there is no other board, both buttons are disabled.
 - **Labels** are matched by **name**. If the target board has a label with the same name it is kept; labels without a match are dropped. The target board is never silently extended with new labels.
 - **Assignees** are only kept if they are **members** of the target board. The dialog shows beforehand what will be dropped.
 - If **nobody** would be left, the dialog shows a picker of the target board's members and only allows the transfer once at least one person is selected. That way no card can end up without an assignee.
