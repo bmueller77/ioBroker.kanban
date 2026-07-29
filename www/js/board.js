@@ -72,6 +72,7 @@ export function mdiIcon(pathData) {
 // als Drop-Zonen mit gestricheltem Rand, damit man ohne Quer-Scrollen ablegen
 // kann. Jede Zone ist eine eigene SortableJS-Liste (group 'cards').
 let quickMoveEl = null;
+let quickTarget = null;   // Landezone unter dem Zeiger (mobiles Verschieben)
 const checkExpanded = new Set();   // Karten-IDs mit aufgeklappter Checkliste (bleibt über Re-Renders)
 
 function isNarrow() {
@@ -94,24 +95,37 @@ function buildQuickMove(evt, sourceCol, board) {
 
     for (const c of others) {
         const qt = el('div', 'quick-target' + (c.isTrash ? ' quick-trash' : ''));
-        // Der Name liegt in einer eigenen Ebene ueber der Zone. Sonst schoebe
-        // die hineingezogene Karte ihn beiseite und die Zone wuerde wachsen.
+        // Der Name liegt in einer eigenen Ebene ueber der Zone, damit ihn nichts
+        // verschieben kann.
         qt.appendChild(el('span', 'quick-label', c.isTrash ? t('col.trash') : c.title));
         qt.dataset.colId = c.id;
         bar.appendChild(qt);
     }
     document.body.appendChild(bar);
 
-    // eslint-disable-next-line no-undef
-    for (const t of Array.from(bar.children)) {
-        // eslint-disable-next-line no-undef
-        Sortable.create(t, { group: 'cards', sort: false, emptyInsertThreshold: 40 });
-    }
+    // Die Zonen werten den Zeiger selbst aus, statt eigene Sortable-Container zu
+    // sein: auf Touch erkennt SortableJS diese kleinen Ziele nicht zuverlaessig.
+    document.addEventListener('pointermove', onQuickPointer, true);
+    document.addEventListener('touchmove', onQuickPointer, { capture: true, passive: true });
     quickMoveEl = bar;
 }
 
+// Zone unter dem Zeiger merken und hervorheben
+function onQuickPointer(ev) {
+    if (!quickMoveEl) return;
+    const p = ev.touches && ev.touches.length ? ev.touches[0] : ev;
+    if (p.clientX === undefined) return;
+    const hit = document.elementFromPoint(p.clientX, p.clientY);
+    const zone = hit && hit.closest ? hit.closest('.quick-target') : null;
+    quickTarget = zone && quickMoveEl.contains(zone) ? zone : null;
+    for (const z of quickMoveEl.children) z.classList.toggle('sortable-over', z === quickTarget);
+}
+
 function removeQuickMove() {
+    document.removeEventListener('pointermove', onQuickPointer, true);
+    document.removeEventListener('touchmove', onQuickPointer, { capture: true });
     if (quickMoveEl) { quickMoveEl.remove(); quickMoveEl = null; }
+    quickTarget = null;
 }
 
 function initials(name) {
@@ -768,17 +782,13 @@ export function renderBoard(container, state, actions) {
             onStart: evt => {
                 if (isNarrow()) buildQuickMove(evt, col, board);
             },
-            onMove: evt => {
-                if (quickMoveEl) {
-                    for (const t of quickMoveEl.children) {
-                        t.classList.toggle('sortable-over', t === evt.to);
-                    }
-                }
-                return true;
-            },
             onEnd: evt => {
-                removeQuickMove();
                 const cardId = evt.item.dataset.cardId;
+                // Ueber einer Landezone losgelassen? Dann zaehlt deren Spalte,
+                // egal wohin SortableJS die Karte gelegt hat.
+                const zoneCol = quickTarget && quickTarget.dataset.colId;
+                removeQuickMove();
+                if (zoneCol) { actions.moveCard(cardId, zoneCol, 0); return; }
                 const toEl = evt.to;
                 const toCol = toEl.dataset.colId || (toEl.closest('.column') && toEl.closest('.column').dataset.colId);
                 if (!toCol) return;

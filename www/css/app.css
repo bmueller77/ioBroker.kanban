@@ -810,7 +810,8 @@ button.mini {
 }
 /* Die hineingezogene Karte tritt zurueck und wird flach gehalten, behaelt aber
    ihre Box: SortableJS misst sie, ohne Geometrie faellt die Zone als Ziel aus. */
-.quick-target > .card { opacity: 0.2; max-height: 36px; overflow: hidden; }
+/* Falls SortableJS doch eine Karte in die Zone legt: flach und zurueckhaltend */
+.quick-target > .card { opacity: 0.2; max-height: 36px; overflow: hidden; pointer-events: none; }
 
 .quick-target.sortable-over,
 .quick-target:hover {
