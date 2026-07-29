@@ -29,6 +29,7 @@ const MDI = {
     chevronUp: 'M7.41,15.41L12,10.83L16.59,15.41L18,14L12,8L6,14L7.41,15.41Z',
     chevronDown: 'M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z',
     chevronRight: 'M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z',
+    plus: 'M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z',
     // Sortiermodi (Feature 1)
     sortManual: 'M10,9A1,1 0 0,1 11,8A1,1 0 0,1 12,9V13.47L13.21,13.6L18.15,15.79C18.68,16.03 19,16.56 19,17.14V21.5C18.97,22.32 18.32,22.97 17.5,23H11C10.62,23 10.26,22.85 10,22.57L5.1,18.37L5.84,17.6C6.03,17.39 6.3,17.28 6.58,17.28H6.8L10,19V9M11,5A4,4 0 0,1 15,9C15,10.5 14.2,11.77 13,12.46V11.24C13.61,10.69 14,9.89 14,9A3,3 0 0,0 11,6A3,3 0 0,0 8,9C8,9.89 8.39,10.69 9,11.24V12.46C7.8,11.77 7,10.5 7,9A4,4 0 0,1 11,5Z',
     sortGrid: 'M9,3H11V5H9V3M13,3H15V5H13V3M9,7H11V9H9V7M13,7H15V9H13V7M9,11H11V13H9V11M13,11H15V13H13V11M9,15H11V17H9V15M13,15H15V17H13V15M9,19H11V21H9V19M13,19H15V21H13V19Z',
@@ -731,7 +732,11 @@ export function renderBoard(container, state, actions) {
         const canAdd = !col.isTrash && ((typeof col.allowAdd === 'boolean') ? col.allowAdd : (board.columns[0] && board.columns[0].id === col.id));
         if (canAdd) {
             const foot = el('div', 'column-foot');
-            const addBtn = el('button', 'linkbtn', t('board.addCard'));
+            const addBtn = el('button', 'add-card-btn');
+            addBtn.type = 'button';
+            addBtn.appendChild(mdiIcon(MDI.plus));
+            addBtn.title = t('board.addCard');
+            addBtn.setAttribute('aria-label', t('board.addCard'));
             addBtn.addEventListener('click', () => actions.openCard(null, col.id));
             foot.appendChild(addBtn);
             colEl.appendChild(foot);
