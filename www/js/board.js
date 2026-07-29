@@ -339,15 +339,20 @@ function renderCard(state, board, card, actions, opts = {}) {
         loc.title = card.location;
         badges.appendChild(loc);
     }
+    if (badges.children.length) c.appendChild(badges);
+
+    // Labels in einer eigenen Zeile, damit sie immer unter Prioritaet,
+    // Faelligkeit und Ort stehen und nicht dazwischenrutschen.
+    const labelRow = el('div', 'badges labels-row');
     for (const lid of card.labels || []) {
         const label = (board.labels || []).find(l => l.id === lid);
         if (!label) continue;
         const pill = el('span', 'label-pill', label.title);
         pill.style.background = label.color || '#888';
         pill.style.color = contrastText(label.color || '#888');
-        badges.appendChild(pill);
+        labelRow.appendChild(pill);
     }
-    if (badges.children.length) c.appendChild(badges);
+    if (labelRow.children.length) c.appendChild(labelRow);
 
     // Zustaendige stehen oben rechts im Titel und werden vom Titeltext umflossen
     // (float), damit sie auf jeder Karte an derselben Stelle sitzen, ohne dem
