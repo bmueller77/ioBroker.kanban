@@ -226,7 +226,8 @@ img.avatar, .avatar img { object-fit: cover; width: 100%; height: 100%; border-r
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 100%;
+    width: 25%;
+    margin: 0 auto;
     padding: 5px 0;
     border: 1px solid var(--accent);
     border-radius: 8px;
