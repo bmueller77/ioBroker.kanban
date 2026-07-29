@@ -363,7 +363,7 @@ html[data-theme="dark"] a.link-badge:hover {
    damit sich der umflossene Bereich und der Zeilenumbruch nicht aendern. */
 .card.has-avatars .title { display: block; }
 .card.has-avatars .title .title-text { display: inline; }
-.card.has-avatars .title .avatars { float: right; margin: 0 -2px 2px 6px; position: relative; z-index: 3; }   /* -2px: rechts derselbe Abstand zum Kartenrand wie oben (8px) */
+.card.has-avatars .title .avatars { float: right; margin: 0 -2px 6px 6px; position: relative; z-index: 3; }   /* -2px: rechts derselbe Abstand zum Kartenrand wie oben (8px) */
 .card.has-avatars .badges, .card.has-avatars .done-stamp { clear: right; }
 .card .title .avatars .avatar { margin-left: -14px; transition: transform .18s ease; }
 .card .title .avatars .avatar:first-child { margin-left: 0; }
