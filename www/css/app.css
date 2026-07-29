@@ -803,7 +803,8 @@ button.mini {
 }
 .col-sort:hover { opacity: 1; color: var(--accent); }
 .col-sort svg { display: block; }
-.col-toggle + .col-sort, .col-sort + .col-sort { margin-left: 6px; }
+/* Auge und Sortier-Icons stehen im selben Raster wie der Rest des Kopfes (gap) */
+.col-sort + .col-sort { margin-left: 6px; }
 /* Richtungspfeil gehoert optisch zum Sortier-Button: eng zusammen */
 .col-sort-dir { padding-right: 0; }
 .col-sort-dir + .col-sort { margin-left: -3px; padding-left: 0; }
