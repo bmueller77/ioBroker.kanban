@@ -798,6 +798,7 @@ button.mini {
 .quick-label {
     position: absolute;
     inset: 0;
+    z-index: 1;            /* bleibt ueber der hineingezogenen Karte lesbar */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -805,7 +806,9 @@ button.mini {
     text-align: center;
     pointer-events: none;
 }
-.quick-target > .card { display: none; }   /* Platzhalter beim Ziehen ausblenden */
+/* Die hineingezogene Karte tritt zurueck, behaelt aber ihre Box: SortableJS
+   misst sie, ohne Geometrie erkennt es die Zone nicht mehr als Ziel. */
+.quick-target > .card { opacity: 0.2; }
 
 .quick-target.sortable-over,
 .quick-target:hover {
