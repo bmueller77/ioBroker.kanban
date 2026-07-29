@@ -300,7 +300,7 @@ Per board you can choose where the "open card" link in notification e-mails poin
 
 **Card anatomy (since 0.3.0):** the **assignees** sit as a stack of avatars in the top right corner and the title text flows around them. Hovering or tapping the stack fans the faces out to the left without changing the line breaks. Long titles are cut off after **two lines** with an ellipsis, the full title stays available as a tooltip. The **card footer** holds the checklist progress on the left, the expand chevron in the middle and the icons for **description, link and recurrence** on the right, in that order. Clicking the description icon opens the description in a **read-only window** with rendered Markdown; links inside always open in a new tab.
 
-**Clicking a card** opens the editor. Since 0.3.0 the fields are arranged like this: title, description, then the row with due date, time, priority and column, directly below it the calendar invite and the location (both belong to scheduling), then assignees and labels side by side, card colour and link side by side, followed by recurrence and checklist. On narrow screens the paired fields stack. The footer holds **Delete**, the **transfer** button, **Cancel** and **Save**.
+**Clicking a card** opens the editor. Since 0.3.0 the fields are arranged like this: title, description, then the row with due date, time, priority and column, directly below it the calendar invite and the location (both belong to scheduling), then assignees and labels side by side, card colour and link side by side, followed by recurrence and checklist. On narrow screens the paired fields stack. The footer holds **Delete**, **Manage** (transfer/clone), **Cancel** and **Save**.
 
 A card has the following content fields (settable via the API under the same names):
 
@@ -328,7 +328,7 @@ The adapter also manages automatically: `id`, `columnId`, `order`, `createdAt`, 
 
 #### Transfer or clone a card (since 0.3.0)
 
-In the footer of the card editor, right next to **Delete**, sits a small button with a transfer icon. It opens the **"Transfer card"** dialog:
+In the footer of the card editor, right next to **Delete**, sits the **Manage** button. It opens the **"Transfer card"** dialog:
 
 - Pick the **target board** and **target column**. The first column flagged "New" is preselected.
 - At the bottom of the board list sits the **current board**, marked "(this board)". Selecting it switches the dialog to **clone** mode: the move/copy toggle disappears (moving would be pointless), the button reads **Clone** and the column the card currently sits in is preselected. The clone carries over everything — checklist, labels, assignees, recurrence — and is inserted directly **below the original**. Handy for recurring tasks you keep around as a template.

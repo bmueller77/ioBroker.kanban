@@ -38,6 +38,8 @@
   "card.checklist": "Liste de contrôle",
   "card.addCheckItem": "+ Ajouter un élément",
   "card.delete": "Supprimer",
+  "card.manage": "Gérer",
+  "card.manageTitle": "Transférer ou cloner la carte",
   "card.cancel": "Annuler",
   "card.save": "Enregistrer",
   "card.checkPlaceholder": "Élément…",

@@ -38,6 +38,8 @@
   "card.checklist": "Checkliste",
   "card.addCheckItem": "+ Punkt hinzufügen",
   "card.delete": "Löschen",
+  "card.manage": "Verwalten",
+  "card.manageTitle": "Karte übertragen oder klonen",
   "card.cancel": "Abbrechen",
   "card.save": "Speichern",
   "card.checkPlaceholder": "Punkt…",

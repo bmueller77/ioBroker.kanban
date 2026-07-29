@@ -72,9 +72,6 @@ function slugify(text) {
 export function initDialogs(state, actions) {
     const dlg = document.getElementById('cardDialog');
     const form = document.getElementById('cardForm');
-    // Transfer-Button (Feature 6) im Editor-Footer mit MDI-Icon versehen
-    const _transferBtn = document.getElementById('transferCardBtn');
-    if (_transferBtn) { _transferBtn.textContent = ''; _transferBtn.appendChild(mdiIcon(MDI.transfer)); }
     // Monats-Select einmalig lokalisiert befüllen (defensiv: bricht nicht die
     // ganze App ab, falls veraltetes HTML gecacht wurde und das Feld fehlt)
     const recMonthSel = form && form.elements ? form.elements.recMonth : null;
@@ -332,7 +329,8 @@ export function initDialogs(state, actions) {
         editingCardId = card ? card.id : null;
         document.getElementById('cardDialogTitle').textContent = card ? t('card.titleEdit') : t('card.titleNew');
         document.getElementById('deleteCardBtn').hidden = !card;
-        document.getElementById('transferCardBtn').hidden = !card || state.boards.length < 2;
+        // Auch bei nur einem Board sinnvoll: der Dialog kann die Karte klonen
+        document.getElementById('transferCardBtn').hidden = !card;
         form.elements.title.value = card ? card.title : '';
         form.elements.description.value = card ? card.description : '';
         form.elements.due.value = (card && card.due) || '';

@@ -38,6 +38,8 @@
   "card.checklist": "Checklist",
   "card.addCheckItem": "+ Item toevoegen",
   "card.delete": "Verwijderen",
+  "card.manage": "Beheren",
+  "card.manageTitle": "Kaart overzetten of klonen",
   "card.cancel": "Annuleren",
   "card.save": "Opslaan",
   "card.checkPlaceholder": "Item…",

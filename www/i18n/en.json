@@ -38,6 +38,8 @@
   "card.checklist": "Checklist",
   "card.addCheckItem": "+ Add item",
   "card.delete": "Delete",
+  "card.manage": "Manage",
+  "card.manageTitle": "Transfer or clone card",
   "card.cancel": "Cancel",
   "card.save": "Save",
   "card.checkPlaceholder": "Item…",

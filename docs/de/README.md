@@ -300,7 +300,7 @@ Je Board lässt sich festlegen, wohin der „Karte öffnen"-Link in den Benachri
 
 **Aufbau einer Karte (seit 0.3.0):** Die **Zuständigen** stehen als Avatarstapel oben rechts, der Titeltext umfließt sie. Ein Zeigen mit der Maus oder ein Tipp auf den Stapel fächert die Gesichter nach links auf, ohne den Zeilenumbruch zu verändern. Lange Titel werden nach **zwei Zeilen** mit „…" abgeschnitten, der vollständige Titel steht im Tooltip. Im **Kartenfuß** steht links der Checklisten-Fortschritt, mittig der Chevron zum Auf- und Zuklappen und rechts die Symbole für **Beschreibung, Link und Wiederholung** in dieser Reihenfolge. Ein Klick auf das Beschreibungssymbol öffnet die Beschreibung in einem **Lesefenster** mit gerendertem Markdown; Links darin öffnen immer in einem neuen Tab.
 
-Ein **Klick auf eine Karte** öffnet den Editor. Seit 0.3.0 sind die Felder so angeordnet: Titel, Beschreibung, dann die Zeile mit Fälligkeit, Uhrzeit, Priorität und Spalte, direkt darunter die Kalender-Einladung und der Ort (beide gehören inhaltlich zur Terminplanung), anschließend Zuständige und Labels nebeneinander, Kartenfarbe und Link nebeneinander, danach Wiederholung und Checkliste. Auf schmalen Bildschirmen rutschen die gepaarten Felder untereinander. In der Fußzeile stehen **Löschen**, der **Übertragen**-Button, **Abbrechen** und **Speichern**.
+Ein **Klick auf eine Karte** öffnet den Editor. Seit 0.3.0 sind die Felder so angeordnet: Titel, Beschreibung, dann die Zeile mit Fälligkeit, Uhrzeit, Priorität und Spalte, direkt darunter die Kalender-Einladung und der Ort (beide gehören inhaltlich zur Terminplanung), anschließend Zuständige und Labels nebeneinander, Kartenfarbe und Link nebeneinander, danach Wiederholung und Checkliste. Auf schmalen Bildschirmen rutschen die gepaarten Felder untereinander. In der Fußzeile stehen **Löschen**, **Verwalten** (übertragen/klonen), **Abbrechen** und **Speichern**.
 
 Eine Karte hat folgende inhaltliche Felder (per API unter denselben Namen setzbar):
 
@@ -328,7 +328,7 @@ Zusätzlich verwaltet der Adapter automatisch: `id`, `columnId`, `order`, `creat
 
 #### Karte übertragen oder klonen (ab 0.3.0)
 
-In der Fußzeile des Karten-Editors sitzt rechts neben **Löschen** ein kleiner Button mit Transfer-Symbol. Er öffnet den Dialog **„Karte übertragen"**:
+In der Fußzeile des Karten-Editors sitzt rechts neben **Löschen** der Button **Verwalten**. Er öffnet den Dialog **„Karte übertragen"**:
 
 - **Ziel-Board** und **Ziel-Spalte** wählen. Vorbelegt ist die erste Spalte mit „Neu"-Häkchen.
 - Ganz unten in der Board-Liste steht das **aktuelle Board** mit dem Zusatz „(dieses Board)". Wird es gewählt, schaltet der Dialog auf **Klonen** um: Der Modus-Umschalter verschwindet (Verschieben wäre sinnlos), der Button heißt **Klonen** und vorbelegt ist die Spalte, in der die Karte gerade liegt. Der Klon übernimmt alle Inhalte inklusive Checkliste, Labels, Zuständigen und Wiederholung und wird direkt **unter dem Original** eingefügt. Praktisch für wiederkehrende Aufgaben, die man als Vorlage benutzt.

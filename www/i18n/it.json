@@ -38,6 +38,8 @@
   "card.checklist": "Lista di controllo",
   "card.addCheckItem": "+ Aggiungi voce",
   "card.delete": "Elimina",
+  "card.manage": "Gestisci",
+  "card.manageTitle": "Trasferisci o clona la scheda",
   "card.cancel": "Annulla",
   "card.save": "Salva",
   "card.checkPlaceholder": "Voce…",
