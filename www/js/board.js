@@ -93,7 +93,10 @@ function buildQuickMove(evt, sourceCol, board) {
     bar.style.top = Math.max(8, Math.round((window.innerHeight - estH) / 2)) + 'px';
 
     for (const c of others) {
-        const qt = el('div', 'quick-target' + (c.isTrash ? ' quick-trash' : ''), c.isTrash ? t('col.trash') : c.title);
+        const qt = el('div', 'quick-target' + (c.isTrash ? ' quick-trash' : ''));
+        // Der Name liegt in einer eigenen Ebene ueber der Zone. Sonst schoebe
+        // die hineingezogene Karte ihn beiseite und die Zone wuerde wachsen.
+        qt.appendChild(el('span', 'quick-label', c.isTrash ? t('col.trash') : c.title));
         qt.dataset.colId = c.id;
         bar.appendChild(qt);
     }

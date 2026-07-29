@@ -779,7 +779,9 @@ button.mini {
 }
 .quick-target {
     pointer-events: auto;
-    min-height: 76px;
+    position: relative;
+    height: 76px;          /* feste Hoehe: die hineingezogene Karte darf sie nicht dehnen */
+    overflow: hidden;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -793,6 +795,18 @@ button.mini {
     box-shadow: var(--shadow);
     opacity: 0.96;
 }
+.quick-label {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 10px;
+    text-align: center;
+    pointer-events: none;
+}
+.quick-target > .card { display: none; }   /* Platzhalter beim Ziehen ausblenden */
+
 .quick-target.sortable-over,
 .quick-target:hover {
     background: var(--accent);
