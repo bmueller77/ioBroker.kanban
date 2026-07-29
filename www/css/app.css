@@ -221,20 +221,20 @@ img.avatar, .avatar img { object-fit: cover; width: 100%; height: 100%; border-r
 }
 
 .column-foot { padding: 0 8px 10px; }
-/* Karte anlegen: kompakter Button mit Plus statt Textzeile */
+/* Karte anlegen: derselbe Stil wie "+ Karte" in der Kopfzeile, nur mit Plus */
 .add-card-btn {
     display: flex;
     align-items: center;
     justify-content: center;
     width: 100%;
-    padding: 4px 0;
-    border: 1px dashed var(--border);
+    padding: 5px 0;
+    border: 1px solid var(--accent);
     border-radius: 8px;
-    background: none;
-    color: var(--muted);
-    box-shadow: none;
+    background: var(--accent);
+    color: var(--accent-text, #fff);
+    box-shadow: var(--ui-shadow);
 }
-.add-card-btn:hover { color: var(--accent); border-color: var(--accent); background: none; }
+.add-card-btn:hover { filter: brightness(1.1); background: var(--accent); }
 .add-card-btn svg { width: 18px; height: 18px; display: block; }
 
 .card {
