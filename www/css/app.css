@@ -12,11 +12,17 @@
     --warn: #ef6c00;
     --shadow: 0 1px 3px rgba(0, 0, 0, .12);
     --radius: 10px;
-    /* Plastik: Karten liegen auf, Spalten sind eingelassen, dazu ein Hauch Verlauf */
-    --card-shadow: 0 4px 5px rgba(0, 0, 0, .20);
-    --card-edge: inset 0 1px 0 rgba(255, 255, 255, .70);
-    --col-emboss: inset 0 1px 2px rgba(0, 0, 0, .18), inset 0 -1px 0 rgba(255, 255, 255, .70);
-    --avatar-shadow: 0 2px 3px rgba(0, 0, 0, .45);
+    /* Plastik: eine Lichtquelle links oben. Aufliegende Flaechen werfen ihren
+       Schatten nach rechts unten, eingelassene sind oben links dunkel und unten
+       rechts hell. Dazu ein Hauch Verlauf von oben nach unten. */
+    --card-shadow: 2px 4px 5px rgba(0, 0, 0, .45);
+    --card-edge: inset 1px 1px 0 rgba(255, 255, 255, .06);
+    --col-emboss: inset 1px 1px 2px rgba(0, 0, 0, .40), inset -1px -1px 0 rgba(255, 255, 255, .06);
+    --avatar-shadow: 2px 4px 4px rgba(0, 0, 0, .95);
+    --chip-shadow: 1px 2px 2px rgba(0, 0, 0, .90);
+    --ui-shadow: 1px 1px 2px rgba(0, 0, 0, .85);
+    --ui-emboss: inset 1px 1px 2px rgba(0, 0, 0, .40), inset -1px -1px 0 rgba(255, 255, 255, .35);
+    --count-emboss: inset 1px 1px 2px rgba(0, 0, 0, .20), inset -1px -1px 0 rgba(255, 255, 255, .20);
     --sheen: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, .10) 100%);
 }
 
@@ -28,10 +34,6 @@ html[data-theme="dark"] {
     --muted: #9d9da8;
     --border: #3c3c46;
     --shadow: 0 1px 3px rgba(0, 0, 0, .5);
-    --card-shadow: 0 4px 5px rgba(0, 0, 0, .45);
-    --card-edge: inset 0 1px 0 rgba(255, 255, 255, .06);
-    --col-emboss: inset 0 1px 2px rgba(0, 0, 0, .40), inset 0 -1px 0 rgba(255, 255, 255, .06);
-    --avatar-shadow: 0 2px 3px rgba(0, 0, 0, .85);
 }
 
 * { box-sizing: border-box; }
@@ -72,6 +74,7 @@ body.embed #topbar { display: none; }
 .spacer { flex: 1; }
 
 #boardSelect {
+    box-shadow: var(--ui-shadow);
     font-size: 16px;
     font-weight: 600;
     padding: 6px 8px;
@@ -120,6 +123,7 @@ button.linkbtn {
 /* Benutzer-Chips */
 
 #userChips { display: flex; gap: 4px; align-items: center; }
+#topbar button { box-shadow: var(--ui-shadow); }
 
 .user-chip {
     display: inline-flex;
@@ -131,7 +135,11 @@ button.linkbtn {
     cursor: pointer;
     background: var(--surface);
     user-select: none;
+    box-shadow: var(--ui-shadow);
 }
+
+/* Ausgeblendeter Benutzer: Chip wirkt eingedrueckt statt aufliegend */
+.user-chip:not(.active) { box-shadow: var(--ui-emboss); }
 
 .user-chip .avatar { width: 33px; height: 33px; font-size: 16px; }
 
@@ -198,6 +206,7 @@ img.avatar, .avatar img { object-fit: cover; width: 100%; height: 100%; border-r
     background: var(--surface);
     border-radius: 999px;
     padding: 1px 8px;
+    box-shadow: var(--count-emboss);
 }
 
 .column.over-wip .column-head, .column.over-wip .count { color: var(--danger); }
@@ -330,6 +339,7 @@ img.avatar, .avatar img { object-fit: cover; width: 100%; height: 100%; border-r
     white-space: nowrap;
 }
 
+.card .badges > .badge, .card .badges > .label-pill { box-shadow: var(--chip-shadow); }
 .badge svg { display: inline-block; width: 14px; height: 14px; vertical-align: -2px; }
 .card-check-toggle svg { width: 14px; height: 14px; }
 .col-chevron svg { width: 13px; height: 13px; vertical-align: -2px; }
@@ -338,6 +348,9 @@ img.avatar, .avatar img { object-fit: cover; width: 100%; height: 100%; border-r
 a.link-badge {
     text-decoration: none;
     cursor: pointer;
+    border: none;
+    background: var(--surface2);
+    color: var(--muted);
     color: inherit;
     border: 1px solid rgba(127, 127, 127, 0.55);
 }
