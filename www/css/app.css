@@ -749,8 +749,10 @@ button.mini {
     line-height: 1;
     cursor: pointer;
     opacity: 0.85;
+    /* wie die Sortier-Icons daneben, nicht in der Textfarbe der Ueberschrift */
+    color: var(--muted);
 }
-.col-toggle:hover { background: none; opacity: 1; }
+.col-toggle:hover { background: none; opacity: 1; color: var(--accent); }
 .col-toggle.off { opacity: 0.55; }
 .col-toggle svg { display: block; }
 
