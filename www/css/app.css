@@ -355,17 +355,6 @@ a.link-badge {
     color: var(--muted);
 }
 a.link-badge:hover { color: var(--accent, #7E57C2); }
-/* Dark Mode: dunkle Emojis (z.B. Telefon) als helle Silhouette rendern,
-   Badge-Rahmen deutlich sichtbar */
-html[data-theme="dark"] a.link-badge {
-    border-color: rgba(255, 255, 255, 0.45);
-    background: rgba(255, 255, 255, 0.10);
-    filter: grayscale(1) brightness(0) invert(1) opacity(0.92);
-}
-html[data-theme="dark"] a.link-badge:hover {
-    filter: none;
-    background: var(--accent, #7E57C2);
-}
 .badge.due-soon { background: var(--warn); color: #fff; }
 .badge.due-done { background: #2e7d32; color: #fff; }   /* erledigt → grün */
 .badge.prio-1 { background: var(--warn); color: #fff; font-weight: 700; }
