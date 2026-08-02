@@ -605,6 +605,16 @@ const _widthWatcher = typeof ResizeObserver === 'function' ? new ResizeObserver(
 }) : null;
 
 export function renderBoard(container, state, actions) {
+    // Scrollpositionen merken: das Board wird bei jeder Änderung komplett neu
+    // aufgebaut (z. B. nach dem Abhaken eines Checklisten-Punkts), sonst springt
+    // die Ansicht dabei an den Anfang.
+    const prevScroll = new Map();
+    for (const colEl of container.querySelectorAll('.column')) {
+        const list = colEl.querySelector('.cards');
+        if (colEl.dataset.colId && list) prevScroll.set(colEl.dataset.colId, list.scrollTop);
+    }
+    const prevLeft = container.scrollLeft;
+    const prevPageY = window.scrollY;
     container.textContent = '';
     const board = state.board;
     if (!board) {
@@ -803,9 +813,22 @@ export function renderBoard(container, state, actions) {
 
     clampCardTitles(container);   // Titel erst messen, wenn die Karten im DOM haengen
     alignCardTitles(container);
+    restoreScroll();
+    // Nach dem Ausmessen der Titel koennen sich Hoehen aendern -> noch einmal setzen
+    requestAnimationFrame(restoreScroll);
     // Nachmessen, sobald Schriften geladen sind: vorher koennen Zeilenhoehen
     // abweichen und Titel faelschlich gekuerzt werden.
     if (document.fonts && document.fonts.status !== 'loaded') {
-        document.fonts.ready.then(() => { clampCardTitles(container); alignCardTitles(container); }).catch(() => {});
+        document.fonts.ready.then(() => { clampCardTitles(container); alignCardTitles(container); restoreScroll(); }).catch(() => {});
+    }
+
+    function restoreScroll() {
+        for (const colEl of container.querySelectorAll('.column')) {
+            const y = prevScroll.get(colEl.dataset.colId);
+            const list = colEl.querySelector('.cards');
+            if (y && list) list.scrollTop = y;
+        }
+        if (prevLeft) container.scrollLeft = prevLeft;
+        if (prevPageY) window.scrollTo(0, prevPageY);
     }
 }
