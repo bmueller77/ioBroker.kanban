@@ -180,6 +180,8 @@ If **"Calendar invite"** is enabled on a card and a date is set, the adapter att
 
 - **Without time** → all-day event on the due date.
 - **With time** → timed event with the **duration** set on the card (`calendarDuration`, default one hour).
+- **With a recurrence** → a **series** instead of a single event: the invite carries an `RRULE`, so the calendar creates the whole series. Daily, every X days, weekly (with weekdays), monthly (day of month), monthly (nth/last weekday) and yearly are mapped. **Exception:** "workday of the month" depends on public holidays, which the calendar standard does not know – those cards stay single events.
+- **The invite is sent only once.** It is attached when the card is **created** or **newly assigned** to someone. Follow-up cards of a recurrence send **no** further invite (the series is already in the calendar), and reminder or move mails attach nothing either. An **updated** invite only goes out when **due date, time, duration or recurrence rule** change – then with the same `UID` and a higher `SEQUENCE`, so the calendar replaces the existing entry instead of adding a second one. Other changes (the title, for instance) deliberately do not trigger a new invite.
 - Title (`SUMMARY`), description, **location** (`LOCATION`) and link (`URL`) are carried over.
 - **Time zone:** timed events are emitted unambiguously in UTC; the underlying time zone is determined from the system (or `system.config`), including daylight saving. All-day events are deliberately time-zone-free.
 
@@ -325,7 +327,7 @@ A card has the following content fields (settable via the API under the same nam
 | **calendarDuration** | `HH:MM` | Duration of the calendar invite, default **`01:00`** (one hour). The field appears in the editor right next to the **calendar invite** checkbox once that is enabled. Only effective for events **with a time of day**; without one it stays an all-day event. |
 | **recurrence** | object | Recurrence rule – see [Recurrence](#recurrence). |
 
-The adapter also manages automatically: `id`, `columnId`, `order`, `createdAt`, `createdBy`, `movedAt`, `doneAt`, `trashedAt`, plus the internal markers `lastReminderAt` and `lastExactAt` (so the same reminder or time-of-day event does not fire twice on the same day).
+The adapter also manages automatically: `id`, `columnId`, `order`, `createdAt`, `createdBy`, `movedAt`, `doneAt`, `trashedAt`, plus the internal markers `lastReminderAt`, `lastExactAt` (so the same reminder or time-of-day event does not fire twice on the same day) and `icsUid`/`icsFingerprint`/`icsSeq` (calendar series: the same UID across the whole recurrence chain, and detection of changed appointment data).
 
 Since 0.3.0 every card object of the **REST API** additionally carries the computed field **`dueAt`** – the due date including time as an ISO timestamp with local offset (e.g. `2026-08-01T13:30:00+02:00`; `00:00` without a time, `null` without a date). It is identical to the `dueAt` of the events, is **not stored** and is ignored on write – so automations do not have to combine `due` + `dueTime` + time zone themselves.
 

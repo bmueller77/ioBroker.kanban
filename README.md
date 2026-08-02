@@ -142,6 +142,7 @@ From **0.1.1**: token-secured write API, Markdown preview sanitized with DOMPuri
   - New URL parameter **`onlyLabel=`** (label whitelist) next to the existing `label=` blacklist, selectable in the share dialog: show only cards carrying one of the given labels
   - Checklist items in the card editor can be **reordered by drag & drop** via a small grip (shown from two items upwards)
   - Calendar invites get an adjustable **duration** (`calendarDuration`, `HH:MM`, default one hour) next to the calendar checkbox
+  - Recurring cards now produce a **series invite** (`RRULE`) instead of one single event per instance, and the invite is sent **once**: follow-up cards attach nothing, an updated invite (same `UID`, higher `SEQUENCE`) only follows a change of due date, time, duration or recurrence rule
   - Columns always share the **full window width**; the board only scrolls horizontally once less than 280 px per column would be left
   - Fix: emptying the trash by hand now sends the same **bundled summary e-mail** as the automatic cleanup (it previously sent nothing at all)
   - Fix: `dueAt` is now also part of the answers of `PATCH /api/boards/<id>`, `…/purge` and every `sendTo`/`action`/webhook command
