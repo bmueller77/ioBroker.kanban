@@ -141,6 +141,8 @@ From **0.1.1**: token-secured write API, Markdown preview sanitized with DOMPuri
   - The address bar now carries the **current board** (`?board=<id>`), updated whenever you switch boards, so the URL can be copied and shared as is
   - New URL parameter **`onlyLabel=`** (label whitelist) next to the existing `label=` blacklist, selectable in the share dialog: show only cards carrying one of the given labels
   - Checklist items in the card editor can be **reordered by drag & drop** via a small grip (shown from two items upwards)
+  - The card editor now opens **only via the edit icon** placed right after the end of the title, not by clicking anywhere on the card — no more editors opening by accident while scrolling or tapping. Cards stay draggable everywhere
+  - The **hit area of the checklist chevron** is noticeably wider and taller (the icon itself keeps its size and position), and whether a checklist is **expanded or collapsed is remembered** per device and board, just like the column sort modes
   - Calendar invites get an adjustable **duration** (`calendarDuration`, `HH:MM`, default one hour) next to the calendar checkbox
   - Recurring cards now produce a **series invite** (`RRULE`) instead of one single event per instance, and the invite is sent **once**: follow-up cards attach nothing, an updated invite (same `UID`, higher `SEQUENCE`) only follows a change of due date, time, duration or recurrence rule
   - Columns always share the **full window width**; the board only scrolls horizontally once less than 280 px per column would be left

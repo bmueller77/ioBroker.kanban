@@ -6,7 +6,7 @@ Aufnahme über die laufende Instanz; für Englisch die Instanz-Sprache auf `en` 
 | Datei | Ansicht | Quelle |
 |---|---|---|
 | `board.png` | Board-Übersicht | Board im Browser |
-| `card-editor.png` | Karten-Dialog | Karte anklicken |
+| `card-editor.png` | Karten-Dialog | Stift-Symbol neben dem Kartentitel anklicken |
 | `settings.png` | Board-Manager, Tab *Board* (Spalten mit Max/WIP/Neu/Erledigt) | ⚙ |
 | `settings-labels.png` | Board-Manager: Labels + Link-Ziel | ⚙ → Tab *Board*, unten |
 | `settings-users.png` | Board-Manager, Tab *Users* (Avatare + Farben) | ⚙ |

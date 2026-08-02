@@ -174,6 +174,7 @@
   "sort.reverse": "Inverti l'ordine",
   "card.doneLabel": "Completata",
   "card.copy": "Copia scheda",
+  "card.edit": "Modifica scheda",
   "trash.daysLeft": "ancora {n} giorni",
   "trash.restore": "Ripristina",
   "trash.purge": "Elimina definitivamente",

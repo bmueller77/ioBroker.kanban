@@ -174,6 +174,7 @@
   "sort.reverse": "Reihenfolge umkehren",
   "card.doneLabel": "Erledigt",
   "card.copy": "Karte kopieren",
+  "card.edit": "Karte bearbeiten",
   "trash.daysLeft": "noch {n} Tage",
   "trash.restore": "Wiederherstellen",
   "trash.purge": "Endgültig löschen",

@@ -48,6 +48,8 @@ const MDI = {
     contentCopy: 'M14 2H6C4.9 2 4 2.9 4 4V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V8L14 2M18 20H6V4H13L18 9V20M17 13.24C17 15.86 14.87 18 12.24 18C10.29 18 8.61 16.82 7.88 15.14H9.5C10.11 16 11.11 16.57 12.24 16.57C14.08 16.57 15.57 15.07 15.57 13.24S14.08 9.9 12.24 9.9C10.95 9.9 9.86 10.65 9.29 11.71L10.81 13.24H7V9.43L8.24 10.67C9.09 9.35 10.55 8.5 12.24 8.5C14.87 8.47 17 10.61 17 13.24Z',
     transfer: 'M8 4A2 2 0 0 0 6 6V10H8V6H16V9H13.5L17 12.5L20.5 9H18V6A2 2 0 0 0 16 4H8M3 12V14H11V12H3M3 15V17H11V15H3M13 15V17H21V15H13M3 18V20H11V18H3M13 18V20H21V18H13Z',
     arrowRightCircle: 'M22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2A10,10 0 0,1 22,12M6,13H14L10.5,16.5L11.92,17.92L17.84,12L11.92,6.08L10.5,7.5L14,11H6V13Z',
+    // Editor oeffnen (mdi:invoice-text-edit-outline) - sitzt hinter dem Kartentitel
+    invoiceTextEdit: 'M9.86 21.43L9 22L6 20L3 22V3H21V10.2C20.37 9.93 19.64 9.93 19 10.22V5H5V18.26L6 17.6L9 19.6L9.86 19V21.43M11.86 19.96L18 13.83L20.03 15.87L13.9 22H11.86V19.96M21.71 14.19L20.73 15.17L18.69 13.13L19.67 12.15L19.68 12.14L19.69 12.13C19.86 11.97 20.12 11.96 20.31 12.09C20.34 12.1 20.37 12.13 20.39 12.15L21.71 13.47C21.91 13.67 21.91 14 21.71 14.19M17 9V7H7V9H17M15 13V11H7V13H15Z',
 };
 
 export { MDI };
@@ -73,7 +75,28 @@ export function mdiIcon(pathData) {
 // kann. Jede Zone ist eine eigene SortableJS-Liste (group 'cards').
 let quickMoveEl = null;
 let quickTarget = null;   // Landezone unter dem Zeiger (mobiles Verschieben)
-const checkExpanded = new Set();   // Karten-IDs mit aufgeklappter Checkliste (bleibt über Re-Renders)
+// Karten-IDs mit aufgeklappter Checkliste. Bleibt über Re-Renders erhalten und
+// wird je Board im localStorage gemerkt - genau wie die Sortierung der Spalten.
+const checkExpanded = new Set();
+let checkExpandedBoard = null;
+
+function checkExpandedKey(boardId) { return 'kanban.checkExpanded.' + boardId; }
+
+/** Merkliste auf das gerade angezeigte Board umstellen (nur beim Boardwechsel). */
+function loadCheckExpanded(boardId) {
+    if (checkExpandedBoard === boardId) return;
+    checkExpandedBoard = boardId;
+    checkExpanded.clear();
+    try {
+        const raw = JSON.parse(localStorage.getItem(checkExpandedKey(boardId)) || '[]');
+        if (Array.isArray(raw)) for (const id of raw) checkExpanded.add(String(id));
+    } catch (e) { /* ignore */ }
+}
+
+function saveCheckExpanded() {
+    if (!checkExpandedBoard) return;
+    try { localStorage.setItem(checkExpandedKey(checkExpandedBoard), JSON.stringify([...checkExpanded])); } catch (e) { /* ignore */ }
+}
 
 function isNarrow() {
     return window.matchMedia('(max-width: 820px)').matches;
@@ -428,6 +451,7 @@ function renderCard(state, board, card, actions, opts = {}) {
             clist.hidden = !expand;
             setChkIcon(expand);
             if (expand) checkExpanded.add(card.id); else checkExpanded.delete(card.id);
+            saveCheckExpanded();
         });
         const done = card.checklist.filter(i => i.done).length;
         const count = el('span', 'badge check-count');
@@ -478,6 +502,23 @@ function renderCard(state, board, card, actions, opts = {}) {
     }
     if (foot.children.length) c.appendChild(foot);
 
+    // Editor oeffnen - kleines Icon direkt hinter dem Titel. Ein Klick irgendwo
+    // auf die Karte oeffnet den Editor bewusst nicht mehr: das passierte zu leicht
+    // versehentlich beim Scrollen oder Antippen.
+    if (!inTrash) {
+        const ed = el('button', 'card-action card-edit');
+        ed.type = 'button';
+        ed.title = t('card.edit');
+        ed.setAttribute('aria-label', ed.title);
+        const eic = mdiIcon(MDI.invoiceTextEdit);
+        eic.setAttribute('width', '16');
+        eic.setAttribute('height', '16');
+        ed.appendChild(eic);
+        ed.addEventListener('click', e => { e.stopPropagation(); actions.openCard(card.id); });
+        stopDrag(ed);
+        titleEl.appendChild(ed);
+    }
+
     // Kopieren erledigter Karten (Feature 3) - kleines Icon direkt hinter dem Titel
     if (isDone && !inTrash) {
         const cp = el('button', 'card-action card-copy');
@@ -516,7 +557,6 @@ function renderCard(state, board, card, actions, opts = {}) {
         c.appendChild(row);
     }
 
-    if (!inTrash) c.addEventListener('click', () => actions.openCard(card.id));
     return c;
 }
 
@@ -620,6 +660,16 @@ export function renderBoard(container, state, actions) {
     if (!board) {
         container.appendChild(el('div', 'empty', t('board.empty')));
         return;
+    }
+
+    // Aufgeklappte Checklisten dieses Boards laden und dabei Karten-IDs
+    // aussortieren, die es nicht mehr gibt (sonst waechst der Eintrag endlos).
+    loadCheckExpanded(board.id);
+    if (checkExpanded.size) {
+        const alive = new Set((board.cards || []).map(c => c.id));
+        let dropped = false;
+        for (const id of [...checkExpanded]) if (!alive.has(id)) { checkExpanded.delete(id); dropped = true; }
+        if (dropped) saveCheckExpanded();
     }
 
     // Personen-Filter (Kopf-Chips) greift nur bei Teilauswahl:
