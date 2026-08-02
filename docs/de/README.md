@@ -433,7 +433,7 @@ Auf schmalen Bildschirmen stapelt das Board die Spalten untereinander; jede Spal
 
 ### Ansichten teilen / URL-Parameter
 
-Über das **Monitor-Symbol** in der Kopfzeile öffnet sich der Dialog **„Ansichten"**. Dort klickst du dir eine gefilterte Ansicht zusammen (Board, Benutzer (mehrfach), Labels (mehrfach), sichtbare Spalten, Limit für erledigte Karten, auszublendende Bedienelemente) und erhältst darunter eine **fertige URL zum Kopieren**. Ideal zum Einbetten in Lovelace (Webpage-Card) oder zum Weitergeben.
+Über das **Monitor-Symbol** in der Kopfzeile öffnet sich der Dialog **„Ansichten"**. Dort klickst du dir eine gefilterte Ansicht zusammen (Board, Benutzer (mehrfach), Labels (mehrfach) samt Auswahl **„Diese Labels ausblenden"** oder **„Nur diese Labels zeigen"**, sichtbare Spalten, Limit für erledigte Karten, auszublendende Bedienelemente) und erhältst darunter eine **fertige URL zum Kopieren**. Ideal zum Einbetten in Lovelace (Webpage-Card) oder zum Weitergeben.
 
 ![Ansichten-Dialog](img/share.png)
 
@@ -444,6 +444,7 @@ Alle Parameter lassen sich auch direkt an die URL hängen:
 | `board=<id>` | Öffnet dieses Board. Ab 0.3.0 trägt die Adresszeile das aktuelle Board automatisch nach: Beim Wechsel über die Board-Auswahl wird `?board=<id>` gesetzt (ohne neuen History-Eintrag, alle übrigen Parameter bleiben stehen), sodass die Adresse direkt kopier- und teilbar ist. |
 | `users=<name,name>` | **Personen-Filter**: zeigt nur Karten, die mindestens einem dieser Benutzer zugewiesen sind (setzt die Kopf-Chips entsprechend). `user=<name>` ist die Kurzform für einen einzelnen Benutzer. |
 | `label=<id,id>` | **Label-Blacklist** (mehrere möglich): blendet Karten mit einem dieser Labels aus, neue Labels bleiben automatisch sichtbar. |
+| `onlyLabel=<id,id>` | **Label-Whitelist** (ab 0.3.0): zeigt **nur** Karten, die mindestens eines dieser Labels tragen – Karten ohne Label fallen weg. Lässt sich mit `label=` kombinieren (erst Whitelist, dann Blacklist). |
 | `columns=<id,id>` | Zeigt nur diese Spalten. Nicht genannte Spalten werden ausgeblendet. |
 | `doneLimit=N` | In Erledigt-Spalten nur die N zuletzt erledigten Karten anzeigen (`0` = keine, weglassen = alle). |
 | `hideSettings=1` | Blendet das Einstellungen-Zahnrad aus. |
@@ -463,6 +464,9 @@ http://192.168.1.10:8095/?board=familie&columns=doing,done&doneLimit=3&users=bjo
 
 # Alles außer Karten mit Label "privat", Einstellungen ausgeblendet
 http://192.168.1.10:8095/?board=familie&label=privat&hideSettings=1
+
+# Umgekehrt: ausschließlich Karten mit Label "pflege-heike"
+http://192.168.1.10:8095/?board=familie&onlyLabel=pflege-heike&hideSettings=1&embed=1
 ```
 
 > **Lovelace/iframe:** Der Adapter setzt **keine** Frame-Header (`X-Frame-Options`/`frame-ancestors`). Die ab 0.1.1 gesetzte CSP steht als `<meta>` und schränkt die Einbettung **nicht** ein, die UI lässt sich also weiterhin direkt in eine Lovelace-Webpage-Card oder ein `<iframe>` einbetten.

@@ -630,8 +630,12 @@ export function renderBoard(container, state, actions) {
         if (userSel) {
             cards = cards.filter(c => (c.assignees || []).some(a => userSel.includes(a)));
         }
+        if (state.labelOnly && state.labelOnly.length) {
+            // Whitelist (?onlyLabel=): nur Karten mit mindestens einem dieser Labels
+            cards = cards.filter(c => (c.labels || []).some(l => state.labelOnly.includes(l)));
+        }
         if (state.labelFilter && state.labelFilter.length) {
-            // Blacklist: Karten mit einem dieser Labels ausblenden (neue Labels bleiben sichtbar)
+            // Blacklist (?label=): Karten mit einem dieser Labels ausblenden (neue Labels bleiben sichtbar)
             cards = cards.filter(c => !(c.labels || []).some(l => state.labelFilter.includes(l)));
         }
         // Zähler = sichtbare Karten des aktiven Filters (vor der doneLimit-Kürzung)
@@ -666,7 +670,7 @@ export function renderBoard(container, state, actions) {
         head.appendChild(el('span', null, col.isTrash ? t('col.trash') : col.title));
         const allInCol = board.cards.filter(c => c.columnId === col.id).length;
         // Bei aktivem Personen-/Label-Filter zählt die Kopfzeile die gefilterten (sichtbaren) Karten
-        const anyFilter = userSel || (state.labelFilter && state.labelFilter.length);
+        const anyFilter = userSel || (state.labelFilter && state.labelFilter.length) || (state.labelOnly && state.labelOnly.length);
         const count = el('span', 'count', (!anyFilter && col.wipLimit > 0) ? `${allInCol}/${col.wipLimit}` : String(anyFilter ? matchedCount : allInCol));
         head.appendChild(count);
         if (col.wipLimit > 0 && allInCol > col.wipLimit) colEl.classList.add('over-wip');

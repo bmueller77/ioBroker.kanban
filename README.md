@@ -139,6 +139,8 @@ From **0.1.1**: token-secured write API, Markdown preview sanitized with DOMPuri
     columns also carry a faint top-to-bottom gradient. Every effect is a CSS variable and can be overridden or
     switched off in your own CSS
   - The address bar now carries the **current board** (`?board=<id>`), updated whenever you switch boards, so the URL can be copied and shared as is
+  - New URL parameter **`onlyLabel=`** (label whitelist) next to the existing `label=` blacklist, selectable in the share dialog: show only cards carrying one of the given labels
+  - Checklist items in the card editor can be **reordered by drag & drop** via a small grip (shown from two items upwards)
   - Fix: a card spawned by a **recurrence** now inherits the **time of day**, the **location** and the **calendar invite** flag from its template (they were silently dropped, so `dueAt` of the new card was always 00:00)
   - Every card returned by the **REST API** now carries the computed field **`dueAt`** (due date incl. time as an ISO timestamp with local offset) — the same value the events already had, so automations no longer need to combine `due` + `dueTime` + time zone themselves
   - New instance option **"fire 'card due' at the card's time of day"** (off by default): cards with a time of day trigger `cardDue` exactly then, flagged `detail.exact: true`, next to the unchanged daily reminder — minute-precise triggers without polling

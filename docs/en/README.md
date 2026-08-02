@@ -444,6 +444,7 @@ All parameters can also be appended to the URL directly:
 | `board=<id>` | Opens this board. Since 0.3.0 the address bar keeps track of the current board: switching via the board picker sets `?board=<id>` (no extra history entry, all other parameters are preserved), so the address can be copied and shared as is. |
 | `users=<name,name>` | **Person filter**: shows only cards assigned to at least one of these users (sets the header chips accordingly). `user=<name>` is the short form for a single user. |
 | `label=<id,id>` | **Label blacklist** (multiple possible): hides cards that have one of these labels, new labels stay visible automatically. |
+| `onlyLabel=<id,id>` | **Label whitelist** (since 0.3.0): shows **only** cards carrying at least one of these labels – cards without a label drop out. Can be combined with `label=` (whitelist first, then blacklist). |
 | `columns=<id,id>` | Shows only these columns. Others are hidden. |
 | `doneLimit=N` | In done columns, show only the N most recently completed cards (`0` = none, omit = all). |
 | `hideSettings=1` | Hides the settings gear. |

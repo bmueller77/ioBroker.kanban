@@ -12,7 +12,8 @@ const state = {
     boards: [],
     board: null,
     avatarVer: 0,   // Cache-Bust für Avatar-Bilder
-    labelFilter: qs.get('label') ? qs.get('label').split(',').filter(Boolean) : null,
+    labelFilter: qs.get('label') ? qs.get('label').split(',').filter(Boolean) : null,          // Blacklist: diese Labels ausblenden
+    labelOnly: qs.get('onlyLabel') ? qs.get('onlyLabel').split(',').filter(Boolean) : null,     // Whitelist: nur Karten mit diesen Labels
     usersFilter: [],   // Mehrfach-User-Filter (Kopf-Chips); je Board aus localStorage, per URL vorbelegbar
     columnsFilter: qs.get('columns') ? qs.get('columns').split(',').filter(Boolean) : null,
     doneLimit: qs.has('doneLimit') ? Math.max(0, parseInt(qs.get('doneLimit'), 10) || 0) : null,   // null = alle, 0 = keine

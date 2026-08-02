@@ -129,6 +129,8 @@
   "share.board": "Bord",
   "share.users": "Gebruikers (leeg = alle)",
   "share.labels": "Labels verbergen (leeg = alle tonen)",
+  "share.labelsHide": "Deze labels verbergen",
+  "share.labelsOnly": "Alleen deze labels tonen",
   "share.visibleColumns": "Zichtbare kolommen",
   "share.doneLimit": "Max. zichtbare voltooide taken (leeg = alle, 0 = geen)",
   "share.doneLimitAll": "alle",

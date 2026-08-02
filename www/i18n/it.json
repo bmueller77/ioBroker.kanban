@@ -129,6 +129,8 @@
   "share.board": "Bacheca",
   "share.users": "Utenti (vuoto = tutti)",
   "share.labels": "Nascondi etichette (vuoto = mostra tutte)",
+  "share.labelsHide": "Nascondi queste etichette",
+  "share.labelsOnly": "Mostra solo queste etichette",
   "share.visibleColumns": "Colonne visibili",
   "share.doneLimit": "Max. attività completate visibili (vuoto = tutte, 0 = nessuna)",
   "share.doneLimitAll": "tutte",

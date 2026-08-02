@@ -602,6 +602,7 @@ dialog footer > button { overflow: hidden; text-overflow: ellipsis; white-space:
 .check-item .ck-grip:active { cursor: grabbing; }
 .check-item .ck-grip svg { display: block; }
 .check-item.ck-ghost { opacity: 0.4; }
+.check-item.ck-fallback { opacity: 0.9; box-shadow: var(--card-shadow); background: var(--surface2); border-radius: 6px; }
 
 .md-preview {
     background: var(--bg);

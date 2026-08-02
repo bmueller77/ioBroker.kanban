@@ -129,6 +129,8 @@
   "share.board": "Tableau",
   "share.users": "Utilisateurs (vide = tous)",
   "share.labels": "Masquer les étiquettes (vide = tout afficher)",
+  "share.labelsHide": "Masquer ces étiquettes",
+  "share.labelsOnly": "Afficher uniquement ces étiquettes",
   "share.visibleColumns": "Colonnes visibles",
   "share.doneLimit": "Max. de tâches terminées visibles (vide = toutes, 0 = aucune)",
   "share.doneLimitAll": "toutes",

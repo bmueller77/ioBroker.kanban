@@ -203,6 +203,11 @@ export function initDialogs(state, actions) {
             draggable: '.check-item',
             animation: 120,
             ghostClass: 'ck-ghost',
+            // Eigenes Drag-Bild statt HTML5-DnD: im modalen Dialog zuverlässiger
+            // und auf Touch identisch zum Desktop. Klon bleibt im Dialog (kein body).
+            forceFallback: true,
+            fallbackOnBody: false,
+            fallbackClass: 'ck-fallback',
         });
     }
     function updateCheckGrips() {
@@ -982,7 +987,7 @@ export function initDialogs(state, actions) {
 
         const opt = {
             board: (state.board && state.board.id) || (state.boards[0] && state.boards[0].id) || '',
-            users: [], labels: [], columns: null, doneLimit: null,
+            users: [], labels: [], labelMode: 'hide', columns: null, doneLimit: null,
             hideSettings: false, embed: false,
         };
 
@@ -1013,8 +1018,17 @@ export function initDialogs(state, actions) {
             usersWrap.appendChild(chk.lab);
         }
 
-        // Labels (Mehrfachauswahl, board-abhängig) – keine angehakt = alle
+        // Labels (Mehrfachauswahl, board-abhängig) – keine angehakt = alle.
+        // Modus: ausblenden (Blacklist, ?label=) oder nur diese zeigen (Whitelist, ?onlyLabel=)
         const labelsLabel = el('label', null, t('share.labels'));
+        const labelModeSel = document.createElement('select');
+        for (const [val, key] of [['hide', 'share.labelsHide'], ['only', 'share.labelsOnly']]) {
+            const o2 = document.createElement('option');
+            o2.value = val; o2.textContent = t(key);
+            labelModeSel.appendChild(o2);
+        }
+        labelModeSel.addEventListener('change', () => { opt.labelMode = labelModeSel.value; update(); });
+        labelsLabel.appendChild(labelModeSel);
         const labelsWrap = el('div', 'share-cols');
         const updateLabels = () => { opt.labels = [...labelsWrap.querySelectorAll('input:checked')].map(i => i.dataset.val); };
         async function fillLabels(boardId) {
@@ -1074,7 +1088,7 @@ export function initDialogs(state, actions) {
             const p = new URLSearchParams();
             if (opt.board) p.set('board', opt.board);
             if (opt.users.length) p.set('users', opt.users.join(','));
-            if (opt.labels.length) p.set('label', opt.labels.join(','));
+            if (opt.labels.length) p.set(opt.labelMode === 'only' ? 'onlyLabel' : 'label', opt.labels.join(','));
             if (opt.columns && opt.columns.length) p.set('columns', opt.columns.join(','));
             if (opt.doneLimit != null) p.set('doneLimit', String(opt.doneLimit));
             if (opt.hideSettings) p.set('hideSettings', '1');

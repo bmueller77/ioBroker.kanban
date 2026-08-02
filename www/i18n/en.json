@@ -129,6 +129,8 @@
   "share.board": "Board",
   "share.users": "Users (empty = all)",
   "share.labels": "Hide labels (empty = show all)",
+  "share.labelsHide": "Hide these labels",
+  "share.labelsOnly": "Show only these labels",
   "share.visibleColumns": "Visible columns",
   "share.doneLimit": "Max. visible completed tasks (empty = all, 0 = none)",
   "share.doneLimitAll": "all",
