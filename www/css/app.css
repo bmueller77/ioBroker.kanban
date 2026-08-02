@@ -595,6 +595,13 @@ dialog footer > button { overflow: hidden; text-overflow: ellipsis; white-space:
 .check-item { display: flex; gap: 6px; align-items: center; }
 .check-item input[type="text"] { flex: 1; }
 .check-item .rm { border: none; background: none; color: var(--muted); font-size: 16px; padding: 2px 6px; }
+/* Anfasser zum Umsortieren – erst ab zwei Punkten sichtbar, Platz bleibt reserviert */
+.check-item .ck-grip { display: flex; align-items: center; color: var(--muted); cursor: grab; opacity: 0; pointer-events: none; }
+#checklistEdit.multi .check-item .ck-grip { opacity: 0.75; pointer-events: auto; }
+.check-item .ck-grip:hover { opacity: 1; color: var(--accent); }
+.check-item .ck-grip:active { cursor: grabbing; }
+.check-item .ck-grip svg { display: block; }
+.check-item.ck-ghost { opacity: 0.4; }
 
 .md-preview {
     background: var(--bg);

@@ -195,9 +195,30 @@ export function initDialogs(state, actions) {
         updateSelection();
     }
 
+    // Checklisten-Punkte lassen sich per Anfasser umsortieren (ab 2 Punkten sichtbar).
+    function ensureChecklistSortable(box) {
+        if (!box || box._sortable || typeof Sortable === 'undefined') return;
+        box._sortable = Sortable.create(box, {
+            handle: '.ck-grip',
+            draggable: '.check-item',
+            animation: 120,
+            ghostClass: 'ck-ghost',
+        });
+    }
+    function updateCheckGrips() {
+        const box = document.getElementById('checklistEdit');
+        if (box) box.classList.toggle('multi', box.querySelectorAll('.check-item').length > 1);
+    }
+
     function addCheckRow(item) {
         const box = document.getElementById('checklistEdit');
         const row = el('div', 'check-item');
+        const grip = el('span', 'ck-grip');
+        const gicon = mdiIcon(MDI.sortGrid);
+        gicon.setAttribute('width', '14');
+        gicon.setAttribute('height', '14');
+        grip.appendChild(gicon);
+        grip.title = t('card.checkDrag');
         const cb = document.createElement('input');
         cb.type = 'checkbox';
         cb.checked = !!(item && item.done);
@@ -207,9 +228,11 @@ export function initDialogs(state, actions) {
         txt.placeholder = t('card.checkPlaceholder');
         const rm = el('button', 'rm', '×');
         rm.type = 'button';
-        rm.addEventListener('click', () => row.remove());
-        row.append(cb, txt, rm);
+        rm.addEventListener('click', () => { row.remove(); updateCheckGrips(); });
+        row.append(grip, cb, txt, rm);
         box.appendChild(row);
+        ensureChecklistSortable(box);
+        updateCheckGrips();
         return row;
     }
 
@@ -319,6 +342,7 @@ export function initDialogs(state, actions) {
         const box = document.getElementById('checklistEdit');
         box.textContent = '';
         for (const item of (src.checklist || [])) addCheckRow({ text: item.text, done: false });
+        updateCheckGrips();
         loadRecurrence(src.recurrence);
         updatePreview();
         dlg.showModal();
@@ -351,6 +375,7 @@ export function initDialogs(state, actions) {
         const box = document.getElementById('checklistEdit');
         box.textContent = '';
         for (const item of (card && card.checklist) || []) addCheckRow(item);
+        updateCheckGrips();
         loadRecurrence(card && card.recurrence);
         updatePreview();
         dlg.showModal();

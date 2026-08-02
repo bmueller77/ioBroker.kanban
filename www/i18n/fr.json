@@ -43,6 +43,7 @@
   "card.cancel": "Annuler",
   "card.save": "Enregistrer",
   "card.checkPlaceholder": "Élément…",
+  "card.checkDrag": "Déplacer l’élément",
   "prio.normal": "Normale",
   "prio.high": "Haute",
   "prio.urgent": "Urgente",

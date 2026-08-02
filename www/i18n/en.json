@@ -43,6 +43,7 @@
   "card.cancel": "Cancel",
   "card.save": "Save",
   "card.checkPlaceholder": "Item…",
+  "card.checkDrag": "Reorder item",
   "prio.normal": "Normal",
   "prio.high": "High",
   "prio.urgent": "Urgent",

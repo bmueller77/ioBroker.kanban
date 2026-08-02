@@ -43,6 +43,7 @@
   "card.cancel": "Abbrechen",
   "card.save": "Speichern",
   "card.checkPlaceholder": "Punkt…",
+  "card.checkDrag": "Punkt verschieben",
   "prio.normal": "Normal",
   "prio.high": "Hoch",
   "prio.urgent": "Dringend",
