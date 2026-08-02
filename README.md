@@ -141,6 +141,12 @@ From **0.1.1**: token-secured write API, Markdown preview sanitized with DOMPuri
   - The address bar now carries the **current board** (`?board=<id>`), updated whenever you switch boards, so the URL can be copied and shared as is
   - New URL parameter **`onlyLabel=`** (label whitelist) next to the existing `label=` blacklist, selectable in the share dialog: show only cards carrying one of the given labels
   - Checklist items in the card editor can be **reordered by drag & drop** via a small grip (shown from two items upwards)
+  - Calendar invites get an adjustable **duration** (`calendarDuration`, `HH:MM`, default one hour) next to the calendar checkbox
+  - Columns always share the **full window width**; the board only scrolls horizontally once less than 280 px per column would be left
+  - Fix: emptying the trash by hand now sends the same **bundled summary e-mail** as the automatic cleanup (it previously sent nothing at all)
+  - Fix: `dueAt` is now also part of the answers of `PATCH /api/boards/<id>`, `…/purge` and every `sendTo`/`action`/webhook command
+  - Fix: native date and time pickers follow the theme again (`color-scheme`), so the calendar icon is visible in dark mode
+  - Fix: the icons in a column header are grouped on the right again instead of drifting apart
   - Fix: a card spawned by a **recurrence** now inherits the **time of day**, the **location** and the **calendar invite** flag from its template (they were silently dropped, so `dueAt` of the new card was always 00:00)
   - Every card returned by the **REST API** now carries the computed field **`dueAt`** (due date incl. time as an ISO timestamp with local offset) — the same value the events already had, so automations no longer need to combine `due` + `dueTime` + time zone themselves
   - New instance option **"fire 'card due' at the card's time of day"** (off by default): cards with a time of day trigger `cardDue` exactly then, flagged `detail.exact: true`, next to the unchanged daily reminder — minute-precise triggers without polling

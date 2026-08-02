@@ -134,7 +134,7 @@ Benachrichtigungen werden bei Karten-Ereignissen ausgelöst und per **E-Mail** (
 | **email-Adapter-Instanz** | Welche `email.x`-Instanz für den Versand genutzt wird. |
 | **Absender** | Optionale Absenderadresse (leer = Standard des email-Adapters). |
 | **Erinnerungs-Uhrzeit** | `HH:MM`, wann fällige Karten geprüft werden (Standard `08:00`). |
-| **Erinnern X Tage vor Fälligkeit** | Vorlauf für `cardDue`-Erinnerungen. |
+| **Erinnern X Tage vor Fälligkeit** | Vorlauf für `cardDue`-Erinnerungen (`0`–`30`, Standard `1`). |
 | **„Karte fällig" zur Uhrzeit der Karte auslösen** | Ab 0.3.0, Standard **aus**. Zusätzlich zur täglichen Erinnerung feuert `cardDue` bei Karten mit gesetzter **Uhrzeit** genau zu dieser Uhrzeit (`detail.exact = true`). Damit lassen sich Automatisierungen minutengenau auslösen, ohne die API abzufragen. **Achtung:** Das Ereignis läuft durch die normale Benachrichtigung, es geht also auch eine zweite „Fällig"-E-Mail an alle raus, die diese aktiviert haben – wer nur Skripte/Webhooks bedienen will, schaltet die E-Mail „Fällig" beim Benutzer ab. |
 | **Standard-Vorgabe** | Globale Fallback-Schalter je Ereignis, greifen, wenn ein Benutzer nichts Eigenes eingestellt hat (siehe unten). |
 
@@ -179,7 +179,7 @@ Für die meisten Setups genügt daher **„Zugew." allein**. „Neu" lohnt sich,
 Ist an einer Karte **„Kalender-Einladung"** aktiviert und ein Datum gesetzt, hängt der Adapter der Benachrichtigungs-E-Mail eine `termin.ics` an:
 
 - **Ohne Uhrzeit** → Ganztagestermin am Fälligkeitstag.
-- **Mit Uhrzeit** → Termin mit Start und einer Stunde Dauer.
+- **Mit Uhrzeit** → Termin mit Start und der an der Karte eingestellten **Dauer** (`calendarDuration`, Standard eine Stunde).
 - Übernommen werden Titel (`SUMMARY`), Beschreibung, **Ort** (`LOCATION`) und Link (`URL`).
 - **Zeitzone:** Uhrzeit-Termine werden eindeutig in UTC ausgegeben; die zugrunde liegende Zeitzone wird aus dem System ermittelt (bzw. `system.config`), Sommer-/Winterzeit inklusive. Ganztägige Termine sind bewusst zeitzonenlos.
 
@@ -193,7 +193,7 @@ Andere Systeme (oder ioBroker selbst) können Karten und Boards per HTTP veränd
 |---|---|
 | **name** | Bezeichnung (erscheint in Logs als Quelle). |
 | **token** | Geheimes Token, Teil der URL. |
-| **allowedBoards** | `*` = alle Boards, oder eine Liste erlaubter Board-IDs (durch Leerzeichen/Komma getrennt). |
+| **allowedBoards** | `*` = alle Boards, oder eine Liste erlaubter Board-IDs (getrennt durch Leerzeichen, Komma oder Semikolon). |
 | **enabled** | Token aktiv/inaktiv. |
 
 Mit dem Button **„Neuen Token generieren"** (über der Tabelle) wird automatisch eine neue Zeile mit einem sicheren Zufallstoken (32 Hex-Zeichen) und dem Namen `agent`/`agent1`/… angelegt. Danach den Namen anpassen, ggf. `allowedBoards` einschränken und **Speichern**. Alternativ das Token-Feld von Hand ausfüllen (z. B. `openssl rand -hex 16`). **Empfehlung:** für jede Integration (jeder Agent, jedes Skript) einen eigenen Token, so lässt sich jeder einzeln per `enabled`-Häkchen sperren oder ersetzen.
@@ -252,6 +252,7 @@ Spalten lassen sich anlegen, per Drag & Drop sortieren, umbenennen und löschen.
 
 Über der Spaltenliste steht eine Kopfzeile mit den Feldbezeichnungen (**Titel · Max · WIP · Neu · Erledigt**). Jede Überschrift hat einen Tooltip mit der ausführlichen Erklärung.
 
+- **Spaltenbreite:** Die Spalten teilen sich immer die **volle Fensterbreite** – zwei Spalten nehmen also je die Hälfte ein. Erst wenn rechnerisch weniger als 280 px je Spalte übrig bleiben, wird das Board waagerecht scrollbar.
 - **Anzeige-Limit (Max):** Zahl > 0 zeigt in dieser Spalte nur die ersten N Karten; darunter erscheint der dezente Hinweis `+X weitere`. `0` = alle anzeigen. Praktisch, damit lange Rückstände das Board nicht sprengen. Der Zähler in der Spaltenkopfzeile zählt weiterhin **alle** Karten der Spalte.
 - **WIP-Limit** (Work-in-Progress): Zahl > 0 begrenzt die empfohlene Kartenanzahl. Wird sie überschritten, warnt die Spalte optisch (Zähler & Kopf werden hervorgehoben). `0` = kein Limit. Das Limit ist eine **Warnung**, keine harte Sperre. Sie bezieht sich immer auf die **Gesamtzahl** der Spalte, auch wenn der Personen-/Label-Filter gerade weniger Karten anzeigt.
 - **„Neu"** (`allowAdd`): legt fest, in welchen Spalten der Link „+ Karte hinzufügen" erscheint.
@@ -319,11 +320,12 @@ Eine Karte hat folgende inhaltliche Felder (per API unter denselben Namen setzba
 | **color** | Hex-Farbe | Farbiger Balken links an der Karte. Wählbar über einen eingebetteten Colorpicker (Farbfeld + Farbton-Regler + Hex-Eingabe) oder Presets. |
 | **link** | URL | Verknüpfung. Auf der Karte erscheint ein **typabhängiges Icon** – siehe [Link-Typen](#link-typen). |
 | **location** | Text | Ort. Erscheint als Orts-Badge (Pin-Symbol) auf der Karte und wird als `LOCATION` in die Kalender-Einladung übernommen. |
-| **checklist** | Liste | Unterpunkte mit Häkchen; auf der Karte als Fortschritt `✓ 2/5` unten links. Über den **Chevron (▾/▴)** in der Mitte des Kartenfußes lassen sich die Punkte direkt auf der Karte auf-/zuklappen und **abhaken** (wird sofort gespeichert). |
+| **checklist** | Liste | Unterpunkte mit Häkchen; ab zwei Punkten lassen sie sich im Editor am kleinen **Anfasser** links per Drag & Drop umsortieren. Auf der Karte als Fortschritt `✓ 2/5` unten links. Über den **Chevron (▾/▴)** in der Mitte des Kartenfußes lassen sich die Punkte direkt auf der Karte auf-/zuklappen und **abhaken** (wird sofort gespeichert). |
 | **calendarInvite** | Ja/Nein | Wenn aktiviert **und** ein Fälligkeitsdatum gesetzt ist, wird jeder Benachrichtigungs-E-Mail zu dieser Karte eine **`.ics`-Kalender-Einladung** angehängt. |
+| **calendarDuration** | `HH:MM` | Termindauer in der Kalender-Einladung, Standard **`01:00`** (eine Stunde). Das Feld erscheint im Editor rechts neben der Kalender-Checkbox, sobald diese aktiv ist. Wirkt nur bei Terminen **mit Uhrzeit**; ohne Uhrzeit bleibt es ein Ganztagestermin. |
 | **recurrence** | Objekt | Wiederholungsregel – siehe [Wiederholungen](#wiederholungen). |
 
-Zusätzlich verwaltet der Adapter automatisch: `id`, `columnId`, `order`, `createdAt`, `createdBy`, `movedAt`, `doneAt`, `trashedAt`.
+Zusätzlich verwaltet der Adapter automatisch: `id`, `columnId`, `order`, `createdAt`, `createdBy`, `movedAt`, `doneAt`, `trashedAt` sowie intern `lastReminderAt` und `lastExactAt` (Merker, damit dieselbe Erinnerung bzw. dasselbe Uhrzeit-Ereignis nicht mehrfach am Tag feuert).
 
 Jedes Kartenobjekt der **REST-API** enthält ab 0.3.0 außerdem das berechnete Feld **`dueAt`** – die Fälligkeit inklusive Uhrzeit als ISO-Zeitstempel mit lokalem Offset (z. B. `2026-08-01T13:30:00+02:00`; ohne Uhrzeit `00:00`, ohne Datum `null`). Es ist identisch mit dem `dueAt` der Ereignisse, wird **nicht gespeichert** und beim Schreiben ignoriert – Automatisierungen müssen also nicht selbst aus `due` + `dueTime` + Zeitzone rechnen.
 
@@ -333,7 +335,7 @@ Jedes Kartenobjekt der **REST-API** enthält ab 0.3.0 außerdem das berechnete F
 
 In der Fußzeile des Karten-Editors sitzt rechts neben **Löschen** der Button **Verwalten**. Er öffnet den gleichnamigen Dialog, der oben drei Schaltflächen anbietet: **Klonen**, **Kopieren** und **Verschieben**. Die Auswahlfelder darunter richten sich nach der gewählten Schaltfläche.
 
-- **Klonen** dupliziert die Karte **im selben Board**. Es erscheint nur die **Ziel-Spalte**, vorbelegt mit der Spalte, in der die Karte gerade liegt. Der Klon übernimmt alle Inhalte inklusive Checkliste, Labels, Zuständigen und Wiederholung und wird direkt **unter dem Original** eingefügt. Praktisch für wiederkehrende Aufgaben, die man als Vorlage benutzt.
+- **Klonen** dupliziert die Karte **im selben Board**. Es erscheint nur die **Ziel-Spalte**, vorbelegt mit der Spalte, in der die Karte gerade liegt. Der Klon übernimmt alle Inhalte inklusive Checkliste, Labels, Zuständigen und Wiederholung. Bleibt die vorbelegte Spalte stehen, landet er direkt **unter dem Original**; wählst du eine andere Spalte, hängt er dort **unten** an. Praktisch für wiederkehrende Aufgaben, die man als Vorlage benutzt.
 - **Kopieren** und **Verschieben** blenden zusätzlich das **Ziel-Board** ein; vorbelegt ist dessen erste Spalte mit „Neu"-Häkchen. Verschieben nimmt die Karte mit (sie verlässt das aktuelle Board), Kopieren legt am Ziel eine neue Karte an und lässt das Original unangetastet. Existiert kein weiteres Board, sind beide Schaltflächen deaktiviert.
 - **Labels** werden über den **Namen** abgeglichen. Gibt es im Ziel-Board ein gleichnamiges Label, wird es übernommen; Labels ohne Entsprechung fallen weg. Das Ziel-Board wird also nicht ungefragt um neue Labels ergänzt.
 - **Zuständige** bleiben nur erhalten, wenn sie im Ziel-Board **Mitglied** sind. Der Dialog zeigt vorher an, was wegfällt.
@@ -452,6 +454,8 @@ Alle Parameter lassen sich auch direkt an die URL hängen:
 | `theme=auto\|light\|dark` | Erzwingt ein Theme. |
 | `accent=%23RRGGBB` | Akzentfarbe (Hex, `#` als `%23` kodieren). |
 | `card=<id>` | Öffnet direkt eine Karte (Deep-Link, z. B. aus E-Mails). |
+| `focus=<id>` | Öffnet **nicht** den Editor, sondern hebt die Karte im Board kurz hervor (pulsierender Rahmen). Wird von Benachrichtigungen mit Link-Ziel „Board-Ansicht" erzeugt. |
+| `lang=de\|en\|fr\|nl\|it` | Überschreibt die Oberflächensprache der Instanz für diese Ansicht. |
 
 **Beispiele**
 
@@ -493,6 +497,7 @@ Für Integrationen im gleichen Netz steht eine REST-API bereit (dieselbe, die di
 | `POST /api/boards` | Board anlegen (`{ id?, title }`). |
 | `GET /api/boards/<id>` | Board mit allen Karten. Mit `?rev=<n>` liefert es `{unchanged:true}`, falls unverändert (Polling). |
 | `PATCH /api/boards/<id>` | Board ändern (Titel, Spalten, Labels, Mitglieder, Aufräum-Einstellung `cleanup: { mode, days, count }`). |
+| `PATCH /api/users/<name>` | Benutzerfarbe setzen (`{ color: "#RRGGBB" }`). Wird von der Benutzer-Verwaltung im Board genutzt. |
 | `DELETE /api/boards/<id>` | Board löschen. |
 | `POST /api/boards/<id>/cards` | Karte anlegen. |
 | `PATCH /api/boards/<id>/cards/<cardId>` | Karte ändern. |
@@ -627,7 +632,7 @@ Ziel-URLs und Ereignisfilter werden in den Instanzeinstellungen gepflegt ([Tab �
 }
 ```
 
-Jedes Event hat die Struktur `{ event, ts, board:{id,title}, card:{…}, detail:{…}, link, dueAt }`. Das Feld `detail` variiert je Ereignistyp (z. B. `assignee` bei `cardAssigned`, `fromColumn`/`toColumn` bei `cardMoved`, `auto`/`reason` beim automatischen Aufräumen). `dueAt` gibt es seit 0.3.0 und enthält die Fälligkeit inklusive Uhrzeit als ISO-Zeitstempel mit lokalem Offset.
+Jedes Event hat die Struktur `{ event, ts, board:{id,title}, card:{…}, detail:{…}, link, dueAt }`. Das Feld `detail` variiert je Ereignistyp (z. B. `assignee` bei `cardAssigned`, `fromColumn`/`toColumn` bei `cardMoved`, `auto`/`reason` bei Massenaktionen, `clone`/`crossBoardCopy` beim Klonen bzw. Kopieren auf ein anderes Board, `crossBoard` beim Verschieben dorthin, `exact` beim kartengenauen `cardDue`). `dueAt` gibt es seit 0.3.0 und enthält die Fälligkeit inklusive Uhrzeit als ISO-Zeitstempel mit lokalem Offset.
 
 ### Benachrichtigungen an beliebige Dienste (Telegram, Pushover, ...)
 
@@ -653,7 +658,7 @@ Neben der eingebauten E-Mail-Benachrichtigung laesst sich **jeder** Dienst anbin
 - `dueAt` - ab 0.3.0: Faelligkeit als ISO-Zeitstempel mit lokalem Offset, z. B. `2026-08-01T09:00:00+02:00`. Ohne gesetzte Uhrzeit wird `00:00` uebermittelt; ohne Faelligkeitsdatum ist der Wert `null`. Das gleiche Feld liefert auch jedes Kartenobjekt der REST-API.
 - **`cardDue` feuert in zwei Varianten:** die **tägliche** Erinnerung zur eingestellten Erinnerungs-Uhrzeit (tagesbasiert, inklusive Vorlauf und überfälliger Karten, `detail.overdue` kann `true` sein) und – wenn die Instanz-Option „‚Karte fällig' zur Uhrzeit der Karte auslösen" aktiv ist – ein **kartengenaues** Ereignis zur Uhrzeit der Karte mit `detail.exact: true` und `detail.dueTime`. Letzteres kommt einmal pro Karte und Tag; fällt der Zeitpunkt in eine Ausfallzeit, wird es beim nächsten Start desselben Tages nachgeholt. Skripte, die nur exakte Termine wollen, filtern auf `ev.detail && ev.detail.exact`.
 
-**Papierkorb-Ereignisse (ab 0.3.0):** `cardDeleted` bedeutet jetzt "in den Papierkorb verschoben" - die Karte ist 30 Tage lang wiederherstellbar. `cardRestored` feuert beim Zurueckholen, `cardPurged` beim endgueltigen Entfernen. Beim automatischen Aufraeumen enthaelt `detail` zusaetzlich `auto: true` und `reason` (`cleanup` bzw. `retention`), damit Skripte Massenaktionen erkennen und z. B. buendeln koennen. E-Mails werden bei automatischen Laeufen als **eine Sammelmail je Benutzer** verschickt statt einzeln pro Karte.
+**Papierkorb-Ereignisse (ab 0.3.0):** `cardDeleted` bedeutet jetzt "in den Papierkorb verschoben" - die Karte ist 30 Tage lang wiederherstellbar. `cardRestored` feuert beim Zurueckholen, `cardPurged` beim endgueltigen Entfernen. Bei Massenaktionen enthaelt `detail` zusaetzlich `auto: true` und `reason`: `cleanup` (aus Erledigt in den Papierkorb), `retention` (30-Tage-Frist abgelaufen) oder `emptyTrash` (Papierkorb von Hand geleert). E-Mails werden in allen drei Faellen als **eine Sammelmail je Benutzer** verschickt statt einzeln pro Karte; die ausgehenden Webhooks feuern weiterhin je Karte.
 **Wiederholungen (ab 0.3.0):** Wird eine wiederkehrende Karte erledigt, legt der Adapter sofort die naechste Instanz an. Dabei feuern `cardCreated` und je Zustaendigem ein `cardAssigned`, beide mit `detail.recurrence: true`. Ohne Filter meldet ein Skript direkt nach dem Abhaken also die neue Karte als "dir zugewiesen". Wer das nicht moechte, blendet solche Ereignisse mit einer Zeile aus:
 
 ```javascript

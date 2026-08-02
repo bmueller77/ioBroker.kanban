@@ -188,8 +188,8 @@ img.avatar, .avatar img { object-fit: cover; width: 100%; height: 100%; border-r
     box-shadow: var(--col-emboss);
     border-radius: var(--radius);
     min-width: 280px;
-    max-width: 640px;
-    flex: 1 1 280px;   /* wächst auf breiten Screens mit, scrollt bei vielen Spalten */
+    flex: 1 1 280px;   /* teilt die Bildschirmbreite unter allen Spalten auf; erst
+                          wenn 280px je Spalte nicht mehr passen, wird gescrollt */
     max-height: 100%;
     display: flex;
     flex-direction: column;

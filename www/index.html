@@ -59,9 +59,14 @@
                 <select name="columnId"></select>
             </label>
         </div>
-        <label class="inline" data-i18n-title="card.calendarInviteTitle">
-            <input type="checkbox" name="calendarInvite"> <span data-i18n="card.calendarInvite">Kalender-Einladung (.ics) an Benachrichtigung anhängen</span>
-        </label>
+        <div class="row">
+            <label class="inline" data-i18n-title="card.calendarInviteTitle">
+                <input type="checkbox" name="calendarInvite"> <span data-i18n="card.calendarInvite">Kalender-Einladung (.ics) an Benachrichtigung anhängen</span>
+            </label>
+            <label id="calDurWrap" hidden data-i18n="card.calendarDuration" data-i18n-title="card.calendarDurationTitle">Dauer
+                <input type="time" name="calendarDuration" step="60" value="01:00">
+            </label>
+        </div>
         <label data-i18n="card.location">Ort
             <input type="text" name="location" data-i18n-ph="card.locationPlaceholder" placeholder="z.B. Rathaus, Musterstr. 1">
         </label>

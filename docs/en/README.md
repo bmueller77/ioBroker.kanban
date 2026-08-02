@@ -134,7 +134,7 @@ Notifications are triggered on card events and delivered via **e-mail** (through
 | **Email adapter instance** | Which `email.x` instance is used for sending. |
 | **Sender** | Optional sender address (empty = email adapter default). |
 | **Reminder time** | `HH:MM`, when due cards are checked (default `08:00`). |
-| **Remind X days before due** | Lead time for `cardDue` reminders. |
+| **Remind X days before due** | Lead time for `cardDue` reminders (`0`–`30`, default `1`). |
 | **Fire "card due" at the card's time of day** | Since 0.3.0, **off** by default. In addition to the daily reminder, cards with a **time of day** fire `cardDue` exactly at that time (`detail.exact = true`), so automations can trigger to the minute without polling the API. **Note:** the event goes through the normal notification path, so a second "due" e-mail is also sent to everyone who has that notification enabled – if you only want to drive scripts/webhooks, turn the "due" e-mail off per user. |
 | **Default** | Global fallback switches per event, they apply when a user has nothing set of their own (see below). |
 
@@ -179,7 +179,7 @@ For most setups **"assigned" alone** is therefore enough. "created" pays off if 
 If **"Calendar invite"** is enabled on a card and a date is set, the adapter attaches a `termin.ics` to the notification e-mail:
 
 - **Without time** → all-day event on the due date.
-- **With time** → timed event of one hour duration.
+- **With time** → timed event with the **duration** set on the card (`calendarDuration`, default one hour).
 - Title (`SUMMARY`), description, **location** (`LOCATION`) and link (`URL`) are carried over.
 - **Time zone:** timed events are emitted unambiguously in UTC; the underlying time zone is determined from the system (or `system.config`), including daylight saving. All-day events are deliberately time-zone-free.
 
@@ -193,7 +193,7 @@ Other systems (or ioBroker itself) can modify cards and boards via HTTP. Those r
 |---|---|
 | **name** | Label (shown as the source in logs). |
 | **token** | Secret token, part of the URL. |
-| **allowedBoards** | `*` = all boards, or a list of allowed board IDs (separated by space/comma). |
+| **allowedBoards** | `*` = all boards, or a list of allowed board IDs (separated by space, comma, or semicolon). |
 | **enabled** | Token active/inactive. |
 
 The **"Generate new token"** button (above the table) automatically adds a new row with a secure random token (32 hex chars) and the name `agent`/`agent1`/…. Then adjust the name, optionally restrict `allowedBoards`, and **Save**. Alternatively fill the token field manually (e.g. `openssl rand -hex 16`). **Recommendation:** use a separate token for each integration (each agent, each script), that way each one can be revoked or replaced individually via the `enabled` checkbox.
@@ -252,6 +252,7 @@ Columns can be created, reordered by drag & drop, renamed and deleted. **Deletin
 
 Above the column list sits a header row with the field names (**Title · Max · WIP · New · Done**). Every heading carries a tooltip with the full explanation.
 
+- **Column width:** columns always share the **full width of the window** – two columns therefore each take up half. Only once less than 280 px would be left per column does the board become horizontally scrollable.
 - **Display limit (Max):** a number > 0 shows only the first N cards in that column; below them a discreet `+X more` hint appears. `0` = show all. Useful so a long backlog does not blow up the board. The counter in the column header still counts **all** cards of the column.
 - **WIP limit** (work in progress): a number > 0 caps the recommended card count. If exceeded, the column warns visually (counter & header are highlighted). `0` = no limit. The limit is a **warning**, not a hard block. It always refers to the **total** number of cards in the column, even while a person/label filter is showing fewer.
 - **"New"** (`allowAdd`): controls in which columns the "+ Add card" link appears.
@@ -319,11 +320,12 @@ A card has the following content fields (settable via the API under the same nam
 | **color** | hex color | Colored bar on the left edge of the card. Chosen via an embedded color picker (color field + hue slider + hex input) or presets. |
 | **link** | URL | A link. The card shows a **type-dependent icon** – see [Link types](#link-types). |
 | **location** | text | Location. Shown as a location badge (pin icon) on the card and copied into the calendar invite as `LOCATION`. |
-| **checklist** | list | Sub-items with checkboxes; shown as progress `✓ 2/5` in the bottom left on the card. The **chevron (▾/▴)** at the middle of the card footer expands/collapses the items directly on the card, where they can also be **ticked off** (saved immediately). |
+| **checklist** | list | Sub-items with checkboxes; once there are at least two, drag the small **handle** on the left in the editor to reorder them. Shown as progress `✓ 2/5` in the bottom left on the card. The **chevron (▾/▴)** at the middle of the card footer expands/collapses the items directly on the card, where they can also be **ticked off** (saved immediately). |
 | **calendarInvite** | yes/no | If enabled **and** a due date is set, a **`.ics` calendar invite** is attached to every notification e-mail for this card. |
+| **calendarDuration** | `HH:MM` | Duration of the calendar invite, default **`01:00`** (one hour). The field appears in the editor right next to the **calendar invite** checkbox once that is enabled. Only effective for events **with a time of day**; without one it stays an all-day event. |
 | **recurrence** | object | Recurrence rule – see [Recurrence](#recurrence). |
 
-The adapter also manages automatically: `id`, `columnId`, `order`, `createdAt`, `createdBy`, `movedAt`, `doneAt`, `trashedAt`.
+The adapter also manages automatically: `id`, `columnId`, `order`, `createdAt`, `createdBy`, `movedAt`, `doneAt`, `trashedAt`, plus the internal markers `lastReminderAt` and `lastExactAt` (so the same reminder or time-of-day event does not fire twice on the same day).
 
 Since 0.3.0 every card object of the **REST API** additionally carries the computed field **`dueAt`** – the due date including time as an ISO timestamp with local offset (e.g. `2026-08-01T13:30:00+02:00`; `00:00` without a time, `null` without a date). It is identical to the `dueAt` of the events, is **not stored** and is ignored on write – so automations do not have to combine `due` + `dueTime` + time zone themselves.
 
@@ -333,7 +335,7 @@ Since 0.3.0 every card object of the **REST API** additionally carries the compu
 
 In the footer of the card editor, right next to **Delete**, sits the **Manage** button. It opens the dialog of the same name, which offers three buttons at the top: **Clone**, **Copy** and **Move**. The selects below adapt to the chosen button.
 
-- **Clone** duplicates the card **within the same board**. Only the **target column** is shown, preselected with the column the card currently sits in. The clone carries over everything — checklist, labels, assignees, recurrence — and is inserted directly **below the original**. Handy for recurring tasks you keep around as a template.
+- **Clone** duplicates the card **within the same board**. Only the **target column** is shown, preselected with the column the card currently sits in. The clone carries over everything — checklist, labels, assignees, recurrence. Leave the preselected column as is and it lands directly **below the original**; pick a different column and it is appended at the **bottom** of that one instead. Handy for recurring tasks you keep around as a template.
 - **Copy** and **Move** additionally reveal the **target board**; its first column flagged "New" is preselected. Move takes the card with it (it leaves the current board), copy creates a new card on the target and leaves the original untouched. If there is no other board, both buttons are disabled.
 - **Labels** are matched by **name**. If the target board has a label with the same name it is kept; labels without a match are dropped. The target board is never silently extended with new labels.
 - **Assignees** are only kept if they are **members** of the target board. The dialog shows beforehand what will be dropped.
@@ -452,6 +454,8 @@ All parameters can also be appended to the URL directly:
 | `theme=auto\|light\|dark` | Forces a theme. |
 | `accent=%23RRGGBB` | Accent color (hex, encode `#` as `%23`). |
 | `card=<id>` | Opens a card directly (deep link, e.g. from e-mails). |
+| `focus=<id>` | Does **not** open the editor, just briefly highlights the card on the board (pulsing outline). Generated by notifications whose link target is **board view**. |
+| `lang=de\|en\|fr\|nl\|it` | Overrides the instance's UI language for this view. |
 
 **Examples**
 
@@ -490,6 +494,7 @@ For integrations on the same network there is a REST API (the same one the web U
 | `POST /api/boards` | Create a board (`{ id?, title }`). |
 | `GET /api/boards/<id>` | Board with all cards. With `?rev=<n>` it returns `{unchanged:true}` if unchanged (polling). |
 | `PATCH /api/boards/<id>` | Change a board (title, columns, labels, members, cleanup setting `cleanup: { mode, days, count }`). |
+| `PATCH /api/users/<name>` | Set a user's color (`{ color: "#RRGGBB" }`). Used by the board's user management. |
 | `DELETE /api/boards/<id>` | Delete a board. |
 | `POST /api/boards/<id>/cards` | Create a card. |
 | `PATCH /api/boards/<id>/cards/<cardId>` | Change a card. |
@@ -624,7 +629,7 @@ Target URLs and event filters are configured in the instance settings ([Tab "Web
 }
 ```
 
-Every event has the shape `{ event, ts, board:{id,title}, card:{…}, detail:{…}, link, dueAt }`. The `detail` field varies by event type (e.g. `assignee` for `cardAssigned`, `fromColumn`/`toColumn` for `cardMoved`, `auto`/`reason` during the automatic cleanup). `dueAt` was added in 0.3.0 and carries the due date including time as an ISO timestamp with local offset.
+Every event has the shape `{ event, ts, board:{id,title}, card:{…}, detail:{…}, link, dueAt }`. The `detail` field varies by event type (e.g. `assignee` for `cardAssigned`, `fromColumn`/`toColumn` for `cardMoved`, `auto`/`reason` for bulk actions, `clone`/`crossBoardCopy` when cloning or copying to another board, `crossBoard` when moving to one, `exact` for the card-precise `cardDue`). `dueAt` was added in 0.3.0 and carries the due date including time as an ISO timestamp with local offset.
 
 ### Notifications to any service (Telegram, Pushover, ...)
 
@@ -650,7 +655,7 @@ Besides the built-in e-mail notification you can connect **any** service without
 - `dueAt` - from 0.3.0: the due date as an ISO timestamp with local offset, e.g. `2026-08-01T09:00:00+02:00`. Without a time set, `00:00` is sent; without a due date the value is `null`. Every card object of the REST API carries the same field.
 - **`cardDue` comes in two flavours:** the **daily** reminder at the configured reminder time (day-based, including lead time and overdue cards, `detail.overdue` may be `true`) and – if the instance option "Fire 'card due' at the card's time of day" is enabled – a **card-precise** event at the card's time with `detail.exact: true` and `detail.dueTime`. The latter fires once per card and day; if the moment falls into a downtime, it is caught up on the next start on the same day. Scripts that only care about exact times filter on `ev.detail && ev.detail.exact`.
 
-**Trash events (from 0.3.0):** `cardDeleted` now means "moved to the trash" - the card can be restored for 30 days. `cardRestored` fires when it is brought back, `cardPurged` when it is removed permanently. During automatic cleanup, `detail` additionally carries `auto: true` and `reason` (`cleanup` or `retention`), so scripts can recognise bulk actions and bundle them. For automatic runs, e-mails are sent as **one summary per user** instead of one per card.
+**Trash events (from 0.3.0):** `cardDeleted` now means "moved to the trash" - the card can be restored for 30 days. `cardRestored` fires when it is brought back, `cardPurged` when it is removed permanently. During bulk actions, `detail` additionally carries `auto: true` and `reason`: `cleanup` (from done into the trash), `retention` (the 30-day deadline expired) or `emptyTrash` (trash emptied by hand). In all three cases e-mails are sent as **one summary per user** instead of one per card; the outbound webhooks still fire per card.
 **Recurrences (from 0.3.0):** completing a recurring card immediately creates the next instance. That fires `cardCreated` plus one `cardAssigned` per assignee, both carrying `detail.recurrence: true`. Without a filter your script therefore announces the follow-up card as "assigned to you" right after you tick the old one off. One line hides those events:
 
 ```javascript

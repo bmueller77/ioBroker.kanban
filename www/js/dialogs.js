@@ -334,6 +334,8 @@ export function initDialogs(state, actions) {
         form.elements.link.value = src.link || '';
         form.elements.location.value = src.location || '';
         form.elements.calendarInvite.checked = !!src.calendarInvite;
+        form.elements.calendarDuration.value = src.calendarDuration || '01:00';
+        updateCalDurUI();
         // Zielspalte: erste „Neu"-Spalte, sonst erste normale Spalte
         const cols = (state.board.columns || []).filter(c => !c.isTrash);
         const target = cols.find(c => c.allowAdd) || cols[0];
@@ -370,6 +372,8 @@ export function initDialogs(state, actions) {
         form.elements.link.value = (card && card.link) || '';
         form.elements.location.value = (card && card.location) || '';
         form.elements.calendarInvite.checked = !!(card && card.calendarInvite);
+        form.elements.calendarDuration.value = (card && card.calendarDuration) || '01:00';
+        updateCalDurUI();
         fillColumnSelect(card ? card.columnId : defaultColumnId);
         selAssignees = new Set(card ? card.assignees : []);
         selLabels = new Set(card ? card.labels : []);
@@ -470,6 +474,17 @@ export function initDialogs(state, actions) {
     function updateDueTimeUI() {
         document.getElementById('dueTimeWrap').hidden = !form.elements.dueTimeEnabled.checked;
     }
+    // Termindauer nur zeigen, wenn eine Kalender-Einladung angehängt wird
+    function updateCalDurUI() {
+        const wrap = document.getElementById('calDurWrap');
+        if (wrap) wrap.hidden = !form.elements.calendarInvite.checked;
+    }
+    on('calendarInvite', 'change', () => {
+        updateCalDurUI();
+        if (form.elements.calendarInvite.checked && !form.elements.calendarDuration.value) {
+            form.elements.calendarDuration.value = '01:00';
+        }
+    });
     on('dueTimeEnabled', 'change', () => {
         updateDueTimeUI();
         if (form.elements.dueTimeEnabled.checked && !form.elements.dueTime.value) {
@@ -516,6 +531,7 @@ export function initDialogs(state, actions) {
             link: form.elements.link.value.trim(),
             location: form.elements.location.value.trim(),
             calendarInvite: form.elements.calendarInvite.checked,
+            calendarDuration: form.elements.calendarDuration.value || '01:00',
             assignees: [...selAssignees],
             labels: [...selLabels],
             color: selColor,

@@ -7,6 +7,7 @@ const { Store } = require('./lib/store');
 const holidays = require('./lib/holidays');
 const { Notifier } = require('./lib/notify');
 const { Scheduler } = require('./lib/scheduler');
+const { cardWithDueAt, boardWithDueAt } = require('./lib/dueat');
 const { Server } = require('./lib/server');
 
 class Kanban extends utils.Adapter {
@@ -138,44 +139,48 @@ class Kanban extends utils.Adapter {
         payload = payload || {};
         const boardId = payload.board || payload.boardId;
         const cardId = payload.cardId || payload.id;
+        // Karten-/Board-Antworten tragen wie in der REST-API das berechnete dueAt
+        const tz = () => this._timezone || 'Europe/Berlin';
+        const card = c => cardWithDueAt(c, tz());
+        const board = b => boardWithDueAt(b, tz());
         switch (cmd) {
             case 'listBoards':
             case 'getBoards':
                 return this.store.listBoards();
             case 'getBoard':
-                return this.store.getBoard(boardId);
+                return board(this.store.getBoard(boardId));
             case 'addBoard':
                 return this.store.createBoard({ id: payload.id, title: payload.title });
             case 'deleteBoard':
                 await this.store.deleteBoard(boardId);
                 return { ok: true };
             case 'addCard':
-                return this.store.addCard(boardId, payload, source);
+                return card(this.store.addCard(boardId, payload, source));
             case 'updateCard':
             case 'editCard':
-                return this.store.updateCard(boardId, cardId, payload, source);
+                return card(this.store.updateCard(boardId, cardId, payload, source));
             case 'moveCard':
-                return this.store.moveCard(boardId, cardId, payload.column || payload.columnId, payload.order, source);
+                return card(this.store.moveCard(boardId, cardId, payload.column || payload.columnId, payload.order, source));
             case 'doneCard': {
-                const board = this.store.getBoard(boardId);
-                if (!board) throw new Error(`Board '${boardId}' existiert nicht`);
-                const doneCol = board.columns.find(c => c.isDone);
+                const b = this.store.getBoard(boardId);
+                if (!b) throw new Error(`Board '${boardId}' existiert nicht`);
+                const doneCol = b.columns.find(c => c.isDone);
                 if (!doneCol) throw new Error(`Board '${boardId}' hat keine Erledigt-Spalte`);
-                return this.store.moveCard(boardId, cardId, doneCol.id, undefined, source);
+                return card(this.store.moveCard(boardId, cardId, doneCol.id, undefined, source));
             }
             case 'deleteCard':
-                return this.store.deleteCard(boardId, cardId, source);
+                return card(this.store.deleteCard(boardId, cardId, source));
             case 'restoreCard':
-                return this.store.restoreCard(boardId, cardId, payload.column || payload.columnId, source);
+                return card(this.store.restoreCard(boardId, cardId, payload.column || payload.columnId, source));
             case 'purgeCard':
-                return this.store.purgeCard(boardId, cardId, source);
+                return card(this.store.purgeCard(boardId, cardId, source));
             case 'emptyTrash':
                 return this.store.emptyTrash(boardId, source);
             case 'transferCard':
-                return this.store.transferCard(boardId, cardId,
+                return card(this.store.transferCard(boardId, cardId,
                     payload.toBoard || payload.targetBoard, payload.toColumn || payload.targetColumn,
                     payload.mode === 'copy' ? 'copy' : 'move',
-                    { assignees: payload.assignees }, source);
+                    { assignees: payload.assignees }, source));
             default:
                 throw new Error(`Unbekanntes Kommando '${cmd}'`);
         }
