@@ -40,6 +40,10 @@ html[data-theme="dark"] {
 
 /* Schlanke, themenkonforme Scrollbalken */
 * { scrollbar-width: thin; scrollbar-color: var(--border) transparent; }
+/* Native Bedienelemente (Datums-/Zeit-Picker, Dropdowns, Scrollbars) folgen dem Theme */
+:root[data-theme="dark"] { color-scheme: dark; }
+:root[data-theme="light"] { color-scheme: light; }
+
 ::-webkit-scrollbar { width: 11px; height: 11px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 6px; border: 3px solid transparent; background-clip: padding-box; }
@@ -198,6 +202,11 @@ img.avatar, .avatar img { object-fit: cover; width: 100%; height: 100%; border-r
     padding: 10px 12px 6px;
     font-weight: 700;
 }
+
+/* Das erste Icon im Spaltenkopf schiebt sich samt aller folgenden nach rechts;
+   die weiteren Icons stehen dann dicht daneben (sonst wuerde der freie Platz
+   mehrfach verteilt und z. B. das Auge landete in der Kopfmitte). */
+.column-head > button:first-of-type { margin-left: auto; }
 
 .column-head .count {
     font-size: 12px;
@@ -766,7 +775,6 @@ button.mini {
 @keyframes card-pulse { 0%, 100% { box-shadow: var(--shadow); } 50% { box-shadow: 0 0 0 4px var(--accent); } }
 
 .col-toggle {
-    margin-left: auto;
     background: none;
     border: none;
     padding: 0 2px;
@@ -833,7 +841,6 @@ button.mini {
 
 /* ---- 0.3.0: Sortier-Umschalter je Spalte (Feature 1) ---- */
 .col-sort {
-    margin-left: auto;
     background: none;
     border: none;
     padding: 0 2px;
