@@ -198,16 +198,16 @@ export function initDialogs(state, actions) {
     // Checklisten-Punkte lassen sich per Anfasser umsortieren (ab 2 Punkten sichtbar).
     function ensureChecklistSortable(box) {
         if (!box || box._sortable || typeof Sortable === 'undefined') return;
+        // Gleiche Konfiguration wie die Spaltenliste im Board-Dialog: natives
+        // Drag & Drop. (forceFallback hängt den Drag-Klon in den Container und
+        // verschiebt damit die Trefferberechnung – der Punkt landete immer unten.)
         box._sortable = Sortable.create(box, {
             handle: '.ck-grip',
             draggable: '.check-item',
-            animation: 120,
+            animation: 150,
             ghostClass: 'ck-ghost',
-            // Eigenes Drag-Bild statt HTML5-DnD: im modalen Dialog zuverlässiger
-            // und auf Touch identisch zum Desktop. Klon bleibt im Dialog (kein body).
-            forceFallback: true,
-            fallbackOnBody: false,
-            fallbackClass: 'ck-fallback',
+            delay: 150,               // Touch: kurz halten zum Ziehen, Scrollen bleibt möglich
+            delayOnTouchOnly: true,
         });
     }
     function updateCheckGrips() {
