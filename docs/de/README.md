@@ -812,6 +812,8 @@ setState('kanban.0.action', JSON.stringify({
 
 Der Adapter führt das Kommando aus und leert den State wieder.
 
+> **Zugriff:** Beide Wege kennen **keinen Token** — wer in ioBroker Skripte ausführen oder States schreiben darf, darf damit alles, auch `deleteBoard` und `emptyTrash`. Das ist so gewollt, weil beides lokale ioBroker-Schnittstellen sind. Ab 0.3.0 lässt sich der `action`-State unter „Webhooks (eingehend)" abschalten, wenn kein Skript darauf schreibt, und unumkehrbare Kommandos landen mit ihrer Quelle im Log. Für Zugriffe von außen ist der Webhook-Weg mit eigenem Token und Board-Begrenzung gedacht.
+
 ### Live-Sync & Deep-Links
 
 - **WebSocket `/ws`:** Bei jeder Änderung sendet der Server eine `dirty`-Nachricht an alle offenen Ansichten; diese laden das betroffene Board neu. So sehen alle Geräte Änderungen praktisch sofort.
@@ -827,7 +829,7 @@ Neben der Oberfläche legt der Adapter States an, die sich in Skripten, VIS/Love
 | `kanban.0.info.connection` | bool | Webserver läuft. |
 | `kanban.0.lastEvent` | json | Zuletzt ausgelöstes Ereignis (`{event, ts, board, card, detail, link, dueAt}`), ideal als Skript-Trigger. |
 | `kanban.0.action` | json (beschreibbar) | Kommando-Eingang, siehe [sendTo & action-State](#sendto--action-state). |
-| `kanban.0.info.apiSecret` | string | Interner Schreib-Token der REST-API (ab 0.1.1). |
+| `kanban.0.info.apiSecret` | string | Leer ab 0.3.0 — der interne Schreib-Token liegt jetzt im Dateispeicher des Adapters, nicht mehr in diesem State. Für Skripte sind die Tokens aus „Webhooks (eingehend)" der richtige Weg. |
 | `kanban.0.boards.<id>.data` | json | Vollständiges Board (Karten, Spalten, Labels). |
 | `kanban.0.boards.<id>.rev` | number | Revision (steigt bei jeder Änderung, für Polling). |
 | `kanban.0.boards.<id>.cardCount` | number | Anzahl Karten im Board. |
@@ -846,12 +848,18 @@ Die `boards.*`- und `users.*`-Spiegel-States eignen sich gut für Dashboards (�
 
 > **Neu in 0.1.1**, ergänzt nach einem Sicherheits-Review.
 
-**Schreibschutz der REST-API (Token).** Lesende Zugriffe (`GET`) auf `/api` bleiben im LAN offen (Web-UI und einfache Dashboards brauchen keinen Token). **Schreibende** Zugriffe (`POST`/`PATCH`/`DELETE`) verlangen einen Token im Header `X-Kanban-Token`. Gültig sind:
+**Schreibschutz der REST-API (Token).** Lesende Zugriffe (`GET`) auf `/api` bleiben im LAN offen (Web-UI und einfache Dashboards brauchen keinen Token). **Schreibende** Zugriffe (`POST`/`PATCH`/`DELETE`) verlangen einen Token im Header `X-Kanban-Token` oder als Feld `_token` im Body. Gültig sind:
 
-- das automatisch erzeugte **SPA-Secret** (State `kanban.0.info.apiSecret`), das der Server der eigenen Oberfläche als `<meta name="kanban-token">` mitgibt, die Web-UI schickt es transparent mit, du musst nichts einstellen;
+- das automatisch erzeugte **SPA-Secret**, das der Server der eigenen Oberfläche als `<meta name="kanban-token">` mitgibt, die Web-UI schickt es transparent mit, du musst nichts einstellen;
 - jeder aktive **inboundToken** (Tab „Webhooks (eingehend)"), damit auch Skripte/Agenten `/api` schreibend nutzen können.
 
 Ohne gültigen Token → HTTP `401`. Über die native Einstellung `apiWriteProtection: false` lässt sich der Schutz abschalten (dann verhält sich `/api` wie in 0.1.0).
+
+> **Ebenfalls neu in 0.3.0:**
+> - Die **Board-Begrenzung eines Tokens** („Erlaubte Boards") gilt jetzt auch auf `/api`, nicht mehr nur auf der Webhook-Route. Ein begrenzter Token bekommt bei fremden Boards `403` — geprüft werden der Board-Pfad **und** alle Board-Angaben im Body, also auch das Ziel beim Übertragen. Nicht board-bezogene Schreibrouten (Board anlegen, Benutzer/Avatare ändern) bleiben begrenzten Tokens verwehrt.
+> - Tokens werden **nicht mehr als URL-Parameter** (`?token=…`) angenommen, da sie dort in Logs, Browser-Verlauf und Referrern landen. Header oder Body-Feld verwenden.
+> - Das **SPA-Secret liegt im Dateispeicher** des Adapters statt im lesbaren State `kanban.0.info.apiSecret`; der State bleibt leer bestehen. Ein vorhandener Wert wird beim ersten Start übernommen und gelöscht.
+> - **Unumkehrbare Kommandos** (`deleteBoard`, `emptyTrash`, `purgeCard`) werden mit ihrer Quelle im Log protokolliert.
 
 > **Grenze dieses Schutzes (ehrlich):** Da die Oberfläche **ohne Login** arbeitet, kann ein Gerät im selben Netz, das die Seite lädt, das SPA-Secret mitlesen. Der Token wehrt damit zuverlässig **fremde Webseiten/CSRF** und naive Scanner ab, ist aber **kein** Ersatz für Netzisolation. Für harte Abschottung den Port nur ans LAN/`127.0.0.1` binden und einen Reverse-Proxy mit Authentifizierung davorsetzen.
 

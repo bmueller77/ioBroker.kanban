@@ -739,6 +739,34 @@
           "xs": 12,
           "lg": 12,
           "xl": 12
+        },
+        "_scopeInfo": {
+          "type": "staticText",
+          "text": {
+            "en": "The board restriction applies to the webhook route and to the REST API: a token limited to specific boards cannot change other boards, create boards or edit users. Tokens are only accepted in the X-Kanban-Token header or as _token in the body — no longer as a URL parameter.",
+            "de": "Die Board-Begrenzung gilt für die Webhook-Route und für die REST-API: Ein auf Boards begrenzter Token kann keine anderen Boards ändern, keine Boards anlegen und keine Benutzer bearbeiten. Tokens werden nur noch im Header X-Kanban-Token oder als _token im Body angenommen — nicht mehr als URL-Parameter."
+          },
+          "sm": 12,
+          "xs": 12,
+          "lg": 12,
+          "xl": 12
+        },
+        "actionStateEnabled": {
+          "type": "checkbox",
+          "label": {
+            "en": "Accept commands via the action state",
+            "de": "Kommandos über den action-State annehmen"
+          },
+          "help": {
+            "en": "kanban.0.action executes the same commands as the webhooks, including deleteBoard and emptyTrash, and requires no token. Turn this off if no script writes to it.",
+            "de": "kanban.0.action führt dieselben Kommandos aus wie die Webhooks, auch deleteBoard und emptyTrash, und braucht keinen Token. Abschalten, wenn kein Skript darauf schreibt."
+          },
+          "default": true,
+          "sm": 12,
+          "md": 6,
+          "xs": 12,
+          "lg": 6,
+          "xl": 6
         }
       }
     },

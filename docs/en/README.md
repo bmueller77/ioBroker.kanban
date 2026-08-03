@@ -809,6 +809,8 @@ setState('kanban.0.action', JSON.stringify({
 
 The adapter executes the command and clears the state again.
 
+> **Access:** neither route uses a token — anyone allowed to run scripts or write states in ioBroker can do everything here, including `deleteBoard` and `emptyTrash`. That is intentional, as both are local ioBroker interfaces. From 0.3.0 the `action` state can be switched off under "Webhooks (in)" if no script writes to it, and irreversible commands are logged with their source. For access from outside, use the webhook route with its own token and board restriction.
+
 ### Live sync & deep links
 
 - **WebSocket `/ws`:** on every change the server sends a `dirty` message to all open views, which reload the affected board. All devices see changes almost instantly.
@@ -824,7 +826,7 @@ Besides the UI, the adapter creates states you can use in scripts, VIS/Lovelace 
 | `kanban.0.info.connection` | bool | Web server running. |
 | `kanban.0.lastEvent` | json | Last triggered event (`{event, ts, board, card, detail, link, dueAt}`), ideal as a script trigger. |
 | `kanban.0.action` | json (writable) | Command input, see [sendTo & action state](#sendto--action-state). |
-| `kanban.0.info.apiSecret` | string | Internal REST-API write token (from 0.1.1). |
+| `kanban.0.info.apiSecret` | string | Empty from 0.3.0 — the internal write token now lives in the adapter's file storage, no longer in this state. For scripts, use the tokens from "Webhooks (in)". |
 | `kanban.0.boards.<id>.data` | json | Full board (cards, columns, labels). |
 | `kanban.0.boards.<id>.rev` | number | Revision (increments on every change, for polling). |
 | `kanban.0.boards.<id>.cardCount` | number | Number of cards in the board. |
@@ -843,12 +845,18 @@ The `boards.*` and `users.*` mirror states are handy for dashboards ("Björn: 3 
 
 > **New in 0.1.1**, added after a security review.
 
-**Write protection for the REST API (token).** Read access (`GET`) to `/api` stays open on the LAN (the web UI and simple dashboards need no token). **Write** access (`POST`/`PATCH`/`DELETE`) requires a token in the `X-Kanban-Token` header. Valid tokens are:
+**Write protection for the REST API (token).** Read access (`GET`) to `/api` stays open on the LAN (the web UI and simple dashboards need no token). **Write** access (`POST`/`PATCH`/`DELETE`) requires a token in the `X-Kanban-Token` header or as a `_token` field in the body. Valid tokens are:
 
-- the automatically generated **SPA secret** (state `kanban.0.info.apiSecret`), which the server hands to its own UI as `<meta name="kanban-token">`, the web UI sends it transparently, nothing to configure;
+- the automatically generated **SPA secret**, which the server hands to its own UI as `<meta name="kanban-token">`, the web UI sends it transparently, nothing to configure;
 - any active **inboundToken** (tab "Webhooks (in)"), so scripts/agents can also write via `/api`.
 
 Without a valid token → HTTP `401`. The native setting `apiWriteProtection: false` disables the protection (then `/api` behaves as in 0.1.0).
+
+> **Also new in 0.3.0:**
+> - A token's **board restriction** ("allowed boards") now applies to `/api` as well, not just to the webhook route. A restricted token gets `403` for other boards — checked against the board in the path **and** every board field in the body, including the target of a transfer. Routes that are not board-specific (creating boards, editing users/avatars) are closed to restricted tokens.
+> - Tokens are **no longer accepted as a URL parameter** (`?token=…`), because URLs end up in logs, browser history and referrers. Use the header or the body field.
+> - The **SPA secret now lives in the adapter's file storage** instead of the readable state `kanban.0.info.apiSecret`; the state remains but stays empty. An existing value is migrated on first start and then cleared.
+> - **Irreversible commands** (`deleteBoard`, `emptyTrash`, `purgeCard`) are logged together with their source.
 
 > **Honest limit of this protection:** because the UI works **without a login**, any device on the same network that loads the page can read the SPA secret. The token thus reliably blocks **third-party websites/CSRF** and naive scanners, but is **not** a substitute for network isolation. For hard isolation, bind the port to the LAN/`127.0.0.1` only and put an authenticating reverse proxy in front.
 

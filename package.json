@@ -41,8 +41,9 @@
   "scripts": {
     "start": "node main.js",
     "test:package": "mocha test/package --exit",
+    "test:guards": "mocha test/guards --exit",
     "test:integration": "mocha test/integration --exit",
-    "test": "npm run test:package",
+    "test": "npm run test:package && npm run test:guards",
     "lint": "eslint ."
   },
   "devDependencies": {

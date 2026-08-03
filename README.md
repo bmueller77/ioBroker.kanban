@@ -112,7 +112,11 @@ setState('kanban.0.action', JSON.stringify({ cmd: 'doneCard', board: 'family', c
 
 ## Security
 
-From **0.1.1**: token-secured write API, Markdown preview sanitized with DOMPurify (no stored XSS), a Content Security Policy and safe link schemes only. The web UI works without a login, the token blocks third-party websites/CSRF but is **not** a substitute for network isolation. For hard isolation, bind the port to the LAN only or put an authenticating reverse proxy in front. Details: [Security & access control](docs/en/README.md#security--access-control).
+From **0.1.1**: token-secured write API, Markdown preview sanitized with DOMPurify (no stored XSS), a Content Security Policy and safe link schemes only. The web UI works without a login, the token blocks third-party websites/CSRF but is **not** a substitute for network isolation. For hard isolation, bind the port to the LAN only or put an authenticating reverse proxy in front.
+
+Also from **0.3.0**: agent tokens keep their board restriction on the REST API as well, tokens are only read from the header or the request body, the write secret lives in the adapter's file storage instead of a readable state, the token-free `action` state can be switched off, and irreversible commands are logged with their source. Note that `sendTo` and the `action` state are local ioBroker interfaces without a token by design — anyone who can run scripts in ioBroker can use them.
+
+Details: [Security & access control](docs/en/README.md#security--access-control).
 
 ## Requirements
 
@@ -155,6 +159,11 @@ From **0.1.1**: token-secured write API, Markdown preview sanitized with DOMPuri
   - Every card returned by the **REST API** now carries the computed field **`dueAt`** (due date incl. time as an ISO timestamp with local offset) — the same value the events already had, so automations no longer need to combine `due` + `dueTime` + time zone themselves
   - New instance option **"fire 'card due' at the card's time of day"** (off by default): cards with a time of day trigger `cardDue` exactly then, flagged `detail.exact: true`, next to the unchanged daily reminder — minute-precise triggers without polling
   - All irreversible actions now use an **in-app confirmation dialog** instead of the browser's `confirm()`
+  - **Board restriction now applies to the REST API**: an agent token limited to certain boards was only checked on the webhook route and could change any board via `/api`. It is now enforced there too, against the board in the path and every board field in the body (including the target of a transfer). Routes that are not board-specific — creating boards, editing users and avatars — are closed to restricted tokens
+  - Tokens are **no longer accepted as a URL parameter** (`?token=…`), only in the `X-Kanban-Token` header or as `_token` in the body, so they stop showing up in logs, browser history and referrers
+  - The **SPA write secret moved into the adapter's file storage**; the state `kanban.0.info.apiSecret` stays but is kept empty. An existing value is migrated on first start. Object access no longer implies write access to the API
+  - The **`action` state can be switched off** in the instance settings ("Webhooks (in)"). It executes the full command vocabulary without a token, so installations that do not use it can close that door
+  - **Irreversible commands** (`deleteBoard`, `emptyTrash`, `purgeCard`) are logged with their source, no matter which route they came in through
 
 - **0.2.1**
   - Now runs on **Express 5** (updated dependency)

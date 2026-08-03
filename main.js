@@ -53,7 +53,13 @@ class Kanban extends utils.Adapter {
         }
 
         this.scheduler.start();
-        await this.subscribeStatesAsync('action');
+        // Der action-State ist eine vollwertige Kommando-Schnittstelle (inkl. Löschen).
+        // Wer ihn nicht braucht, kann ihn in den Instanz-Einstellungen abschalten.
+        if (this.config.actionStateEnabled === false) {
+            this.log.info('action-State ist deaktiviert — Kommandos nur über REST, Webhooks und sendTo.');
+        } else {
+            await this.subscribeStatesAsync('action');
+        }
         this.log.info(`Kanban bereit — UI: ${this._baseUrl()}/`);
     }
 
@@ -98,22 +104,50 @@ class Kanban extends utils.Adapter {
         this.log.info(`Feiertage: Quelle ${info.source}, ${info.count} relevante Feiertage/Jahr`);
     }
 
-    /** Secret für den Schreibschutz der /api-Routen. Einmalig erzeugt und im State
-     *  info.apiSecret abgelegt (kein Neustart-Loop wie bei native-Änderungen). Wird in
-     *  index.html als <meta name="kanban-token"> an die eigene SPA ausgeliefert. */
+    /** Secret für den Schreibschutz der /api-Routen. Wird in index.html als
+     *  <meta name="kanban-token"> an die eigene SPA ausgeliefert.
+     *
+     *  Ab 0.3.0 liegt das Secret im Dateispeicher des Adapters (apisecret.json) statt
+     *  im lesbaren State info.apiSecret: Objektzugriff soll nicht automatisch
+     *  Schreibzugriff auf die API bedeuten. Der State bleibt aus Kompatibilitätsgründen
+     *  bestehen, wird aber leer geführt; ein dort noch vorhandener Wert wird einmalig
+     *  übernommen und danach entfernt. Für Skripte sind die Agenten-Tokens der Weg. */
     async _initApiSecret() {
+        const newSecret = () => require('node:crypto').randomBytes(24).toString('hex');
         try {
             await this.setObjectNotExistsAsync('info.apiSecret', {
                 type: 'state',
-                common: { name: 'API write secret', type: 'string', role: 'text', read: true, write: false },
+                common: {
+                    name: 'API write secret (deprecated, moved to file storage)',
+                    type: 'string', role: 'text', read: true, write: false,
+                },
                 native: {},
             });
-            const st = await this.getStateAsync('info.apiSecret');
-            if (st && st.val) { this._apiSecret = String(st.val); return; }
-            this._apiSecret = require('node:crypto').randomBytes(24).toString('hex');
-            await this.setStateAsync('info.apiSecret', this._apiSecret, true);
+
+            let secret = '';
+            try {
+                const data = await this.readFileAsync(this.namespace, 'apisecret.json');
+                const buf = data && data.file !== undefined ? data.file : data;
+                const parsed = JSON.parse((Buffer.isBuffer(buf) ? buf : Buffer.from(buf)).toString('utf8'));
+                if (parsed && parsed.secret) secret = String(parsed.secret);
+            } catch (e) { /* noch keine Datei -> unten anlegen */ }
+
+            if (!secret) {
+                // Migration: bisher im State abgelegtes Secret übernehmen, sonst neu erzeugen
+                const st = await this.getStateAsync('info.apiSecret');
+                secret = st && st.val ? String(st.val) : newSecret();
+                await this.writeFileAsync(this.namespace, 'apisecret.json',
+                    Buffer.from(JSON.stringify({ secret }), 'utf8'));
+                this.log.info('API-Secret liegt jetzt im Dateispeicher; der State info.apiSecret wird nicht mehr befüllt.');
+            }
+
+            this._apiSecret = secret;
+
+            // State leeren (einmalig nach der Migration, danach idempotent)
+            const cur = await this.getStateAsync('info.apiSecret');
+            if (cur && cur.val) await this.setStateAsync('info.apiSecret', '', true);
         } catch (e) {
-            this._apiSecret = require('node:crypto').randomBytes(24).toString('hex');
+            this._apiSecret = newSecret();
             this.log.warn(`API-Secret nicht persistierbar, nutze flüchtiges: ${e.message}`);
         }
     }
@@ -143,6 +177,10 @@ class Kanban extends utils.Adapter {
         const tz = () => this._timezone || 'Europe/Berlin';
         const card = c => cardWithDueAt(c, tz());
         const board = b => boardWithDueAt(b, tz());
+        // Unumkehrbare Kommandos immer protokollieren — egal über welchen Weg sie kommen
+        if (cmd === 'deleteBoard' || cmd === 'emptyTrash' || cmd === 'purgeCard') {
+            this.log.info(`Kommando '${cmd}'${boardId ? ` auf Board '${boardId}'` : ''}${cardId ? `, Karte '${cardId}'` : ''} — Quelle: ${source || 'unbekannt'}`);
+        }
         switch (cmd) {
             case 'listBoards':
             case 'getBoards':
@@ -189,6 +227,7 @@ class Kanban extends utils.Adapter {
     async onStateChange(id, state) {
         if (!state || state.ack || !state.val) return;
         if (id !== `${this.namespace}.action`) return;
+        if (this.config.actionStateEnabled === false) return;
         let parsed;
         try {
             parsed = JSON.parse(state.val);
