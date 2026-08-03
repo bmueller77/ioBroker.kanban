@@ -92,3 +92,45 @@ describe('REST-API: Schreibschutz und Board-Bindung', () => {
         assert.equal(call({ token: undefined, config: { apiWriteProtection: false } }), 200);
     });
 });
+
+describe('Webhook-Kommandos: Board-Bindung', () => {
+    const server = () => new Server(
+        { _apiSecret: SPA, config: { inboundTokens: TOKENS }, log: { warn() {}, info() {}, error() {}, debug() {} } },
+        {}, async () => ({}),
+    );
+    const scoped = TOKENS.find(t => t.name === 'agent-fam');
+    const open = TOKENS.find(t => t.name === 'agent-all');
+    /** null = erlaubt, sonst der HTTP-Code */
+    const check = (entry, body) => {
+        const r = server().checkActionCommand(entry, body);
+        return r ? r.code : null;
+    };
+
+    it('lässt unbegrenzte Tokens alles ausführen', () => {
+        assert.equal(check(open, { cmd: 'addBoard', title: 'X' }), null);
+        assert.equal(check(open, { cmd: 'addCard', board: 'agenten', title: 'X' }), null);
+    });
+
+    it('bindet begrenzte Tokens an ihre Boards', () => {
+        assert.equal(check(scoped, { cmd: 'addCard', board: 'familie', title: 'X' }), null);
+        assert.equal(check(scoped, { cmd: 'addCard', board: 'agenten', title: 'X' }), 403);
+        assert.equal(check(scoped, { cmd: 'deleteBoard', board: 'agenten' }), 403);
+    });
+
+    it('prüft beim Übertragen auch das Zielboard', () => {
+        assert.equal(check(scoped, { cmd: 'transferCard', board: 'familie', toBoard: 'familie' }), null);
+        assert.equal(check(scoped, { cmd: 'transferCard', board: 'familie', toBoard: 'agenten' }), 403);
+        assert.equal(check(scoped, { cmd: 'transferCard', board: 'familie', targetBoard: 'agenten' }), 403);
+    });
+
+    it('verwehrt begrenzten Tokens schreibende Kommandos ohne Board-Angabe', () => {
+        // Regression: addBoard nennt kein Board und lief deshalb am Guard vorbei
+        assert.equal(check(scoped, { cmd: 'addBoard', title: 'Verbotenes Board' }), 403);
+        assert.equal(check(scoped, { cmd: 'irgendwasNeues' }), 403);
+    });
+
+    it('lässt lesende Kommandos ohne Board-Angabe zu', () => {
+        assert.equal(check(scoped, { cmd: 'listBoards' }), null);
+        assert.equal(check(scoped, { cmd: 'getBoards' }), null);
+    });
+});

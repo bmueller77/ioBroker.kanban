@@ -853,7 +853,7 @@ The `boards.*` and `users.*` mirror states are handy for dashboards ("Björn: 3 
 Without a valid token → HTTP `401`. The native setting `apiWriteProtection: false` disables the protection (then `/api` behaves as in 0.1.0).
 
 > **Also new in 0.3.0:**
-> - A token's **board restriction** ("allowed boards") now applies to `/api` as well, not just to the webhook route. A restricted token gets `403` for other boards — checked against the board in the path **and** every board field in the body, including the target of a transfer. Routes that are not board-specific (creating boards, editing users/avatars) are closed to restricted tokens.
+> - A token's **board restriction** ("allowed boards") applies on **both** routes — REST (`/api/boards/<id>/…`) and webhook commands (`addCard`, `moveCard`, `deleteBoard`, `transferCard`, …). Checked are the board in the path **and** every board field in the body, including the target of a transfer; another board yields `403`. A **writing** command that names no board at all — such as `addBoard`, or editing users and avatars — is closed to restricted tokens as well. Purely **reading** commands (`listBoards`, `getBoard`) stay open, as reading needs no token anyway.
 > - Tokens are **no longer accepted as a URL parameter** (`?token=…`), because URLs end up in logs, browser history and referrers. Use the header or the body field.
 > - The **SPA secret now lives in the adapter's file storage** instead of the readable state `kanban.0.info.apiSecret`; the state remains but stays empty. An existing value is migrated on first start and then cleared.
 > - **Irreversible commands** (`deleteBoard`, `emptyTrash`, `purgeCard`) are logged together with their source.
