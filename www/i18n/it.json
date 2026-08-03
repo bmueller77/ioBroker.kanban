@@ -123,6 +123,7 @@
   "boards.close": "Chiudi",
   "boards.save": "Salva",
   "boards.newBoard": "Nuova bacheca…",
+  "boards.noneYet": "Nessuna bacheca — inserisci un nome sopra e clicca su \"Crea\".",
   "boards.create": "Crea",
   "share.title": "Viste",
   "share.hint": "Crea un link con filtri e opzioni di visualizzazione predefiniti – es. per l'incorporamento (scheda web Lovelace) o la condivisione.",

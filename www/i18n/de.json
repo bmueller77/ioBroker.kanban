@@ -123,6 +123,7 @@
   "boards.close": "Schließen",
   "boards.save": "Speichern",
   "boards.newBoard": "Neues Board…",
+  "boards.noneYet": "Noch kein Board vorhanden — oben einen Namen eingeben und auf „Anlegen\" klicken.",
   "boards.create": "Anlegen",
   "share.title": "Ansichten",
   "share.hint": "Link mit vordefinierten Filtern und Ansichts-Optionen erzeugen – z.B. zum Einbetten (Lovelace-Webpage-Card) oder Weitergeben.",

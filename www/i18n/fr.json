@@ -123,6 +123,7 @@
   "boards.close": "Fermer",
   "boards.save": "Enregistrer",
   "boards.newBoard": "Nouveau tableau…",
+  "boards.noneYet": "Aucun tableau — saisissez un nom ci-dessus et cliquez sur « Créer ».",
   "boards.create": "Créer",
   "share.title": "Vues",
   "share.hint": "Créer un lien avec des filtres et options d'affichage prédéfinis – p. ex. pour l'intégration (carte web Lovelace) ou le partage.",

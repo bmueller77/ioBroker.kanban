@@ -123,6 +123,7 @@
   "boards.close": "Close",
   "boards.save": "Save",
   "boards.newBoard": "New board…",
+  "boards.noneYet": "No board yet — enter a name above and click \"Create\".",
   "boards.create": "Create",
   "share.title": "Views",
   "share.hint": "Create a link with predefined filters and view options – e.g. for embedding (Lovelace webpage card) or sharing.",

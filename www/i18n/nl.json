@@ -123,6 +123,7 @@
   "boards.close": "Sluiten",
   "boards.save": "Opslaan",
   "boards.newBoard": "Nieuw bord…",
+  "boards.noneYet": "Nog geen bord — voer hierboven een naam in en klik op \"Aanmaken\".",
   "boards.create": "Aanmaken",
   "share.title": "Weergaven",
   "share.hint": "Maak een link met vooraf ingestelde filters en weergaveopties – bijv. voor insluiten (Lovelace-webpaginakaart) of delen.",

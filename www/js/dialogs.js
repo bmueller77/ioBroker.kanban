@@ -694,9 +694,9 @@ export function initDialogs(state, actions) {
             dirty = false;
             titleInput = colBox = labelBox = linkTargetSel = linkUrlInput = null;
             cleanupModeSel = cleanupDaysInp = cleanupCountInp = memberWrap = null;
-            if (!editBoard) { panel.appendChild(el('div', 'hint', t('board.empty'))); return; }
 
             // ---- Kopfzeile: Board-Auswahl | Anzeigen | neues Board | Anlegen ----
+            // Wird auch ohne Board gebaut — sonst gaebe es keinen Weg, das erste anzulegen.
             const topRow = el('div', 'row board-toprow');
             boardSel = document.createElement('select');
             for (const b of state.boards) {
@@ -707,6 +707,7 @@ export function initDialogs(state, actions) {
             boardSel.value = editId;
             boardSel.title = t('boards.editingBoard');
             boardSel.dataset.noDirty = '1';   // Board-Wechsel ist keine Aenderung am Board
+            boardSel.disabled = !state.boards.length;
             boardSel.addEventListener('change', () => switchEdit(boardSel.value));
 
             const showBtn = el('button', 'icon-btn');
@@ -714,7 +715,7 @@ export function initDialogs(state, actions) {
             showBtn.appendChild(mdiIcon(MDI.arrowRightCircle));
             showBtn.title = t('boards.showBoard');
             showBtn.setAttribute('aria-label', showBtn.title);
-            showBtn.disabled = !!(state.board && state.board.id === editId);
+            showBtn.disabled = !editBoard || !!(state.board && state.board.id === editId);
             showBtn.addEventListener('click', async () => {
                 if (state.board && state.board.id === editId) return;
                 const b = state.boards.find(x => x.id === editId);
@@ -743,6 +744,10 @@ export function initDialogs(state, actions) {
             });
             topRow.append(boardSel, showBtn, newInput, newBtn);
             panel.appendChild(topRow);
+
+            // Noch kein Board: nur die Kopfzeile zum Anlegen zeigen, alles Weitere
+            // braucht ein Board.
+            if (!editBoard) { panel.appendChild(el('div', 'hint', t('boards.noneYet'))); return; }
 
             // ---- Board-Titel ----
             const titleLabel = el('label', null, t('boards.boardTitle'));
