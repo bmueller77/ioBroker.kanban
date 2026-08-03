@@ -117,6 +117,8 @@
   "boards.members": "Members (assignable users)",
   "boards.membersHint": "Each board needs at least one selected user.",
   "boards.membersRequiredShort": "Each board needs at least one user.",
+  "boards.memberRemoveTitle": "Remove member",
+  "boards.memberRemoveMsg": "{count} card(s) have only {names} assigned. Those cards keep the assignment but no longer appear in the person filter. Remove anyway?",
   "boards.deleteBoard": "Delete board",
   "boards.close": "Close",
   "boards.save": "Save",

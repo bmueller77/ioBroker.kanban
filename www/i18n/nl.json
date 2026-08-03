@@ -117,6 +117,8 @@
   "boards.members": "Leden (toewijsbare gebruikers)",
   "boards.membersHint": "Elk board heeft minstens één gebruiker nodig.",
   "boards.membersRequiredShort": "Elk board heeft minstens één gebruiker nodig.",
+  "boards.memberRemoveTitle": "Lid verwijderen",
+  "boards.memberRemoveMsg": "{count} kaart(en) hebben alleen {names} als verantwoordelijke. Die kaarten behouden de toewijzing, maar verschijnen niet meer in het personenfilter. Toch verwijderen?",
   "boards.deleteBoard": "Bord verwijderen",
   "boards.close": "Sluiten",
   "boards.save": "Opslaan",

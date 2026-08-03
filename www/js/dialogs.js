@@ -1,6 +1,6 @@
 // Karten-Dialog + Board-/Spalten-Verwaltung
 
-import { openColorPicker } from './colorpicker.js';
+import { openColorPicker, closeColorPicker, colorPickerOpen } from './colorpicker.js';
 import { api } from './api.js';
 import { t } from './i18n.js';
 import { boardUsers, contrastText, mdiIcon, MDI } from './board.js';
@@ -560,6 +560,7 @@ export function initDialogs(state, actions) {
     // ---------------------------------------------------------- Board-Verwaltung
 
     const bdlg = document.getElementById('boardDialog');
+    let bdlgCancel = null;   // Escape-Handler des Board-Dialogs (haengt an der Closure)
 
     async function openBoardManager() {
         const body = document.getElementById('boardDialogBody');
@@ -598,8 +599,13 @@ export function initDialogs(state, actions) {
         };
 
         async function loadEdit(id) {
-            try { editBoard = await api(`api/boards/${encodeURIComponent(id)}`); }
-            catch (e) { editBoard = null; }
+            // Ohne id wuerde die Anfrage auf der Board-LISTE landen: ein Array ohne
+            // .title, das dann als "undefined" im Titelfeld erscheint.
+            if (!id) { editBoard = null; return; }
+            try {
+                const b = await api(`api/boards/${encodeURIComponent(id)}`);
+                editBoard = b && b.id ? b : null;
+            } catch (e) { editBoard = null; }
         }
 
         // Aenderungen des bearbeiteten Boards einsammeln und speichern
@@ -609,6 +615,30 @@ export function initDialogs(state, actions) {
             if (memberWrap && !members.length) {
                 await confirmDialog({ title: t('boards.members'), message: t('boards.membersRequiredShort'), ok: t('confirm.ok') });
                 return false;
+            }
+            // Wer aus der Mitgliederliste fliegt, bleibt auf seinen Karten stehen —
+            // die tauchen dann aber nicht mehr im Personenfilter auf. Vorher fragen.
+            if (members) {
+                const dropped = (editBoard.members || []).filter(n => !members.includes(n));
+                if (dropped.length) {
+                    const trashIds = (editBoard.columns || []).filter(c => c.isTrash).map(c => c.id);
+                    const orphans = (editBoard.cards || []).filter(c =>
+                        !trashIds.includes(c.columnId)
+                        && (c.assignees || []).length
+                        && (c.assignees || []).every(a => dropped.includes(a)));
+                    if (orphans.length) {
+                        const names = dropped.map(n => {
+                            const u = (state.users || []).find(x => x.name === n);
+                            return (u && u.displayName) || n;
+                        }).join(', ');
+                        const go = await confirmDialog({
+                            title: t('boards.memberRemoveTitle'),
+                            message: t('boards.memberRemoveMsg', { count: orphans.length, names }),
+                            ok: t('confirm.ok'),
+                        });
+                        if (go !== true) return false;
+                    }
+                }
             }
             const columns = [...colBox.children].map(row => ({
                 id: row.dataset.colId || undefined,
@@ -991,6 +1021,18 @@ export function initDialogs(state, actions) {
         validateMembers();
 
         activate('board');
+        // Escape: erst den Farbwaehler schliessen, danach nur mit Rueckfrage den
+        // ganzen Dialog verwerfen — sonst sind ungespeicherte Spalten und Labels weg.
+        // Der Handler haengt an der Closure dieses Aufrufs und wird darum jedes Mal
+        // ausgetauscht.
+        if (bdlgCancel) bdlg.removeEventListener('cancel', bdlgCancel);
+        bdlgCancel = ev => {
+            if (colorPickerOpen()) { ev.preventDefault(); closeColorPicker(); return; }
+            if (!dirty) return;
+            ev.preventDefault();
+            guardUnsaved().then(ok => { if (ok) bdlg.close(); });
+        };
+        bdlg.addEventListener('cancel', bdlgCancel);
         bdlg.showModal();
     }
     // ---------------------------------------------------------- Ansicht teilen

@@ -116,10 +116,15 @@ Hier wird festgelegt, **welche Personen es gibt**, die Liste gilt für die gesam
 
 | Feld | Bedeutung |
 |---|---|
-| **name** | Interne ID, klein geschrieben, ohne Umlaute (z. B. `bjoern`). Wird in URL-Parametern und Zuweisungen verwendet. |
-| **displayName** | Anzeigename (z. B. `Björn`). |
-| **email** | Optional. Zieladresse für E-Mail-Benachrichtigungen. |
+| **ID** (`name`) | Interne ID, klein geschrieben, ohne Umlaute (z. B. `bjoern`). Wird in URL-Parametern und Zuweisungen verwendet. |
+| **Anzeigename** (`displayName`) | Anzeigename (z. B. `Björn`). |
+| **E-Mail** (`email`) | Optional. Zieladresse für E-Mail-Benachrichtigungen. |
 | **notify…** | Neun Checkboxen je Benutzer für die Benachrichtigungssteuerung, siehe [Tab „E-Mail", Benachrichtigungen](#tab-e-mail--benachrichtigungen). |
+
+Eine neue Zeile legst du über das **„+"** in der Kopfzeile der Tabelle an, das Papierkorb-Symbol am Zeilenende entfernt sie wieder (ohne Rückfrage). Zeilen ohne ID werden beim Speichern verworfen. Eine frische Instanz bringt zwei Beispielbenutzer `user1` und `user2` mit.
+
+> **Die ID ist der Schlüssel.** Über die Spalte *ID* finden Boards und Karten ihre Personen. Änderst du sie nachträglich, gilt der Benutzer für bestehende Boards als **neue** Person: Das Board verliert diesen Eintrag aus seiner Mitgliederliste. Damit daraus keine Sackgasse wird, sind in einem Board, dessen Mitgliederliste ins Leere zeigt, **alle** Benutzer zuweisbar – du kannst also weiterarbeiten und die Mitglieder in Ruhe unter ⚙ → *Board* wieder anhaken. Karten behalten ihre alten Zuständigen; diese erscheinen dann aber nicht mehr im Personenfilter.
+> *Empfehlung:* Benutzer-IDs vor dem ersten Board festlegen. Der **Anzeigename** lässt sich jederzeit gefahrlos ändern.
 
 > **Nicht hier:** Benutzerfarbe, Avatarbild und die Zuordnung zu einzelnen Boards werden seit 0.2.0 direkt in der Weboberfläche gepflegt – siehe [Benutzer im Board](#benutzer-im-board).
 

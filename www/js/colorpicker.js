@@ -157,3 +157,9 @@ export function closeColorPicker() {
     openPop.pop.remove();
     openPop = null;
 }
+
+/** Ist gerade ein Farbwähler offen? Dialoge fragen das bei Escape ab, damit die
+ *  Taste erst das Popover schliesst und nicht gleich den ganzen Dialog verwirft. */
+export function colorPickerOpen() {
+    return !!openPop;
+}

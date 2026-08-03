@@ -117,6 +117,8 @@
   "boards.members": "Mitglieder (zuweisbare Benutzer)",
   "boards.membersHint": "Pro Board muss mindestens ein Benutzer ausgewählt sein.",
   "boards.membersRequiredShort": "Jedes Board braucht mindestens einen Benutzer.",
+  "boards.memberRemoveTitle": "Mitglied entfernen",
+  "boards.memberRemoveMsg": "{count} Karte(n) haben nur {names} als zuständige Person. Diese Karten behalten die Zuordnung, tauchen aber nicht mehr im Personenfilter auf. Trotzdem entfernen?",
   "boards.deleteBoard": "Board löschen",
   "boards.close": "Schließen",
   "boards.save": "Speichern",

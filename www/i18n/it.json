@@ -117,6 +117,8 @@
   "boards.members": "Membri (utenti assegnabili)",
   "boards.membersHint": "Ogni bacheca deve avere almeno un utente.",
   "boards.membersRequiredShort": "Ogni bacheca richiede almeno un utente.",
+  "boards.memberRemoveTitle": "Rimuovi membro",
+  "boards.memberRemoveMsg": "{count} scheda/e hanno solo {names} come responsabile. Queste schede mantengono l’assegnazione ma non compaiono più nel filtro per persona. Rimuovere comunque?",
   "boards.deleteBoard": "Elimina bacheca",
   "boards.close": "Chiudi",
   "boards.save": "Salva",

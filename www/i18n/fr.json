@@ -117,6 +117,8 @@
   "boards.members": "Membres (utilisateurs assignables)",
   "boards.membersHint": "Chaque tableau doit comporter au moins un utilisateur.",
   "boards.membersRequiredShort": "Chaque tableau nécessite au moins un utilisateur.",
+  "boards.memberRemoveTitle": "Retirer le membre",
+  "boards.memberRemoveMsg": "{count} carte(s) n’ont que {names} comme responsable. Ces cartes conservent l’affectation mais n’apparaissent plus dans le filtre par personne. Retirer quand même ?",
   "boards.deleteBoard": "Supprimer le tableau",
   "boards.close": "Fermer",
   "boards.save": "Enregistrer",

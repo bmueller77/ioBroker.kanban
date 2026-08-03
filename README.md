@@ -165,6 +165,7 @@ Details: [Security & access control](docs/en/README.md#security--access-control)
   - The **`action` state can be switched off** in the instance settings ("Webhooks (in)"). It executes the full command vocabulary without a token, so installations that do not use it can close that door
   - **Irreversible commands** (`deleteBoard`, `emptyTrash`, `purgeCard`) are logged with their source, no matter which route they came in through
   - All **log messages are now in English** (they were partly German before), following the usual ioBroker convention. Texts in the web UI and in the admin config stay translated
+  - Fixes from the 0.3.0 acceptance test: a board whose member list points nowhere — after renaming user IDs in the admin — now offers **all** users instead of becoming unusable (assignee is a required field); user rows without an ID are dropped instead of showing up as a member called "null"; the board dialog no longer shows "undefined" as the title on a fresh instance; removing a member who is the only assignee of cards now asks first; **Escape** closes an open colour picker instead of discarding the whole settings dialog, and asks before dropping unsaved changes
 
 - **0.2.1**
   - Now runs on **Express 5** (updated dependency)

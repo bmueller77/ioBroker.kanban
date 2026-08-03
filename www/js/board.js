@@ -574,8 +574,15 @@ export function contrastText(bg) {
 
 // Zuweisbare Benutzer des aktiven Boards: Mitglieder, sonst (leer) alle.
 export function boardUsers(state) {
+    const all = state.users || [];
     const m = state.board && Array.isArray(state.board.members) ? state.board.members : [];
-    return m.length ? (state.users || []).filter(u => m.includes(u.name)) : (state.users || []);
+    if (!m.length) return all;
+    const hit = all.filter(u => m.includes(u.name));
+    // Zeigt die Mitgliederliste ins Leere — etwa weil die Benutzer-IDs in den
+    // Instanz-Einstellungen umbenannt wurden —, sind alle Benutzer zuweisbar.
+    // Sonst haette das Board keine Zustaendigen mehr und es liesse sich keine
+    // Karte mehr anlegen (Zustaendig ist Pflichtfeld).
+    return hit.length ? hit : all;
 }
 
 /**

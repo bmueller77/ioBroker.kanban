@@ -116,10 +116,15 @@ This is where you define **which people exist**, the list applies to the entire 
 
 | Field | Meaning |
 |---|---|
-| **name** | Internal ID, lowercase, no special characters (e.g. `bjoern`). Used in URL parameters and assignments. |
-| **displayName** | Display name (e.g. `Björn`). |
-| **email** | Optional. Target address for e-mail notifications. |
+| **ID** (`name`) | Internal ID, lowercase, no special characters (e.g. `bjoern`). Used in URL parameters and assignments. |
+| **Display name** (`displayName`) | Display name (e.g. `Björn`). |
+| **E-mail** (`email`) | Optional. Target address for e-mail notifications. |
 | **notify…** | Nine per-user checkboxes controlling notifications, see [Tab "Email", notifications](#tab-email--notifications). |
+
+Add a row with the **"+"** in the table header; the bin icon at the end of a row removes it again (without asking). Rows without an ID are dropped when saving. A fresh instance ships with two example users, `user1` and `user2`.
+
+> **The ID is the key.** Boards and cards find their people through the *ID* column. If you change it later, the user counts as a **new** person for existing boards, and the board loses that entry from its member list. So that this is not a dead end, **all** users are assignable in a board whose member list points nowhere – you can keep working and re-tick the members under ⚙ → *Board* whenever you like. Cards keep their existing assignees, but those no longer show up in the person filter.
+> *Recommendation:* settle the user IDs before creating the first board. The **display name** can be changed at any time.
 
 > **Not here:** user colour, avatar image and the assignment to individual boards are maintained directly in the web UI since 0.2.0 – see [Users in the board](#users-in-the-board).
 
