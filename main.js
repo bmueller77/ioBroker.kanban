@@ -48,7 +48,7 @@ class Kanban extends utils.Adapter {
             this._port = await this.webServer.start();
             await this.setStateAsync('info.connection', true, true);
         } catch (e) {
-            this.log.error(`Webserver konnte nicht starten: ${e.message}`);
+            this.log.error(`Web server failed to start: ${e.message}`);
             return;
         }
 
@@ -56,11 +56,11 @@ class Kanban extends utils.Adapter {
         // Der action-State ist eine vollwertige Kommando-Schnittstelle (inkl. Löschen).
         // Wer ihn nicht braucht, kann ihn in den Instanz-Einstellungen abschalten.
         if (this.config.actionStateEnabled === false) {
-            this.log.info('action-State ist deaktiviert — Kommandos nur über REST, Webhooks und sendTo.');
+            this.log.info('action state is disabled - commands are only accepted via REST, webhooks and sendTo.');
         } else {
             await this.subscribeStatesAsync('action');
         }
-        this.log.info(`Kanban bereit — UI: ${this._baseUrl()}/`);
+        this.log.info(`Kanban ready - UI: ${this._baseUrl()}/`);
     }
 
     /** Sprache ermitteln: Instanz-Einstellung `language` (leer/'auto' = System),
@@ -74,7 +74,7 @@ class Kanban extends utils.Adapter {
             } catch (e) { lang = 'en'; }
         }
         this._language = lang || 'en';
-        this.log.info(`Sprache / language: ${this._language}`);
+        this.log.info(`Language: ${this._language}`);
     }
 
     /** Zeitzone ermitteln (für Kalender-Anhänge). ioBroker führt keine eigene
@@ -88,7 +88,7 @@ class Kanban extends utils.Adapter {
             if (cfgTz) tz = cfgTz;
         } catch (e) { /* System-Zeitzone genügt */ }
         this._timezone = tz || 'Europe/Berlin';
-        this.log.info(`Zeitzone: ${this._timezone}`);
+        this.log.info(`Time zone: ${this._timezone}`);
     }
 
     /** Feiertage für die Arbeitstag-Wiederholungen einrichten. Nutzt – falls
@@ -101,7 +101,7 @@ class Kanban extends utils.Adapter {
             if (obj && obj.native) native = obj.native;
         } catch (e) { /* Adapter nicht vorhanden -> Default */ }
         const info = holidays.configure(native);
-        this.log.info(`Feiertage: Quelle ${info.source}, ${info.count} relevante Feiertage/Jahr`);
+        this.log.info(`Public holidays: source ${info.source}, ${info.count} relevant holidays per year`);
     }
 
     /** Secret für den Schreibschutz der /api-Routen. Wird in index.html als
@@ -138,7 +138,7 @@ class Kanban extends utils.Adapter {
                 secret = st && st.val ? String(st.val) : newSecret();
                 await this.writeFileAsync(this.namespace, 'apisecret.json',
                     Buffer.from(JSON.stringify({ secret }), 'utf8'));
-                this.log.info('API-Secret liegt jetzt im Dateispeicher; der State info.apiSecret wird nicht mehr befüllt.');
+                this.log.info('API secret moved to the file storage; the state info.apiSecret is no longer filled.');
             }
 
             this._apiSecret = secret;
@@ -148,7 +148,7 @@ class Kanban extends utils.Adapter {
             if (cur && cur.val) await this.setStateAsync('info.apiSecret', '', true);
         } catch (e) {
             this._apiSecret = newSecret();
-            this.log.warn(`API-Secret nicht persistierbar, nutze flüchtiges: ${e.message}`);
+            this.log.warn(`Could not persist the API secret, using a volatile one: ${e.message}`);
         }
     }
 
@@ -179,7 +179,7 @@ class Kanban extends utils.Adapter {
         const board = b => boardWithDueAt(b, tz());
         // Unumkehrbare Kommandos immer protokollieren — egal über welchen Weg sie kommen
         if (cmd === 'deleteBoard' || cmd === 'emptyTrash' || cmd === 'purgeCard') {
-            this.log.info(`Kommando '${cmd}'${boardId ? ` auf Board '${boardId}'` : ''}${cardId ? `, Karte '${cardId}'` : ''} — Quelle: ${source || 'unbekannt'}`);
+            this.log.info(`Command '${cmd}'${boardId ? ` on board '${boardId}'` : ''}${cardId ? `, card '${cardId}'` : ''} - source: ${source || 'unknown'}`);
         }
         switch (cmd) {
             case 'listBoards':
@@ -232,15 +232,15 @@ class Kanban extends utils.Adapter {
         try {
             parsed = JSON.parse(state.val);
         } catch (e) {
-            this.log.warn(`action-State enthält kein gültiges JSON: ${e.message}`);
+            this.log.warn(`action state does not contain valid JSON: ${e.message}`);
             await this.setStateAsync('action', '', true);
             return;
         }
         try {
             await this.handleCommand(parsed.cmd, parsed, 'action-state');
-            this.log.debug(`action-Kommando '${parsed.cmd}' ausgeführt`);
+            this.log.debug(`action command '${parsed.cmd}' executed`);
         } catch (e) {
-            this.log.warn(`action-Kommando fehlgeschlagen: ${e.message}`);
+            this.log.warn(`action command failed: ${e.message}`);
         }
         await this.setStateAsync('action', '', true);
     }
