@@ -57,14 +57,17 @@ A full-featured **Kanban board as a dedicated ioBroker adapter**. The adapter sh
 
 ## Installation & first steps
 
-1. Install the adapter and create an **instance** (`kanban.0`).
-2. In the instance settings, adjust **port** (default `8095`), **IP binding** (default `0.0.0.0`) and **base URL** as needed.
-3. Open the web UI: **`http://<host>:8095/`**
-4. On first launch there is no board yet. Use the **gear icon (⚙)** at the top right to create one. Every new board comes with three default columns:
+1. **Install the adapter.** In the ioBroker admin under *Adapters*, filter for `kanban` and install it (for a GitHub install see [Installation in the main README](../../README.md#installation)).
+2. **Create an instance.** Open the **⋮** menu on the adapter tile and pick **"+"**. ioBroker creates the instance (`kanban.0`) and shows a console window you can close after `Process exited with code 0`. Repeat for every further instance (`kanban.1`, `kanban.2`, …).
+3. **Set the port.** Under *Instances*, open the gear of the instance, tab **General**: adjust **port** (default `8095`), **IP binding** (default `0.0.0.0`) and **base URL**.
+   **With several instances:** each needs its own port. If the configured one is taken, the adapter still starts and falls back to the next free port – but the instance list keeps showing the *configured* port, and the link there leads to the wrong instance. The port actually in use is in the log (`Port 8095 is in use - falling back to free port 8096`). Enter it permanently afterwards.
+4. **Check the users.** Tab **Users**: a fresh instance ships with two example users, `user1` and `user2`, which appear as chips in the board. Rename them **before** creating the first board – see [Tab "Users"](#tab-users) for why.
+5. **Open the web UI:** **`http://<host>:<port>/`**
+6. On first launch there is no board yet. Use the **gear icon (⚙)** at the top right to create one. Every new board comes with three default columns:
    - **To do** (`todo`)
    - **In progress** (`doing`)
    - **Done** (`done`, flagged as the "Done" column)
-5. Create your first task with **"+ Card"**.
+7. Create your first task with **"+ Card"**.
 
 **Multiple instances:** Every instance (`kanban.0`, `kanban.1`, …) is a fully independent system with its own port, language, users and boards – **no data is shared**. Useful e.g. for separate areas (family vs. club) or a test system next to the production board.
 
@@ -74,7 +77,9 @@ A full-featured **Kanban board as a dedicated ioBroker adapter**. The adapter sh
 
 ## Part A: Instance settings (ioBroker admin)
 
-These settings live in the **ioBroker admin** under *Instances → `kanban.0` → gear*. They apply to the **entire instance** and only take effect on **Save**, the adapter restarts in the process. The sections below match the five tabs of the configuration page.
+These settings live in the **ioBroker admin** under *Instances → `kanban.0` → gear*.
+
+> Throughout this document `kanban.0` stands for **your** instance. With a second instance all paths and states read `kanban.1`, `kanban.2`, … accordingly. They apply to the **entire instance** and only take effect on **Save**, the adapter restarts in the process. The sections below match the five tabs of the configuration page.
 
 ### Tab "General"
 
@@ -207,6 +212,15 @@ The **"Generate new token"** button (above the table) automatically adds a new r
 
 Invalid token → HTTP `401`. Board not allowed → HTTP `403`.
 
+**Quick test:** a single call tells you whether a freshly created token works – for the standard case there is no need to jump to [Part C](#webhooks--inbound):
+
+```bash
+curl -X POST "http://<host>:8095/webhook/<YOUR_TOKEN>/action" \
+  -H 'Content-Type: application/json' -d '{"cmd":"listBoards"}'
+```
+
+If a **board list** comes back, the token is valid. All further commands and the complete list of responses and error codes are in [Part C](#webhooks--inbound).
+
 ### Tab "Webhooks (out)"
 
 The adapter can send an **HTTP POST** to arbitrary URLs on every event, e.g. to Node-RED, IFTTT, a chat service or your own scripts.
@@ -245,7 +259,7 @@ At the very top of the Board tab sits a row with four elements:
 | **Board picker** | Selects which board you are **editing**. The board displayed in the background does not change. If you have unsaved changes, the dialog asks first (save, discard, cancel). |
 | **Arrow button** | Switches the **displayed** board to the one you are editing, while the dialog stays open. It is greyed out when the active board is already selected. |
 | **Name field + "Create"** | Creates a new board. It immediately becomes the board you are editing and starts with all known users as members plus its own trash column. |
-| **"Delete board"** (at the bottom) | Deletes the board being edited after a confirmation. The last remaining board cannot be deleted. |
+| **"Delete board"** (at the bottom) | Deletes the board being edited after a confirmation. The last remaining board cannot be deleted **in the web UI**. Via API and webhook (`deleteBoard`) that lock does **not** apply: the last board can be removed there as well, after which the instance shows "No board yet" again. |
 
 Below that follow the board title, the member selection (see [Users in the board](#users-in-the-board)), columns, labels, the notification link target and the [Move done cards to the trash](#cleanup) section.
 
@@ -259,6 +273,7 @@ Columns can be created, reordered by drag & drop, renamed and deleted. **Deletin
 
 Above the column list sits a header row with the field names (**Title · Max · WIP · New · Done**). Every heading carries a tooltip with the full explanation.
 
+- **Column ID:** besides its visible title every column carries an **immutable ID**. The three default columns are called `todo`, `doing` and `done`, newly created columns get a generated ID like `col_msd0mu8tkck68`. **Renaming keeps the ID**, so shared `columns=` links and `moveCard` calls keep working unchanged. You can look the IDs up via `GET /api/boards/<id>` (see [REST API](#rest-api)).
 - **Column width:** columns always share the **full width of the window** – two columns therefore each take up half. Only once less than 280 px would be left per column does the board become horizontally scrollable.
 - **Display limit (Max):** a number > 0 shows only the first N cards in that column; below them a discreet `+X more` hint appears. `0` = show all. Useful so a long backlog does not blow up the board. The counter in the column header still counts **all** cards of the column.
 - **WIP limit** (work in progress): a number > 0 caps the recommended card count. If exceeded, the column warns visually (counter & header are highlighted). `0` = no limit. The limit is a **warning**, not a hard block. It always refers to the **total** number of cards in the column, even while a person/label filter is showing fewer.
@@ -277,6 +292,7 @@ Every board has a **"Trash" system column**. Deleted cards no longer vanish stra
 - **What ends up there:** anything you remove with the **Delete** button in the card editor, cards you **drag** into the trash, and the cards from the [automatic cleanup](#cleanup).
 - **Bringing a card back:** drag it out of the trash or tap the **restore** icon on the card. It returns to the first open column.
 - **Deleting for good right away:** the second icon on the card removes it irreversibly. The broom button in the column header empties the **entire** trash. Both ask first.
+- **Reading the confirmations correctly:** the confirmation when deleting a card simply says "Really delete this card?" – but since 0.3.0 that **always means the trash**, the card is still there. Truly irreversible are only the second icon on a card **inside** the trash and the broom button in the column header; their dialogs say so explicitly.
 - **Remaining time:** every card shows how long it will still be kept, for example "30 days left".
 - **Its own look:** the column is deliberately kept neutral grey, independent of theme and accent colour, so it stands apart from the working columns.
 - **Special status:** the trash always sits on the far right, cannot be renamed, moved or deleted and does not show up in the column configuration. It has no WIP limit, no "+ Add card" link and no sort toggle; it is sorted by deletion time, so the card whose deadline expires first sits on top. It does not count towards the WIP limit or the counters of other columns.
@@ -318,11 +334,11 @@ A card has the following content fields (settable via the API under the same nam
 | Field | Type | Description |
 |---|---|---|
 | **title** | text | Task title (required). |
-| **description** | Markdown | Description, rendered as Markdown (links, images, lists …). Embedded HTML is sanitized before display (XSS protection). |
+| **description** | Markdown | Description, rendered as Markdown (links, images, lists …). As soon as the field contains something, the editor shows a **live preview** of the rendered Markdown **below the input**, so you see the result while typing. Embedded HTML is sanitized before display (XSS protection). |
 | **due** | `YYYY-MM-DD` | Due date. Overdue / soon-due cards are highlighted. |
 | **dueTime** | `HH:MM` | Optional time of day. Enabled via a checkbox, shown on the card after the date. Only effective together with `due`. |
-| **priority** | `0`/`1`/`2` | Normal / High / Urgent. |
-| **assignees** | list of user IDs | Assignees. Determine who receives notifications. **Required:** the UI needs at least one assignee before a card can be saved. Required fields are marked with a red `*`. Cards created via API/webhook may stay unassigned. |
+| **priority** | `0`/`1`/`2` | Normal / High / Urgent. On the card this shows as a badge below the title (before due date and location): **Normal** shows nothing, **High** an orange `!`, **Urgent** a red `!!`. Other values are rejected, via the API with an error – see [Responses & errors](#responses--errors). |
+| **assignees** | list of user IDs | Assignees. Determine who receives notifications. **Required:** the UI needs at least one assignee before a card can be saved. Required fields are marked with a red `*`. Cards created via API/webhook may stay unassigned. If a board's **member list points nowhere** (e.g. after renaming a user ID), **all** users are assignable since 0.3.0 – that way no dead end arises in which no card can be saved at all. |
 | **labels** | list of label IDs | Colored tags. Labels are managed per board (create, rename, recolor, delete). |
 | **color** | hex color | Colored bar on the left edge of the card. Chosen via an embedded color picker (color field + hue slider + hex input) or presets. |
 | **link** | URL | A link. The card shows a **type-dependent icon** – see [Link types](#link-types). |
@@ -442,7 +458,9 @@ On narrow screens the board stacks the columns vertically; each column collapses
 
 ### Sharing views / URL parameters
 
-The **monitor icon** in the header opens the **"Views"** dialog. There you assemble a filtered view (board, users (multiple), labels (multiple), visible columns, done-card limit, controls to hide) and get a **ready-to-copy URL** below. Ideal for embedding in Lovelace (webpage card) or for sharing.
+The **monitor icon** in the header opens the **"Views"** dialog. There you assemble a filtered view and get a **ready-to-copy URL** below. Ideal for embedding in Lovelace (webpage card) or for sharing.
+
+The dialog covers the **most common** filters: board, users (multiple), labels (multiple) including the switch between **"Hide these labels"** (blacklist) and **"Show only these labels"** (whitelist), visible columns, the done-card limit (`doneLimit`) and the controls to hide (`hideSettings`, `embed`). **Not** in the dialog, but available **as URL parameters only**, are `theme`, `accent`, `lang`, `card` and `focus` – append those to the generated address by hand if you need them.
 
 ![Views dialog](img/share.png)
 
@@ -451,7 +469,7 @@ All parameters can also be appended to the URL directly:
 | Parameter | Effect |
 |---|---|
 | `board=<id>` | Opens this board. Since 0.3.0 the address bar keeps track of the current board: switching via the board picker sets `?board=<id>` (no extra history entry, all other parameters are preserved), so the address can be copied and shared as is. |
-| `users=<name,name>` | **Person filter**: shows only cards assigned to at least one of these users (sets the header chips accordingly). `user=<name>` is the short form for a single user. |
+| `users=<name,name>` | **Person filter**: shows only cards assigned to at least one of these users (sets the header chips accordingly). `user=<name>` is the short form for a single user. **Careful:** the parameter overwrites the chip selection stored per board in the browser **for good** – it stays active on the next visit *without* the parameter. Reset it via the chips in the header bar. |
 | `label=<id,id>` | **Label blacklist** (multiple possible): hides cards that have one of these labels, new labels stay visible automatically. |
 | `onlyLabel=<id,id>` | **Label whitelist** (since 0.3.0): shows **only** cards carrying at least one of these labels – cards without a label drop out. Can be combined with `label=` (whitelist first, then blacklist). |
 | `columns=<id,id>` | Shows only these columns. Others are hidden. |
@@ -513,6 +531,27 @@ For integrations on the same network there is a REST API (the same one the web U
 | `POST /api/boards/<id>/cards/<cardId>/transfer` | Transfer a card to another board (`{ toBoard, toColumn?, mode: "move"\|"copy", assignees? }`). With `toBoard` = the same board and `mode: "copy"` the card is cloned in place. |
 
 > **Write access** to `/api` requires a token from 0.1.1 (`X-Kanban-Token`; the web UI sends it automatically), **reading** stays open on the LAN. Details and limits: [Security & access control](#security--access-control). For external access use the token-based [webhooks](#webhooks--inbound).
+
+#### Structure of a column object
+
+This is how `GET /api/boards/<id>` returns each column, and exactly how `PATCH /api/boards/<id>` expects it back:
+
+```json
+{ "id": "todo", "title": "To do", "maxVisible": 0, "wipLimit": 0, "isDone": false, "allowAdd": true }
+```
+
+| Field | Meaning |
+|---|---|
+| `id` | Immutable [column ID](#columns) (`todo`, `doing`, `done` or a generated one like `col_msd0mu8tkck68`). It survives renaming. |
+| `title` | The column title shown in the UI, freely editable. |
+| `maxVisible` | Display limit ("Max"): a number > 0 shows only the first N cards, `0` = all. |
+| `wipLimit` | WIP warning threshold, `0` = no limit. |
+| `isDone` | `true` = "Done" column (sets `doneAt` and triggers recurrences). |
+| `allowAdd` | `true` = the column shows the "+ Add card" link. |
+
+The **trash** appears as an additional column with `isTrash: true`. It is managed by the adapter itself and must **not** be sent along when writing.
+
+> **`PATCH` replaces the column list entirely.** There is no way to change a single column: read the current list via `GET /api/boards/<id>`, modify or extend it there and send the **complete** list back. Anything missing counts as deleted – the cards of that column then move to the first column of the board.
 
 ### Webhooks – inbound
 
@@ -609,6 +648,25 @@ PATCH  /webhook/<token>/boards/<id>/cards/<cardId>
 POST   /webhook/<token>/boards/<id>/cards/<cardId>
 POST   /webhook/<token>/boards/<id>/cards/<cardId>/move
 ```
+
+#### Responses & errors
+
+Every call – webhook as well as REST – answers with JSON. On success you get HTTP `200` with the affected object (card or board); commands without a result of their own, such as `emptyTrash`, report `{"ok":true}`. On failure the reason sits in the `error` field (the adapter emits these messages verbatim, in German):
+
+| Situation | Code | Response |
+|---|---|---|
+| Success | `200` | the affected object or `{"ok":true}` |
+| Token missing or invalid | `401` | `{"error":"invalid token"}` |
+| Board blocked for this token | `403` | `{"error":"Token darf Board '…' nicht ändern"}` |
+| Writing command without a board while the token is restricted to boards | `403` | `{"error":"token is limited to specific boards"}` |
+| Board does not exist | `404` | `{"error":"Board '…' existiert nicht"}` |
+| Card does not exist | `404` | `{"error":"Karte '…' existiert nicht"}` |
+| Column does not exist | `404` | `{"error":"Spalte '…' existiert nicht in Board '…'"}` |
+| Required field missing | `400` | `{"error":"title fehlt"}` |
+| Invalid date | `400` | `{"error":"due muss im Format YYYY-MM-DD vorliegen, nicht '…'"}` |
+| Invalid priority | `400` | `{"error":"priority kennt nur 0, 1 oder 2, nicht '…'"}` |
+
+> **New: stricter validation.** Up to 0.3.0 the adapter quietly straightened out bad input: an unknown `columnId` was bent onto the first column, an invalid `due` was simply dropped, and `getBoard` on an unknown board answered with `200` and `null`. All three now return an **error**. Automations relying on the old, forgiving behaviour need to be adjusted – in exchange, nothing silently ends up in the wrong place any more.
 
 ### Webhooks – outbound
 
@@ -821,6 +879,8 @@ The adapter executes the command and clears the state again.
 - **WebSocket `/ws`:** on every change the server sends a `dirty` message to all open views, which reload the affected board. All devices see changes almost instantly.
 - **Polling fallback:** if the WebSocket is unavailable, the UI periodically checks for changes using `?rev=`.
 - **Deep link:** `…/?board=<id>&card=<id>` opens the given card directly, this is how notification e-mails link ("Open card in board").
+- **Simultaneous editing:** the card editor works **without locking**. If two people save the same card shortly after one another, the **last** save wins; the first person's change is lost without any notice. For cards several people maintain, it pays to agree briefly on who currently has it open.
+- **After an adapter restart:** an open page **reconnects on its own** – which also covers every save of the instance settings, since that restarts the adapter. On top of that the view syncs whenever you switch back to the tab, and once a minute. Should a view still look stale, a reload fixes it.
 
 ### ioBroker states & objects
 
@@ -831,7 +891,7 @@ Besides the UI, the adapter creates states you can use in scripts, VIS/Lovelace 
 | `kanban.0.info.connection` | bool | Web server running. |
 | `kanban.0.lastEvent` | json | Last triggered event (`{event, ts, board, card, detail, link, dueAt}`), ideal as a script trigger. |
 | `kanban.0.action` | json (writable) | Command input, see [sendTo & action state](#sendto--action-state). |
-| `kanban.0.info.apiSecret` | string | Empty from 0.3.0 — the internal write token now lives in the adapter's file storage, no longer in this state. For scripts, use the tokens from "Webhooks (in)". |
+| `kanban.0.info.apiSecret` | string | From 0.3.0 the internal write token lives in the adapter's file storage, no longer in this state. On instances **upgraded from an older version** the state remains and stays **empty**; on **newly created** 0.3.0 instances it is **not created at all**. For scripts, use the tokens from "Webhooks (in)". |
 | `kanban.0.boards.<id>.data` | json | Full board (cards, columns, labels). |
 | `kanban.0.boards.<id>.rev` | number | Revision (increments on every change, for polling). |
 | `kanban.0.boards.<id>.cardCount` | number | Number of cards in the board. |
@@ -901,4 +961,7 @@ Translations live as **one file per language** under `www/i18n/` (e.g. `de.json`
 - **"Close" in the settings dialog discards changes.** The board manager only applies changes on **Save**; "Close" discards them without asking.
 - **The date in the edit dialog looks different from the card.** The input is the browser's native date field and follows the browser language; the display on the cards follows the instance's configured **date format**. Both mean the same date.
 - **A webhook command fails with "card 'undefined' does not exist".** Almost always the wrong ID field: it is `cardId` or `id`, **not** `card`.
+- **"Spalte '…' existiert nicht in Board '…'" when creating a card.** Since 0.3.0 an unknown `columnId` returns a `404` instead of silently dropping the card into the first column. The valid [column IDs](#columns) are listed by `GET /api/boards/<id>` – careful: a column's title is **not** its ID.
+- **"due muss im Format YYYY-MM-DD vorliegen".** The due date is only accepted as `YYYY-MM-DD` (e.g. `2026-07-20`), not as `20/07/2026` or a timestamp. An invalid date used to be discarded without comment, today the call fails with `400`.
+- **"priority kennt nur 0, 1 oder 2".** Priority knows exactly three values: `0` = normal, `1` = high, `2` = urgent. Text such as `"high"` or larger numbers are rejected with `400`.
 - **New columns missing in a shared URL.** The `columns=` filter is static. If a column is added later, the view must be shared again. In the "Views" dialog itself, columns are detected live.

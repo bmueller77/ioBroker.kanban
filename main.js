@@ -177,20 +177,21 @@ class Kanban extends utils.Adapter {
         const tz = () => this._timezone || 'Europe/Berlin';
         const card = c => cardWithDueAt(c, tz());
         const board = b => boardWithDueAt(b, tz());
-        // Unumkehrbare Kommandos immer protokollieren — egal über welchen Weg sie kommen
-        if (cmd === 'deleteBoard' || cmd === 'emptyTrash' || cmd === 'purgeCard') {
-            this.log.info(`Command '${cmd}'${boardId ? ` on board '${boardId}'` : ''}${cardId ? `, card '${cardId}'` : ''} - source: ${source || 'unknown'}`);
-        }
         switch (cmd) {
             case 'listBoards':
             case 'getBoards':
                 return this.store.listBoards();
-            case 'getBoard':
-                return board(this.store.getBoard(boardId));
+            case 'getBoard': {
+                const b = this.store.getBoard(boardId);
+                // Nicht still null liefern: ein Skript, das nur den Statuscode prüft,
+                // hielte das sonst für einen Erfolg.
+                if (!b) throw new Error(`Board '${boardId}' existiert nicht`);
+                return board(b);
+            }
             case 'addBoard':
                 return this.store.createBoard({ id: payload.id, title: payload.title });
             case 'deleteBoard':
-                await this.store.deleteBoard(boardId);
+                await this.store.deleteBoard(boardId, source);
                 return { ok: true };
             case 'addCard':
                 return card(this.store.addCard(boardId, payload, source));
@@ -257,7 +258,11 @@ class Kanban extends utils.Adapter {
             let name = 'agent';
             for (let i = 1; tokens.some(t => t && t.name === name); i++) name = `agent${i}`;
             tokens.push({ name, token, allowedBoards: '*', enabled: true });
-            if (obj.callback) this.sendTo(obj.from, obj.command, { inboundTokens: tokens }, obj.callback);
+            // jsonConfig übernimmt bei useNative nur ein Feld namens `native` in die
+            // Konfiguration; ohne diese Hülle blieb der Button wirkungslos.
+            if (obj.callback) {
+                this.sendTo(obj.from, obj.command, { native: { inboundTokens: tokens }, saveConfig: true }, obj.callback);
+            }
             return;
         }
 

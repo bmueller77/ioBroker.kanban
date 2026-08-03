@@ -139,7 +139,7 @@
   "share.generatedUrl": "URL générée",
   "share.copy": "Copier",
   "share.copied": "Copié ✓",
-  "confirm.deleteCard": "Vraiment supprimer cette carte ?",
+  "confirm.deleteCard": "Déplacer cette carte vers la corbeille ? Vous pourrez la restaurer pendant 30 jours.",
   "confirm.deleteBoard": "Supprimer le tableau « {title} » avec toutes ses cartes ?",
   "error.moveFailed": "Échec du déplacement : {msg}",
   "error.saveFailed": "Échec de l'enregistrement : {msg}",

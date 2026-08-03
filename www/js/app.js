@@ -352,8 +352,9 @@ async function init() {
     // URL-Vorbelegung des User-Filters (?users= oder ?user=) fuer das Startboard
     const urlUsers = (qs.get('users') || qs.get('user') || '').split(',').filter(Boolean);
     if (urlUsers.length && state.board) {
+        // Nur fuer diesen Aufruf setzen, nicht speichern: ein geteilter Link soll die
+        // persoenliche Chip-Auswahl des Geraets nicht dauerhaft ueberschreiben.
         state.usersFilter = urlUsers;
-        saveUserFilter(state.board.id, urlUsers);
         render();
     }
 
@@ -383,7 +384,9 @@ async function init() {
             else if (!state.board) loadBoards().then(() => loadBoard(boardId, true));
             else loadBoards().then(renderHeader);
         },
-        () => refreshCurrent(),
+        // Waehrend eines Adapter-Neustarts schlaegt der Abgleich fehl; das ist normal
+        // und darf den naechsten Versuch nicht verhindern.
+        () => refreshCurrent().catch(() => {}),
     );
 
     render();

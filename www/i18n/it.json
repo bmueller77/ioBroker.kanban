@@ -139,7 +139,7 @@
   "share.generatedUrl": "URL generato",
   "share.copy": "Copia",
   "share.copied": "Copiato ✓",
-  "confirm.deleteCard": "Eliminare davvero questa scheda?",
+  "confirm.deleteCard": "Spostare questa scheda nel cestino? Potrai ripristinarla per 30 giorni.",
   "confirm.deleteBoard": "Eliminare la bacheca \"{title}\" con tutte le sue schede?",
   "error.moveFailed": "Spostamento non riuscito: {msg}",
   "error.saveFailed": "Salvataggio non riuscito: {msg}",

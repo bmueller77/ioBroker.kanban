@@ -139,7 +139,7 @@
   "share.generatedUrl": "Generated URL",
   "share.copy": "Copy",
   "share.copied": "Copied ✓",
-  "confirm.deleteCard": "Really delete this card?",
+  "confirm.deleteCard": "Move this card to the trash? You can restore it from there for 30 days.",
   "confirm.deleteBoard": "Delete board \"{title}\" with all its cards?",
   "error.moveFailed": "Move failed: {msg}",
   "error.saveFailed": "Save failed: {msg}",

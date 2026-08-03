@@ -139,7 +139,7 @@
   "share.generatedUrl": "Generierte URL",
   "share.copy": "Kopieren",
   "share.copied": "Kopiert ✓",
-  "confirm.deleteCard": "Karte wirklich löschen?",
+  "confirm.deleteCard": "Karte in den Papierkorb verschieben? Von dort ist sie 30 Tage lang wiederherstellbar.",
   "confirm.deleteBoard": "Board \"{title}\" mit allen Karten löschen?",
   "error.moveFailed": "Verschieben fehlgeschlagen: {msg}",
   "error.saveFailed": "Speichern fehlgeschlagen: {msg}",

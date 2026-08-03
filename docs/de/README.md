@@ -57,14 +57,17 @@ Ein vollwertiges **Kanban-Board als eigener ioBroker-Adapter**. Der Adapter brin
 
 ## Installation & erste Schritte
 
-1. Adapter installieren und eine **Instanz** anlegen (`kanban.0`).
-2. In den Instanzeinstellungen ggf. **Port** (Standard `8095`), **IP-Bindung** (Standard `0.0.0.0`) und **Basis-URL** anpassen.
-3. Web-UI öffnen: **`http://<host>:8095/`**
-4. Beim ersten Start ist noch kein Board vorhanden. Über das **Zahnrad-Symbol (⚙)** oben rechts ein neues Board anlegen. Jedes neue Board erhält automatisch drei Standardspalten:
+1. **Adapter installieren.** Im ioBroker-Admin unter *Adapter* nach `kanban` filtern und den Adapter installieren (bei GitHub-Installation siehe [Installation im Haupt-README](../../README.md#installation)).
+2. **Instanz anlegen.** Auf der Adapter-Kachel das Menü **⋮** öffnen und **„+"** wählen. ioBroker legt die Instanz an (`kanban.0`) und zeigt dabei ein Konsolenfenster, das nach `Process exited with code 0` geschlossen werden kann. Für jede weitere Instanz (`kanban.1`, `kanban.2`, …) denselben Weg noch einmal gehen.
+3. **Port festlegen.** Unter *Instanzen* das Zahnrad der Instanz öffnen, Tab **Allgemein**: **Port** (Standard `8095`), **IP-Bindung** (Standard `0.0.0.0`) und **Basis-URL** anpassen.
+   **Bei mehreren Instanzen:** Jede braucht einen eigenen Port. Ist der eingetragene belegt, startet der Adapter trotzdem und weicht auf den nächsten freien Port aus – die Instanzliste zeigt dann aber weiter den *eingetragenen* Port, und der Link dort führt auf die falsche Instanz. Der tatsächlich benutzte Port steht im Log (`Port 8095 is in use - falling back to free port 8096`). Trage ihn danach fest ein.
+4. **Benutzer prüfen.** Tab **Benutzer**: Eine frische Instanz bringt zwei Beispielbenutzer `user1` und `user2` mit, die im Board als Chips erscheinen. Benenne sie **vor** dem ersten Board um – warum, steht im [Tab „Benutzer"](#tab-benutzer).
+5. **Web-UI öffnen:** **`http://<host>:<port>/`**
+6. Beim ersten Start ist noch kein Board vorhanden. Über das **Zahnrad-Symbol (⚙)** oben rechts ein neues Board anlegen. Jedes neue Board erhält automatisch drei Standardspalten:
    - **Zu erledigen** (`todo`)
    - **In Arbeit** (`doing`)
    - **Erledigt** (`done`, als „Erledigt"-Spalte markiert)
-5. Mit **„+ Karte"** die erste Aufgabe anlegen.
+7. Mit **„+ Karte"** die erste Aufgabe anlegen.
 
 **Mehrere Instanzen:** Jede Instanz (`kanban.0`, `kanban.1`, …) ist ein vollständig eigenständiges System mit eigenem Port, eigener Sprache, eigenen Benutzern und eigenen Boards – **Daten werden nicht geteilt**. Sinnvoll z. B. für getrennte Bereiche (Familie vs. Verein) oder ein Testsystem neben dem Produktivboard.
 
@@ -74,7 +77,9 @@ Ein vollwertiges **Kanban-Board als eigener ioBroker-Adapter**. Der Adapter brin
 
 ## Teil A: Instanzeinstellungen (ioBroker-Admin)
 
-Diese Einstellungen liegen im **ioBroker-Admin** unter *Instanzen → `kanban.0` → Zahnrad*. Sie gelten für die **gesamte Instanz** und werden erst mit **Speichern** übernommen, der Adapter startet dabei neu. Die folgenden Abschnitte entsprechen den fünf Tabs der Konfigurationsseite.
+Diese Einstellungen liegen im **ioBroker-Admin** unter *Instanzen → `kanban.0` → Zahnrad*.
+
+> In diesem Dokument steht `kanban.0` stellvertretend für **deine** Instanz. Bei einer zweiten Instanz lauten alle Pfade und States entsprechend `kanban.1`, `kanban.2`, … Sie gelten für die **gesamte Instanz** und werden erst mit **Speichern** übernommen, der Adapter startet dabei neu. Die folgenden Abschnitte entsprechen den fünf Tabs der Konfigurationsseite.
 
 ### Tab „Allgemein"
 
@@ -207,6 +212,15 @@ Mit dem Button **„Neuen Token generieren"** (über der Tabelle) wird automatis
 
 Ungültiges Token → HTTP `401`. Board nicht erlaubt → HTTP `403`.
 
+**Schnelltest:** Ob ein frisch angelegter Token funktioniert, klärt ein einzelner Aufruf – der Standardfall braucht keinen Ausflug in [Teil C](#webhooks--eingehend):
+
+```bash
+curl -X POST "http://<host>:8095/webhook/<DEIN_TOKEN>/action" \
+  -H 'Content-Type: application/json' -d '{"cmd":"listBoards"}'
+```
+
+Kommt eine **Board-Liste** zurück, ist der Token gültig. Alle weiteren Kommandos sowie die vollständige Liste der Antworten und Fehlercodes stehen in [Teil C](#webhooks--eingehend).
+
 ### Tab „Webhooks (ausgehend)"
 
 Der Adapter kann bei jedem Ereignis einen **HTTP-POST** an beliebige URLs senden, z. B. an Node-RED, IFTTT, einen Chat-Dienst oder eigene Skripte.
@@ -245,7 +259,7 @@ Ganz oben im Board-Tab steht eine Zeile mit vier Elementen:
 | **Board-Auswahl** | Legt fest, welches Board du gerade **bearbeitest**. Das aktive Board im Hintergrund wechselt dadurch nicht. Hast du ungespeicherte Änderungen, fragt der Dialog vorher nach (Speichern, Verwerfen, Abbrechen). |
 | **Pfeil-Button** | Wechselt das **angezeigte** Board auf das gerade bearbeitete. Der Dialog bleibt dabei offen. Ist bereits das aktive Board gewählt, ist der Button ausgegraut. |
 | **Namensfeld + „Anlegen"** | Legt ein neues Board an. Es wird sofort zum bearbeiteten Board und bekommt automatisch alle bekannten Benutzer als Mitglieder sowie einen Papierkorb. |
-| **„Board löschen"** (ganz unten) | Löscht das bearbeitete Board nach Rückfrage. Das letzte verbleibende Board lässt sich nicht löschen. |
+| **„Board löschen"** (ganz unten) | Löscht das bearbeitete Board nach Rückfrage. Das letzte verbleibende Board lässt sich **in der Weboberfläche** nicht löschen. Über API und Webhook (`deleteBoard`) greift diese Sperre **nicht**: Dort lässt sich auch das letzte Board entfernen, die Instanz zeigt danach wieder „Kein Board vorhanden". |
 
 Darunter folgen Board-Titel, die Mitgliederauswahl (siehe [Benutzer im Board](#benutzer-im-board)), Spalten, Labels, das Link-Ziel für Benachrichtigungen sowie der Abschnitt [Erledigte Karten in den Papierkorb](#papierkorb).
 
@@ -259,6 +273,7 @@ Spalten lassen sich anlegen, per Drag & Drop sortieren, umbenennen und löschen.
 
 Über der Spaltenliste steht eine Kopfzeile mit den Feldbezeichnungen (**Titel · Max · WIP · Neu · Erledigt**). Jede Überschrift hat einen Tooltip mit der ausführlichen Erklärung.
 
+- **Spalten-ID:** Neben dem sichtbaren Titel trägt jede Spalte eine **unveränderliche ID**. Die drei Standardspalten heißen `todo`, `doing` und `done`, neu angelegte Spalten bekommen eine erzeugte ID der Form `col_msd0mu8tkck68`. Beim **Umbenennen bleibt die ID erhalten** – geteilte `columns=`-Links und `moveCard`-Aufrufe funktionieren also unverändert weiter. Nachschlagen lassen sich die IDs über `GET /api/boards/<id>` (siehe [REST-API](#rest-api)).
 - **Spaltenbreite:** Die Spalten teilen sich immer die **volle Fensterbreite** – zwei Spalten nehmen also je die Hälfte ein. Erst wenn rechnerisch weniger als 280 px je Spalte übrig bleiben, wird das Board waagerecht scrollbar.
 - **Anzeige-Limit (Max):** Zahl > 0 zeigt in dieser Spalte nur die ersten N Karten; darunter erscheint der dezente Hinweis `+X weitere`. `0` = alle anzeigen. Praktisch, damit lange Rückstände das Board nicht sprengen. Der Zähler in der Spaltenkopfzeile zählt weiterhin **alle** Karten der Spalte.
 - **WIP-Limit** (Work-in-Progress): Zahl > 0 begrenzt die empfohlene Kartenanzahl. Wird sie überschritten, warnt die Spalte optisch (Zähler & Kopf werden hervorgehoben). `0` = kein Limit. Das Limit ist eine **Warnung**, keine harte Sperre. Sie bezieht sich immer auf die **Gesamtzahl** der Spalte, auch wenn der Personen-/Label-Filter gerade weniger Karten anzeigt.
@@ -277,6 +292,7 @@ Jedes Board hat eine **Systemspalte „Papierkorb"**. Gelöschte Karten verschwi
 - **Was dort landet:** alles, was du über den **Löschen**-Button im Karten-Editor entfernst, Karten, die du **per Drag & Drop** in den Papierkorb ziehst, sowie die Karten aus dem [automatischen Aufräumen](#erledigte-karten-in-den-papierkorb).
 - **Zurückholen:** Karte aus dem Papierkorb herausziehen oder das **Wiederherstellen**-Symbol auf der Karte antippen. Sie landet dann in der ersten offenen Spalte.
 - **Sofort endgültig löschen:** Das zweite Symbol auf der Karte entfernt sie unwiderruflich. Am Spaltenkopf leert der Besen-Button den **kompletten** Papierkorb. Beides fragt vorher nach.
+- **Rückfragen richtig lesen:** Der Bestätigungsdialog beim Löschen einer Karte lautet schlicht „Karte wirklich löschen?" – gemeint ist damit seit 0.3.0 aber **immer der Papierkorb**, die Karte ist also weiter da. Wirklich unwiderruflich sind nur das zweite Symbol auf einer Karte **im** Papierkorb und der Besen-Button am Spaltenkopf; deren Dialoge sagen das ausdrücklich.
 - **Restlaufzeit:** Jede Karte zeigt an, wie lange sie noch aufbewahrt wird, zum Beispiel „noch 30 Tage".
 - **Eigene Optik:** Die Spalte ist bewusst neutral grau gehalten, unabhängig von Theme und Akzentfarbe, damit sie sich von den Arbeitsspalten abhebt.
 - **Sonderstellung:** Der Papierkorb steht immer ganz rechts, lässt sich nicht umbenennen, verschieben oder löschen und taucht in der Spalten-Konfiguration nicht auf. Er kennt kein WIP-Limit, keinen „Neu"-Button und keinen Sortier-Umschalter, sondern ist fest nach Löschzeitpunkt sortiert (die Karte, deren Frist zuerst abläuft, steht oben). Zum WIP-Limit und zum Zähler anderer Spalten trägt er nicht bei.
@@ -318,11 +334,11 @@ Eine Karte hat folgende inhaltliche Felder (per API unter denselben Namen setzba
 | Feld | Typ | Beschreibung |
 |---|---|---|
 | **title** | Text | Titel der Aufgabe (Pflichtfeld). |
-| **description** | Markdown | Beschreibung; wird als Markdown gerendert (Links, Bilder, Listen …). Eingebettetes HTML wird vor der Anzeige bereinigt (XSS-Schutz). |
+| **description** | Markdown | Beschreibung; wird als Markdown gerendert (Links, Bilder, Listen …). Der Editor blendet **unter dem Eingabefeld eine Live-Vorschau** des gerenderten Markdowns ein, sobald etwas im Feld steht – du siehst das Ergebnis also beim Tippen. Eingebettetes HTML wird vor der Anzeige bereinigt (XSS-Schutz). |
 | **due** | `YYYY-MM-DD` | Fälligkeitsdatum. Überfällige/bald fällige Karten werden farblich hervorgehoben. |
 | **dueTime** | `HH:MM` | Optionale Uhrzeit. Wird über eine Checkbox aktiviert und erscheint auf der Karte hinter dem Datum. Nur wirksam zusammen mit `due`. |
-| **priority** | `0`/`1`/`2` | Normal / Hoch / Dringend. |
-| **assignees** | Liste von Benutzer-IDs | Zuständige. Steuern, wer Benachrichtigungen erhält. **Pflichtfeld:** In der Oberfläche muss mindestens ein Zuständiger gewählt sein, sonst lässt sich die Karte nicht speichern. Pflichtfelder sind mit einem roten `*` markiert. Über API/Webhook angelegte Karten dürfen ohne Zuständigen bleiben. |
+| **priority** | `0`/`1`/`2` | Normal / Hoch / Dringend. Auf der Karte zeigt sich das als Badge unter dem Titel (vor Fälligkeit und Ort): bei **Normal** erscheint nichts, bei **Hoch** ein oranges `!`, bei **Dringend** ein rotes `!!`. Andere Werte werden abgelehnt, per API mit einem Fehler – siehe [Antworten & Fehler](#antworten--fehler). |
+| **assignees** | Liste von Benutzer-IDs | Zuständige. Steuern, wer Benachrichtigungen erhält. **Pflichtfeld:** In der Oberfläche muss mindestens ein Zuständiger gewählt sein, sonst lässt sich die Karte nicht speichern. Pflichtfelder sind mit einem roten `*` markiert. Über API/Webhook angelegte Karten dürfen ohne Zuständigen bleiben. Zeigt die **Mitgliederliste eines Boards ins Leere** (z. B. nach dem Umbenennen einer Benutzer-ID), sind seit 0.3.0 **alle** Benutzer zuweisbar – so entsteht kein toter Zustand, in dem sich keine Karte mehr speichern lässt. |
 | **labels** | Liste von Label-IDs | Farbige Schlagworte. Labels werden pro Board verwaltet (anlegen, umbenennen, umfärben, löschen). |
 | **color** | Hex-Farbe | Farbiger Balken links an der Karte. Wählbar über einen eingebetteten Colorpicker (Farbfeld + Farbton-Regler + Hex-Eingabe) oder Presets. |
 | **link** | URL | Verknüpfung. Auf der Karte erscheint ein **typabhängiges Icon** – siehe [Link-Typen](#link-typen). |
@@ -442,7 +458,9 @@ Auf schmalen Bildschirmen stapelt das Board die Spalten untereinander; jede Spal
 
 ### Ansichten teilen / URL-Parameter
 
-Über das **Monitor-Symbol** in der Kopfzeile öffnet sich der Dialog **„Ansichten"**. Dort klickst du dir eine gefilterte Ansicht zusammen (Board, Benutzer (mehrfach), Labels (mehrfach) samt Auswahl **„Diese Labels ausblenden"** oder **„Nur diese Labels zeigen"**, sichtbare Spalten, Limit für erledigte Karten, auszublendende Bedienelemente) und erhältst darunter eine **fertige URL zum Kopieren**. Ideal zum Einbetten in Lovelace (Webpage-Card) oder zum Weitergeben.
+Über das **Monitor-Symbol** in der Kopfzeile öffnet sich der Dialog **„Ansichten"**. Dort klickst du dir eine gefilterte Ansicht zusammen und erhältst darunter eine **fertige URL zum Kopieren**. Ideal zum Einbetten in Lovelace (Webpage-Card) oder zum Weitergeben.
+
+Der Dialog deckt die **gebräuchlichsten** Filter ab: Board, Benutzer (mehrfach), Labels (mehrfach) samt Umschaltung zwischen **„Diese Labels ausblenden"** (Blacklist) und **„Nur diese Labels zeigen"** (Whitelist), sichtbare Spalten, Limit für erledigte Karten (`doneLimit`) sowie das Ausblenden von Bedienelementen (`hideSettings`, `embed`). **Nicht** im Dialog, sondern **nur als URL-Parameter** gibt es `theme`, `accent`, `lang`, `card` und `focus` – die hängst du bei Bedarf von Hand an die erzeugte Adresse an.
 
 ![Ansichten-Dialog](img/share.png)
 
@@ -451,7 +469,7 @@ Alle Parameter lassen sich auch direkt an die URL hängen:
 | Parameter | Wirkung |
 |---|---|
 | `board=<id>` | Öffnet dieses Board. Ab 0.3.0 trägt die Adresszeile das aktuelle Board automatisch nach: Beim Wechsel über die Board-Auswahl wird `?board=<id>` gesetzt (ohne neuen History-Eintrag, alle übrigen Parameter bleiben stehen), sodass die Adresse direkt kopier- und teilbar ist. |
-| `users=<name,name>` | **Personen-Filter**: zeigt nur Karten, die mindestens einem dieser Benutzer zugewiesen sind (setzt die Kopf-Chips entsprechend). `user=<name>` ist die Kurzform für einen einzelnen Benutzer. |
+| `users=<name,name>` | **Personen-Filter**: zeigt nur Karten, die mindestens einem dieser Benutzer zugewiesen sind (setzt die Kopf-Chips entsprechend). `user=<name>` ist die Kurzform für einen einzelnen Benutzer. **Achtung:** Der Parameter überschreibt die je Board im Browser gespeicherte Chip-Auswahl **dauerhaft** – sie bleibt auch beim nächsten Aufruf *ohne* Parameter aktiv. Zurücksetzen lässt sie sich über die Chips in der Kopfleiste. |
 | `label=<id,id>` | **Label-Blacklist** (mehrere möglich): blendet Karten mit einem dieser Labels aus, neue Labels bleiben automatisch sichtbar. |
 | `onlyLabel=<id,id>` | **Label-Whitelist** (ab 0.3.0): zeigt **nur** Karten, die mindestens eines dieser Labels tragen – Karten ohne Label fallen weg. Lässt sich mit `label=` kombinieren (erst Whitelist, dann Blacklist). |
 | `columns=<id,id>` | Zeigt nur diese Spalten. Nicht genannte Spalten werden ausgeblendet. |
@@ -516,6 +534,27 @@ Für Integrationen im gleichen Netz steht eine REST-API bereit (dieselbe, die di
 | `POST /api/boards/<id>/cards/<cardId>/transfer` | Karte auf ein anderes Board übertragen (`{ toBoard, toColumn?, mode: "move"\|"copy", assignees? }`). Mit `toBoard` = eigenes Board und `mode: "copy"` wird die Karte im selben Board geklont. |
 
 > **Schreibzugriffe** auf `/api` brauchen ab 0.1.1 einen Token (`X-Kanban-Token`; die Web-UI schickt ihn automatisch mit), **Lesen** bleibt im LAN offen. Details und Grenzen: [Sicherheit & Zugriffsschutz](#sicherheit--zugriffsschutz). Für Zugriffe von außen die tokenbasierten [Webhooks](#webhooks--eingehend) verwenden.
+
+#### Aufbau eines Spaltenobjekts
+
+So liefert `GET /api/boards/<id>` jede Spalte, und genau so erwartet `PATCH /api/boards/<id>` sie zurück:
+
+```json
+{ "id": "todo", "title": "Zu erledigen", "maxVisible": 0, "wipLimit": 0, "isDone": false, "allowAdd": true }
+```
+
+| Feld | Bedeutung |
+|---|---|
+| `id` | Unveränderliche [Spalten-ID](#spalten) (`todo`, `doing`, `done` oder eine erzeugte wie `col_msd0mu8tkck68`). Sie bleibt beim Umbenennen erhalten. |
+| `title` | Angezeigter Titel der Spalte, frei änderbar. |
+| `maxVisible` | Anzeige-Limit („Max"): Zahl > 0 zeigt nur die ersten N Karten, `0` = alle. |
+| `wipLimit` | WIP-Warnschwelle, `0` = kein Limit. |
+| `isDone` | `true` = „Erledigt"-Spalte (setzt `doneAt` und löst Wiederholungen aus). |
+| `allowAdd` | `true` = die Spalte zeigt den Link „+ Karte hinzufügen". |
+
+Der **Papierkorb** erscheint zusätzlich als Spalte mit `isTrash: true`. Er wird vom Adapter selbst verwaltet und darf beim Schreiben **nicht mitgeschickt** werden.
+
+> **`PATCH` ersetzt die Spaltenliste vollständig.** Einzelne Spalten lassen sich nicht ändern: erst per `GET /api/boards/<id>` die aktuelle Liste lesen, sie dort ändern oder ergänzen und die **komplette** Liste zurückschicken. Was fehlt, gilt als gelöscht – die Karten der Spalte wandern dann in die erste Spalte des Boards.
 
 ### Webhooks – eingehend
 
@@ -613,6 +652,25 @@ POST   /webhook/<token>/boards/<id>/cards/<cardId>
 POST   /webhook/<token>/boards/<id>/cards/<cardId>/move
 ```
 
+#### Antworten & Fehler
+
+Alle Aufrufe – Webhook wie REST – antworten mit JSON. Bei Erfolg kommt HTTP `200` mit dem betroffenen Objekt (Karte bzw. Board); Kommandos ohne eigenes Ergebnis, etwa `emptyTrash`, melden `{"ok":true}`. Im Fehlerfall steht der Grund im Feld `error`:
+
+| Situation | Code | Antwort |
+|---|---|---|
+| Erfolg | `200` | betroffenes Objekt bzw. `{"ok":true}` |
+| Token fehlt oder ist ungültig | `401` | `{"error":"invalid token"}` |
+| Board ist für diesen Token gesperrt | `403` | `{"error":"Token darf Board '…' nicht ändern"}` |
+| Schreibendes Kommando ohne Board-Angabe bei board-begrenztem Token | `403` | `{"error":"token is limited to specific boards"}` |
+| Board existiert nicht | `404` | `{"error":"Board '…' existiert nicht"}` |
+| Karte existiert nicht | `404` | `{"error":"Karte '…' existiert nicht"}` |
+| Spalte existiert nicht | `404` | `{"error":"Spalte '…' existiert nicht in Board '…'"}` |
+| Pflichtfeld fehlt | `400` | `{"error":"title fehlt"}` |
+| Ungültiges Datum | `400` | `{"error":"due muss im Format YYYY-MM-DD vorliegen, nicht '…'"}` |
+| Ungültige Priorität | `400` | `{"error":"priority kennt nur 0, 1 oder 2, nicht '…'"}` |
+
+> **Neu: strengere Prüfung.** Bis 0.3.0 hat der Adapter fehlerhafte Angaben stillschweigend zurechtgebogen: Eine unbekannte `columnId` wurde auf die erste Spalte gebogen, ein ungültiges `due` einfach verworfen, und `getBoard` auf ein unbekanntes Board antwortete mit `200` und `null`. Alle drei Fälle liefern jetzt einen **Fehler**. Automatisierungen, die sich auf das alte, nachsichtige Verhalten verlassen haben, müssen also nachgezogen werden – dafür bleibt nichts mehr unbemerkt an der falschen Stelle liegen.
+
 ### Webhooks – ausgehend
 
 Ziel-URLs und Ereignisfilter werden in den Instanzeinstellungen gepflegt ([Tab „Webhooks (ausgehend)"](#tab-webhooks-ausgehend)).
@@ -643,7 +701,7 @@ Jedes Event hat die Struktur `{ event, ts, board:{id,title}, card:{…}, detail:
 
 ### Benachrichtigungen an beliebige Dienste (Telegram, Pushover, ...)
 
-Neben der eingebauten E-Mail-Benachrichtigung laesst sich **jeder** Dienst anbinden, ohne dass er fest im Adapter integriert sein muss. Bei jedem Ereignis schreibt der Adapter den State `kanban.0.lastEvent` und sendet - falls konfiguriert - einen [ausgehenden Webhook](#webhooks--ausgehend). Ein kurzes Skript (JavaScript-Adapter) oder ein Node-RED-Flow greift das ab und leitet es an Telegram, Pushover, Signal, Pushbullet o. AE. weiter.
+Neben der eingebauten E-Mail-Benachrichtigung lässt sich **jeder** Dienst anbinden, ohne dass er fest im Adapter integriert sein muss. Bei jedem Ereignis schreibt der Adapter den State `kanban.0.lastEvent` und sendet - falls konfiguriert - einen [ausgehenden Webhook](#webhooks--ausgehend). Ein kurzes Skript (JavaScript-Adapter) oder ein Node-RED-Flow greift das ab und leitet es an Telegram, Pushover, Signal, Pushbullet o. Ä. weiter.
 
 **Aufbau eines Ereignisses** (Inhalt von `lastEvent` bzw. Webhook-Body):
 
@@ -652,7 +710,7 @@ Neben der eingebauten E-Mail-Benachrichtigung laesst sich **jeder** Dienst anbin
   "event": "cardAssigned",
   "ts": "2026-07-25T09:00:00.000Z",
   "board": { "id": "familie", "title": "Familie" },
-  "card": { "id": "c_abc", "title": "Muelltonne rausstellen", "due": "2026-07-27", "dueTime": "18:00", "assignees": ["user1"], "priority": 1, "labels": ["haushalt"] },
+  "card": { "id": "c_abc", "title": "Mülltonne rausstellen", "due": "2026-07-27", "dueTime": "18:00", "assignees": ["user1"], "priority": 1, "labels": ["haushalt"] },
   "detail": { "assignee": "user1", "by": "user2" },
   "link": "http://<host>:8095/?board=familie&card=c_abc",
   "dueAt": "2026-07-27T18:00:00+02:00"
@@ -662,17 +720,17 @@ Neben der eingebauten E-Mail-Benachrichtigung laesst sich **jeder** Dienst anbin
 - `event` - Ereignistyp: `cardCreated`, `cardAssigned`, `cardUpdated`, `cardMoved`, `cardDone`, `cardDeleted`, `cardRestored`, `cardPurged`, `cardDue`.
 - `card.assignees` - die Zustaendigen (Benutzer-**IDs**, nicht Anzeigenamen); an sie richtet sich die Benachrichtigung.
 - `link` - fertiger Deep-Link zur Karte (ab 0.2.1; nutzt die Basis-URL aus den Instanzeinstellungen).
-- `dueAt` - ab 0.3.0: Faelligkeit als ISO-Zeitstempel mit lokalem Offset, z. B. `2026-08-01T09:00:00+02:00`. Ohne gesetzte Uhrzeit wird `00:00` uebermittelt; ohne Faelligkeitsdatum ist der Wert `null`. Das gleiche Feld liefert auch jedes Kartenobjekt der REST-API.
+- `dueAt` - ab 0.3.0: Fälligkeit als ISO-Zeitstempel mit lokalem Offset, z. B. `2026-08-01T09:00:00+02:00`. Ohne gesetzte Uhrzeit wird `00:00` übermittelt; ohne Fälligkeitsdatum ist der Wert `null`. Das gleiche Feld liefert auch jedes Kartenobjekt der REST-API.
 - **`cardDue` feuert in zwei Varianten:** die **tägliche** Erinnerung zur eingestellten Erinnerungs-Uhrzeit (tagesbasiert, inklusive Vorlauf und überfälliger Karten, `detail.overdue` kann `true` sein) und – wenn die Instanz-Option „‚Karte fällig' zur Uhrzeit der Karte auslösen" aktiv ist – ein **kartengenaues** Ereignis zur Uhrzeit der Karte mit `detail.exact: true` und `detail.dueTime`. Letzteres kommt einmal pro Karte und Tag; fällt der Zeitpunkt in eine Ausfallzeit, wird es beim nächsten Start desselben Tages nachgeholt. Skripte, die nur exakte Termine wollen, filtern auf `ev.detail && ev.detail.exact`.
 
-**Papierkorb-Ereignisse (ab 0.3.0):** `cardDeleted` bedeutet jetzt "in den Papierkorb verschoben" - die Karte ist 30 Tage lang wiederherstellbar. `cardRestored` feuert beim Zurueckholen, `cardPurged` beim endgueltigen Entfernen. Bei Massenaktionen enthaelt `detail` zusaetzlich `auto: true` und `reason`: `cleanup` (aus Erledigt in den Papierkorb), `retention` (30-Tage-Frist abgelaufen) oder `emptyTrash` (Papierkorb von Hand geleert). E-Mails werden in allen drei Faellen als **eine Sammelmail je Benutzer** verschickt statt einzeln pro Karte; die ausgehenden Webhooks feuern weiterhin je Karte.
-**Wiederholungen (ab 0.3.0):** Wird eine wiederkehrende Karte erledigt, legt der Adapter sofort die naechste Instanz an. Dabei feuern `cardCreated` und je Zustaendigem ein `cardAssigned`, beide mit `detail.recurrence: true`. Ohne Filter meldet ein Skript direkt nach dem Abhaken also die neue Karte als "dir zugewiesen". Wer das nicht moechte, blendet solche Ereignisse mit einer Zeile aus:
+**Papierkorb-Ereignisse (ab 0.3.0):** `cardDeleted` bedeutet jetzt "in den Papierkorb verschoben" - die Karte ist 30 Tage lang wiederherstellbar. `cardRestored` feuert beim Zurückholen, `cardPurged` beim endgültigen Entfernen. Bei Massenaktionen enthält `detail` zusätzlich `auto: true` und `reason`: `cleanup` (aus Erledigt in den Papierkorb), `retention` (30-Tage-Frist abgelaufen) oder `emptyTrash` (Papierkorb von Hand geleert). E-Mails werden in allen drei Fällen als **eine Sammelmail je Benutzer** verschickt statt einzeln pro Karte; die ausgehenden Webhooks feuern weiterhin je Karte.
+**Wiederholungen (ab 0.3.0):** Wird eine wiederkehrende Karte erledigt, legt der Adapter sofort die nächste Instanz an. Dabei feuern `cardCreated` und je Zuständigem ein `cardAssigned`, beide mit `detail.recurrence: true`. Ohne Filter meldet ein Skript direkt nach dem Abhaken also die neue Karte als "dir zugewiesen". Wer das nicht möchte, blendet solche Ereignisse mit einer Zeile aus:
 
 ```javascript
 if (ev.detail && ev.detail.recurrence) return;   // Folgekarte einer Wiederholung
 ```
 
-- `detail.by` - **wer die Aenderung ausgeloest hat.** Wichtig: Das Board arbeitet **ohne Login** - die Weboberflaeche kennt den Verursacher nicht und laesst `by` leer bzw. `api`. Gefuellt ist es nur bei Aenderungen ueber API, Webhook oder Skript, die ein `by` mitgeben (z. B. eigene Agenten). Ein "nicht den Ausloeser benachrichtigen"-Filter greift daher nur bei solchen Quellen.
+- `detail.by` - **wer die Änderung ausgelöst hat.** Wichtig: Das Board arbeitet **ohne Login** - die Weboberfläche kennt den Verursacher nicht und lässt `by` leer bzw. `api`. Gefüllt ist es nur bei Änderungen über API, Webhook oder Skript, die ein `by` mitgeben (z. B. eigene Agenten). Ein "nicht den Auslöser benachrichtigen"-Filter greift daher nur bei solchen Quellen.
 
 > **Voraussetzung je Dienst:** Der Empfaenger muss dem Dienst bekannt sein. Bei **Telegram** z. B. muss die Person dem Bot einmalig `/start` (ggf. + Passwort) senden; danach steht sie mit ihrer numerischen **chatId** im State `telegram.0.communicate.users`. Diese chatId traegst du unten in `USERS` als Wert ein - der **Schluessel** ist die Kanban-Benutzer-ID (z. B. `user1`), nicht der Anzeigename.
 
@@ -824,6 +882,8 @@ Der Adapter führt das Kommando aus und leert den State wieder.
 - **WebSocket `/ws`:** Bei jeder Änderung sendet der Server eine `dirty`-Nachricht an alle offenen Ansichten; diese laden das betroffene Board neu. So sehen alle Geräte Änderungen praktisch sofort.
 - **Polling-Fallback:** Ist der WebSocket nicht verfügbar, fragt die UI periodisch mit `?rev=` nach Änderungen.
 - **Deep-Link:** `…/?board=<id>&card=<id>` öffnet direkt die betreffende Karte, so verlinken auch die Benachrichtigungs-E-Mails („Karte im Board öffnen").
+- **Gleichzeitiges Bearbeiten:** Der Karten-Editor arbeitet **ohne Sperre**. Speichern zwei Personen dieselbe Karte kurz nacheinander, gewinnt der **letzte** Speichervorgang; die Änderung des ersten geht dabei ohne Hinweis verloren. Bei gemeinsam gepflegten Karten also besser kurz absprechen, wer sie gerade offen hat.
+- **Nach einem Adapter-Neustart:** Eine offene Seite verbindet sich **selbsttätig neu** – das gilt auch nach jedem Speichern der Instanzeinstellungen, denn dabei startet der Adapter. Zusätzlich gleicht sich die Ansicht ab, sobald du auf den Tab zurückwechselst, und im Minutentakt. Sollte eine Ansicht doch einmal veraltet wirken, hilft ein Neuladen.
 
 ### ioBroker-States & Objekte
 
@@ -834,7 +894,7 @@ Neben der Oberfläche legt der Adapter States an, die sich in Skripten, VIS/Love
 | `kanban.0.info.connection` | bool | Webserver läuft. |
 | `kanban.0.lastEvent` | json | Zuletzt ausgelöstes Ereignis (`{event, ts, board, card, detail, link, dueAt}`), ideal als Skript-Trigger. |
 | `kanban.0.action` | json (beschreibbar) | Kommando-Eingang, siehe [sendTo & action-State](#sendto--action-state). |
-| `kanban.0.info.apiSecret` | string | Leer ab 0.3.0 — der interne Schreib-Token liegt jetzt im Dateispeicher des Adapters, nicht mehr in diesem State. Für Skripte sind die Tokens aus „Webhooks (eingehend)" der richtige Weg. |
+| `kanban.0.info.apiSecret` | string | Der interne Schreib-Token liegt ab 0.3.0 im Dateispeicher des Adapters, nicht mehr in diesem State. Bei Instanzen, die von einer **älteren Version aktualisiert** wurden, bleibt der State bestehen und ist **leer**; bei **neu angelegten** 0.3.0-Instanzen wird er **gar nicht mehr erzeugt**. Für Skripte sind die Tokens aus „Webhooks (eingehend)" der richtige Weg. |
 | `kanban.0.boards.<id>.data` | json | Vollständiges Board (Karten, Spalten, Labels). |
 | `kanban.0.boards.<id>.rev` | number | Revision (steigt bei jeder Änderung, für Polling). |
 | `kanban.0.boards.<id>.cardCount` | number | Anzahl Karten im Board. |
@@ -904,4 +964,7 @@ Die Übersetzungen liegen als **eine Datei pro Sprache** unter `www/i18n/` (z. B
 - **„Schließen" im Einstellungen-Dialog verwirft Änderungen.** Der Board-Manager übernimmt Änderungen erst mit **Speichern**; „Schließen" verwirft sie kommentarlos.
 - **Das Datum im Bearbeiten-Dialog sieht anders aus als auf der Karte.** Das Eingabefeld ist das native Datumsfeld des Browsers und folgt dessen Sprache; die Anzeige auf den Karten folgt dem konfigurierten **Datumsformat** der Instanz. Beides meint dasselbe Datum.
 - **Ein Webhook-Kommando schlägt fehl mit „Karte 'undefined' existiert nicht".** Fast immer das falsche ID-Feld: Es heißt `cardId` oder `id`, **nicht** `card`.
+- **„Spalte '…' existiert nicht in Board '…'" beim Anlegen einer Karte.** Eine unbekannte `columnId` liefert seit 0.3.0 einen `404`, statt die Karte still in der ersten Spalte abzulegen. Die gültigen [Spalten-IDs](#spalten) stehen in `GET /api/boards/<id>` – Achtung: Der Titel einer Spalte ist **nicht** ihre ID.
+- **„due muss im Format YYYY-MM-DD vorliegen".** Das Fälligkeitsdatum wird ausschließlich als `YYYY-MM-DD` angenommen (z. B. `2026-07-20`), nicht als `20.07.2026` oder Zeitstempel. Früher wurde ein ungültiges Datum kommentarlos verworfen, heute bricht der Aufruf mit `400` ab.
+- **„priority kennt nur 0, 1 oder 2".** Die Priorität kennt genau drei Werte: `0` = Normal, `1` = Hoch, `2` = Dringend. Texte wie `"hoch"` oder Zahlen darüber werden mit `400` abgelehnt.
 - **Neue Spalten fehlen in einer geteilten URL.** Der `columns=`-Filter ist statisch. Kommt später eine Spalte dazu, muss die Ansicht neu geteilt werden. Im „Ansichten"-Dialog selbst werden Spalten dagegen live erkannt.

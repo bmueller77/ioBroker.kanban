@@ -758,8 +758,8 @@
             "de": "Kommandos über den action-State annehmen"
           },
           "help": {
-            "en": "kanban.0.action executes the same commands as the webhooks, including deleteBoard and emptyTrash, and requires no token. Turn this off if no script writes to it.",
-            "de": "kanban.0.action führt dieselben Kommandos aus wie die Webhooks, auch deleteBoard und emptyTrash, und braucht keinen Token. Abschalten, wenn kein Skript darauf schreibt."
+            "en": "The action state of this instance executes the same commands as the webhooks, including deleteBoard and emptyTrash, and requires no token. Turn this off if no script writes to it.",
+            "de": "Der action-State dieser Instanz führt dieselben Kommandos aus wie die Webhooks, auch deleteBoard und emptyTrash, und braucht keinen Token. Abschalten, wenn kein Skript darauf schreibt."
           },
           "default": true,
           "sm": 12,
@@ -805,7 +805,8 @@
                 "de": "Name"
               },
               "filter": false,
-              "sort": false
+              "sort": false,
+              "default": "webhook"
             },
             {
               "type": "text",
@@ -816,7 +817,8 @@
                 "de": "URL"
               },
               "filter": false,
-              "sort": false
+              "sort": false,
+              "default": "https://"
             },
             {
               "type": "text",

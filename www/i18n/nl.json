@@ -139,7 +139,7 @@
   "share.generatedUrl": "Gegenereerde URL",
   "share.copy": "Kopiëren",
   "share.copied": "Gekopieerd ✓",
-  "confirm.deleteCard": "Deze kaart echt verwijderen?",
+  "confirm.deleteCard": "Deze kaart naar de prullenbak verplaatsen? Je kunt hem daar 30 dagen terughalen.",
   "confirm.deleteBoard": "Bord \"{title}\" met alle kaarten verwijderen?",
   "error.moveFailed": "Verplaatsen mislukt: {msg}",
   "error.saveFailed": "Opslaan mislukt: {msg}",
