@@ -952,7 +952,7 @@ Ohne gültigen Token → HTTP `401`. Über die native Einstellung `apiWriteProte
 > - Das **SPA-Secret liegt im Dateispeicher** des Adapters statt im lesbaren State `kanban.0.info.apiSecret`; der State bleibt leer bestehen. Ein vorhandener Wert wird beim ersten Start übernommen und gelöscht.
 > - **Unumkehrbare Kommandos** (`deleteBoard`, `emptyTrash`, `purgeCard`) werden mit ihrer Quelle im Log protokolliert.
 
-**Fremde Webseiten kommen nicht an die API (CORS).** Ab 0.3.1 verschickt der Adapter CORS-Freigaben nur noch auf `/api` und `/webhook` und nur für Herkünfte, die du unter *Webhooks (eingehend)* → **Erlaubte Browser-Herkünfte** einträgst. Die Vorgabe ist leer, also nur gleiche Herkunft.
+**Fremde Webseiten kommen nicht an die API (CORS).** Ab 0.3.0 verschickt der Adapter CORS-Freigaben nur noch auf `/api` und `/webhook` und nur für Herkünfte, die du unter *Webhooks (eingehend)* → **Erlaubte Browser-Herkünfte** einträgst. Die Vorgabe ist leer, also nur gleiche Herkunft.
 
 Bis 0.3.0 stand `Access-Control-Allow-Origin: *` auf **allen** Routen, auch auf der Seite, die den Schreib-Token im `<meta>`-Tag ausliefert. Eine beliebige Webseite, die du im Browser geöffnet hattest, konnte damit im Hintergrund deinen Adapter im Netz suchen, diese Seite lesen, den Token herausziehen und anschließend Karten und Boards ändern oder löschen. Genau das ist jetzt zu. Betroffen war ausschließlich der Zugriff **aus einem Browser** — Skripte, Node-RED und `curl` kennen keine Herkunftsprüfung und funktionieren unverändert weiter, mit und ohne Eintrag.
 

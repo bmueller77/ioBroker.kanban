@@ -949,7 +949,7 @@ Without a valid token → HTTP `401`. The native setting `apiWriteProtection: fa
 > - The **SPA secret now lives in the adapter's file storage** instead of the readable state `kanban.0.info.apiSecret`; the state remains but stays empty. An existing value is migrated on first start and then cleared.
 > - **Irreversible commands** (`deleteBoard`, `emptyTrash`, `purgeCard`) are logged together with their source.
 
-**Third-party websites cannot reach the API (CORS).** From 0.3.1 the adapter sends CORS permissions only on `/api` and `/webhook`, and only for origins you list under *Webhooks (in)* → **Allowed browser origins**. The default is empty, meaning same origin only.
+**Third-party websites cannot reach the API (CORS).** From 0.3.0 the adapter sends CORS permissions only on `/api` and `/webhook`, and only for origins you list under *Webhooks (in)* → **Allowed browser origins**. The default is empty, meaning same origin only.
 
 Up to 0.3.0 `Access-Control-Allow-Origin: *` sat on **every** route, including the page that hands out the write token in its `<meta>` tag. Any website you had open in your browser could therefore scan the network for your adapter in the background, read that page, extract the token and then change or delete cards and boards. That door is now shut. Only access **from a browser** was ever affected — scripts, Node-RED and `curl` know no origin check and keep working unchanged, with or without an entry.
 
