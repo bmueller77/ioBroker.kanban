@@ -481,8 +481,8 @@
         "_otherServicesHint": {
           "type": "staticText",
           "text": {
-            "en": "Only e-mail is built in. Every other service is reached through the lastEvent state or an outbound webhook — the docs walk through it with a Telegram script you can copy.",
-            "de": "Eingebaut ist nur E-Mail. Jeden anderen Dienst erreichst du über den lastEvent-State oder einen ausgehenden Webhook — die Doku zeigt das an einem Telegram-Skript zum Kopieren."
+            "en": "Only e-mail is built in. Every other service goes through the lastEvent state or an outbound webhook — the docs walk through it with a Telegram script you can copy.",
+            "de": "Eingebaut ist nur E-Mail. Jeder andere Dienst läuft über den lastEvent-State oder einen ausgehenden Webhook — die Doku zeigt das an einem Telegram-Skript zum Kopieren."
           },
           "sm": 12,
           "xs": 12,

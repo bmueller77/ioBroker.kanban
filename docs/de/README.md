@@ -77,9 +77,9 @@ Ein vollwertiges **Kanban-Board als eigener ioBroker-Adapter**. Der Adapter brin
 
 ## Teil A: Instanzeinstellungen (ioBroker-Admin)
 
-Diese Einstellungen liegen im **ioBroker-Admin** unter *Instanzen → `kanban.0` → Zahnrad*.
+Diese Einstellungen liegen im **ioBroker-Admin** unter *Instanzen → `kanban.0` → Zahnrad*. Sie gelten für die **gesamte Instanz** und werden erst mit **Speichern** übernommen, der Adapter startet dabei neu. Die folgenden Abschnitte entsprechen den fünf Tabs der Konfigurationsseite.
 
-> In diesem Dokument steht `kanban.0` stellvertretend für **deine** Instanz. Bei einer zweiten Instanz lauten alle Pfade und States entsprechend `kanban.1`, `kanban.2`, … Sie gelten für die **gesamte Instanz** und werden erst mit **Speichern** übernommen, der Adapter startet dabei neu. Die folgenden Abschnitte entsprechen den fünf Tabs der Konfigurationsseite.
+> In diesem Dokument steht `kanban.0` stellvertretend für **deine** Instanz. Bei einer zweiten Instanz lauten alle Pfade und States entsprechend `kanban.1`, `kanban.2`, …
 
 ### Tab „Allgemein"
 
@@ -693,7 +693,7 @@ Alle Aufrufe – Webhook wie REST – antworten mit JSON. Bei Erfolg kommt HTTP 
 | Ungültiges Datum | `400` | `{"error":"due muss im Format YYYY-MM-DD vorliegen, nicht '…'"}` |
 | Ungültige Priorität | `400` | `{"error":"priority kennt nur 0, 1 oder 2, nicht '…'"}` |
 
-> **Neu: strengere Prüfung.** Bis 0.3.0 hat der Adapter fehlerhafte Angaben stillschweigend zurechtgebogen: Eine unbekannte `columnId` wurde auf die erste Spalte gebogen, ein ungültiges `due` einfach verworfen, und `getBoard` auf ein unbekanntes Board antwortete mit `200` und `null`. Alle drei Fälle liefern jetzt einen **Fehler**. Automatisierungen, die sich auf das alte, nachsichtige Verhalten verlassen haben, müssen also nachgezogen werden – dafür bleibt nichts mehr unbemerkt an der falschen Stelle liegen.
+> **Neu: strengere Prüfung.** Bis 0.3.0 hat der Adapter fehlerhafte Angaben stillschweigend zurechtgebogen: Eine unbekannte `columnId` landete in der ersten Spalte, ein ungültiges `due` wurde einfach verworfen, und `getBoard` auf ein unbekanntes Board antwortete mit `200` und `null`. Alle drei Fälle liefern jetzt einen **Fehler**. Automatisierungen, die sich auf das alte, nachsichtige Verhalten verlassen haben, müssen also nachgezogen werden – dafür bleibt nichts mehr unbemerkt an der falschen Stelle liegen.
 
 ### Webhooks – ausgehend
 
