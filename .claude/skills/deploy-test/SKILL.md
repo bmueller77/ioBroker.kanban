@@ -28,6 +28,17 @@ Auslesen sind gesperrt. Nicht damit anfangen, das kostet nur Zeit.
 Im Admin **nie auf feste Koordinaten klicken**: Layout verschiebt sich. Immer
 `find` → `ref_N` → `computer{action:"left_click", ref:"ref_N"}`.
 
+`find` sucht über den Accessibility-Baum, nicht über das Aussehen. Suchbegriffe,
+die funktionieren:
+
+| Gesucht | Anfrage, die trifft |
+|---|---|
+| Octocat-Symbol in der Adapter-Leiste | `button to install adapter from custom URL` (heißt dort „Installieren aus eigener URL") |
+| Speichern-Knopf unten | `SPEICHERN button in the bottom action bar` — im Baum steht **„Save"**, nicht „Speichern" |
+| Feld in einer Tabellenzeile | über den **Inhalt**: `textbox containing the value team-board` |
+
+`computer{action:"wait"}` nimmt höchstens **10** Sekunden je Aufruf.
+
 ## Ablauf
 
 ### 1. Pushen
@@ -67,7 +78,20 @@ fertig" ausschalten**, sonst verschwindet das Fenster und die Ausgabe ist weg.
 Der Umschalter „Weniger Protokolle / Detailliert" steuert die Ausgabetiefe.
 `SCHLIESSEN` ist während des Laufs ausgegraut und wird am Ende aktiv.
 
+Der Lauf dauert rund 20 Sekunden. Am Ende steht im Fenster:
+
+```
+Updating objects from io-package.json for adapter "kanban" with version "0.3.0"
+Update "system.adapter.kanban.1"
+Process exited with code 0
+```
+
+Die Versionszeile ist die nützlichste: Sie zeigt, welcher Stand wirklich
+angekommen ist. `Process exited with code 0` allein reicht nicht — in
+wiederverwendeten Fenstern kann die Zeile vom vorherigen Lauf stammen.
+
 Nach der Installation starten die Instanzen selbsttätig neu, auch `kanban.0`.
+Rund 10 Sekunden warten, bevor die erste Prüfung läuft.
 
 ### 4. Erfolg prüfen — niemals am Dialog
 
