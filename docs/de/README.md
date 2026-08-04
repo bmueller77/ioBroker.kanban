@@ -389,6 +389,8 @@ Anklickbar sind nur die sicheren Schemata `http(s)`, `mailto:`, `tel:` und `geo:
 
 Standardmäßig bestimmst du die Reihenfolge selbst: Karte anklicken, gedrückt halten und nach oben oder unten ziehen (funktioniert auch per Touch am Smartphone). Genauso ziehst du eine Karte per Drag & Drop in eine andere Spalte, um ihren Status zu ändern. Die gewählte Reihenfolge bleibt erhalten und wird live auf alle offenen Ansichten synchronisiert.
 
+Das gilt auch, wenn gerade **nicht alle Karten sichtbar sind** – etwa bei gesetztem Personen- oder Label-Filter oder bei einem Anzeige-Limit. Die Karte landet dann genau dort, wo du sie zwischen den sichtbaren Nachbarn abgelegt hast; die ausgeblendeten Karten behalten ihre Reihenfolge drumherum.
+
 Seit 0.3.0 kann **jede Spalte einzeln** stattdessen automatisch sortiert werden. Ein Klick auf das Sortier-Symbol im Spaltenkopf öffnet ein kleines Menü mit fünf Modi:
 
 | Modus | Verhalten |

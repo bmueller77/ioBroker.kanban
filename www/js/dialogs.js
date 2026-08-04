@@ -3,7 +3,7 @@
 import { openColorPicker, closeColorPicker, colorPickerOpen } from './colorpicker.js';
 import { api } from './api.js';
 import { t } from './i18n.js';
-import { boardUsers, contrastText, mdiIcon, MDI } from './board.js';
+import { boardUsers, boardMembers, contrastText, mdiIcon, MDI } from './board.js';
 
 const CARD_COLORS = ['', '#e57373', '#ffb74d', '#fff176', '#aed581', '#4fc3f7', '#9575cd', '#f06292', '#a1887f'];
 const WEEKDAYS = [['Mo', 1], ['Di', 2], ['Mi', 3], ['Do', 4], ['Fr', 5], ['Sa', 6], ['So', 7]];
@@ -1140,15 +1140,26 @@ export function initDialogs(state, actions) {
             return { lab, sel };
         })();
 
-        // Benutzer (Mehrfachauswahl) – keine angehakt = alle
+        // Benutzer (Mehrfachauswahl, board-abhängig) – keine angehakt = alle
         const usersLabel = el('label', null, t('share.users'));
         const usersWrap = el('div', 'share-cols');
         const updateUsers = () => { opt.users = [...usersWrap.querySelectorAll('input:checked')].map(i => i.dataset.val); };
-        for (const u of boardUsers(state)) {
-            const chk = mkCheck(u.displayName);
-            chk.inp.dataset.val = u.name;
-            chk.inp.addEventListener('change', () => { updateUsers(); update(); });
-            usersWrap.appendChild(chk.lab);
+        /** Beim Board-Wechsel mitziehen: Die Liste blieb früher auf den Mitgliedern
+         *  des angezeigten Boards stehen. Ein damit erzeugter `users=`-Link nannte
+         *  dann Personen, die im Zielboard niemandem gehören — und filterte beim
+         *  Öffnen stillschweigend gar nicht. */
+        async function fillUsers(boardId) {
+            usersWrap.textContent = '';
+            opt.users = [];
+            let b = state.board && state.board.id === boardId ? state.board : null;
+            if (!b && boardId) { try { b = await api(`api/boards/${encodeURIComponent(boardId)}`); } catch (e) { b = null; } }
+            const names = new Set(boardMembers(b, state.users));
+            for (const u of (state.users || []).filter(x => names.has(x.name))) {
+                const chk = mkCheck(u.displayName || u.name);
+                chk.inp.dataset.val = u.name;
+                chk.inp.addEventListener('change', () => { updateUsers(); update(); });
+                usersWrap.appendChild(chk.lab);
+            }
         }
 
         // Labels (Mehrfachauswahl, board-abhängig) – keine angehakt = alle.
@@ -1231,7 +1242,7 @@ export function initDialogs(state, actions) {
         };
         const update = () => { urlField.value = buildUrl(); };
 
-        board.sel.addEventListener('change', async () => { opt.board = board.sel.value; await Promise.all([fillLabels(opt.board), fillColumns(opt.board)]); update(); });
+        board.sel.addEventListener('change', async () => { opt.board = board.sel.value; await Promise.all([fillUsers(opt.board), fillLabels(opt.board), fillColumns(opt.board)]); update(); });
         doneLimitInp.addEventListener('input', () => { opt.doneLimit = doneLimitInp.value === '' ? null : Math.max(0, parseInt(doneLimitInp.value, 10) || 0); update(); });
         cHideSettings.inp.addEventListener('change', () => { opt.hideSettings = cHideSettings.inp.checked; update(); });
         cEmbed.inp.addEventListener('change', () => { opt.embed = cEmbed.inp.checked; update(); });
@@ -1251,7 +1262,7 @@ export function initDialogs(state, actions) {
         foot.append(el('span', 'spacer'), close);
         body.appendChild(foot);
 
-        await Promise.all([fillLabels(opt.board), fillColumns(opt.board)]);
+        await Promise.all([fillUsers(opt.board), fillLabels(opt.board), fillColumns(opt.board)]);
         update();
         sdlg.showModal();
     }
@@ -1356,7 +1367,10 @@ export function initDialogs(state, actions) {
             const fromById = new Map((state.board.labels || []).map(l => [l.id, l]));
             const toNames = new Set((targetBoard.labels || []).map(labelName));
             const droppedLabels = (card.labels || []).filter(id => { const n = labelName(fromById.get(id)); return !(n && toNames.has(n)); });
-            const members = new Set(targetBoard.members || []);
+            // Wirksame Mitglieder wie auf dem Server: eine Liste, die auf keinen
+            // bekannten Benutzer zeigt, bedeutet "alle". Die rohe Liste ergab hier
+            // sonst eine Sackgasse — Zustaendiger war Pflicht, aber die Auswahl leer.
+            const members = new Set(boardMembers(targetBoard, state.users));
             const keptAssignees = (card.assignees || []).filter(a => members.has(a));
             const droppedAssignees = (card.assignees || []).filter(a => !members.has(a));
             const parts = [];

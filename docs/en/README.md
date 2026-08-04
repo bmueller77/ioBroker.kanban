@@ -389,6 +389,8 @@ Only the safe schemes `http(s)`, `mailto:`, `tel:` and `geo:` are clickable – 
 
 By default you set the order of cards within a column yourself: click a card, hold it and drag it up or down (this works with touch on a phone too). In the same way you drag a card into another column to change its status. The order you choose is kept and synced live to all open views.
 
+This holds even when **not all cards are visible** — with a person or label filter active, or a display limit in place. The card then lands exactly where you dropped it between the visible neighbours, and the hidden cards keep their order around it.
+
 Since 0.3.0 **each column individually** can be sorted automatically instead. Clicking the sort icon in the column header opens a small menu with five modes:
 
 | Mode | Behaviour |

@@ -573,16 +573,70 @@ export function contrastText(bg) {
 }
 
 // Zuweisbare Benutzer des aktiven Boards: Mitglieder, sonst (leer) alle.
+/**
+ * Wirksame Mitglieder eines beliebigen Boards. Spiegelt die Regel des Servers
+ * (lib/store.js, transferCard): Zeigt die Mitgliederliste ins Leere — etwa weil
+ * die Benutzer-IDs in den Instanz-Einstellungen umbenannt wurden —, gelten alle
+ * bekannten Benutzer. Sonst haette das Board keine Zustaendigen mehr und es
+ * liesse sich keine Karte mehr anlegen (Zustaendig ist Pflichtfeld).
+ *
+ * Gilt fuer jedes Board, nicht nur das gerade angezeigte: Der Uebertragen-Dialog
+ * las die Liste frueher roh und hielt ein Board mit leerer Liste faelschlich
+ * fuer "niemand zuweisbar".
+ */
+/**
+ * Sichtbaren Ablage-Index in die Ordnung der vollstaendigen Spalte uebersetzen.
+ *
+ * Der Server versteht `order` als Index in der **vollstaendigen**, nach `order`
+ * sortierten Spalte; die Oberflaeche kennt beim Ziehen aber nur die **sichtbaren**
+ * Karten. Sobald Personenfilter, `?label=`/`?onlyLabel=`, `doneLimit` oder das
+ * Anzeige-Limit einer Spalte etwas ausblenden, meinen beide etwas anderes, und
+ * die Karte lag nach dem Neuladen an einer anderen Stelle als abgelegt.
+ *
+ * Massgeblich ist die Nachbarschaft: Die Karte gehoert vor die naechste sichtbare
+ * Karte, sonst hinter die vorherige.
+ *
+ * @param board Board aus dem State
+ * @param columnId Zielspalte
+ * @param movedId ID der gezogenen Karte
+ * @param listEl DOM-Liste der Zielspalte (enthaelt die Karte bereits)
+ * @param visibleIndex Position der Karte in dieser Liste (evt.newIndex)
+ */
+export function absoluteOrder(board, columnId, movedId, listEl, visibleIndex) {
+    const full = (board.cards || [])
+        .filter(c => c.columnId === columnId && c.id !== movedId)
+        .sort((a, b) => a.order - b.order);
+    if (!full.length) return 0;
+
+    const domIds = [...listEl.children]
+        .map(node => node && node.dataset && node.dataset.cardId)
+        .filter(Boolean);
+    const indexOf = id => full.findIndex(c => c.id === id);
+
+    const nextId = domIds[visibleIndex + 1];
+    if (nextId) {
+        const i = indexOf(nextId);
+        if (i !== -1) return i;
+    }
+    const prevId = visibleIndex > 0 ? domIds[visibleIndex - 1] : null;
+    if (prevId) {
+        const i = indexOf(prevId);
+        if (i !== -1) return i + 1;
+    }
+    // Keine sichtbaren Nachbarn: oben einsortieren, wenn ganz oben abgelegt,
+    // sonst ans Ende.
+    return visibleIndex === 0 ? 0 : full.length;
+}
+
+export function boardMembers(board, users) {
+    const all = (users || []).map(u => u && u.name).filter(Boolean);
+    const listed = (board && Array.isArray(board.members) ? board.members : []).filter(n => all.includes(n));
+    return listed.length ? listed : all;
+}
+
 export function boardUsers(state) {
-    const all = state.users || [];
-    const m = state.board && Array.isArray(state.board.members) ? state.board.members : [];
-    if (!m.length) return all;
-    const hit = all.filter(u => m.includes(u.name));
-    // Zeigt die Mitgliederliste ins Leere — etwa weil die Benutzer-IDs in den
-    // Instanz-Einstellungen umbenannt wurden —, sind alle Benutzer zuweisbar.
-    // Sonst haette das Board keine Zustaendigen mehr und es liesse sich keine
-    // Karte mehr anlegen (Zustaendig ist Pflichtfeld).
-    return hit.length ? hit : all;
+    const names = new Set(boardMembers(state.board, state.users));
+    return (state.users || []).filter(u => names.has(u.name));
 }
 
 /**
@@ -635,7 +689,8 @@ function reflowTitles(delay = 150) {
         if (b) { clampCardTitles(b); alignCardTitles(b); }
     }, delay);
 }
-window.addEventListener('resize', () => reflowTitles());
+// wie beim ResizeObserver unten: nur registrieren, wenn es ein Fenster gibt
+if (typeof window !== 'undefined') window.addEventListener('resize', () => reflowTitles());
 
 /* Spaltenbreite kann sich auch ohne Fensteraenderung aendern, z.B. wenn eine
  * Spalte einen Scrollbalken bekommt. Dann muessen die Titel neu vermessen
@@ -863,7 +918,10 @@ export function renderBoard(container, state, actions) {
                 const toEl = evt.to;
                 const toCol = toEl.dataset.colId || (toEl.closest('.column') && toEl.closest('.column').dataset.colId);
                 if (!toCol) return;
-                actions.moveCard(cardId, toCol, evt.newIndex);
+                // evt.newIndex zaehlt nur die sichtbaren Karten — der Server rechnet
+                // mit der vollstaendigen Spalte. Ohne Umrechnung landet die Karte in
+                // gefilterten Ansichten woanders als abgelegt.
+                actions.moveCard(cardId, toCol, absoluteOrder(state.board, toCol, cardId, toEl, evt.newIndex));
             },
         });
     }

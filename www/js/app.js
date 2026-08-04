@@ -131,9 +131,20 @@ async function loadBoard(id, force) {
     render();
 }
 
+// Laufende Nummer je Abruf: Watchdog, Tab-Fokus und der Minutentakt koennen
+// gleichzeitig abrufen, und Antworten treffen nicht zwingend in der Reihenfolge
+// ein, in der sie losgeschickt wurden.
+let refreshSeq = 0;
+
 async function refreshCurrent() {
     if (!state.board) return;
-    const data = await api(`api/boards/${encodeURIComponent(state.board.id)}?rev=${state.board.rev}`);
+    const boardId = state.board.id;
+    const seq = ++refreshSeq;
+    const data = await api(`api/boards/${encodeURIComponent(boardId)}?rev=${state.board.rev}`);
+    // Antwort verwerfen, wenn inzwischen das Board gewechselt wurde oder ein
+    // neuerer Abruf laeuft. Sonst sprang die Ansicht auf das alte Board zurueck
+    // bzw. eine aeltere Revision ueberschrieb eine neuere.
+    if (seq !== refreshSeq || !state.board || state.board.id !== boardId) return;
     if (!data.unchanged) {
         state.board = data;
         render();

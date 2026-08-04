@@ -44,8 +44,9 @@
     "test:guards": "mocha test/guards --exit",
     "test:cron": "mocha test/cron --exit",
     "test:trash": "mocha test/trash --exit",
+    "test:ui": "mocha test/ui.mjs --exit",
     "test:integration": "mocha test/integration --exit",
-    "test": "npm run test:package && npm run test:guards && npm run test:cron && npm run test:trash",
+    "test": "npm run test:package && npm run test:guards && npm run test:cron && npm run test:trash && npm run test:ui",
     "lint": "eslint ."
   },
   "devDependencies": {
