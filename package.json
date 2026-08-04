@@ -22,7 +22,7 @@
     "tasks"
   ],
   "engines": {
-    "node": ">=20"
+    "node": ">=22"
   },
   "dependencies": {
     "@iobroker/adapter-core": "^3.4.3",
@@ -50,9 +50,9 @@
     "lint": "eslint ."
   },
   "devDependencies": {
-    "@iobroker/adapter-dev": "^1.3.0",
-    "@iobroker/eslint-config": "^1.0.0",
-    "@iobroker/testing": "^5.0.4",
+    "@iobroker/adapter-dev": "^1.5.0",
+    "@iobroker/eslint-config": "^2.2.0",
+    "@iobroker/testing": "^5.2.2",
     "@types/node": "^22.0.0"
   }
 }

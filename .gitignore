@@ -14,3 +14,6 @@ Thumbs.db
 
 # Lokales Dev-Sync-Skript (enthält persönliche Pfade)
 deploy.sh
+
+# ioBroker-Bot legt diese Datei beim Release an
+.commitinfo

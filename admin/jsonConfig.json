@@ -218,7 +218,8 @@
           "sm": 12,
           "xs": 12,
           "lg": 12,
-          "xl": 12
+          "xl": 12,
+          "md": 12
         }
       }
     },
@@ -238,7 +239,8 @@
           "sm": 12,
           "xs": 12,
           "lg": 12,
-          "xl": 12
+          "xl": 12,
+          "md": 12
         },
         "users": {
           "type": "table",
@@ -419,7 +421,8 @@
           ],
           "xs": 12,
           "lg": 12,
-          "xl": 12
+          "xl": 12,
+          "md": 12
         },
         "_notifyLegend": {
           "type": "staticText",
@@ -431,7 +434,8 @@
           "sm": 12,
           "xs": 12,
           "lg": 12,
-          "xl": 12
+          "xl": 12,
+          "md": 12
         },
         "_notifyInfo": {
           "type": "staticText",
@@ -442,7 +446,8 @@
           "sm": 12,
           "xs": 12,
           "lg": 12,
-          "xl": 12
+          "xl": 12,
+          "md": 12
         }
       }
     },
@@ -487,7 +492,8 @@
           "sm": 12,
           "xs": 12,
           "lg": 12,
-          "xl": 12
+          "xl": 12,
+          "md": 12
         },
         "_otherServicesLink": {
           "type": "staticLink",
@@ -513,7 +519,10 @@
             "de": "Erinnerungs-Uhrzeit (HH:MM)"
           },
           "validator": "!data.reminderTime || /^([01]?\\d|2[0-3]):[0-5]\\d$/.test(data.reminderTime)",
-          "validatorErrorText": "Format HH:MM",
+          "validatorErrorText": {
+            "en": "Please use the format HH:MM, e.g. 07:30.",
+            "de": "Bitte im Format HH:MM angeben, z. B. 07:30."
+          },
           "sm": 6,
           "md": 2,
           "xs": 12,
@@ -566,7 +575,8 @@
           "sm": 12,
           "xs": 12,
           "lg": 12,
-          "xl": 12
+          "xl": 12,
+          "md": 12
         },
         "notifyAssigned": {
           "type": "checkbox",
@@ -694,7 +704,8 @@
           "sm": 12,
           "xs": 12,
           "lg": 12,
-          "xl": 12
+          "xl": 12,
+          "md": 12
         },
         "generateToken": {
           "type": "sendTo",
@@ -766,7 +777,8 @@
           ],
           "xs": 12,
           "lg": 12,
-          "xl": 12
+          "xl": 12,
+          "md": 12
         },
         "_scopeInfo": {
           "type": "staticText",
@@ -777,7 +789,8 @@
           "sm": 12,
           "xs": 12,
           "lg": 12,
-          "xl": 12
+          "xl": 12,
+          "md": 12
         },
         "actionStateEnabled": {
           "type": "checkbox",
@@ -831,7 +844,8 @@
           "sm": 12,
           "xs": 12,
           "lg": 12,
-          "xl": 12
+          "xl": 12,
+          "md": 12
         },
         "outboundWebhooks": {
           "type": "table",
@@ -890,7 +904,8 @@
           ],
           "xs": 12,
           "lg": 12,
-          "xl": 12
+          "xl": 12,
+          "md": 12
         }
       }
     }

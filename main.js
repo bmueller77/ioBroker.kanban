@@ -24,10 +24,16 @@ class Kanban extends utils.Adapter {
 
         this.bus = new EventBus();
         this.store = new Store(this, this.bus);
-        this.notifier = new Notifier(this, () => this._baseUrl(), () => this._timezone);
+        this.notifier = new Notifier(
+            this,
+            () => this._baseUrl(),
+            () => this._timezone,
+        );
         this.notifier.attach(this.bus);
         this.scheduler = new Scheduler(this, this.store, this.bus);
-        this.webServer = new Server(this, this.store, (cmd, payload, source) => this.handleCommand(cmd, payload, source));
+        this.webServer = new Server(this, this.store, (cmd, payload, source) =>
+            this.handleCommand(cmd, payload, source),
+        );
 
         // Meta-Objekt für den Dateispeicher (Benutzer-Avatare)
         await this.setForeignObjectNotExistsAsync(this.namespace, {
@@ -63,55 +69,73 @@ class Kanban extends utils.Adapter {
         this.log.info(`Kanban ready - UI: ${this._baseUrl()}/`);
     }
 
-    /** Sprache ermitteln: Instanz-Einstellung `language` (leer/'auto' = System),
-     *  sonst ioBroker-Systemsprache, sonst Englisch. */
+    /**
+     * Sprache ermitteln: Instanz-Einstellung `language` (leer/'auto' = System),
+     *  sonst ioBroker-Systemsprache, sonst Englisch.
+     */
     async _resolveLanguage() {
         let lang = String(this.config.language || '').toLowerCase();
         if (!lang || lang === 'auto') {
             try {
                 const sys = await this.getForeignObjectAsync('system.config');
                 lang = (sys && sys.common && sys.common.language) || 'en';
-            } catch (e) { lang = 'en'; }
+            } catch {
+                lang = 'en';
+            }
         }
         this._language = lang || 'en';
         this.log.info(`Language: ${this._language}`);
     }
 
-    /** Zeitzone ermitteln (für Kalender-Anhänge). ioBroker führt keine eigene
+    /**
+     * Zeitzone ermitteln (für Kalender-Anhänge). ioBroker führt keine eigene
      *  Zeitzone → System-Zeitzone des Prozesses; falls ioBroker künftig eine
-     *  in system.config.common pflegt, hat diese Vorrang. */
+     *  in system.config.common pflegt, hat diese Vorrang.
+     */
     async _resolveTimezone() {
         let tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
         try {
             const sys = await this.getForeignObjectAsync('system.config');
             const cfgTz = sys && sys.common && (sys.common.timezone || sys.common.tz);
-            if (cfgTz) tz = cfgTz;
-        } catch (e) { /* System-Zeitzone genügt */ }
+            if (cfgTz) {
+                tz = cfgTz;
+            }
+        } catch {
+            /* System-Zeitzone genügt */
+        }
         this._timezone = tz || 'Europe/Berlin';
         this.log.info(`Time zone: ${this._timezone}`);
     }
 
-    /** Feiertage für die Arbeitstag-Wiederholungen einrichten. Nutzt – falls
+    /**
+     * Feiertage für die Arbeitstag-Wiederholungen einrichten. Nutzt – falls
      *  installiert – die Bundesland-Konfiguration des feiertage-Adapters,
-     *  sonst die bundesweit einheitlichen gesetzlichen Feiertage. */
+     *  sonst die bundesweit einheitlichen gesetzlichen Feiertage.
+     */
     async _initHolidays() {
         let native = null;
         try {
             const obj = await this.getForeignObjectAsync('system.adapter.feiertage.0');
-            if (obj && obj.native) native = obj.native;
-        } catch (e) { /* Adapter nicht vorhanden -> Default */ }
+            if (obj && obj.native) {
+                native = obj.native;
+            }
+        } catch {
+            /* Adapter nicht vorhanden -> Default */
+        }
         const info = holidays.configure(native);
         this.log.info(`Public holidays: source ${info.source}, ${info.count} relevant holidays per year`);
     }
 
-    /** Secret für den Schreibschutz der /api-Routen. Wird in index.html als
+    /**
+     * Secret für den Schreibschutz der /api-Routen. Wird in index.html als
      *  <meta name="kanban-token"> an die eigene SPA ausgeliefert.
      *
      *  Ab 0.3.0 liegt das Secret im Dateispeicher des Adapters (apisecret.json) statt
      *  im lesbaren State info.apiSecret: Objektzugriff soll nicht automatisch
      *  Schreibzugriff auf die API bedeuten. Der State bleibt aus Kompatibilitätsgründen
      *  bestehen, wird aber leer geführt; ein dort noch vorhandener Wert wird einmalig
-     *  übernommen und danach entfernt. Für Skripte sind die Agenten-Tokens der Weg. */
+     *  übernommen und danach entfernt. Für Skripte sind die Agenten-Tokens der Weg.
+     */
     async _initApiSecret() {
         const newSecret = () => require('node:crypto').randomBytes(24).toString('hex');
         try {
@@ -119,7 +143,10 @@ class Kanban extends utils.Adapter {
                 type: 'state',
                 common: {
                     name: 'API write secret (deprecated, moved to file storage)',
-                    type: 'string', role: 'text', read: true, write: false,
+                    type: 'string',
+                    role: 'text',
+                    read: true,
+                    write: false,
                 },
                 native: {},
             });
@@ -129,15 +156,22 @@ class Kanban extends utils.Adapter {
                 const data = await this.readFileAsync(this.namespace, 'apisecret.json');
                 const buf = data && data.file !== undefined ? data.file : data;
                 const parsed = JSON.parse((Buffer.isBuffer(buf) ? buf : Buffer.from(buf)).toString('utf8'));
-                if (parsed && parsed.secret) secret = String(parsed.secret);
-            } catch (e) { /* noch keine Datei -> unten anlegen */ }
+                if (parsed && parsed.secret) {
+                    secret = String(parsed.secret);
+                }
+            } catch {
+                /* noch keine Datei -> unten anlegen */
+            }
 
             if (!secret) {
                 // Migration: bisher im State abgelegtes Secret übernehmen, sonst neu erzeugen
                 const st = await this.getStateAsync('info.apiSecret');
                 secret = st && st.val ? String(st.val) : newSecret();
-                await this.writeFileAsync(this.namespace, 'apisecret.json',
-                    Buffer.from(JSON.stringify({ secret }), 'utf8'));
+                await this.writeFileAsync(
+                    this.namespace,
+                    'apisecret.json',
+                    Buffer.from(JSON.stringify({ secret }), 'utf8'),
+                );
                 this.log.info('API secret moved to the file storage; the state info.apiSecret is no longer filled.');
             }
 
@@ -145,7 +179,9 @@ class Kanban extends utils.Adapter {
 
             // State leeren (einmalig nach der Migration, danach idempotent)
             const cur = await this.getStateAsync('info.apiSecret');
-            if (cur && cur.val) await this.setStateAsync('info.apiSecret', '', true);
+            if (cur && cur.val) {
+                await this.setStateAsync('info.apiSecret', '', true);
+            }
         } catch (e) {
             this._apiSecret = newSecret();
             this.log.warn(`Could not persist the API secret, using a volatile one: ${e.message}`);
@@ -154,13 +190,20 @@ class Kanban extends utils.Adapter {
 
     _baseUrl() {
         const cfg = this.config;
-        if (cfg.publicUrl) return String(cfg.publicUrl).replace(/\/+$/, '');
+        if (cfg.publicUrl) {
+            return String(cfg.publicUrl).replace(/\/+$/, '');
+        }
         let ip = '127.0.0.1';
         for (const ifaces of Object.values(os.networkInterfaces())) {
             for (const iface of ifaces || []) {
-                if (iface.family === 'IPv4' && !iface.internal) { ip = iface.address; break; }
+                if (iface.family === 'IPv4' && !iface.internal) {
+                    ip = iface.address;
+                    break;
+                }
             }
-            if (ip !== '127.0.0.1') break;
+            if (ip !== '127.0.0.1') {
+                break;
+            }
         }
         return `http://${ip}:${this._port || cfg.port || 8095}`;
     }
@@ -168,6 +211,10 @@ class Kanban extends utils.Adapter {
     /**
      * Gemeinsamer Kommando-Kern — bedient REST (indirekt), eingehende Webhooks,
      * sendTo('kanban.0', <cmd>, {...}) und den action-State.
+     *
+     * @param cmd
+     * @param payload
+     * @param source
      */
     async handleCommand(cmd, payload, source) {
         payload = payload || {};
@@ -185,7 +232,9 @@ class Kanban extends utils.Adapter {
                 const b = this.store.getBoard(boardId);
                 // Nicht still null liefern: ein Skript, das nur den Statuscode prüft,
                 // hielte das sonst für einen Erfolg.
-                if (!b) throw new Error(`Board '${boardId}' existiert nicht`);
+                if (!b) {
+                    throw new Error(`Board '${boardId}' existiert nicht`);
+                }
                 return board(b);
             }
             case 'addBoard':
@@ -199,12 +248,18 @@ class Kanban extends utils.Adapter {
             case 'editCard':
                 return card(this.store.updateCard(boardId, cardId, payload, source));
             case 'moveCard':
-                return card(this.store.moveCard(boardId, cardId, payload.column || payload.columnId, payload.order, source));
+                return card(
+                    this.store.moveCard(boardId, cardId, payload.column || payload.columnId, payload.order, source),
+                );
             case 'doneCard': {
                 const b = this.store.getBoard(boardId);
-                if (!b) throw new Error(`Board '${boardId}' existiert nicht`);
+                if (!b) {
+                    throw new Error(`Board '${boardId}' existiert nicht`);
+                }
                 const doneCol = b.columns.find(c => c.isDone);
-                if (!doneCol) throw new Error(`Board '${boardId}' hat keine Erledigt-Spalte`);
+                if (!doneCol) {
+                    throw new Error(`Board '${boardId}' hat keine Erledigt-Spalte`);
+                }
                 return card(this.store.moveCard(boardId, cardId, doneCol.id, undefined, source));
             }
             case 'deleteCard':
@@ -216,19 +271,32 @@ class Kanban extends utils.Adapter {
             case 'emptyTrash':
                 return this.store.emptyTrash(boardId, source);
             case 'transferCard':
-                return card(this.store.transferCard(boardId, cardId,
-                    payload.toBoard || payload.targetBoard, payload.toColumn || payload.targetColumn,
-                    payload.mode === 'copy' ? 'copy' : 'move',
-                    { assignees: payload.assignees }, source));
+                return card(
+                    this.store.transferCard(
+                        boardId,
+                        cardId,
+                        payload.toBoard || payload.targetBoard,
+                        payload.toColumn || payload.targetColumn,
+                        payload.mode === 'copy' ? 'copy' : 'move',
+                        { assignees: payload.assignees },
+                        source,
+                    ),
+                );
             default:
                 throw new Error(`Unbekanntes Kommando '${cmd}'`);
         }
     }
 
     async onStateChange(id, state) {
-        if (!state || state.ack || !state.val) return;
-        if (id !== `${this.namespace}.action`) return;
-        if (this.config.actionStateEnabled === false) return;
+        if (!state || state.ack || !state.val) {
+            return;
+        }
+        if (id !== `${this.namespace}.action`) {
+            return;
+        }
+        if (this.config.actionStateEnabled === false) {
+            return;
+        }
         let parsed;
         try {
             parsed = JSON.parse(state.val);
@@ -247,7 +315,9 @@ class Kanban extends utils.Adapter {
     }
 
     async onMessage(obj) {
-        if (!obj || !obj.command) return;
+        if (!obj || !obj.command) {
+            return;
+        }
 
         // Admin-Button „Token generieren": hängt einen neuen Zufallstoken an die
         // aktuelle Tokens-Tabelle an und gibt sie zurück (Admin schreibt sie ins Feld).
@@ -256,12 +326,19 @@ class Kanban extends utils.Adapter {
             const tokens = Array.isArray(native.inboundTokens) ? native.inboundTokens.slice() : [];
             const token = require('node:crypto').randomBytes(16).toString('hex');
             let name = 'agent';
-            for (let i = 1; tokens.some(t => t && t.name === name); i++) name = `agent${i}`;
+            for (let i = 1; tokens.some(t => t && t.name === name); i++) {
+                name = `agent${i}`;
+            }
             tokens.push({ name, token, allowedBoards: '*', enabled: true });
             // jsonConfig übernimmt bei useNative nur ein Feld namens `native` in die
             // Konfiguration; ohne diese Hülle blieb der Button wirkungslos.
             if (obj.callback) {
-                this.sendTo(obj.from, obj.command, { native: { inboundTokens: tokens }, saveConfig: true }, obj.callback);
+                this.sendTo(
+                    obj.from,
+                    obj.command,
+                    { native: { inboundTokens: tokens }, saveConfig: true },
+                    obj.callback,
+                );
             }
             return;
         }
@@ -280,11 +357,17 @@ class Kanban extends utils.Adapter {
 
     async onUnload(callback) {
         try {
-            if (this.scheduler) this.scheduler.stop();
-            if (this.webServer) await this.webServer.stop();
-            if (this.store) await this.store.flush();
+            if (this.scheduler) {
+                this.scheduler.stop();
+            }
+            if (this.webServer) {
+                await this.webServer.stop();
+            }
+            if (this.store) {
+                await this.store.flush();
+            }
             await this.setStateAsync('info.connection', false, true);
-        } catch (e) {
+        } catch {
             // ignorieren — wir fahren ohnehin herunter
         } finally {
             callback();
