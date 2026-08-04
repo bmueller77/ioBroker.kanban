@@ -90,8 +90,20 @@ Die Versionszeile ist die nützlichste: Sie zeigt, welcher Stand wirklich
 angekommen ist. `Process exited with code 0` allein reicht nicht — in
 wiederverwendeten Fenstern kann die Zeile vom vorherigen Lauf stammen.
 
-Nach der Installation starten die Instanzen selbsttätig neu, auch `kanban.0`.
-Rund 10 Sekunden warten, bevor die erste Prüfung läuft.
+### 3b. Instanzen neu starten — nicht darauf verlassen, dass es von selbst passiert
+
+**Der Install ersetzt nur die Dateien.** Ob die laufenden Instanzen den neuen Code
+übernehmen, hängt daran, ob sich die Versionsnummer geändert hat: Bei gleicher
+Nummer (etwa zwei Läufe hintereinander mit `0.3.0`) laufen sie unverändert weiter,
+und die Prüfung misst dann den **alten** Stand. Genau das führt zu dem Fehlschluss
+„der Fix wirkt nicht".
+
+Deshalb nach jedem Install: *Instanzen* → oben nach `kanban` filtern → in jeder
+betroffenen Zeile der **Neu-starten-Knopf** (Kreispfeil, dritte Schaltfläche).
+`find` findet ihn über `restart button in the kanban.1 instance row`.
+
+`kanban.0` gehört mit neu gestartet, damit produktiv und Test denselben Code
+fahren. Danach rund 15 Sekunden warten, bevor die erste Prüfung läuft.
 
 ### 4. Erfolg prüfen — niemals am Dialog
 
@@ -117,9 +129,24 @@ Boards der Testinstanz lesen (GET braucht keinen Token):
 curl -s http://172.30.0.40:8096/api/boards
 ```
 
-Für tokenpflichtige Tests in den Instanzeinstellungen → Tab **Webhooks
-(eingehend)** → **„Neuen Token generieren"** (fragt sofort „Konfiguration
-speichern?"), danach ggf. **Erlaubte Boards** eintragen und unten **SPEICHERN**.
+Für einen **unbegrenzten** Schreib-Token reicht die ausgelieferte Seite — das
+SPA-Secret steht als `<meta>` darin und ist im LAN bewusst offen (dokumentierte
+Grenze des Schutzes):
+
+```bash
+SPA=$(curl -s http://172.30.0.40:8096/ | grep -o 'kanban-token" content="[^"]*"' | sed 's/.*content="//;s/"//')
+curl -s -X POST http://172.30.0.40:8096/api/boards -H "X-Kanban-Token: $SPA" \
+  -H 'Content-Type: application/json' -d '{"id":"pruefung","title":"Pruefung"}'
+```
+
+Damit lässt sich ein Wegwerf-Board anlegen, darauf testen und es hinterher per
+`DELETE /api/boards/pruefung` wieder entfernen — ohne die echten Boards
+anzufassen.
+
+Für Tests der **Board-Begrenzung** dagegen einen eigenen Token: Instanzeinstellungen
+→ Tab **Webhooks (eingehend)** → **„Neuen Token generieren"** (fragt sofort
+„Konfiguration speichern?"), danach **Erlaubte Boards** eintragen und unten
+**SPEICHERN**.
 
 ```bash
 T=<token>; H=http://172.30.0.40:8096
