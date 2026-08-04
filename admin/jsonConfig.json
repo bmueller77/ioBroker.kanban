@@ -65,6 +65,30 @@
             {
               "label": "generalTab_language_options_5_label",
               "value": "it"
+            },
+            {
+              "label": "generalTab_language_options6_label",
+              "value": "es"
+            },
+            {
+              "label": "generalTab_language_options7_label",
+              "value": "pl"
+            },
+            {
+              "label": "generalTab_language_options8_label",
+              "value": "pt"
+            },
+            {
+              "label": "generalTab_language_options9_label",
+              "value": "ru"
+            },
+            {
+              "label": "generalTab_language_options10_label",
+              "value": "uk"
+            },
+            {
+              "label": "generalTab_language_options11_label",
+              "value": "zh-cn"
             }
           ],
           "sm": 6,

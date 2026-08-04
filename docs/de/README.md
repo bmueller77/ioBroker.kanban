@@ -508,7 +508,7 @@ Alle Parameter lassen sich auch direkt an die URL hängen:
 | `accent=%23RRGGBB` | Akzentfarbe (Hex, `#` als `%23` kodieren). |
 | `card=<id>` | Öffnet direkt eine Karte (Deep-Link, z. B. aus E-Mails). |
 | `focus=<id>` | Öffnet **nicht** den Editor, sondern hebt die Karte im Board kurz hervor (pulsierender Rahmen). Wird von Benachrichtigungen mit Link-Ziel „Board-Ansicht" erzeugt. |
-| `lang=de\|en\|fr\|nl\|it` | Überschreibt die Oberflächensprache der Instanz für diese Ansicht. |
+| `lang=<code>` | Überschreibt die Oberflächensprache der Instanz für diese Ansicht (de, en, fr, nl, it, es, pl, pt, ru, uk, zh-cn). |
 
 **Beispiele**
 
@@ -972,7 +972,7 @@ Einen Eintrag brauchst du nur, wenn eine Webseite unter **anderer** Adresse die 
 
 Die Oberfläche ist **mehrsprachig**. Die Standardsprache richtet sich nach der **in ioBroker eingestellten Systemsprache**; in den Instanzeinstellungen lässt sich die Sprache optional fest wählen.
 
-Die Übersetzungen liegen als **eine Datei pro Sprache** unter `www/i18n/` (z. B. `de.json`, `en.json`). Aktuell sind **fünf Sprachen** enthalten: **Deutsch, Englisch, Französisch, Niederländisch und Italienisch** (im Instanz-Dropdown „Sprache" wählbar: Automatisch/de/en/fr/nl/it). Weitere Sprachen lassen sich einfach ergänzen, indem eine weitere JSON-Datei mit denselben Schlüsseln hinzugefügt wird. Ist für die gewünschte Sprache keine Datei vorhanden, wird auf Englisch zurückgegriffen.
+Die Übersetzungen liegen als **eine Datei pro Sprache** unter `www/i18n/` (z. B. `de.json`, `en.json`). Aktuell sind **elf Sprachen** enthalten: **Deutsch, Englisch, Französisch, Niederländisch, Italienisch, Spanisch, Polnisch, Portugiesisch, Russisch, Ukrainisch und Chinesisch (vereinfacht)** — alle im Instanz-Dropdown „Sprache" wählbar, zusätzlich zu „Automatisch". Weitere Sprachen lassen sich einfach ergänzen, indem eine weitere JSON-Datei mit denselben Schlüsseln hinzugefügt wird. Ist für die gewünschte Sprache keine Datei vorhanden, wird auf Englisch zurückgegriffen.
 
 ### FAQ & Fallstricke
 

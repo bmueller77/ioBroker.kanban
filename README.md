@@ -24,7 +24,7 @@ Install the adapter from the ioBroker admin: *Adapters* → filter for `kanban` 
 - **Webhooks inbound** (token-secured) and **outbound** (JSON POST on events)
 - **Share view**: dialog to build filtered, embeddable links
 - **iframe-friendly** (no frame headers) with `?embed=1` mode for Lovelace & co.
-- **Multilingual** (de, en, fr, nl, it), configurable **date & time format** per instance (moment/Day.js tokens with localised month/weekday names, 12h/24h), theming (light/dark/auto, accent color, custom CSS)
+- **Multilingual** (de, en, fr, nl, it, es, pl, pt, ru, uk, zh-cn), configurable **date & time format** per instance (moment/Day.js tokens with localised month/weekday names, 12h/24h), theming (light/dark/auto, accent color, custom CSS)
 
 ## Web UI / URL parameters
 
@@ -40,7 +40,7 @@ Install the adapter from the ioBroker admin: *Adapters* → filter for `kanban` 
 | `theme=light\|dark\|auto` | force a theme |
 | `embed=1` | borderless view without the header bar (for iframes) |
 | `card=<id>` | open a card dialog directly (deep link from e-mails) |
-| `lang=de\|en\|fr\|nl\|it` | force a language |
+| `lang=<code>` | force a language (de, en, fr, nl, it, es, pl, pt, ru, uk, zh-cn) |
 
 ### Lovelace embedding
 
