@@ -205,7 +205,7 @@ Andere Systeme (oder ioBroker selbst) können Karten und Boards per HTTP veränd
 |---|---|
 | **name** | Bezeichnung (erscheint in Logs als Quelle). |
 | **token** | Geheimes Token, Teil der URL. |
-| **allowedBoards** | `*` = alle Boards, oder eine Liste erlaubter Board-IDs (getrennt durch Leerzeichen, Komma oder Semikolon). |
+| **allowedBoards** | `*` = alle Boards, oder eine Liste erlaubter Board-IDs (getrennt durch Leerzeichen, Komma oder Semikolon). **Leer = kein Board**: Der Token darf dann nichts mehr schreiben. Wer alle Boards meint, trägt ausdrücklich `*` ein. |
 | **enabled** | Token aktiv/inaktiv. |
 
 Mit dem Button **„Neuen Token generieren"** (über der Tabelle) wird automatisch eine neue Zeile mit einem sicheren Zufallstoken (32 Hex-Zeichen) und dem Namen `agent`/`agent1`/… angelegt. Danach den Namen anpassen, ggf. `allowedBoards` einschränken und **Speichern**. Alternativ das Token-Feld von Hand ausfüllen (z. B. `openssl rand -hex 16`). **Empfehlung:** für jede Integration (jeder Agent, jedes Skript) einen eigenen Token, so lässt sich jeder einzeln per `enabled`-Häkchen sperren oder ersetzen.
@@ -435,7 +435,7 @@ Minute  Stunde  Tag  Monat  Wochentag
    0      8      *     *      1-5      -> Montag bis Freitag um 08:00
 ```
 
-Je Feld verstanden werden `*`, einzelne Zahlen, Listen (`1,15`), Bereiche (`1-5`), Schrittweiten (`*/3`, `1-7/2`) sowie die englischen Kurznamen für Monat (`jan`…`dec`) und Wochentag (`mon`…`sun`). Sonntag ist `0` **und** `7`.
+Je Feld verstanden werden `*`, einzelne Zahlen, Listen (`1,15`), Bereiche (`1-5`), Schrittweiten (`*/3`, `1-7/2`) sowie die englischen Kurznamen für Monat (`jan`…`dec`) und Wochentag (`mon`…`sun`). Sonntag ist `0` **und** `7`. Der Ausdruck darf höchstens 120 Zeichen lang sein — auch das längste sinnvolle Muster bleibt weit darunter.
 
 Drei Dinge unterscheiden sich von einem echten Cron-Dienst:
 

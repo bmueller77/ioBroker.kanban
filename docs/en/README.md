@@ -205,7 +205,7 @@ Other systems (or ioBroker itself) can modify cards and boards via HTTP. Those r
 |---|---|
 | **name** | Label (shown as the source in logs). |
 | **token** | Secret token, part of the URL. |
-| **allowedBoards** | `*` = all boards, or a list of allowed board IDs (separated by space, comma, or semicolon). |
+| **allowedBoards** | `*` = all boards, or a list of allowed board IDs (separated by space, comma, or semicolon). **Empty = no board**: such a token can no longer write anything. Enter `*` explicitly if you mean all boards. |
 | **enabled** | Token active/inactive. |
 
 The **"Generate new token"** button (above the table) automatically adds a new row with a secure random token (32 hex chars) and the name `agent`/`agent1`/…. Then adjust the name, optionally restrict `allowedBoards`, and **Save**. Alternatively fill the token field manually (e.g. `openssl rand -hex 16`). **Recommendation:** use a separate token for each integration (each agent, each script), that way each one can be revoked or replaced individually via the `enabled` checkbox.
@@ -435,7 +435,7 @@ minute  hour  day  month  weekday
    0      8    *     *      1-5    -> Monday to Friday at 08:00
 ```
 
-Each field understands `*`, single numbers, lists (`1,15`), ranges (`1-5`), steps (`*/3`, `1-7/2`) and the English short names for month (`jan`…`dec`) and weekday (`mon`…`sun`). Sunday is both `0` and `7`.
+Each field understands `*`, single numbers, lists (`1,15`), ranges (`1-5`), steps (`*/3`, `1-7/2`) and the English short names for month (`jan`…`dec`) and weekday (`mon`…`sun`). Sunday is both `0` and `7`. An expression may be at most 120 characters long — even the longest sensible pattern stays well below that.
 
 Three things differ from a real cron daemon:
 

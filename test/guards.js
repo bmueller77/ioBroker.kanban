@@ -13,6 +13,9 @@ const TOKENS = [
     { name: 'agent-fam', token: 'tok-fam', allowedBoards: 'familie', enabled: true },
     { name: 'agent-two', token: 'tok-two', allowedBoards: 'familie, agenten', enabled: true },
     { name: 'agent-off', token: 'tok-off', allowedBoards: '*', enabled: false },
+    // Von Hand angelegte, nicht ausgefüllte Zeilen — beide waren Löcher:
+    { name: 'leer', token: '', allowedBoards: '*', enabled: true },
+    { name: 'ohne-boards', token: 'tok-leer-boards', allowedBoards: '', enabled: true },
 ];
 
 /** Führt _guardApiWrite mit einem nachgebauten Request aus und liefert den HTTP-Code. */
@@ -102,6 +105,23 @@ describe('REST-API: Schreibschutz und Board-Bindung', () => {
 
     it('beantwortet eine kaputt kodierte Board-ID mit 400 statt 500', () => {
         assert.equal(call({ token: 'tok-fam', path: '/boards/%ZZ/cards' }), 400);
+    });
+
+    it('lässt sich nicht über eine leere Token-Zeile aushebeln', () => {
+        // Regression: ohne Header fiel der Wert auf '' zurück und traf genau die
+        // leer gelassene Tabellenzeile — die schreibende API stand damit offen.
+        assert.equal(call({ token: undefined }), 401);
+        assert.equal(call({ token: '' }), 401);
+        assert.equal(call({ token: '   ' }), 401);
+        assert.equal(call({ token: undefined, tokenIn: 'body' }), 401);
+    });
+
+    it('behandelt leere „Erlaubte Boards" als kein Board, nicht als alle', () => {
+        // Regression: '' wurde zu '*' — wer die Liste leerte, um Rechte zu
+        // entziehen, vergab sie damit für jedes Board.
+        assert.equal(call({ token: 'tok-leer-boards', path: '/boards/familie/cards' }), 403);
+        assert.equal(call({ token: 'tok-leer-boards', path: '/boards/agenten/cards' }), 403);
+        assert.equal(call({ token: 'tok-leer-boards', path: '/boards' }), 403);
     });
 
     it('respektiert apiWriteProtection = false', () => {

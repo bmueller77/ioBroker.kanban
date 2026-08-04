@@ -1,6 +1,7 @@
 const assert = require('node:assert/strict');
 const { parseCron, cronMatchesDate, validateCron } = require('../lib/cron');
 const { nextCronDates, recMatches } = require('../lib/store');
+const { buildRrule } = require('../lib/notify');
 
 /** Datum als lokale Mittagszeit — so rechnet auch der Store, damit keine
  *  Zeitzonenverschiebung den Tag kippt. */
@@ -94,5 +95,36 @@ describe('Cron: Anbindung an die Wiederholung', () => {
 
     it('liefert nichts für ein unerfüllbares Muster', () => {
         assert.deepEqual(nextCronDates('0 0 30 2 *', 3), []);
+    });
+
+    it('weist überlange Ausdrücke ab, statt den Event-Loop zu blockieren', () => {
+        // Regression: die token-freie Prüfroute nahm kilobytegroße Ausdrücke an und
+        // zerlegte sie für jeden Kandidatentag neu — 6 KB blockierten rund 300 ms.
+        const riesig = `${Array.from({ length: 1200 }, (_, i) => i % 60).join(',')} 0 30 2 *`;
+        assert.match(validateCron(riesig).error, /zu lang/);
+        assert.equal(validateCron(riesig).ok, false);
+        assert.deepEqual(nextCronDates(riesig, 3), []);
+        // Das längste sinnvolle Muster bleibt zulässig.
+        assert.equal(validateCron('0 8 * jan,feb,mar,apr,may,jun,jul,aug,sep,oct,nov,dec *').ok, true);
+    });
+});
+
+describe('Cron: Kalender-Serientermin (RRULE)', () => {
+    it('nimmt den Sonntag mit — als 0 und als 7', () => {
+        // Regression: ICS_DAYS ist mit 1..7 indiziert, v % 7 machte aus Cron-0 und
+        // Cron-7 die 0 und liess den Sonntag aus der Serie fallen.
+        assert.equal(buildRrule({ type: 'cron', cron: '0 9 * * 0' }), 'RRULE:FREQ=WEEKLY;BYDAY=SU');
+        assert.equal(buildRrule({ type: 'cron', cron: '0 9 * * 7' }), 'RRULE:FREQ=WEEKLY;BYDAY=SU');
+        assert.equal(buildRrule({ type: 'cron', cron: '0 9 * * 0,3' }), 'RRULE:FREQ=WEEKLY;BYDAY=SU,WE');
+        assert.equal(buildRrule({ type: 'cron', cron: '0 9 * * 1-7' }), 'RRULE:FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR,SA,SU');
+    });
+
+    it('nennt denselben Tag nicht doppelt', () => {
+        assert.equal(buildRrule({ type: 'cron', cron: '0 9 * * 0,7' }), 'RRULE:FREQ=WEEKLY;BYDAY=SU');
+    });
+
+    it('lässt die übrigen Wochentage unverändert', () => {
+        assert.equal(buildRrule({ type: 'cron', cron: '0 8 * * 1-5' }), 'RRULE:FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR');
+        assert.equal(buildRrule({ type: 'cron', cron: '0 8 * * *' }), 'RRULE:FREQ=DAILY');
     });
 });
