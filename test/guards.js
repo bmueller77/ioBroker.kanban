@@ -88,6 +88,22 @@ describe('REST-API: Schreibschutz und Board-Bindung', () => {
         assert.equal(call({ token: 'tok-all', path: '/boards' }), 200);
     });
 
+    it('lässt sich nicht mit einem erlaubten Board im Body aushebeln', () => {
+        // Regression: createBoard liest `board` gar nicht, der Guard akzeptierte es
+        // aber als Nachweis — ein begrenzter Token legte so fremde Boards an.
+        assert.equal(call({ token: 'tok-fam', path: '/boards', body: { title: 'X', board: 'familie' } }), 403);
+        assert.equal(call({ token: 'tok-fam', path: '/boards', body: { title: 'X', boardId: 'familie' } }), 403);
+        assert.equal(call({ token: 'tok-fam', method: 'PATCH', path: '/users/bjoern', body: { color: '#fff', board: 'familie' } }), 403);
+        assert.equal(call({ token: 'tok-fam', path: '/users/bjoern/avatar', body: { image: 'x', boardId: 'familie' } }), 403);
+        // Das Board aus dem Pfad bleibt maßgeblich: ein erlaubtes Board im Body
+        // macht ein fremdes Pfad-Board nicht zulässig.
+        assert.equal(call({ token: 'tok-fam', path: '/boards/agenten/cards', body: { board: 'familie' } }), 403);
+    });
+
+    it('beantwortet eine kaputt kodierte Board-ID mit 400 statt 500', () => {
+        assert.equal(call({ token: 'tok-fam', path: '/boards/%ZZ/cards' }), 400);
+    });
+
     it('respektiert apiWriteProtection = false', () => {
         assert.equal(call({ token: undefined, config: { apiWriteProtection: false } }), 200);
     });
@@ -127,6 +143,19 @@ describe('Webhook-Kommandos: Board-Bindung', () => {
         // Regression: addBoard nennt kein Board und lief deshalb am Guard vorbei
         assert.equal(check(scoped, { cmd: 'addBoard', title: 'Verbotenes Board' }), 403);
         assert.equal(check(scoped, { cmd: 'irgendwasNeues' }), 403);
+    });
+
+    it('lässt sich nicht mit einem erlaubten Board im Body aushebeln', () => {
+        // Regression: addBoard ignoriert `board`, der Guard nahm es trotzdem als
+        // Nachweis — ein auf 'familie' begrenzter Token legte so Boards an.
+        assert.equal(check(scoped, { cmd: 'addBoard', title: 'Neu', board: 'familie' }), 403);
+        assert.equal(check(scoped, { cmd: 'addBoard', title: 'Neu', boardId: 'familie' }), 403);
+        assert.equal(check(scoped, { cmd: 'addBoard', title: 'Neu', toBoard: 'familie' }), 403);
+        // Ebenso darf ein erlaubtes Zielboard das gesperrte Quellboard nicht decken.
+        assert.equal(check(scoped, { cmd: 'transferCard', board: 'agenten', toBoard: 'familie' }), 403);
+        // Fehlt das maßgebliche Board, lässt sich die Bindung nicht prüfen.
+        assert.equal(check(scoped, { cmd: 'addCard', title: 'X' }), 403);
+        assert.equal(check(scoped, { cmd: 'transferCard', board: 'familie' }), 403);
     });
 
     it('lässt lesende Kommandos ohne Board-Angabe zu', () => {

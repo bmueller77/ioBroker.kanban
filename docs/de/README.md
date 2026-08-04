@@ -221,6 +221,8 @@ curl -X POST "http://<host>:8095/webhook/<DEIN_TOKEN>/action" \
 
 Kommt eine **Board-Liste** zurück, ist der Token gültig. Alle weiteren Kommandos sowie die vollständige Liste der Antworten und Fehlercodes stehen in [Teil C](#webhooks--eingehend).
 
+Unter der Tabelle stehen zwei weitere Schalter: **„Kommandos über den action-State annehmen"** (siehe [sendTo & action-State](#sendto--action-state)) und **„Erlaubte Browser-Herkünfte (CORS)"**. Letzteres bleibt normalerweise leer und wird nur gebraucht, wenn eine Webseite unter anderer Adresse die API aus dem Browser aufruft – Einzelheiten unter [Sicherheit & Zugriffsschutz](#sicherheit--zugriffsschutz).
+
 ### Tab „Webhooks (ausgehend)"
 
 Der Adapter kann bei jedem Ereignis einen **HTTP-POST** an beliebige URLs senden, z. B. an Node-RED, IFTTT, einen Chat-Dienst oder eigene Skripte.
@@ -945,10 +947,16 @@ Die `boards.*`- und `users.*`-Spiegel-States eignen sich gut für Dashboards (�
 Ohne gültigen Token → HTTP `401`. Über die native Einstellung `apiWriteProtection: false` lässt sich der Schutz abschalten (dann verhält sich `/api` wie in 0.1.0).
 
 > **Ebenfalls neu in 0.3.0:**
-> - Die **Board-Begrenzung eines Tokens** („Erlaubte Boards") gilt auf **beiden** Wegen — REST (`/api/boards/<id>/…`) und Webhook-Kommandos (`addCard`, `moveCard`, `deleteBoard`, `transferCard`, …). Geprüft werden der Board-Pfad **und** jede Board-Angabe im Body, also auch das Ziel beim Übertragen; bei einem fremden Board kommt `403`. Nennt ein **schreibendes** Kommando gar kein Board — etwa `addBoard` oder das Ändern von Benutzern und Avataren —, ist es für einen begrenzten Token ebenfalls gesperrt. Rein **lesende** Kommandos (`listBoards`, `getBoard`) bleiben erlaubt, Lesen ist am Adapter ohnehin nicht token-pflichtig.
+> - Die **Board-Begrenzung eines Tokens** („Erlaubte Boards") gilt auf **beiden** Wegen — REST (`/api/boards/<id>/…`) und Webhook-Kommandos (`addCard`, `moveCard`, `deleteBoard`, `transferCard`, …). Maßgeblich ist, welches Board der Aufruf **tatsächlich anfasst**: bei REST das Board im Pfad, beim Übertragen zusätzlich das Zielboard, bei Kommandos das Feld, das genau dieses Kommando auswertet. Ein fremdes Board ergibt `403`. Nennt ein **schreibendes** Kommando gar kein Board — etwa `addBoard` oder das Ändern von Benutzern und Avataren —, ist es für einen begrenzten Token ebenfalls gesperrt, und zwar unabhängig davon, was sonst im Body steht. Rein **lesende** Kommandos (`listBoards`, `getBoard`) bleiben erlaubt, Lesen ist am Adapter ohnehin nicht token-pflichtig.
 > - Tokens werden **nicht mehr als URL-Parameter** (`?token=…`) angenommen, da sie dort in Logs, Browser-Verlauf und Referrern landen. Header oder Body-Feld verwenden.
 > - Das **SPA-Secret liegt im Dateispeicher** des Adapters statt im lesbaren State `kanban.0.info.apiSecret`; der State bleibt leer bestehen. Ein vorhandener Wert wird beim ersten Start übernommen und gelöscht.
 > - **Unumkehrbare Kommandos** (`deleteBoard`, `emptyTrash`, `purgeCard`) werden mit ihrer Quelle im Log protokolliert.
+
+**Fremde Webseiten kommen nicht an die API (CORS).** Ab 0.3.1 verschickt der Adapter CORS-Freigaben nur noch auf `/api` und `/webhook` und nur für Herkünfte, die du unter *Webhooks (eingehend)* → **Erlaubte Browser-Herkünfte** einträgst. Die Vorgabe ist leer, also nur gleiche Herkunft.
+
+Bis 0.3.0 stand `Access-Control-Allow-Origin: *` auf **allen** Routen, auch auf der Seite, die den Schreib-Token im `<meta>`-Tag ausliefert. Eine beliebige Webseite, die du im Browser geöffnet hattest, konnte damit im Hintergrund deinen Adapter im Netz suchen, diese Seite lesen, den Token herausziehen und anschließend Karten und Boards ändern oder löschen. Genau das ist jetzt zu. Betroffen war ausschließlich der Zugriff **aus einem Browser** — Skripte, Node-RED und `curl` kennen keine Herkunftsprüfung und funktionieren unverändert weiter, mit und ohne Eintrag.
+
+Einen Eintrag brauchst du nur, wenn eine Webseite unter **anderer** Adresse die API **aus dem Browser** aufruft, etwa ein eigenes Dashboard unter `https://dashboard.local:8123`. Mehrere Herkünfte per Komma trennen. Ein `*` ist möglich, gibt aber jeder Webseite Lesezugriff auf alle Boards — dann besser die konkreten Adressen eintragen.
 
 > **Grenze dieses Schutzes (ehrlich):** Da die Oberfläche **ohne Login** arbeitet, kann ein Gerät im selben Netz, das die Seite lädt, das SPA-Secret mitlesen. Der Token wehrt damit zuverlässig **fremde Webseiten/CSRF** und naive Scanner ab, ist aber **kein** Ersatz für Netzisolation. Für harte Abschottung den Port nur ans LAN/`127.0.0.1` binden und einen Reverse-Proxy mit Authentifizierung davorsetzen.
 

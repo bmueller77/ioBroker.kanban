@@ -156,7 +156,8 @@
     "language": "",
     "notifyUpdated": false,
     "apiWriteProtection": true,
-    "actionStateEnabled": true
+    "actionStateEnabled": true,
+    "corsOrigins": ""
   },
   "objects": [],
   "instanceObjects": [

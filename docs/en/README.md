@@ -221,6 +221,8 @@ curl -X POST "http://<host>:8095/webhook/<YOUR_TOKEN>/action" \
 
 If a **board list** comes back, the token is valid. All further commands and the complete list of responses and error codes are in [Part C](#webhooks--inbound).
 
+Below the table sit two more switches: **"Accept commands via the action state"** (see [sendTo & action state](#sendto--action-state)) and **"Allowed browser origins (CORS)"**. The latter normally stays empty and is only needed when a website on another address calls the API from the browser – details under [Security & access control](#security--access-control).
+
 ### Tab "Webhooks (out)"
 
 The adapter can send an **HTTP POST** to arbitrary URLs on every event, e.g. to Node-RED, IFTTT, a chat service or your own scripts.
@@ -942,10 +944,16 @@ The `boards.*` and `users.*` mirror states are handy for dashboards ("Björn: 3 
 Without a valid token → HTTP `401`. The native setting `apiWriteProtection: false` disables the protection (then `/api` behaves as in 0.1.0).
 
 > **Also new in 0.3.0:**
-> - A token's **board restriction** ("allowed boards") applies on **both** routes — REST (`/api/boards/<id>/…`) and webhook commands (`addCard`, `moveCard`, `deleteBoard`, `transferCard`, …). Checked are the board in the path **and** every board field in the body, including the target of a transfer; another board yields `403`. A **writing** command that names no board at all — such as `addBoard`, or editing users and avatars — is closed to restricted tokens as well. Purely **reading** commands (`listBoards`, `getBoard`) stay open, as reading needs no token anyway.
+> - A token's **board restriction** ("allowed boards") applies on **both** routes — REST (`/api/boards/<id>/…`) and webhook commands (`addCard`, `moveCard`, `deleteBoard`, `transferCard`, …). What counts is the board the call **actually touches**: for REST the board in the path, plus the target board of a transfer, and for commands the field that this particular command evaluates. Another board yields `403`. A **writing** command that names no board at all — such as `addBoard`, or editing users and avatars — is closed to restricted tokens as well, no matter what else the body contains. Purely **reading** commands (`listBoards`, `getBoard`) stay open, as reading needs no token anyway.
 > - Tokens are **no longer accepted as a URL parameter** (`?token=…`), because URLs end up in logs, browser history and referrers. Use the header or the body field.
 > - The **SPA secret now lives in the adapter's file storage** instead of the readable state `kanban.0.info.apiSecret`; the state remains but stays empty. An existing value is migrated on first start and then cleared.
 > - **Irreversible commands** (`deleteBoard`, `emptyTrash`, `purgeCard`) are logged together with their source.
+
+**Third-party websites cannot reach the API (CORS).** From 0.3.1 the adapter sends CORS permissions only on `/api` and `/webhook`, and only for origins you list under *Webhooks (in)* → **Allowed browser origins**. The default is empty, meaning same origin only.
+
+Up to 0.3.0 `Access-Control-Allow-Origin: *` sat on **every** route, including the page that hands out the write token in its `<meta>` tag. Any website you had open in your browser could therefore scan the network for your adapter in the background, read that page, extract the token and then change or delete cards and boards. That door is now shut. Only access **from a browser** was ever affected — scripts, Node-RED and `curl` know no origin check and keep working unchanged, with or without an entry.
+
+You only need an entry if a website on a **different** address calls the API **from the browser**, for example your own dashboard at `https://dashboard.local:8123`. Separate several origins with commas. A `*` works too, but grants every website read access to all boards — prefer listing the actual addresses.
 
 > **Honest limit of this protection:** because the UI works **without a login**, any device on the same network that loads the page can read the SPA secret. The token thus reliably blocks **third-party websites/CSRF** and naive scanners, but is **not** a substitute for network isolation. For hard isolation, bind the port to the LAN/`127.0.0.1` only and put an authenticating reverse proxy in front.
 

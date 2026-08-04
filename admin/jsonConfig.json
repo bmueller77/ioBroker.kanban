@@ -795,6 +795,23 @@
           "xs": 12,
           "lg": 6,
           "xl": 6
+        },
+        "corsOrigins": {
+          "type": "text",
+          "label": {
+            "en": "Allowed browser origins (CORS)",
+            "de": "Erlaubte Browser-Herkünfte (CORS)"
+          },
+          "help": {
+            "en": "Only needed for web pages on another origin that call the API from the browser, e.g. https://dashboard.local:8123 (comma-separated). Empty = same origin only, which is the safe default. Scripts, Node-RED and curl are not affected.",
+            "de": "Nur nötig für Webseiten anderer Herkunft, die die API aus dem Browser aufrufen, z. B. https://dashboard.local:8123 (mehrere per Komma). Leer = nur gleiche Herkunft, das ist die sichere Vorgabe. Skripte, Node-RED und curl sind davon nicht betroffen."
+          },
+          "default": "",
+          "sm": 12,
+          "md": 6,
+          "xs": 12,
+          "lg": 6,
+          "xl": 6
         }
       }
     },
