@@ -126,6 +126,10 @@ Details: [Security & access control](docs/en/README.md#security--access-control)
 
 ## Changelog
 
+- **0.3.1**
+  - **Recurrence by cron expression**: a new recurrence type takes the usual five fields (`0 8 * * 1-5`) with lists, ranges, steps and the English short names for month and weekday. The expression works as a pattern, not as a schedule — the adapter uses it to find the next due date when a card is ticked off. Minute and hour set the time of the card, and the editor shows the rule in plain words plus the next three dates while you type. Simple patterns also become a proper recurring calendar invitation
+  - The **notification tab** now links straight to the docs section that shows how to reach Telegram, Pushover and anything else through the `lastEvent` state or an outbound webhook
+
 - **0.3.0**
   - **Trash**: deleting a card no longer removes it immediately, it moves to a per-board **Trash** column and can be restored for **30 days**, after which it is deleted permanently. The trash column is hidden by default and can be shown per device (board settings). It has its own fixed grey styling, is sorted by deletion time and shows the remaining days per card
   - Optional **automatic cleanup** of old done cards per board, by **age** (default 90 days) or by **count** (default 100), moving them into the trash daily and on adapter start

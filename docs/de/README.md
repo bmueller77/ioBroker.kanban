@@ -420,8 +420,32 @@ Wird eine wiederkehrende Karte **ohne** manuelles Datum angelegt, setzt der Adap
 | `workday` | Erster/letzter/n-ter **Arbeitstag** im Monat | `workdayPos`: `first` / `last` / `nth` / `nth_last`, `n`: bei `nth`/`nth_last` |
 | `yearly` | Jährlich | `month`: `1..12`, `dayOfMonth`: `1..31` |
 | `every_n_days` | Alle X Tage ab Startdatum | `interval`: N, `startDate`: `YYYY-MM-DD` |
+| `cron` | Cron-Ausdruck als Muster | `cron`: `"0 8 * * 1-5"` |
 
 **Arbeitstag** heißt: kein Wochenende **und** kein gesetzlicher Feiertag (siehe unten). Beispiel: „erster Arbeitstag im Mai" landet auf dem 4.5., wenn der 1.5. auf einen Feiertag/Wochenende fällt.
+
+#### Cron-Ausdruck
+
+Für Muster, die sich mit den festen Typen nicht ausdrücken lassen, gibt es den Typ **Cron-Ausdruck**. Er nimmt die üblichen fünf Felder:
+
+```
+Minute  Stunde  Tag  Monat  Wochentag
+   0      8      *     *      1-5      -> Montag bis Freitag um 08:00
+```
+
+Je Feld verstanden werden `*`, einzelne Zahlen, Listen (`1,15`), Bereiche (`1-5`), Schrittweiten (`*/3`, `1-7/2`) sowie die englischen Kurznamen für Monat (`jan`…`dec`) und Wochentag (`mon`…`sun`). Sonntag ist `0` **und** `7`.
+
+Drei Dinge unterscheiden sich von einem echten Cron-Dienst:
+
+- **Der Ausdruck ist ein Muster, kein Zeitplan.** Der Adapter führt nichts zu diesen Zeitpunkten aus – er sucht damit das nächste Fälligkeitsdatum, wenn die Karte erledigt wird. Wie bei allen Wiederholungen entsteht die Folgekarte beim Abhaken, nicht von selbst.
+- **Minute und Stunde setzen die Uhrzeit der Karte.** `0 8 * * 1-5` erzeugt Karten mit Uhrzeit `08:00`; das Feld *Uhrzeit* im Editor wird dabei aus dem Muster befüllt und gesperrt. Nennt das Muster mehrere Zeiten (`15,45 8-10 * * *`), gilt die früheste.
+- **`L`, `W`, `#` und `?` gibt es nicht.** Für „letzter Werktag im Monat" oder „zweiter Dienstag" nimmst du die Typen *Arbeitstag im Monat* bzw. *Monatlich (Wochentag)* – die kennen zusätzlich die Feiertagslogik, die kein Cron abbilden kann.
+
+Sind **Tag** und **Wochentag** gleichzeitig eingeschränkt, gilt wie im Original **oder**: `0 8 1 * mon` trifft jeden Monatsersten *und* jeden Montag.
+
+Unter dem Eingabefeld zeigt der Editor die Regel im Klartext und die nächsten drei Termine. Ist der Ausdruck fehlerhaft, steht dort die Ursache statt einer Vorschau; die Karte lässt sich dann nicht speichern.
+
+**Kalender-Einladung:** Einfache Muster werden in eine Serienregel übersetzt (täglich, feste Wochentage, feste Monatstage, jährlich). Verschachtelte Muster – etwa Tag und Wochentag gleichzeitig oder Schrittweiten über mehrere Felder – lassen sich im Kalenderstandard nicht ausdrücken; solche Karten verschicken einen Einzeltermin je Wiederholung.
 
 ### Feiertage
 

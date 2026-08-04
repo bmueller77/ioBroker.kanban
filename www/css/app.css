@@ -980,3 +980,10 @@ dialog button:disabled { opacity: 0.45; cursor: default; filter: grayscale(0.6);
 @media (max-width: 600px) {
     .board-toprow { flex-direction: row; }
 }
+
+/* Cron-Wiederholung: Klartext, naechste Termine, Fehlermeldung */
+.rec-cron-info { margin: 4px 0 2px; font-size: 12px; line-height: 1.5; }
+.rec-cron-info .cron-good { color: var(--accent); font-weight: 600; }
+.rec-cron-info .cron-next { color: var(--muted); }
+.rec-cron-info .cron-bad { color: var(--danger, #d32f2f); }
+input[name="recCron"] { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }

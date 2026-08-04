@@ -420,8 +420,32 @@ If a recurring card is created **without** a manual date, the adapter automatica
 | `workday` | First/last/n-th **working day** of the month | `workdayPos`: `first` / `last` / `nth` / `nth_last`, `n`: for `nth`/`nth_last` |
 | `yearly` | Yearly | `month`: `1..12`, `dayOfMonth`: `1..31` |
 | `every_n_days` | Every X days from a start date | `interval`: N, `startDate`: `YYYY-MM-DD` |
+| `cron` | Cron expression used as a pattern | `cron`: `"0 8 * * 1-5"` |
 
 A **working day** means: not a weekend **and** not a public holiday (see below). Example: "first working day in May" lands on the 4th if May 1st is a holiday/weekend.
+
+#### Cron expression
+
+For patterns the fixed types can't express there is the **cron expression** type. It takes the usual five fields:
+
+```
+minute  hour  day  month  weekday
+   0      8    *     *      1-5    -> Monday to Friday at 08:00
+```
+
+Each field understands `*`, single numbers, lists (`1,15`), ranges (`1-5`), steps (`*/3`, `1-7/2`) and the English short names for month (`jan`…`dec`) and weekday (`mon`…`sun`). Sunday is both `0` and `7`.
+
+Three things differ from a real cron daemon:
+
+- **The expression is a pattern, not a schedule.** The adapter runs nothing at those moments – it uses the pattern to find the next due date when a card is completed. As with every recurrence, the follow-up card appears when you tick the card off, not on its own.
+- **Minute and hour set the time of the card.** `0 8 * * 1-5` produces cards with the time `08:00`; the *time* field in the editor is filled from the pattern and locked. If the pattern names several times (`15,45 8-10 * * *`), the earliest one wins.
+- **`L`, `W`, `#` and `?` do not exist.** For "last working day of the month" or "second Tuesday" use the types *working day of the month* and *monthly (weekday)* – they also know the public-holiday logic that no cron can express.
+
+If **day** and **weekday** are both restricted, they combine with **or**, as in the original: `0 8 1 * mon` matches every first of the month *and* every Monday.
+
+Below the input the editor shows the rule in plain words and the next three dates. If the expression is faulty, the reason appears there instead of a preview and the card cannot be saved.
+
+**Calendar invitation:** simple patterns are translated into a recurrence rule (daily, fixed weekdays, fixed days of the month, yearly). Nested patterns – day and weekday at once, or steps across several fields – have no equivalent in the calendar standard; those cards send a single event per occurrence.
 
 ### Public holidays
 

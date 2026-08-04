@@ -100,7 +100,11 @@
                     <option value="workday" data-i18n="rec.workday">Arbeitstag im Monat</option>
                     <option value="yearly" data-i18n="rec.yearly">Jährlich</option>
                     <option value="every_n_days" data-i18n="rec.everyNDays">Alle X Tage</option>
+                    <option value="cron" data-i18n="rec.cron">Cron-Ausdruck</option>
                 </select>
+            </label>
+            <label id="recCronWrap" hidden data-i18n="rec.cronExpr">Muster
+                <input type="text" name="recCron" placeholder="0 8 * * 1-5" spellcheck="false" autocapitalize="off" autocomplete="off">
             </label>
             <label id="recIntervalWrap" hidden data-i18n="rec.interval">Intervall (Tage)
                 <input type="number" name="recInterval" min="1" value="2">
@@ -131,6 +135,7 @@
             </label>
         </div>
         <div id="recWeekdayWrap" class="chip-pick" hidden></div>
+        <div id="recCronInfo" class="rec-cron-info" hidden></div>
         <div id="recHint" class="hint" hidden></div>
 
         <label data-i18n="card.checklist">Checkliste</label>

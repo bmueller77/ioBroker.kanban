@@ -478,6 +478,34 @@
           "lg": 4,
           "xl": 4
         },
+        "_otherServicesHint": {
+          "type": "staticText",
+          "text": {
+            "en": "Only e-mail is built in. Every other service is reached through the lastEvent state or an outbound webhook — the docs walk through it with a Telegram script you can copy.",
+            "de": "Eingebaut ist nur E-Mail. Jeden anderen Dienst erreichst du über den lastEvent-State oder einen ausgehenden Webhook — die Doku zeigt das an einem Telegram-Skript zum Kopieren."
+          },
+          "sm": 12,
+          "xs": 12,
+          "lg": 12,
+          "xl": 12
+        },
+        "_otherServicesLink": {
+          "type": "staticLink",
+          "label": {
+            "en": "Send to Telegram, Pushover and others",
+            "de": "An Telegram, Pushover und andere schicken"
+          },
+          "href": "https://github.com/bmueller77/iobroker.kanban/blob/main/docs/de/README.md#benachrichtigungen-an-beliebige-dienste-telegram-pushover-",
+          "target": "_blank",
+          "button": true,
+          "variant": "outlined",
+          "icon": "book",
+          "sm": 12,
+          "md": 6,
+          "xs": 12,
+          "lg": 6,
+          "xl": 6
+        },
         "reminderTime": {
           "type": "text",
           "label": {

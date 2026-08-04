@@ -420,6 +420,7 @@ export function initDialogs(state, actions) {
         form.elements.recOrdinal.value = String(rec.ordinal || 1);
         form.elements.recWorkdayPos.value = rec.workdayPos || 'first';
         form.elements.recWorkdayN.value = rec.n || 1;
+        form.elements.recCron.value = rec.cron || '';
         const initWd = (rec.dayOfWeek && rec.dayOfWeek.length) ? rec.dayOfWeek : [isoToday()];
         selWeekdays = new Set(rec.type === 'monthly_weekday' ? [initWd[0]] : initWd);
         renderWeekdayPick();
@@ -438,6 +439,13 @@ export function initDialogs(state, actions) {
         document.getElementById('recOrdinalWrap').hidden = type !== 'monthly_weekday';
         document.getElementById('recWorkdayPosWrap').hidden = type !== 'workday';
         document.getElementById('recWorkdayNWrap').hidden = !(type === 'workday' && (pos === 'nth' || pos === 'nth_last'));
+        document.getElementById('recCronWrap').hidden = type !== 'cron';
+        document.getElementById('recCronInfo').hidden = type !== 'cron';
+        // Bei Cron gibt das Muster die Uhrzeit vor — ein frei editierbares Feld
+        // wuerde etwas anderes anzeigen als die Karte spaeter bekommt.
+        form.elements.dueTimeEnabled.disabled = type === 'cron';
+        form.elements.dueTime.readOnly = type === 'cron';
+        if (type === 'cron') scheduleCronCheck();
         const hint = document.getElementById('recHint');
         const txt = type === 'none' ? '' : t('rec.hint.' + type);
         hint.hidden = !txt;
@@ -446,6 +454,67 @@ export function initDialogs(state, actions) {
 
     on('recType', 'change', () => { renderWeekdayPick(); updateRecUI(); });
     on('recWorkdayPos', 'change', updateRecUI);
+    on('recCron', 'input', scheduleCronCheck);
+
+    // ---- Cron: Klartext und naechste Termine -------------------------------
+    let cronTimer = null;
+    function scheduleCronCheck() {
+        clearTimeout(cronTimer);
+        cronTimer = setTimeout(runCronCheck, 300);
+    }
+
+    const CRON_FIELDS = ['cron.minute', 'cron.hour', 'cron.day', 'cron.month', 'cron.weekday'];
+    const CRON_DOW = ['cron.sun', 'cron.mon', 'cron.tue', 'cron.wed', 'cron.thu', 'cron.fri', 'cron.sat'];
+
+    /** Muster in Worte fassen. Gaengige Faelle als Satz, alles Weitere feldweise —
+     *  eine erzwungene Satzform waere bei '1-5/2' irrefuehrender als die Aufzaehlung. */
+    function cronText(expr) {
+        const p = expr.trim().split(/\s+/);
+        if (p.length !== 5) return '';
+        const [mi, ho, dom, mon, dow] = p;
+        const time = /^\d+$/.test(mi) && /^\d+$/.test(ho)
+            ? `${String(ho).padStart(2, '0')}:${String(mi).padStart(2, '0')}` : null;
+        const named = n => t(CRON_DOW[Number(n) % 7]);
+        const simple = mon === '*' && (dom === '*' || dow === '*');
+        if (time && simple) {
+            if (dom === '*' && dow === '*') return t('cron.everyDayAt', { time });
+            if (dow === '*') {
+                if (/^\d+$/.test(dom)) return t('cron.monthlyAt', { day: dom, time });
+            } else if (/^\d+-\d+$/.test(dow)) {
+                const [a, b] = dow.split('-');
+                return t('cron.rangeAt', { from: named(a), to: named(b), time });
+            } else if (/^\d+(,\d+)*$/.test(dow)) {
+                return t('cron.daysAt', { days: dow.split(',').map(named).join(', '), time });
+            }
+        }
+        return p.map((v, i) => `${t(CRON_FIELDS[i])} ${v}`).join(' · ');
+    }
+
+    async function runCronCheck() {
+        const box = document.getElementById('recCronInfo');
+        const expr = form.elements.recCron.value.trim();
+        box.textContent = '';
+        if (!expr) { box.appendChild(el('span', 'hint', t('cron.empty'))); return; }
+        let res;
+        try { res = await api('api/cron/check?expr=' + encodeURIComponent(expr)); }
+        catch (e) { box.appendChild(el('span', 'cron-bad', e.message)); return; }
+        if (!res.ok) { box.appendChild(el('span', 'cron-bad', res.error)); return; }
+        box.appendChild(el('div', 'cron-good', cronText(expr)));
+        if (res.next && res.next.length) {
+            box.appendChild(el('div', 'cron-next', t('cron.next', { dates: res.next.map(fmtDateShort).join(' · ') })));
+        }
+        // Uhrzeit der Karte an das Muster angleichen
+        if (res.time) {
+            form.elements.dueTime.value = res.time;
+            form.elements.dueTimeEnabled.checked = true;
+            document.getElementById('dueTimeWrap').hidden = false;
+        }
+    }
+
+    function fmtDateShort(iso) {
+        const [y, m, d] = iso.split('-');
+        return `${d}.${m}.${y}`;
+    }
 
     function readRecurrence() {
         const t = form.elements.recType.value;
@@ -464,6 +533,7 @@ export function initDialogs(state, actions) {
                 rec.n = Math.max(1, Number(form.elements.recWorkdayN.value) || 1);
             }
         }
+        if (t === 'cron') rec.cron = form.elements.recCron.value.trim();
         if (t === 'every_n_days') {
             rec.interval = Math.max(1, Number(form.elements.recInterval.value) || 1);
             rec.startDate = form.elements.due.value || null;   // Referenzpunkt = Fälligkeit
