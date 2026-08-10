@@ -98,8 +98,26 @@ function saveCheckExpanded() {
     try { localStorage.setItem(checkExpandedKey(checkExpandedBoard), JSON.stringify([...checkExpanded])); } catch (e) { /* ignore */ }
 }
 
-function isNarrow() {
-    return window.matchMedia('(max-width: 820px)').matches;
+/**
+ * Landezonen beim Ziehen anbieten?
+ *
+ * Auf Touch-Geraeten immer: Sobald mehr Spalten nebeneinander liegen, als in
+ * den Bildschirm passen, scrollt das Board waagerecht — und eine Karte mit dem
+ * Finger quer ueber einen scrollenden Bereich in eine andere Spalte zu ziehen,
+ * ist kaum machbar. Genau dafuer gibt es die Zonen.
+ *
+ * Die Breite allein taugt als Kriterium nicht: Ein Tablet im Querformat (Tab
+ * S5e: 1280x800 CSS-Pixel) lag ueber der frueheren 820px-Grenze und bekam
+ * deshalb keine Zonen, obwohl es genau der Fall ist, fuer den sie gedacht sind.
+ * Hochkant (800px) erschienen sie — Verschieben zwischen Spalten funktionierte
+ * also je nach Haltung des Geraets oder eben nicht.
+ *
+ * Die Breiten-Regel bleibt zusaetzlich bestehen, damit auch ein schmales
+ * Fenster mit Maus die Zonen bekommt.
+ */
+function wantsQuickMove() {
+    return window.matchMedia('(pointer: coarse)').matches
+        || window.matchMedia('(max-width: 820px)').matches;
 }
 
 function buildQuickMove(evt, sourceCol, board) {
@@ -111,13 +129,21 @@ function buildQuickMove(evt, sourceCol, board) {
     // aufgenommene Karte nicht und sind mit dem Daumen gut erreichbar.
     const bar = el('div', 'quick-move');
     const width = Math.max(120, Math.round(window.innerWidth / 3) - 12);
-    const estH = others.length * 82 + (others.length - 1) * 6;
+    // Zonenhoehe so waehlen, dass die Leiste in den Bildschirm passt. Bei vielen
+    // Spalten lief sie sonst unten heraus, und die letzten Spalten waren gar
+    // nicht erreichbar.
+    const gap = 6;
+    const avail = window.innerHeight - 16;
+    const fits = n => others.length * n + (others.length - 1) * gap <= avail;
+    const zoneH = fits(82) ? 82 : Math.max(36, Math.floor((avail - (others.length - 1) * gap) / others.length));
+    const estH = others.length * zoneH + (others.length - 1) * gap;
     bar.style.right = '8px';
     bar.style.width = width + 'px';
     bar.style.top = Math.max(8, Math.round((window.innerHeight - estH) / 2)) + 'px';
 
     for (const c of others) {
         const qt = el('div', 'quick-target' + (c.isTrash ? ' quick-trash' : ''));
+        qt.style.minHeight = zoneH + 'px';
         // Der Name liegt in einer eigenen Ebene ueber der Zone, damit ihn nichts
         // verschieben kann.
         qt.appendChild(el('span', 'quick-label', c.isTrash ? t('col.trash') : c.title));
@@ -906,7 +932,7 @@ export function renderBoard(container, state, actions) {
             preventOnFilter: false,              // damit deren Klick normal durchkommt
 
             onStart: evt => {
-                if (isNarrow()) buildQuickMove(evt, col, board);
+                if (wantsQuickMove()) buildQuickMove(evt, col, board);
             },
             onEnd: evt => {
                 const cardId = evt.item.dataset.cardId;
