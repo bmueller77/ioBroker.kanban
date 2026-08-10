@@ -125,25 +125,17 @@ function buildQuickMove(evt, sourceCol, board) {
     const others = board.columns.filter(c => c.id !== sourceCol.id);
     if (!others.length) return;
 
-    // Die Zonen liegen im rechten Drittel des Fensters. Dort verdecken sie die
-    // aufgenommene Karte nicht und sind mit dem Daumen gut erreichbar.
+    // Waagerechte Leiste am oberen Rand: Sie verdeckt die aufgenommene Karte
+    // nicht (die liegt darunter), der Weg dorthin ist kurz, und die Zonen stehen
+    // in derselben Reihenfolge wie die Spalten. Bei vielen Spalten bricht die
+    // Leiste dank flex-wrap in eine zweite Reihe um, statt aus dem Bild zu laufen.
     const bar = el('div', 'quick-move');
-    const width = Math.max(120, Math.round(window.innerWidth / 3) - 12);
-    // Zonenhoehe so waehlen, dass die Leiste in den Bildschirm passt. Bei vielen
-    // Spalten lief sie sonst unten heraus, und die letzten Spalten waren gar
-    // nicht erreichbar.
-    const gap = 6;
-    const avail = window.innerHeight - 16;
-    const fits = n => others.length * n + (others.length - 1) * gap <= avail;
-    const zoneH = fits(82) ? 82 : Math.max(36, Math.floor((avail - (others.length - 1) * gap) / others.length));
-    const estH = others.length * zoneH + (others.length - 1) * gap;
+    bar.style.left = '8px';
     bar.style.right = '8px';
-    bar.style.width = width + 'px';
-    bar.style.top = Math.max(8, Math.round((window.innerHeight - estH) / 2)) + 'px';
+    bar.style.top = '8px';
 
     for (const c of others) {
         const qt = el('div', 'quick-target' + (c.isTrash ? ' quick-trash' : ''));
-        qt.style.minHeight = zoneH + 'px';
         // Der Name liegt in einer eigenen Ebene ueber der Zone, damit ihn nichts
         // verschieben kann.
         qt.appendChild(el('span', 'quick-label', c.isTrash ? t('col.trash') : c.title));

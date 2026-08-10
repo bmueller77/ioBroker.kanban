@@ -261,6 +261,12 @@ img.avatar, .avatar img { object-fit: cover; width: 100%; height: 100%; border-r
     padding: 8px 10px;
     cursor: grab;
     -webkit-tap-highlight-color: transparent;
+    /* Beruehrung, die auf einer Karte beginnt, darf nur senkrecht scrollen.
+       Ohne diese Angabe uebernimmt der Browser eine Seitwaertsbewegung als
+       waagerechtes Scrollen von #board, bricht den laufenden Zug ab und die
+       Karte springt zurueck — auf dem Tablet liess sich deshalb nichts in eine
+       andere Spalte ziehen. Senkrechtes Scrollen der Spalte bleibt erhalten. */
+    touch-action: pan-y;
 }
 
 /* Farbstreifen links - unabhaengig vom Kartenrahmen (nutzt --card-color) */
@@ -806,18 +812,26 @@ button.mini {
 .col-toggle svg { display: block; }
 
 /* Schnellablage-Ziele beim Ziehen einer Karte (unter der aufgenommenen Karte) */
+/* Leiste quer ueber die volle Breite statt einer Spalte am rechten Rand: Dort
+   war der Weg vom aufgenommenen Kaertchen im ungenstigsten Fall die gesamte
+   Bildschirmbreite. Waagerecht verteilt liegt jedes Ziel hoechstens eine halbe
+   Breite entfernt, und die Reihenfolge entspricht der der Spalten. */
 .quick-move {
     position: fixed;
     z-index: 900;
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
     gap: 6px;
     pointer-events: none;   /* die Leiste selbst fängt keine Klicks, nur die Zonen */
 }
 .quick-target {
     pointer-events: auto;
     position: relative;
-    min-height: 76px;
+    flex: 1 1 110px;
+    max-width: 220px;
+    min-height: 64px;
     display: flex;
     align-items: center;
     justify-content: center;
