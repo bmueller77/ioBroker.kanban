@@ -267,6 +267,15 @@ img.avatar, .avatar img { object-fit: cover; width: 100%; height: 100%; border-r
        Karte springt zurueck — auf dem Tablet liess sich deshalb nichts in eine
        andere Spalte ziehen. Senkrechtes Scrollen der Spalte bleibt erhalten. */
     touch-action: pan-y;
+    /* Ziehen heisst auf dem Touchscreen: aufliegen und halten. Genau das ist
+       fuer den Browser auch ein langer Druck — nach etwa einer Sekunde beginnt
+       er, Text zu markieren bzw. das Kontextmenue zu oeffnen, schickt
+       touchcancel und der Zug bricht ab. Die Karte fiel dadurch mitten in der
+       Bewegung zurueck. Markieren wird hier nicht gebraucht: Text bearbeitet
+       man im Karten-Dialog, und der ist davon nicht betroffen. */
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
 }
 
 /* Farbstreifen links - unabhaengig vom Kartenrahmen (nutzt --card-color) */

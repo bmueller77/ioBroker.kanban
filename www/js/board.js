@@ -69,6 +69,52 @@ export function mdiIcon(pathData) {
     return svg;
 }
 
+// ---- Diagnose: wer beendet einen laufenden Zug? --------------------------
+// Mit ?debugDrag=1 blendet die Seite unten ein Protokoll ein. Auf einem Tablet
+// gibt es keine erreichbare Entwicklerkonsole, und ohne Messung bleibt nur
+// Raten, warum eine Karte mitten in der Bewegung zurueckfaellt. Ohne den
+// Parameter wird nichts registriert und nichts angezeigt.
+let dragDebugEl = null;
+let dragT0 = 0;
+
+function dragDebugOn() {
+    try { return new URLSearchParams(location.search).get('debugDrag') === '1'; } catch (e) { return false; }
+}
+
+function dragLog(what) {
+    if (!dragDebugEl) return;
+    const dt = dragT0 ? Math.round(performance.now() - dragT0) : 0;
+    const line = document.createElement('div');
+    line.textContent = `${String(dt).padStart(5)} ms  ${what}`;
+    dragDebugEl.appendChild(line);
+    while (dragDebugEl.childElementCount > 14) dragDebugEl.removeChild(dragDebugEl.firstChild);
+    dragDebugEl.scrollTop = dragDebugEl.scrollHeight;
+}
+
+function initDragDebug() {
+    if (dragDebugEl || !dragDebugOn()) return;
+    dragDebugEl = document.createElement('div');
+    dragDebugEl.id = 'dragDebug';
+    Object.assign(dragDebugEl.style, {
+        position: 'fixed', left: '8px', bottom: '8px', zIndex: '2000',
+        maxHeight: '38vh', overflowY: 'auto', width: 'calc(100% - 16px)',
+        background: 'rgba(0,0,0,.82)', color: '#0f0', font: '12px/1.35 monospace',
+        padding: '6px 8px', borderRadius: '8px', pointerEvents: 'none',
+        whiteSpace: 'pre',
+    });
+    document.body.appendChild(dragDebugEl);
+    // Alle Ereignisse, die einen Zug beenden koennen — in der Erfassungsphase,
+    // damit sie auch dann ankommen, wenn jemand sie unterwegs abfaengt.
+    for (const type of ['touchcancel', 'pointercancel', 'contextmenu', 'selectstart',
+        'touchend', 'pointerup', 'dragstart', 'dragend', 'scroll', 'visibilitychange']) {
+        document.addEventListener(type, ev => {
+            const tgt = ev.target && ev.target.className ? String(ev.target.className).slice(0, 24) : '';
+            dragLog(`${type}  ${tgt}`);
+        }, true);
+    }
+    dragLog('Protokoll bereit — jetzt eine Karte ziehen');
+}
+
 // ---- Schnellablage-Ziele beim Ziehen (v.a. schmale Screens) --------------
 // Beim Aufnehmen einer Karte erscheinen direkt darunter die übrigen Spalten
 // als Drop-Zonen mit gestricheltem Rand, damit man ohne Quer-Scrollen ablegen
@@ -725,6 +771,7 @@ const _widthWatcher = typeof ResizeObserver === 'function' ? new ResizeObserver(
 }) : null;
 
 export function renderBoard(container, state, actions) {
+    initDragDebug();   // tut nur etwas bei ?debugDrag=1
     // Scrollpositionen merken: das Board wird bei jeder Änderung komplett neu
     // aufgebaut (z. B. nach dem Abhaken eines Checklisten-Punkts), sonst springt
     // die Ansicht dabei an den Anfang.
@@ -924,9 +971,12 @@ export function renderBoard(container, state, actions) {
             preventOnFilter: false,              // damit deren Klick normal durchkommt
 
             onStart: evt => {
+                dragT0 = performance.now();
+                dragLog('Sortable onStart — Zug laeuft');
                 if (wantsQuickMove()) buildQuickMove(evt, col, board);
             },
             onEnd: evt => {
+                dragLog(`Sortable onEnd — von ${evt.from && evt.from.dataset.colId} nach ${evt.to && evt.to.dataset.colId}`);
                 const cardId = evt.item.dataset.cardId;
                 // Ueber einer Landezone losgelassen? Dann zaehlt deren Spalte,
                 // egal wohin SortableJS die Karte gelegt hat.
