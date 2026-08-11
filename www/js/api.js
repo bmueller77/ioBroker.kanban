@@ -1,7 +1,12 @@
 // REST-Wrapper + WebSocket mit Reconnect und Polling-Fallback
 
 // Schreib-Token: vom Server in index.html injiziert (<meta name="kanban-token">).
-const WRITE_TOKEN = (document.querySelector('meta[name="kanban-token"]') || {}).content || '';
+// Die Abfrage ist gegen ein fehlendes document abgesichert, damit sich das Modul
+// auch ausserhalb des Browsers laden laesst — board.js importiert es, und board.js
+// wird in den Tests geladen.
+const WRITE_TOKEN = typeof document !== 'undefined'
+    ? ((document.querySelector('meta[name="kanban-token"]') || {}).content || '')
+    : '';
 
 export async function api(path, opts = {}) {
     const init = { method: opts.method || 'GET', headers: {} };
