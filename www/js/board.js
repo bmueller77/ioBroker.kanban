@@ -1,6 +1,7 @@
 // Board-Rendering + SortableJS-Drag&Drop
 
 import { t, currentLang } from './i18n.js';
+import { api } from './api.js';
 
 function el(tag, cls, text) {
     const e = document.createElement(tag);
@@ -77,8 +78,34 @@ export function mdiIcon(pathData) {
 let dragDebugEl = null;
 let dragT0 = 0;
 
+// Der Ablauf wird immer mitgeschrieben und am Ende eines Zuges an den Adapter
+// geschickt (GET /api/debug/drag holt ihn wieder). So laesst er sich auch von
+// einem Tablet im Kiosk-Modus einsammeln, wo weder URL noch Konsole erreichbar
+// sind. Aufgezeichnet wird nur waehrend eines laufenden Zuges.
+const dragTrace = [];
+let dragActive = false;
+
 function dragDebugOn() {
     try { return new URLSearchParams(location.search).get('debugDrag') === '1'; } catch (e) { return false; }
+}
+
+function traceAdd(what) {
+    if (!dragActive) return;
+    if (dragTrace.length > 60) return;
+    dragTrace.push(`${String(Math.round(performance.now() - dragT0)).padStart(5)} ms  ${what}`);
+}
+
+async function sendTrace(reason) {
+    if (!dragTrace.length) return;
+    const payload = {
+        reason,
+        ua: navigator.userAgent,
+        screen: `${window.innerWidth}x${window.innerHeight}`,
+        coarse: window.matchMedia('(pointer: coarse)').matches,
+        trace: dragTrace.slice(0, 60),
+    };
+    dragTrace.length = 0;
+    try { await api('api/debug/drag', { method: 'POST', body: payload }); } catch (e) { /* Diagnose darf nie stoeren */ }
 }
 
 function dragLog(what) {
@@ -91,7 +118,25 @@ function dragLog(what) {
     dragDebugEl.scrollTop = dragDebugEl.scrollHeight;
 }
 
+let dragDebugReady = false;
+
+/** Ereignisse mitschreiben — immer. Das Einblenden bleibt an ?debugDrag=1. */
+function initDragTrace() {
+    if (dragDebugReady) return;
+    dragDebugReady = true;
+    for (const type of ['touchcancel', 'pointercancel', 'contextmenu', 'selectstart',
+        'touchend', 'pointerup', 'dragstart', 'dragend', 'scroll', 'visibilitychange',
+        'touchstart', 'pointerdown']) {
+        document.addEventListener(type, ev => {
+            const cls = ev.target && ev.target.className ? String(ev.target.className).slice(0, 28) : '';
+            traceAdd(`${type}  ${cls}`);
+            dragLog(`${type}  ${cls}`);
+        }, true);
+    }
+}
+
 function initDragDebug() {
+    initDragTrace();
     if (dragDebugEl || !dragDebugOn()) return;
     dragDebugEl = document.createElement('div');
     dragDebugEl.id = 'dragDebug';
@@ -103,15 +148,6 @@ function initDragDebug() {
         whiteSpace: 'pre',
     });
     document.body.appendChild(dragDebugEl);
-    // Alle Ereignisse, die einen Zug beenden koennen — in der Erfassungsphase,
-    // damit sie auch dann ankommen, wenn jemand sie unterwegs abfaengt.
-    for (const type of ['touchcancel', 'pointercancel', 'contextmenu', 'selectstart',
-        'touchend', 'pointerup', 'dragstart', 'dragend', 'scroll', 'visibilitychange']) {
-        document.addEventListener(type, ev => {
-            const tgt = ev.target && ev.target.className ? String(ev.target.className).slice(0, 24) : '';
-            dragLog(`${type}  ${tgt}`);
-        }, true);
-    }
     dragLog('Protokoll bereit — jetzt eine Karte ziehen');
 }
 
@@ -972,11 +1008,17 @@ export function renderBoard(container, state, actions) {
 
             onStart: evt => {
                 dragT0 = performance.now();
+                dragActive = true;
+                dragTrace.length = 0;
+                traceAdd(`Sortable onStart — Spalte ${col.id}`);
                 dragLog('Sortable onStart — Zug laeuft');
                 if (wantsQuickMove()) buildQuickMove(evt, col, board);
             },
             onEnd: evt => {
+                traceAdd(`Sortable onEnd — von ${evt.from && evt.from.dataset.colId} nach ${evt.to && evt.to.dataset.colId}, Zone ${quickTarget && quickTarget.dataset.colId}`);
                 dragLog(`Sortable onEnd — von ${evt.from && evt.from.dataset.colId} nach ${evt.to && evt.to.dataset.colId}`);
+                dragActive = false;
+                sendTrace('onEnd');
                 const cardId = evt.item.dataset.cardId;
                 // Ueber einer Landezone losgelassen? Dann zaehlt deren Spalte,
                 // egal wohin SortableJS die Karte gelegt hat.
