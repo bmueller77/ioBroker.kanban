@@ -23,11 +23,11 @@ Empfohlen: Fensterbreite ~1200–1450 px (Board), heller **oder** dunkler Modus 
 ## Maße
 
 Die Dialogbilder zeigen **nur den Dialog**, ohne das Board dahinter. Der Dialog ist
-60 vw breit: bei einem 1868 px breiten Fenster ergibt das die 1122 px, die alle
-`settings-*.png`, `card-editor.png` und `share.png` haben. Das Board selbst wird bei
-1868 px Breite aufgenommen, die Höhe richtet sich nach dem Inhalt (aktuell 876 px
-deutsch, 720 px englisch).
+60 vw breit, bei einem 1868 px breiten Fenster also 1120 px. Genau die haben alle
+`settings-*.png`, `card-editor.png` und `share.png`; ihre Höhe richtet sich nach dem
+Inhalt. Das Board wird bei denselben 1868 px aufgenommen (876 px hoch deutsch,
+720 px englisch), die Mobilbilder bei 360 × 780 mit Faktor 2, also 720 × 1560.
 
-Die Admin-Bilder sind auf die Konfigurationsfläche zugeschnitten (ohne ioBroker-Rahmen
-und Seitenleiste) und 1504 px breit — die Benutzertabelle braucht seit 0.3.0 elf
-Ereignis-Spalten, schmaler passt sie nicht mehr aufs Bild.
+Die Admin-Bilder sind auf die Konfigurationsfläche zugeschnitten, ohne ioBroker-Rahmen
+und Seitenleiste, und 1504 px breit. Schmaler geht nicht mehr: Die Benutzertabelle hat
+seit 0.3.0 elf Ereignis-Spalten, die sonst rechts aus dem Bild laufen.

@@ -1,8 +1,8 @@
 # ioBroker Kanban – Dokumentation (Deutsch)
 
-Ein vollwertiges **Kanban-Board als eigener ioBroker-Adapter**. Der Adapter bringt einen eigenen Webserver mit, serviert eine schlanke Single-Page-App (Vanilla-JS, ohne Framework) und hält alle Ansichten per WebSocket live synchron. Karten lassen sich per Drag & Drop verschieben, Boards und Spalten frei konfigurieren, Aufgaben wiederkehrend planen, Benachrichtigungen per E-Mail verschicken (inkl. Kalender-Einladung) und das Ganze per REST/Webhook/`sendTo` in andere Automatisierungen einbinden.
+Ein **Kanban-Board als eigener ioBroker-Adapter**. Er bringt seinen eigenen Webserver mit, liefert eine Single-Page-App ohne Framework aus (reines JavaScript) und hält alle offenen Ansichten per WebSocket live synchron. Karten lassen sich per Drag & Drop verschieben, Boards und Spalten frei konfigurieren, Aufgaben wiederkehrend planen und Benachrichtigungen per E-Mail verschicken, auf Wunsch mit Kalender-Einladung. Nach außen ist alles per REST, Webhook und `sendTo` erreichbar.
 
-> **Für wen?** Für alle, die im Smart-Home eine gemeinsame Aufgabenverwaltung wollen, Familie, WG, Haustechnik-Wartung, und diese eng mit ioBroker (Skripte, Lovelace, Node-RED) verzahnen möchten.
+> **Für wen?** Für Haushalte, die Aufgaben gemeinsam verwalten wollen – Familie, WG, Wartungsplan fürs Haus – und sie dort haben möchten, wo ohnehin ioBroker läuft: abfragbar aus Skripten, einbettbar in Lovelace, ansteuerbar über Node-RED.
 
 > **Version 0.3.0**, Papierkorb je Board (30 Tage wiederherstellbar), automatisches Aufräumen alter erledigter Karten, Sortierung je Spalte in fünf Modi mit Richtungsumschalter, erledigte Karten durchgestrichen mit Zeitstempel und Kopier-Button, Karten zwischen Boards verschieben oder kopieren, neue Ereignisse `cardRestored`/`cardPurged` und `dueAt` (Fälligkeit inkl. Uhrzeit) in jedem Ereignis, überarbeitete Board-Einstellungen und Karten-Editor, Bestätigungsdialoge direkt in der Oberfläche.
 >
@@ -437,7 +437,7 @@ Minute  Stunde  Tag  Monat  Wochentag
    0      8      *     *      1-5      -> Montag bis Freitag um 08:00
 ```
 
-Je Feld verstanden werden `*`, einzelne Zahlen, Listen (`1,15`), Bereiche (`1-5`), Schrittweiten (`*/3`, `1-7/2`) sowie die englischen Kurznamen für Monat (`jan`…`dec`) und Wochentag (`mon`…`sun`). Sonntag ist `0` **und** `7`. Der Ausdruck darf höchstens 120 Zeichen lang sein — auch das längste sinnvolle Muster bleibt weit darunter.
+Je Feld verstanden werden `*`, einzelne Zahlen, Listen (`1,15`), Bereiche (`1-5`), Schrittweiten (`*/3`, `1-7/2`) sowie die englischen Kurznamen für Monat (`jan`…`dec`) und Wochentag (`mon`…`sun`). Sonntag ist `0` **und** `7`. Der Ausdruck darf höchstens 120 Zeichen lang sein – auch das längste sinnvolle Muster bleibt weit darunter.
 
 Drei Dinge unterscheiden sich von einem echten Cron-Dienst:
 
@@ -729,7 +729,7 @@ Jedes Event hat die Struktur `{ event, ts, board:{id,title}, card:{…}, detail:
 
 ### Benachrichtigungen an beliebige Dienste (Telegram, Pushover, ...)
 
-Neben der eingebauten E-Mail-Benachrichtigung lässt sich **jeder** Dienst anbinden, ohne dass er fest im Adapter integriert sein muss. Bei jedem Ereignis schreibt der Adapter den State `kanban.0.lastEvent` und sendet - falls konfiguriert - einen [ausgehenden Webhook](#webhooks--ausgehend). Ein kurzes Skript (JavaScript-Adapter) oder ein Node-RED-Flow greift das ab und leitet es an Telegram, Pushover, Signal, Pushbullet o. Ä. weiter.
+Neben der eingebauten E-Mail-Benachrichtigung lässt sich **jeder** Dienst anbinden, ohne dass er fest im Adapter integriert sein muss. Bei jedem Ereignis schreibt der Adapter den State `kanban.0.lastEvent` und sendet – falls konfiguriert – einen [ausgehenden Webhook](#webhooks--ausgehend). Ein kurzes Skript (JavaScript-Adapter) oder ein Node-RED-Flow greift das ab und leitet es an Telegram, Pushover, Signal, Pushbullet o. Ä. weiter.
 
 **Aufbau eines Ereignisses** (Inhalt von `lastEvent` bzw. Webhook-Body):
 
@@ -745,24 +745,25 @@ Neben der eingebauten E-Mail-Benachrichtigung lässt sich **jeder** Dienst anbin
 }
 ```
 
-- `event` - Ereignistyp: `cardCreated`, `cardAssigned`, `cardUpdated`, `cardMoved`, `cardDone`, `cardDeleted`, `cardRestored`, `cardPurged`, `cardDue`.
-- `card.assignees` - die Zustaendigen (Benutzer-**IDs**, nicht Anzeigenamen); an sie richtet sich die Benachrichtigung.
-- `link` - fertiger Deep-Link zur Karte (ab 0.2.1; nutzt die Basis-URL aus den Instanzeinstellungen).
-- `dueAt` - ab 0.3.0: Fälligkeit als ISO-Zeitstempel mit lokalem Offset, z. B. `2026-08-01T09:00:00+02:00`. Ohne gesetzte Uhrzeit wird `00:00` übermittelt; ohne Fälligkeitsdatum ist der Wert `null`. Das gleiche Feld liefert auch jedes Kartenobjekt der REST-API.
+- `event` – Ereignistyp: `cardCreated`, `cardAssigned`, `cardUpdated`, `cardMoved`, `cardDone`, `cardDeleted`, `cardRestored`, `cardPurged`, `cardDue`.
+- `card.assignees` – die Zuständigen (Benutzer-**IDs**, nicht Anzeigenamen); an sie richtet sich die Benachrichtigung.
+- `link` – fertiger Deep-Link zur Karte (ab 0.2.1; nutzt die Basis-URL aus den Instanzeinstellungen).
+- `dueAt` – ab 0.3.0: Fälligkeit als ISO-Zeitstempel mit lokalem Offset, z. B. `2026-08-01T09:00:00+02:00`. Ohne gesetzte Uhrzeit wird `00:00` übermittelt; ohne Fälligkeitsdatum ist der Wert `null`. Das gleiche Feld liefert auch jedes Kartenobjekt der REST-API.
 - **`cardDue` feuert in zwei Varianten:** die **tägliche** Erinnerung zur eingestellten Erinnerungs-Uhrzeit (tagesbasiert, inklusive Vorlauf und überfälliger Karten, `detail.overdue` kann `true` sein) und – wenn die Instanz-Option „‚Karte fällig' zur Uhrzeit der Karte auslösen" aktiv ist – ein **kartengenaues** Ereignis zur Uhrzeit der Karte mit `detail.exact: true` und `detail.dueTime`. Letzteres kommt einmal pro Karte und Tag; fällt der Zeitpunkt in eine Ausfallzeit, wird es beim nächsten Start desselben Tages nachgeholt. Skripte, die nur exakte Termine wollen, filtern auf `ev.detail && ev.detail.exact`.
 
-**Papierkorb-Ereignisse (ab 0.3.0):** `cardDeleted` bedeutet jetzt "in den Papierkorb verschoben" - die Karte ist 30 Tage lang wiederherstellbar. `cardRestored` feuert beim Zurückholen, `cardPurged` beim endgültigen Entfernen. Bei Massenaktionen enthält `detail` zusätzlich `auto: true` und `reason`: `cleanup` (aus Erledigt in den Papierkorb), `retention` (30-Tage-Frist abgelaufen) oder `emptyTrash` (Papierkorb von Hand geleert). E-Mails werden in allen drei Fällen als **eine Sammelmail je Benutzer** verschickt statt einzeln pro Karte; die ausgehenden Webhooks feuern weiterhin je Karte.
-**Wiederholungen (ab 0.3.0):** Wird eine wiederkehrende Karte erledigt, legt der Adapter sofort die nächste Instanz an. Dabei feuern `cardCreated` und je Zuständigem ein `cardAssigned`, beide mit `detail.recurrence: true`. Ohne Filter meldet ein Skript direkt nach dem Abhaken also die neue Karte als "dir zugewiesen". Wer das nicht möchte, blendet solche Ereignisse mit einer Zeile aus:
+**Papierkorb-Ereignisse (ab 0.3.0):** `cardDeleted` bedeutet jetzt „in den Papierkorb verschoben" – die Karte ist 30 Tage lang wiederherstellbar. `cardRestored` feuert beim Zurückholen, `cardPurged` beim endgültigen Entfernen. Bei Massenaktionen enthält `detail` zusätzlich `auto: true` und `reason`: `cleanup` (aus Erledigt in den Papierkorb), `retention` (30-Tage-Frist abgelaufen) oder `emptyTrash` (Papierkorb von Hand geleert). E-Mails werden in allen drei Fällen als **eine Sammelmail je Benutzer** verschickt statt einzeln pro Karte; die ausgehenden Webhooks feuern weiterhin je Karte.
+
+**Wiederholungen (ab 0.3.0):** Wird eine wiederkehrende Karte erledigt, legt der Adapter sofort die nächste Instanz an. Dabei feuern `cardCreated` und je Zuständigem ein `cardAssigned`, beide mit `detail.recurrence: true`. Ohne Filter meldet ein Skript direkt nach dem Abhaken also die neue Karte als „dir zugewiesen". Wer das nicht möchte, blendet solche Ereignisse mit einer Zeile aus:
 
 ```javascript
 if (ev.detail && ev.detail.recurrence) return;   // Folgekarte einer Wiederholung
 ```
 
-- `detail.by` - **wer die Änderung ausgelöst hat.** Wichtig: Das Board arbeitet **ohne Login** - die Weboberfläche kennt den Verursacher nicht und lässt `by` leer bzw. `api`. Gefüllt ist es nur bei Änderungen über API, Webhook oder Skript, die ein `by` mitgeben (z. B. eigene Agenten). Ein "nicht den Auslöser benachrichtigen"-Filter greift daher nur bei solchen Quellen.
+- `detail.by` – **wer die Änderung ausgelöst hat.** Wichtig: Das Board arbeitet **ohne Login**, die Weboberfläche kennt den Verursacher nicht und lässt `by` leer bzw. `api`. Gefüllt ist es nur bei Änderungen über API, Webhook oder Skript, die ein `by` mitgeben (z. B. eigene Agenten). Ein „nicht den Auslöser benachrichtigen"-Filter greift daher nur bei solchen Quellen.
 
-> **Voraussetzung je Dienst:** Der Empfaenger muss dem Dienst bekannt sein. Bei **Telegram** z. B. muss die Person dem Bot einmalig `/start` (ggf. + Passwort) senden; danach steht sie mit ihrer numerischen **chatId** im State `telegram.0.communicate.users`. Diese chatId traegst du unten in `USERS` als Wert ein - der **Schluessel** ist die Kanban-Benutzer-ID (z. B. `user1`), nicht der Anzeigename.
+> **Voraussetzung je Dienst:** Der Empfänger muss dem Dienst bekannt sein. Bei **Telegram** z. B. muss die Person dem Bot einmalig `/start` (ggf. + Passwort) senden; danach steht sie mit ihrer numerischen **chatId** im State `telegram.0.communicate.users`. Diese chatId trägst du unten in `USERS` als Wert ein – der **Schlüssel** ist die Kanban-Benutzer-ID (z. B. `user1`), nicht der Anzeigename.
 
-**Beispiel: Telegram** (im JavaScript-Adapter als Skript anlegen). Oben `USERS` (Kanban-ID -> Telegram-**chatId**) und ggf. `BASE_URL` anpassen. Fuer einen anderen Dienst nur die `sendTo`-Zeile tauschen (siehe darunter):
+**Beispiel: Telegram** (im JavaScript-Adapter als Skript anlegen). Oben `USERS` (Kanban-ID -> Telegram-**chatId**) und ggf. `BASE_URL` anpassen. Für einen anderen Dienst nur die `sendTo`-Zeile tauschen (siehe darunter):
 
 ```javascript
 // ============================================================
@@ -865,7 +866,7 @@ on({ id: KANBAN + '.lastEvent', change: 'any' }, (obj) => {
 });
 ```
 
-**Andere Dienste** - nur die Sende-Zeile tauschen:
+**Andere Dienste** – nur die Sende-Zeile tauschen:
 
 ```javascript
 // Pushover  (message ist Pflicht; title/sound/priority/device optional)
@@ -903,7 +904,7 @@ setState('kanban.0.action', JSON.stringify({
 
 Der Adapter führt das Kommando aus und leert den State wieder.
 
-> **Zugriff:** Beide Wege kennen **keinen Token** — wer in ioBroker Skripte ausführen oder States schreiben darf, darf damit alles, auch `deleteBoard` und `emptyTrash`. Das ist so gewollt, weil beides lokale ioBroker-Schnittstellen sind. Ab 0.3.0 lässt sich der `action`-State unter „Webhooks (eingehend)" abschalten, wenn kein Skript darauf schreibt, und unumkehrbare Kommandos landen mit ihrer Quelle im Log. Für Zugriffe von außen ist der Webhook-Weg mit eigenem Token und Board-Begrenzung gedacht.
+> **Zugriff:** Beide Wege kennen **keinen Token** – wer in ioBroker Skripte ausführen oder States schreiben darf, darf damit alles, auch `deleteBoard` und `emptyTrash`. Das ist so gewollt, weil beides lokale ioBroker-Schnittstellen sind. Ab 0.3.0 lässt sich der `action`-State unter „Webhooks (eingehend)" abschalten, wenn kein Skript darauf schreibt, und unumkehrbare Kommandos landen mit ihrer Quelle im Log. Für Zugriffe von außen ist der Webhook-Weg mit eigenem Token und Board-Begrenzung gedacht.
 
 ### Live-Sync & Deep-Links
 
@@ -949,16 +950,16 @@ Die `boards.*`- und `users.*`-Spiegel-States eignen sich gut für Dashboards (�
 Ohne gültigen Token → HTTP `401`. Über die native Einstellung `apiWriteProtection: false` lässt sich der Schutz abschalten (dann verhält sich `/api` wie in 0.1.0).
 
 > **Ebenfalls neu in 0.3.0:**
-> - Die **Board-Begrenzung eines Tokens** („Erlaubte Boards") gilt auf **beiden** Wegen — REST (`/api/boards/<id>/…`) und Webhook-Kommandos (`addCard`, `moveCard`, `deleteBoard`, `transferCard`, …). Maßgeblich ist, welches Board der Aufruf **tatsächlich anfasst**: bei REST das Board im Pfad, beim Übertragen zusätzlich das Zielboard, bei Kommandos das Feld, das genau dieses Kommando auswertet. Ein fremdes Board ergibt `403`. Nennt ein **schreibendes** Kommando gar kein Board — etwa `addBoard` oder das Ändern von Benutzern und Avataren —, ist es für einen begrenzten Token ebenfalls gesperrt, und zwar unabhängig davon, was sonst im Body steht. Rein **lesende** Kommandos (`listBoards`, `getBoard`) bleiben erlaubt, Lesen ist am Adapter ohnehin nicht token-pflichtig.
+> - Die **Board-Begrenzung eines Tokens** („Erlaubte Boards") gilt auf **beiden** Wegen: REST (`/api/boards/<id>/…`) und Webhook-Kommandos (`addCard`, `moveCard`, `deleteBoard`, `transferCard`, …). Maßgeblich ist, welches Board der Aufruf **tatsächlich anfasst**: bei REST das Board im Pfad, beim Übertragen zusätzlich das Zielboard, bei Kommandos das Feld, das genau dieses Kommando auswertet. Ein fremdes Board ergibt `403`. Nennt ein **schreibendes** Kommando gar kein Board (etwa `addBoard` oder das Ändern von Benutzern und Avataren), ist es für einen begrenzten Token ebenfalls gesperrt, und zwar unabhängig davon, was sonst im Body steht. Rein **lesende** Kommandos (`listBoards`, `getBoard`) bleiben erlaubt, Lesen ist am Adapter ohnehin nicht token-pflichtig.
 > - Tokens werden **nicht mehr als URL-Parameter** (`?token=…`) angenommen, da sie dort in Logs, Browser-Verlauf und Referrern landen. Header oder Body-Feld verwenden.
 > - Das **SPA-Secret liegt im Dateispeicher** des Adapters statt im lesbaren State `kanban.0.info.apiSecret`; der State bleibt leer bestehen. Ein vorhandener Wert wird beim ersten Start übernommen und gelöscht.
 > - **Unumkehrbare Kommandos** (`deleteBoard`, `emptyTrash`, `purgeCard`) werden mit ihrer Quelle im Log protokolliert.
 
 **Fremde Webseiten kommen nicht an die API (CORS).** Ab 0.3.0 verschickt der Adapter CORS-Freigaben nur noch auf `/api` und `/webhook` und nur für Herkünfte, die du unter *Webhooks (eingehend)* → **Erlaubte Browser-Herkünfte** einträgst. Die Vorgabe ist leer, also nur gleiche Herkunft.
 
-Bis 0.3.0 stand `Access-Control-Allow-Origin: *` auf **allen** Routen, auch auf der Seite, die den Schreib-Token im `<meta>`-Tag ausliefert. Eine beliebige Webseite, die du im Browser geöffnet hattest, konnte damit im Hintergrund deinen Adapter im Netz suchen, diese Seite lesen, den Token herausziehen und anschließend Karten und Boards ändern oder löschen. Genau das ist jetzt zu. Betroffen war ausschließlich der Zugriff **aus einem Browser** — Skripte, Node-RED und `curl` kennen keine Herkunftsprüfung und funktionieren unverändert weiter, mit und ohne Eintrag.
+Bis 0.3.0 stand `Access-Control-Allow-Origin: *` auf **allen** Routen, auch auf der Seite, die den Schreib-Token im `<meta>`-Tag ausliefert. Eine beliebige Webseite, die du im Browser geöffnet hattest, konnte damit im Hintergrund deinen Adapter im Netz suchen, diese Seite lesen, den Token herausziehen und anschließend Karten und Boards ändern oder löschen. Genau das ist jetzt zu. Betroffen war ausschließlich der Zugriff **aus einem Browser** – Skripte, Node-RED und `curl` kennen keine Herkunftsprüfung und funktionieren unverändert weiter, mit und ohne Eintrag.
 
-Einen Eintrag brauchst du nur, wenn eine Webseite unter **anderer** Adresse die API **aus dem Browser** aufruft, etwa ein eigenes Dashboard unter `https://dashboard.local:8123`. Mehrere Herkünfte per Komma trennen. Ein `*` ist möglich, gibt aber jeder Webseite Lesezugriff auf alle Boards — dann besser die konkreten Adressen eintragen.
+Einen Eintrag brauchst du nur, wenn eine Webseite unter **anderer** Adresse die API **aus dem Browser** aufruft, etwa ein eigenes Dashboard unter `https://dashboard.local:8123`. Mehrere Herkünfte per Komma trennen. Ein `*` ist möglich, gibt aber jeder Webseite Lesezugriff auf alle Boards – dann besser die konkreten Adressen eintragen.
 
 > **Grenze dieses Schutzes (ehrlich):** Da die Oberfläche **ohne Login** arbeitet, kann ein Gerät im selben Netz, das die Seite lädt, das SPA-Secret mitlesen. Der Token wehrt damit zuverlässig **fremde Webseiten/CSRF** und naive Scanner ab, ist aber **kein** Ersatz für Netzisolation. Für harte Abschottung den Port nur ans LAN/`127.0.0.1` binden und einen Reverse-Proxy mit Authentifizierung davorsetzen.
 
@@ -972,7 +973,7 @@ Einen Eintrag brauchst du nur, wenn eine Webseite unter **anderer** Adresse die 
 
 Die Oberfläche ist **mehrsprachig**. Die Standardsprache richtet sich nach der **in ioBroker eingestellten Systemsprache**; in den Instanzeinstellungen lässt sich die Sprache optional fest wählen.
 
-Die Übersetzungen liegen als **eine Datei pro Sprache** unter `www/i18n/` (z. B. `de.json`, `en.json`). Aktuell sind **elf Sprachen** enthalten: **Deutsch, Englisch, Französisch, Niederländisch, Italienisch, Spanisch, Polnisch, Portugiesisch, Russisch, Ukrainisch und Chinesisch (vereinfacht)** — alle im Instanz-Dropdown „Sprache" wählbar, zusätzlich zu „Automatisch". Weitere Sprachen lassen sich einfach ergänzen, indem eine weitere JSON-Datei mit denselben Schlüsseln hinzugefügt wird. Ist für die gewünschte Sprache keine Datei vorhanden, wird auf Englisch zurückgegriffen.
+Die Übersetzungen liegen als **eine Datei pro Sprache** unter `www/i18n/` (z. B. `de.json`, `en.json`). Aktuell sind **elf Sprachen** enthalten: **Deutsch, Englisch, Französisch, Niederländisch, Italienisch, Spanisch, Polnisch, Portugiesisch, Russisch, Ukrainisch und Chinesisch (vereinfacht)** – alle im Instanz-Dropdown „Sprache" wählbar, zusätzlich zu „Automatisch". Weitere Sprachen lassen sich einfach ergänzen, indem eine weitere JSON-Datei mit denselben Schlüsseln hinzugefügt wird. Ist für die gewünschte Sprache keine Datei vorhanden, wird auf Englisch zurückgegriffen.
 
 ### FAQ & Fallstricke
 

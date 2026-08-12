@@ -1,22 +1,22 @@
-# ioBroker Kanban – Documentation (English)
+# ioBroker Kanban: documentation (English)
 
-A full-featured **Kanban board as a dedicated ioBroker adapter**. The adapter ships its own web server, serves a lean single-page app (vanilla JS, no framework) and keeps all open views in sync live via WebSocket. Cards are moved by drag & drop, boards and columns are freely configurable, tasks can recur, notifications go out by e-mail (including calendar invites), and everything can be driven from other automations via REST, webhooks or `sendTo`.
+A **Kanban board as a dedicated ioBroker adapter**. It ships its own web server, serves a single-page app with no framework (plain JavaScript) and keeps every open view in sync over a WebSocket. Cards move by drag & drop, boards and columns are freely configurable, tasks can recur, and notifications go out by e-mail, with a calendar invite if you want one. Everything is reachable from outside over REST, webhooks and `sendTo`.
 
-> **Who is it for?** Anyone who wants shared task management in their smart home, family, flat-share, house maintenance, tightly integrated with ioBroker (scripts, Lovelace, Node-RED).
+> **Who is it for?** Households that manage tasks together, whether that is a family, a flat-share or the maintenance plan for a house, and want those tasks where ioBroker already runs: readable from scripts, embeddable in Lovelace, controllable from Node-RED.
 
 > **Version 0.3.0**, Per-board trash (restorable for 30 days), automatic cleanup of old done cards, per-column sorting with five modes and a direction toggle, done cards with strikethrough title, completion timestamp and copy button, moving or copying cards between boards, new events `cardRestored`/`cardPurged` and `dueAt` (due date incl. time) in every event, reworked board settings and card editor, confirmation dialogs inside the UI.
 >
-> **Version 0.2.1** – Express 5, fixed avatar upload (CSP blocked `blob:` URLs), Node.js 20+ and admin 7.8.23+, ready-to-use deep link in the event, notification routing via script (Telegram/Pushover, see below), updated dependencies and repository compliance.
+> **Version 0.2.1**: Express 5, fixed avatar upload (CSP blocked `blob:` URLs), Node.js 20+ and admin 7.8.23+, ready-to-use deep link in the event, notification routing via script (Telegram/Pushover, see below), updated dependencies and repository compliance.
 
-> **Version 0.2.0** – Mobile (accordion columns, full-screen dialogs with a fixed action bar), assignable users per board, header chips as a saved per-board filter, user colours in the web UI (no restart), automatic text contrast colour on labels/avatars, per-board notification link target, per-instance date and time format (moment/Day.js tokens incl. localised month and weekday names), at least one assignee required per card, per-column display limit, Material Design icons throughout.
+> **Version 0.2.0**: mobile (accordion columns, full-screen dialogs with a fixed action bar), assignable users per board, header chips as a saved per-board filter, user colours in the web UI (no restart), automatic text contrast colour on labels/avatars, per-board notification link target, per-instance date and time format (moment/Day.js tokens incl. localised month and weekday names), at least one assignee required per card, per-column display limit, Material Design icons throughout.
 
-> **Version 0.1.3** – Fix: the column task count now respects the active person/label filter (previously showed the column total).
+> **Version 0.1.3**: the column task count now respects the active person/label filter (previously showed the column total).
 
-> **Version 0.1.2** – "Share view": labels now act as a **blacklist** (selection hides them, new labels stay visible); `doneLimit` distinguishes **empty = all** from **`0` = none**.
+> **Version 0.1.2**: "Share view": labels now act as a **blacklist** (selection hides them, new labels stay visible); `doneLimit` distinguishes **empty = all** from **`0` = none**.
 
-> **Version 0.1.1** – security update: write protection for the REST API via token (`X-Kanban-Token`), XSS-sanitized Markdown preview, safe link schemes only, and a Content Security Policy. See [Security & access control](#security--access-control).
+> **Version 0.1.1**, a security update: write protection for the REST API via token (`X-Kanban-Token`), XSS-sanitized Markdown preview, safe link schemes only, and a Content Security Policy. See [Security & access control](#security--access-control).
 
-![Kanban board – overview](img/board.png)
+![Kanban board overview](img/board.png)
 
 ---
 
@@ -34,7 +34,7 @@ A full-featured **Kanban board as a dedicated ioBroker adapter**. The adapter sh
   - [Boards, columns & labels](#boards-columns--labels)
     - [Trash](#trash)
     - [Move done cards to the trash](#cleanup)
-  - [Cards – all fields](#cards--all-fields)
+  - [Cards: all fields](#cards-all-fields)
   - [Sorting & order](#sorting--order)
   - [Recurrence](#recurrence)
   - [Public holidays](#public-holidays)
@@ -43,8 +43,8 @@ A full-featured **Kanban board as a dedicated ioBroker adapter**. The adapter sh
   - [Sharing views / URL parameters](#sharing-views--url-parameters)
 - **[Part C: Integration & automation](#part-c-integration--automation)**
   - [REST API](#rest-api)
-  - [Webhooks – inbound](#webhooks--inbound)
-  - [Webhooks – outbound](#webhooks--outbound)
+  - [Webhooks: inbound](#webhooks-inbound)
+  - [Webhooks: outbound](#webhooks-outbound)
   - [sendTo & action state](#sendto--action-state)
   - [Live sync & deep links](#live-sync--deep-links)
   - [ioBroker states & objects](#iobroker-states--objects)
@@ -60,8 +60,8 @@ A full-featured **Kanban board as a dedicated ioBroker adapter**. The adapter sh
 1. **Install the adapter.** In the ioBroker admin under *Adapters*, filter for `kanban` and install it (for a GitHub install see [Installation in the main README](../../README.md#installation)).
 2. **Create an instance.** Open the **⋮** menu on the adapter tile and pick **"+"**. ioBroker creates the instance (`kanban.0`) and shows a console window you can close after `Process exited with code 0`. Repeat for every further instance (`kanban.1`, `kanban.2`, …).
 3. **Set the port.** Under *Instances*, open the gear of the instance, tab **General**: adjust **port** (default `8095`), **IP binding** (default `0.0.0.0`) and **base URL**.
-   **With several instances:** each needs its own port. If the configured one is taken, the adapter still starts and falls back to the next free port – but the instance list keeps showing the *configured* port, and the link there leads to the wrong instance. The port actually in use is in the log (`Port 8095 is in use - falling back to free port 8096`). Then enter that port in the settings.
-4. **Check the users.** Tab **Users**: a fresh instance ships with two example users, `user1` and `user2`, which appear as chips in the board. Rename them **before** creating the first board – see [Tab "Users"](#tab-users) for why.
+   **With several instances:** each needs its own port. If the configured one is taken, the adapter still starts and falls back to the next free port. The instance list, however, keeps showing the *configured* port, and the link there leads to the wrong instance. The port actually in use is in the log (`Port 8095 is in use - falling back to free port 8096`). Then enter that port in the settings.
+4. **Check the users.** Tab **Users**: a fresh instance ships with two example users, `user1` and `user2`, which appear as chips in the board. Rename them **before** creating the first board. [Tab "Users"](#tab-users) explains why.
 5. **Open the web UI:** **`http://<host>:<port>/`**
 6. On first launch there is no board yet. Use the **gear icon (⚙)** at the top right to create one. Every new board comes with three default columns:
    - **To do** (`todo`)
@@ -69,7 +69,7 @@ A full-featured **Kanban board as a dedicated ioBroker adapter**. The adapter sh
    - **Done** (`done`, flagged as the "Done" column)
 7. Create your first task with **"+ Card"**.
 
-**Multiple instances:** Every instance (`kanban.0`, `kanban.1`, …) is a fully independent system with its own port, language, users and boards – **no data is shared**. Useful e.g. for separate areas (family vs. club) or a test system next to the production board.
+**Multiple instances:** Every instance (`kanban.0`, `kanban.1`, …) is a fully independent system with its own port, language, users and boards. **No data is shared.** Useful e.g. for separate areas (family vs. club) or a test system next to the production board.
 
 **How this documentation is organised:** [Part A](#part-a-instance-settings-iobroker-admin) covers everything configured in the **ioBroker admin** under *Instances → `kanban.0` → gear* (port, language, user list, e-mail, webhook tokens). [Part B](#part-b-the-board-web-ui) describes the **web UI** of the board itself (boards, columns, cards, views). [Part C](#part-c-integration--automation) is aimed at scripts and third-party systems, [Part D](#part-d-reference) holds security, languages and the FAQ.
 
@@ -83,7 +83,7 @@ These settings live in the **ioBroker admin** under *Instances → `kanban.0` �
 
 ### Tab "General"
 
-![Instance settings – General](img/admin-general.png)
+![Instance settings, General tab](img/admin-general.png)
 
 | Setting | Meaning |
 |---|---|
@@ -117,7 +117,7 @@ Month and weekday names are rendered in the board language. Examples: `DD.MM.` �
 
 This is where you define **which people exist**, the list applies to the entire instance. In the board they appear as chips in the header bar and can be assigned to cards.
 
-![Instance settings – Users](img/admin-users.png)
+![Instance settings, Users tab](img/admin-users.png)
 
 | Field | Meaning |
 |---|---|
@@ -128,24 +128,24 @@ This is where you define **which people exist**, the list applies to the entire 
 
 Add a row with the **"+"** in the table header; the bin icon at the end of a row removes it again (without asking). Rows without an ID are dropped when saving. A fresh instance ships with two example users, `user1` and `user2`.
 
-> **The ID is the key.** Boards and cards find their people through the *ID* column. If you change it later, the user counts as a **new** person for existing boards, and the board loses that entry from its member list. So that this is not a dead end, **all** users are assignable in a board whose member list points nowhere – you can keep working and re-tick the members under ⚙ → *Board* whenever you like. Cards keep their existing assignees, but those no longer show up in the person filter.
+> **The ID is the key.** Boards and cards find their people through the *ID* column. If you change it later, the user counts as a **new** person for existing boards, and the board loses that entry from its member list. So that this is not a dead end, **all** users are assignable in a board whose member list points nowhere, so you can keep working and re-tick the members under ⚙ → *Board* whenever you like. Cards keep their existing assignees, but those no longer show up in the person filter.
 > *Recommendation:* settle the user IDs before creating the first board. The **display name** can be changed at any time.
 
-> **Not here:** user colour, avatar image and the assignment to individual boards are maintained directly in the web UI since 0.2.0 – see [Users in the board](#users-in-the-board).
+> **Not here:** user colour, avatar image and the assignment to individual boards are maintained directly in the web UI since 0.2.0. See [Users in the board](#users-in-the-board).
 
 ### Tab "Notifications"
 
 Notifications are triggered on card events and delivered via **e-mail** (through the ioBroker `email` adapter) and/or **outbound webhooks**. In addition, every event is written to the state `kanban.0.lastEvent` (as a script trigger).
 
-![Instance settings – Notifications](img/admin-email.png)
+![Instance settings, Notifications tab](img/admin-email.png)
 
 | Setting | Meaning |
 |---|---|
 | **Email adapter instance** | Which `email.x` instance is used for sending. |
 | **Sender** | Optional sender address (empty = email adapter default). |
 | **Reminder time** | `HH:MM`, when due cards are checked (default `08:00`). |
-| **Remind X days before due** | Lead time for `cardDue` reminders (`0`–`30`, default `1`). |
-| **Fire "card due" at the card's time of day** | Since 0.3.0, **off** by default. In addition to the daily reminder, cards with a **time of day** fire `cardDue` exactly at that time (`detail.exact = true`), so automations can trigger to the minute without polling the API. **Note:** the event goes through the normal notification path, so a second "due" e-mail is also sent to everyone who has that notification enabled – if you only want to drive scripts/webhooks, turn the "due" e-mail off per user. |
+| **Remind X days before due** | Lead time for `cardDue` reminders (`0` to `30`, default `1`). |
+| **Fire "card due" at the card's time of day** | Since 0.3.0, **off** by default. In addition to the daily reminder, cards with a **time of day** fire `cardDue` exactly at that time (`detail.exact = true`), so automations can trigger to the minute without polling the API. **Note:** the event goes through the normal notification path, so a second "due" e-mail is also sent to everyone who has that notification enabled. If you only want to drive scripts/webhooks, turn the "due" e-mail off per user. |
 | **Default** | Global fallback switches per event, they apply when a user has nothing set of their own (see below). |
 
 #### Who gets notified, and when?
@@ -190,8 +190,8 @@ If **"Calendar invite"** is enabled on a card and a date is set, the adapter att
 
 - **Without time** → all-day event on the due date.
 - **With time** → timed event with the **duration** set on the card (`calendarDuration`, default one hour).
-- **With a recurrence** → a **series** instead of a single event: the invite carries an `RRULE`, so the calendar creates the whole series. Daily, every X days, weekly (with weekdays), monthly (day of month), monthly (nth/last weekday) and yearly are mapped. **Exception:** "workday of the month" depends on public holidays, which the calendar standard does not know – those cards stay single events.
-- **The invite is sent only once.** It is attached when the card is **created** or **newly assigned** to someone. Follow-up cards of a recurrence send **no** further invite (the series is already in the calendar), and reminder or move mails attach nothing either. An **updated** invite only goes out when **due date, time, duration or recurrence rule** change – then with the same `UID` and a higher `SEQUENCE`, so the calendar replaces the existing entry instead of adding a second one. Other changes (the title, for instance) deliberately do not trigger a new invite.
+- **With a recurrence** → a **series** instead of a single event: the invite carries an `RRULE`, so the calendar creates the whole series. Daily, every X days, weekly (with weekdays), monthly (day of month), monthly (nth/last weekday) and yearly are mapped. **Exception:** "workday of the month" depends on public holidays, which the calendar standard does not know, so those cards stay single events.
+- **The invite is sent only once.** It is attached when the card is **created** or **newly assigned** to someone. Follow-up cards of a recurrence send **no** further invite (the series is already in the calendar), and reminder or move mails attach nothing either. An **updated** invite only goes out when **due date, time, duration or recurrence rule** change. That invite carries the same `UID` and a higher `SEQUENCE`, so the calendar replaces the existing entry instead of adding a second one. Other changes (the title, for instance) deliberately do not trigger a new invite.
 - Title (`SUMMARY`), description, **location** (`LOCATION`) and link (`URL`) are carried over.
 - **Time zone:** timed events are emitted unambiguously in UTC; the underlying time zone is determined from the system (or `system.config`), including daylight saving. All-day events are deliberately time-zone-free.
 
@@ -199,7 +199,7 @@ The attachment is included with **every** notification for the card, so if you e
 
 ### Tab "Webhooks (in)"
 
-Other systems (or ioBroker itself) can modify cards and boards via HTTP. Those requests are secured with **tokens**, which are managed here. The matching endpoints and commands are documented in [Part C](#webhooks--inbound).
+Other systems (or ioBroker itself) can modify cards and boards via HTTP. Those requests are secured with **tokens**, which are managed here. The matching endpoints and commands are documented in [Part C](#webhooks-inbound).
 
 | Field | Meaning |
 |---|---|
@@ -212,16 +212,16 @@ The **"Generate new token"** button (above the table) automatically adds a new r
 
 Invalid token → HTTP `401`. Board not allowed → HTTP `403`.
 
-**Quick test:** a single call tells you whether a freshly created token works – for the standard case there is no need to jump to [Part C](#webhooks--inbound):
+**Quick test:** a single call tells you whether a freshly created token works. For the standard case there is no need to jump to [Part C](#webhooks-inbound):
 
 ```bash
 curl -X POST "http://<host>:8095/webhook/<YOUR_TOKEN>/action" \
   -H 'Content-Type: application/json' -d '{"cmd":"listBoards"}'
 ```
 
-If a **board list** comes back, the token is valid. All further commands and the complete list of responses and error codes are in [Part C](#webhooks--inbound).
+If a **board list** comes back, the token is valid. All further commands and the complete list of responses and error codes are in [Part C](#webhooks-inbound).
 
-Below the table sit two more switches: **"Accept commands via the action state"** (see [sendTo & action state](#sendto--action-state)) and **"Allowed browser origins (CORS)"**. The latter normally stays empty and is only needed when a website on another address calls the API from the browser – details under [Security & access control](#security--access-control).
+Below the table sit two more switches: **"Accept commands via the action state"** (see [sendTo & action state](#sendto--action-state)) and **"Allowed browser origins (CORS)"**. The latter normally stays empty and is only needed when a website on another address calls the API from the browser. Details are under [Security & access control](#security--access-control).
 
 ### Tab "Webhooks (out)"
 
@@ -236,7 +236,7 @@ The adapter can send an **HTTP POST** to arbitrary URLs on every event, e.g. to 
 
 **Event types:** `cardCreated`, `cardUpdated`, `cardMoved`, `cardAssigned`, `cardDone`, `cardDeleted`, `cardRestored`, `cardPurged`, `cardDue`.
 
-The structure of the JSON payload and the delivery details are in [Part C](#webhooks--outbound).
+The structure of the JSON payload and the delivery details are in [Part C](#webhooks-outbound).
 
 ---
 
@@ -276,13 +276,13 @@ Columns can be created, reordered by drag & drop, renamed and deleted. **Deletin
 Above the column list sits a header row with the field names (**Title · Max · WIP · New · Done**). Every heading carries a tooltip with the full explanation.
 
 - **Column ID:** besides its visible title every column carries an **immutable ID**. The three default columns are called `todo`, `doing` and `done`, newly created columns get a generated ID like `col_msd0mu8tkck68`. **Renaming keeps the ID**, so shared `columns=` links and `moveCard` calls keep working unchanged. You can look the IDs up via `GET /api/boards/<id>` (see [REST API](#rest-api)). IDs must be **unique**: if a `PATCH` sends the same ID twice, or the ID of the trash column, the affected column receives a freshly generated one.
-- **Column width:** columns always share the **full width of the window** – two columns therefore each take up half. Only once less than 280 px would be left per column does the board become horizontally scrollable.
+- **Column width:** columns always share the **full width of the window**, so two columns each take up half. Only once less than 280 px would be left per column does the board become horizontally scrollable.
 - **Display limit (Max):** a number > 0 shows only the first N cards in that column; below them a discreet `+X more` hint appears. `0` = show all. Useful so a long backlog does not blow up the board. The counter in the column header still counts **all** cards of the column.
 - **WIP limit** (work in progress): a number > 0 caps the recommended card count. If exceeded, the column warns visually (counter & header are highlighted). `0` = no limit. The limit is a **warning**, not a hard block. It always refers to the **total** number of cards in the column, even while a person/label filter is showing fewer.
 - **"New"** (`allowAdd`): controls in which columns the "+ Add card" link appears.
 - **"Done" column** (`isDone`): cards moved here count as completed (`doneAt` is set, recurrences are triggered). Their title is shown with a **strikethrough**, and below it the completion time appears in brackets, for example `(Done: 26/07/2026 20:09)`, in the instance's date and time format.
 - **Show/hide done (eye icon):** every done column has an eye toggle at the top right that shows or hides the completed cards (stored per device).
-- **Limit of visible done cards:** the URL parameter `doneLimit=N` (see [Sharing views / URL parameters](#sharing-views--url-parameters)) shows only the N most recently completed cards – handy for compact, shared views.
+- **Limit of visible done cards:** the URL parameter `doneLimit=N` (see [Sharing views / URL parameters](#sharing-views--url-parameters)) shows only the N most recently completed cards, which is handy for compact, shared views.
 - **Copy a completed card:** next to the title of a done card sits a small copy icon. It opens the editor with the same content as a **new** card. On save it lands in the first column flagged "New", checklist items start unticked, and the due date is prefilled with **today** if the original had one at all (a time of day is kept). Meant for recurring chores that have no fixed recurrence rule.
 
 <a id="trash"></a>
@@ -293,8 +293,8 @@ Every board has a **"Trash" system column**. Deleted cards no longer vanish stra
 - **Visibility:** the trash is **hidden by default**. Show it via **"Show trash"** at the bottom of the board settings. That setting applies to **your device only**, so other people keep seeing their usual board.
 - **What ends up there:** anything you remove with the **Delete** button in the card editor, cards you **drag** into the trash, and the cards from the [automatic cleanup](#cleanup).
 - **Bringing a card back:** drag it out of the trash or tap the **restore** icon on the card. It returns to the first open column.
-- **Deleting for good right away:** the second icon on the card removes it irreversibly. The broom button in the column header empties the **entire** trash. Both ask first. Via API and webhook, `purgeCard` likewise applies **only to cards in the trash** — on an active card it answers `400` with "Karte '…' liegt nicht im Papierkorb". Getting past the retention period therefore always leads through the trash first.
-- **Reading the confirmations correctly:** the confirmation when deleting a card simply says "Really delete this card?" – but since 0.3.0 that **always means the trash**, the card is still there. Truly irreversible are only the second icon on a card **inside** the trash and the broom button in the column header; their dialogs say so explicitly.
+- **Deleting for good right away:** the second icon on the card removes it irreversibly. The broom button in the column header empties the **entire** trash. Both ask first. Via API and webhook, `purgeCard` likewise applies **only to cards in the trash**: on an active card it answers `400` with "Karte '…' liegt nicht im Papierkorb". Getting past the retention period therefore always leads through the trash first.
+- **Reading the confirmations correctly:** the confirmation when deleting a card simply says "Really delete this card?", but since 0.3.0 that **always means the trash** and the card is still there. Truly irreversible are only the second icon on a card **inside** the trash and the broom button in the column header; their dialogs say so explicitly.
 - **Remaining time:** every card shows how long it will still be kept, for example "30 days left".
 - **Its own look:** the column is deliberately kept neutral grey, independent of theme and accent colour, so it stands apart from the working columns.
 - **Special status:** the trash always sits on the far right, cannot be renamed, moved or deleted and does not show up in the column configuration. It has no WIP limit, no "+ Add card" link and no sort toggle; it is sorted by deletion time, so the card whose deadline expires first sits on top. It does not count towards the WIP limit or the counters of other columns.
@@ -319,13 +319,13 @@ Labels are coloured tags and are managed **per board** in the *Board* tab (creat
 
 #### Link in notifications (from 0.2.0)
 
-![Board settings – labels and link target](img/settings-labels.png)
+![Board settings, labels and link target](img/settings-labels.png)
 
 Per board you can choose where the "open card" link in notification e-mails points: **board view** (default, opens the board and briefly highlights the card), **card editor** (opens the edit dialog directly) or **custom URL** (a fixed address, e.g. your Lovelace dashboard the board is embedded in).
 
-### Cards – all fields
+### Cards: all fields
 
-**Card anatomy (since 0.3.0):** the **assignees** sit as a stack of avatars in the top right corner and the title text flows around them. Hovering or tapping the stack fans the faces out to the left without changing the line breaks. Long titles are cut off after **two lines** with an ellipsis, the full title stays available as a tooltip. The **card footer** holds the checklist progress on the left, the expand chevron in the middle and the icons for **description, link and recurrence** on the right, in that order. Clicking the description icon opens the description in a **read-only window** with rendered Markdown; links inside always open in a new tab. The chevron's hit area is deliberately wider and taller than the symbol itself so it is easy to hit by touch. Whether a checklist is expanded or collapsed is **remembered per device and board** – just like the column sort modes – and survives a reload.
+**Card anatomy (since 0.3.0):** the **assignees** sit as a stack of avatars in the top right corner and the title text flows around them. Hovering or tapping the stack fans the faces out to the left without changing the line breaks. Long titles are cut off after **two lines** with an ellipsis, the full title stays available as a tooltip. The **card footer** holds the checklist progress on the left, the expand chevron in the middle and the icons for **description, link and recurrence** on the right, in that order. Clicking the description icon opens the description in a **read-only window** with rendered Markdown; links inside always open in a new tab. The chevron's hit area is deliberately wider and taller than the symbol itself so it is easy to hit by touch. Whether a checklist is expanded or collapsed is **remembered per device and board**, just like the column sort modes, and survives a reload.
 
 Since 0.3.0 the editor opens **only via the pencil icon right next to the end of the title**; clicking anywhere on the card no longer opens it. That keeps the editor from popping up by accident while scrolling or tapping. Cards can still be grabbed and dragged anywhere. Inside the editor the fields are arranged like this: title, description, then the row with due date, time, priority and column, directly below it the calendar invite and the location (both belong to scheduling), then assignees and labels side by side, card colour and link side by side, followed by recurrence and checklist. On narrow screens the paired fields stack. The footer holds **Delete**, **Manage** (transfer/clone), **Cancel** and **Save**.
 
@@ -339,20 +339,20 @@ A card has the following content fields (settable via the API under the same nam
 | **description** | Markdown | Description, rendered as Markdown (links, images, lists …). As soon as the field contains something, the editor shows a **live preview** of the rendered Markdown **below the input**, so you see the result while typing. Embedded HTML is sanitized before display (XSS protection). |
 | **due** | `YYYY-MM-DD` | Due date. Overdue / soon-due cards are highlighted. |
 | **dueTime** | `HH:MM` | Optional time of day. Enabled via a checkbox, shown on the card after the date. Only effective together with `due`. |
-| **priority** | `0`/`1`/`2` | Normal / High / Urgent. On the card this shows as a badge below the title (before due date and location): **Normal** shows nothing, **High** an orange `!`, **Urgent** a red `!!`. Other values are rejected, via the API with an error – see [Responses & errors](#responses--errors). |
-| **assignees** | list of user IDs | Assignees. Determine who receives notifications. **Required:** the UI needs at least one assignee before a card can be saved. Required fields are marked with a red `*`. Cards created via API/webhook may stay unassigned. If a board's **member list no longer matches any existing user** (e.g. after renaming a user ID), **all** users are assignable since 0.3.0 – so you are never left unable to save a card. |
+| **priority** | `0`/`1`/`2` | Normal / High / Urgent. On the card this shows as a badge below the title (before due date and location): **Normal** shows nothing, **High** an orange `!`, **Urgent** a red `!!`. Other values are rejected, via the API with an error (see [Responses & errors](#responses--errors)). |
+| **assignees** | list of user IDs | Assignees. Determine who receives notifications. **Required:** the UI needs at least one assignee before a card can be saved. Required fields are marked with a red `*`. Cards created via API/webhook may stay unassigned. If a board's **member list no longer matches any existing user** (e.g. after renaming a user ID), **all** users are assignable since 0.3.0, so you are never left unable to save a card. |
 | **labels** | list of label IDs | Colored tags. Labels are managed per board (create, rename, recolor, delete). |
 | **color** | hex color | Colored bar on the left edge of the card. Chosen via an embedded color picker (color field + hue slider + hex input) or presets. |
-| **link** | URL | A link. The card shows a **type-dependent icon** – see [Link types](#link-types). |
+| **link** | URL | A link. The card shows a **type-dependent icon** (see [Link types](#link-types)). |
 | **location** | text | Location. Shown as a location badge (pin icon) on the card and copied into the calendar invite as `LOCATION`. |
 | **checklist** | list | Sub-items with checkboxes; once there are at least two, drag the small **handle** on the left in the editor to reorder them. Shown as progress `✓ 2/5` in the bottom left on the card. The **chevron (▾/▴)** at the middle of the card footer expands/collapses the items directly on the card, where they can also be **ticked off** (saved immediately). |
 | **calendarInvite** | yes/no | If enabled **and** a due date is set, a **`.ics` calendar invite** is attached to every notification e-mail for this card. |
 | **calendarDuration** | `HH:MM` | Duration of the calendar invite, default **`01:00`** (one hour). The field appears in the editor right next to the **calendar invite** checkbox once that is enabled. Only effective for events **with a time of day**; without one it stays an all-day event. |
-| **recurrence** | object | Recurrence rule – see [Recurrence](#recurrence). |
+| **recurrence** | object | Recurrence rule (see [Recurrence](#recurrence)). |
 
 The adapter also manages automatically: `id`, `columnId`, `order`, `createdAt`, `createdBy`, `movedAt`, `doneAt`, `trashedAt`, plus the internal markers `lastReminderAt`, `lastExactAt` (so the same reminder or time-of-day event does not fire twice on the same day) and `icsUid`/`icsFingerprint`/`icsSeq` (calendar series: the same UID across the whole recurrence chain, and detection of changed appointment data).
 
-Since 0.3.0 every card object of the **REST API** additionally carries the computed field **`dueAt`** – the due date including time as an ISO timestamp with local offset (e.g. `2026-08-01T13:30:00+02:00`; `00:00` without a time, `null` without a date). It is identical to the `dueAt` of the events, is **not stored** and is ignored on write – so automations do not have to combine `due` + `dueTime` + time zone themselves.
+Since 0.3.0 every card object of the **REST API** additionally carries the computed field **`dueAt`**, the due date including time as an ISO timestamp with local offset (e.g. `2026-08-01T13:30:00+02:00`; `00:00` without a time, `null` without a date). It is identical to the `dueAt` of the events, is **not stored** and is ignored on write, so automations do not have to combine `due` + `dueTime` + time zone themselves.
 
 `movedAt` records **since when a card has been sitting in its current column** and is the basis for the "age in column" sort mode. It is only refreshed on a real column change; reordering within the same column leaves it untouched. `trashedAt` marks when a card went to the trash and drives the 30-day deadline.
 
@@ -360,7 +360,7 @@ Since 0.3.0 every card object of the **REST API** additionally carries the compu
 
 In the footer of the card editor, right next to **Delete**, sits the **Manage** button. It opens the dialog of the same name, which offers three buttons at the top: **Clone**, **Copy** and **Move**. The selects below adapt to the chosen button.
 
-- **Clone** duplicates the card **within the same board**. Only the **target column** is shown, preselected with the column the card currently sits in. The clone carries over everything — checklist, labels, assignees, recurrence. Leave the preselected column as is and it lands directly **below the original**; pick a different column and it is appended at the **bottom** of that one instead. Handy for recurring tasks you keep around as a template.
+- **Clone** duplicates the card **within the same board**. Only the **target column** is shown, preselected with the column the card currently sits in. The clone carries over everything: checklist, labels, assignees, recurrence. Leave the preselected column as is and it lands directly **below the original**; pick a different column and it is appended at the **bottom** of that one instead. Handy for recurring tasks you keep around as a template.
 - **Copy** and **Move** additionally reveal the **target board**; its first column flagged "New" is preselected. Move takes the card with it (it leaves the current board), copy creates a new card on the target and leaves the original untouched. If there is no other board, both buttons are disabled.
 - **Labels** are matched by **name**. If the target board has a label with the same name it is kept; labels without a match are dropped. The target board is never silently extended with new labels.
 - **Assignees** are only kept if they are **members** of the target board. The dialog shows beforehand what will be dropped.
@@ -380,16 +380,16 @@ The board derives a matching icon (Material Design Icons) from the address you e
 | <img src="../icons/image.svg" width="22" alt="icon"> | `.jpg` `.jpeg` `.png` `.gif` `.webp` `.svg` | `https://example.com/grundriss.png` |
 | <img src="../icons/navigation.svg" width="22" alt="icon"> | route: `waze.com`, `/maps/dir/`, `daddr=` | `https://www.waze.com/ul?ll=52.52,13.405` |
 | <img src="../icons/map-marker.svg" width="22" alt="icon"> | place: Google/Apple Maps, OpenStreetMap, `geo:` | `geo:52.52,13.405` |
-| <img src="../icons/lan.svg" width="22" alt="icon"> | internal address: private ranges (`10.`, `172.16.`–`172.31.`, `192.168.`), `127.`, `169.254.`, `localhost` plus host names ending in `.local` `.lan` `.home` `.internal` `.fritz.box` | `http://192.168.1.10:8123/` |
+| <img src="../icons/lan.svg" width="22" alt="icon"> | internal address: private ranges (`10.`, `172.16.` to `172.31.`, `192.168.`), `127.`, `169.254.`, `localhost` plus host names ending in `.local` `.lan` `.home` `.internal` `.fritz.box` | `http://192.168.1.10:8123/` |
 | <img src="../icons/web.svg" width="22" alt="icon"> | everything else | `https://example.com` |
 
-Only the safe schemes `http(s)`, `mailto:`, `tel:` and `geo:` are clickable – see [Security & access control](#security--access-control).
+Only the safe schemes `http(s)`, `mailto:`, `tel:` and `geo:` are clickable (see [Security & access control](#security--access-control)).
 
 ### Sorting & order
 
 By default you set the order of cards within a column yourself: click a card, hold it and drag it up or down (this works with touch on a phone too). In the same way you drag a card into another column to change its status. The order you choose is kept and synced live to all open views.
 
-This holds even when **not all cards are visible** — with a person or label filter active, or a display limit in place. The card then lands exactly where you dropped it between the visible neighbours, and the hidden cards keep their order around it.
+This holds even when **not all cards are visible**, with a person or label filter active or a display limit in place. The card then lands exactly where you dropped it between the visible neighbours, and the hidden cards keep their order around it.
 
 Since 0.3.0 **each column individually** can be sorted automatically instead. Clicking the sort icon in the column header opens a small menu with five modes:
 
@@ -417,7 +417,7 @@ If a recurring card is created **without** a manual date, the adapter automatica
 
 | Type (`recurrence.type`) | Meaning | Additional fields |
 |---|---|---|
-| `daily` | Every day | – |
+| `daily` | Every day | none |
 | `weekly` | On specific weekdays | `dayOfWeek`: list `[1..7]` (1 = Monday … 7 = Sunday) |
 | `monthly` | Fixed day of month | `dayOfMonth`: `1..31` (the 31st is clamped to the last day in short months) |
 | `monthly_weekday` | N-th/last weekday of the month, e.g. **2nd Tuesday** | `ordinal`: `1..4` or `-1` (last), `dayOfWeek`: `[iso]` |
@@ -437,19 +437,19 @@ minute  hour  day  month  weekday
    0      8    *     *      1-5    -> Monday to Friday at 08:00
 ```
 
-Each field understands `*`, single numbers, lists (`1,15`), ranges (`1-5`), steps (`*/3`, `1-7/2`) and the English short names for month (`jan`…`dec`) and weekday (`mon`…`sun`). Sunday is both `0` and `7`. An expression may be at most 120 characters long — even the longest sensible pattern stays well below that.
+Each field understands `*`, single numbers, lists (`1,15`), ranges (`1-5`), steps (`*/3`, `1-7/2`) and the English short names for month (`jan`…`dec`) and weekday (`mon`…`sun`). Sunday is both `0` and `7`. An expression may be at most 120 characters long, and even the longest sensible pattern stays well below that.
 
 Three things differ from a real cron daemon:
 
-- **The expression is a pattern, not a schedule.** The adapter runs nothing at those moments – it uses the pattern to find the next due date when a card is completed. As with every recurrence, the follow-up card appears when you tick the card off, not on its own.
+- **The expression is a pattern, not a schedule.** The adapter runs nothing at those moments. It uses the pattern to find the next due date when a card is completed. As with every recurrence, the follow-up card appears when you tick the card off, not on its own.
 - **Minute and hour set the time of the card.** `0 8 * * 1-5` produces cards with the time `08:00`; the *time* field in the editor is filled from the pattern and locked. If the pattern names several times (`15,45 8-10 * * *`), the earliest one wins.
-- **`L`, `W`, `#` and `?` do not exist.** For "last working day of the month" or "second Tuesday" use the types *working day of the month* and *monthly (weekday)* – they also know the public-holiday logic that no cron can express.
+- **`L`, `W`, `#` and `?` do not exist.** For "last working day of the month" or "second Tuesday" use the types *working day of the month* and *monthly (weekday)*, which also know the public-holiday logic that no cron can express.
 
 If **day** and **weekday** are both restricted, they combine with **or**, as in the original: `0 8 1 * mon` matches every first of the month *and* every Monday.
 
 Below the input the editor shows the rule in plain words and the next three dates. If the expression is faulty, the reason appears there instead of a preview and the card cannot be saved.
 
-**Calendar invitation:** simple patterns are translated into a recurrence rule (daily, fixed weekdays, fixed days of the month, yearly). Nested patterns – day and weekday at once, or steps across several fields – have no equivalent in the calendar standard; those cards send a single event per occurrence.
+**Calendar invitation:** simple patterns are translated into a recurrence rule (daily, fixed weekdays, fixed days of the month, yearly). Nested patterns (day and weekday at once, or steps across several fields) have no equivalent in the calendar standard; those cards send a single event per occurrence.
 
 ### Public holidays
 
@@ -462,7 +462,7 @@ For the **working-day recurrences** the adapter computes public holidays itself 
 
 ### Users in the board
 
-Which people exist at all comes from the instance settings ([Tab "Users"](#tab-users)). Their appearance and board assignment, however, are maintained directly in the web UI – without restarting the adapter.
+Which people exist at all comes from the instance settings ([Tab "Users"](#tab-users)). Their appearance and board assignment, however, are maintained directly in the web UI, without restarting the adapter.
 
 **Header chips as a filter:** The user chips in the header double as a **multi-select filter**, tapping toggles a person on or off. With a partial selection the board only shows cards of the selected people; with **all or none** active, all cards are shown. The selection is **stored per board in the browser** and restored on the next visit.
 
@@ -470,11 +470,11 @@ Which people exist at all comes from the instance settings ([Tab "Users"](#tab-u
 
 **Avatar image (optional):** By default the avatar shows the initials (on the user color). In the board UI under **⚙ → "User avatars"** you can **upload a PNG/JPG** per user, which is then shown as a round avatar (with preview; the image is automatically cropped to a square, scaled to 128 px and stored in the ioBroker file storage, no config bloat). "Remove avatar" reverts to the initials.
 
-![Board settings – user avatars and colours](img/settings-users.png)
+![Board settings, user avatars and colours](img/settings-users.png)
 
 **Members per board:** in the Board tab of the settings (**⚙ → Board**), right below the board title, you define which users are assignable there (card dialog, header chips and the Views dialog only show members). Every board needs **at least one member**; new boards start with all users. Using the board picker at the top you can also edit the members of other boards without switching to them.
 
-![Board settings – members per board](img/settings-boards.png)
+![Board settings, members per board](img/settings-boards.png)
 
 ### Mobile view
 
@@ -488,7 +488,7 @@ On narrow screens the board stacks the columns vertically; each column collapses
 
 The **monitor icon** in the header opens the **"Views"** dialog. There you assemble a filtered view and get a **ready-to-copy URL** below. Ideal for embedding in Lovelace (webpage card) or for sharing.
 
-The dialog covers the **most common** filters: board, users (multiple), labels (multiple) including the switch between **"Hide these labels"** (blacklist) and **"Show only these labels"** (whitelist), visible columns, the done-card limit (`doneLimit`) and the controls to hide (`hideSettings`, `embed`). **Not** in the dialog, but available **as URL parameters only**, are `theme`, `accent`, `lang`, `card` and `focus` – append those to the generated address by hand if you need them.
+The dialog covers the **most common** filters: board, users (multiple), labels (multiple) including the switch between **"Hide these labels"** (blacklist) and **"Show only these labels"** (whitelist), visible columns, the done-card limit (`doneLimit`) and the controls to hide (`hideSettings`, `embed`). **Not** in the dialog, but available **as URL parameters only**, are `theme`, `accent`, `lang`, `card` and `focus`. Append those to the generated address by hand if you need them.
 
 ![Views dialog](img/share.png)
 
@@ -497,9 +497,9 @@ All parameters can also be appended to the URL directly:
 | Parameter | Effect |
 |---|---|
 | `board=<id>` | Opens this board. Since 0.3.0 the address bar keeps track of the current board: switching via the board picker sets `?board=<id>` (no extra history entry, all other parameters are preserved), so the address can be copied and shared as is. |
-| `users=<name,name>` | **Person filter**: shows only cards assigned to at least one of these users (sets the header chips accordingly). `user=<name>` is the short form for a single user. **Careful:** the parameter overwrites the chip selection stored per board in the browser **for good** – it stays active on the next visit *without* the parameter. Reset it via the chips in the header bar. |
+| `users=<name,name>` | **Person filter**: shows only cards assigned to at least one of these users (sets the header chips accordingly). `user=<name>` is the short form for a single user. **Careful:** the parameter overwrites the chip selection stored per board in the browser **for good**: it stays active on the next visit *without* the parameter. Reset it via the chips in the header bar. |
 | `label=<id,id>` | **Label blacklist** (multiple possible): hides cards that have one of these labels, new labels stay visible automatically. |
-| `onlyLabel=<id,id>` | **Label whitelist** (since 0.3.0): shows **only** cards carrying at least one of these labels – cards without a label drop out. Can be combined with `label=` (whitelist first, then blacklist). |
+| `onlyLabel=<id,id>` | **Label whitelist** (since 0.3.0): shows **only** cards carrying at least one of these labels, so cards without a label drop out. Can be combined with `label=` (whitelist first, then blacklist). |
 | `columns=<id,id>` | Shows only these columns. Others are hidden. |
 | `doneLimit=N` | In done columns, show only the N most recently completed cards (`0` = none, omit = all). |
 | `hideSettings=1` | Hides the settings gear. |
@@ -533,7 +533,7 @@ Boards and cards can be driven entirely from the outside, from ioBroker scripts,
 
 ### REST API
 
-For integrations on the same network there is a REST API (the same one the web UI uses). **Reading** (`GET`) is open, **writing** (`POST`/`PATCH`/`DELETE`) requires a token from 0.1.1 – see [Security & access control](#security--access-control).
+For integrations on the same network there is a REST API (the same one the web UI uses). **Reading** (`GET`) is open, **writing** (`POST`/`PATCH`/`DELETE`) requires a token from 0.1.1 (see [Security & access control](#security--access-control)).
 
 | Method & path | Purpose |
 |---|---|
@@ -558,7 +558,7 @@ For integrations on the same network there is a REST API (the same one the web U
 | `POST /api/boards/<id>/trash/empty` | Empty the board's trash completely. |
 | `POST /api/boards/<id>/cards/<cardId>/transfer` | Transfer a card to another board (`{ toBoard, toColumn?, mode: "move"\|"copy", assignees? }`). With `toBoard` = the same board and `mode: "copy"` the card is cloned in place. |
 
-> **Write access** to `/api` requires a token from 0.1.1 (`X-Kanban-Token`; the web UI sends it automatically), **reading** stays open on the LAN. Details and limits: [Security & access control](#security--access-control). For external access use the token-based [webhooks](#webhooks--inbound).
+> **Write access** to `/api` requires a token from 0.1.1 (`X-Kanban-Token`; the web UI sends it automatically), **reading** stays open on the LAN. Details and limits: [Security & access control](#security--access-control). For external access use the token-based [webhooks](#webhooks-inbound).
 
 #### Structure of a column object
 
@@ -579,9 +579,9 @@ This is how `GET /api/boards/<id>` returns each column, and exactly how `PATCH /
 
 The **trash** appears as an additional column with `isTrash: true`. It is managed by the adapter itself and must **not** be sent along when writing.
 
-> **`PATCH` replaces the column list entirely.** There is no way to change a single column: read the current list via `GET /api/boards/<id>`, modify or extend it there and send the **complete** list back. Anything missing counts as deleted – the cards of that column then move to the first column of the board.
+> **`PATCH` replaces the column list entirely.** There is no way to change a single column: read the current list via `GET /api/boards/<id>`, modify or extend it there and send the **complete** list back. Anything missing counts as deleted, and the cards of that column then move to the first column of the board.
 
-### Webhooks – inbound
+### Webhooks: inbound
 
 The **tokens** used here are managed in the instance settings ([Tab "Webhooks (in)"](#tab-webhooks-in)).
 
@@ -597,7 +597,7 @@ The body contains `cmd` plus the appropriate fields. The same **command vocabula
 | `cmd` | Required fields | Additional fields |
 |---|---|---|
 | `addBoard` | `title` | `id` (optional, otherwise derived from the title) |
-| `deleteBoard` | `board` | – |
+| `deleteBoard` | `board` | none |
 | `addCard` | `board`, `title` | all card fields (`due`, `assignees`, `labels`, `priority`, `location`, `recurrence`, …), `columnId` |
 | `updateCard` (alias `editCard`) | `board`, `cardId`\|`id` | card fields to change |
 | `moveCard` | `board`, `cardId`\|`id`, `column`\|`columnId` | `order` |
@@ -606,12 +606,12 @@ The body contains `cmd` plus the appropriate fields. The same **command vocabula
 | `restoreCard` | `board`, `cardId`\|`id` | `column`\|`columnId` (target column; otherwise the first open one) |
 | `purgeCard` | `board`, `cardId`\|`id` |, (removes permanently) |
 | `emptyTrash` | `board` |, (empties the trash) |
-| `transferCard` | `board`, `cardId`\|`id`, `toBoard` | `toColumn`, `mode` (`move` or `copy`, default `move`), `assignees` – with `mode: "copy"`, `toBoard` may be the card's own board (clone) |
-| `listBoards` / `getBoards` | – | – |
-| `getBoard` | `board` | – |
+| `transferCard` | `board`, `cardId`\|`id`, `toBoard` | `toColumn`, `mode` (`move` or `copy`, default `move`), `assignees`. With `mode: "copy"`, `toBoard` may be the card's own board (clone) |
+| `listBoards` / `getBoards` | none | none |
+| `getBoard` | `board` | none |
 
 > **Field-name pitfalls (important!)**
-> - The card ID is **`cardId` OR `id`** – **not** `card`.
+> - The card ID is **`cardId` OR `id`**, **not** `card`.
 > - The target column of `moveCard` is **`column` OR `columnId`**.
 > - The board is given via **`board` OR `boardId`**.
 
@@ -679,7 +679,7 @@ POST   /webhook/<token>/boards/<id>/cards/<cardId>/move
 
 #### Responses & errors
 
-Every call – webhook as well as REST – answers with JSON. On success you get HTTP `200` with the affected object (card or board); commands without a result of their own, such as `emptyTrash`, report `{"ok":true}`. On failure the reason sits in the `error` field (the adapter emits these messages verbatim, in German):
+Every call, webhook as well as REST, answers with JSON. On success you get HTTP `200` with the affected object (card or board); commands without a result of their own, such as `emptyTrash`, report `{"ok":true}`. On failure the reason sits in the `error` field (the adapter emits these messages verbatim, in German):
 
 | Situation | Code | Response |
 |---|---|---|
@@ -694,9 +694,9 @@ Every call – webhook as well as REST – answers with JSON. On success you get
 | Invalid date | `400` | `{"error":"due muss im Format YYYY-MM-DD vorliegen, nicht '…'"}` |
 | Invalid priority | `400` | `{"error":"priority kennt nur 0, 1 oder 2, nicht '…'"}` |
 
-> **New: stricter validation.** Up to 0.3.0 the adapter quietly straightened out bad input: an unknown `columnId` landed in the first column, an invalid `due` was simply dropped, and `getBoard` on an unknown board answered with `200` and `null`. All three now return an **error**. Automations relying on the old, forgiving behaviour need to be adjusted – in exchange, nothing silently ends up in the wrong place any more.
+> **New: stricter validation.** Up to 0.3.0 the adapter quietly straightened out bad input: an unknown `columnId` landed in the first column, an invalid `due` was simply dropped, and `getBoard` on an unknown board answered with `200` and `null`. All three now return an **error**. Automations relying on the old, forgiving behaviour need to be adjusted. In exchange, nothing silently ends up in the wrong place any more.
 
-### Webhooks – outbound
+### Webhooks: outbound
 
 Target URLs and event filters are configured in the instance settings ([Tab "Webhooks (out)"](#tab-webhooks-out)).
 
@@ -726,7 +726,7 @@ Every event has the shape `{ event, ts, board:{id,title}, card:{…}, detail:{�
 
 ### Notifications to any service (Telegram, Pushover, ...)
 
-Besides the built-in e-mail notification you can connect **any** service without it being hard-wired into the adapter. On every event the adapter writes the state `kanban.0.lastEvent` and - if configured - sends an [outbound webhook](#webhooks--outbound). A short script (JavaScript adapter) or a Node-RED flow picks that up and forwards it to Telegram, Pushover, Signal, Pushbullet and so on.
+Besides the built-in e-mail notification you can connect **any** service without it being hard-wired into the adapter. On every event the adapter writes the state `kanban.0.lastEvent` and - if configured - sends an [outbound webhook](#webhooks-outbound). A short script (JavaScript adapter) or a Node-RED flow picks that up and forwards it to Telegram, Pushover, Signal, Pushbullet and so on.
 
 **Structure of an event** (content of `lastEvent` / the webhook body):
 
@@ -746,7 +746,7 @@ Besides the built-in e-mail notification you can connect **any** service without
 - `card.assignees` - the assignees (user **ids**, not display names); the notification is aimed at them.
 - `link` - ready-to-use deep link to the card (from 0.2.1; uses the base URL from the instance settings).
 - `dueAt` - from 0.3.0: the due date as an ISO timestamp with local offset, e.g. `2026-08-01T09:00:00+02:00`. Without a time set, `00:00` is sent; without a due date the value is `null`. Every card object of the REST API carries the same field.
-- **`cardDue` comes in two flavours:** the **daily** reminder at the configured reminder time (day-based, including lead time and overdue cards, `detail.overdue` may be `true`) and – if the instance option "Fire 'card due' at the card's time of day" is enabled – a **card-precise** event at the card's time with `detail.exact: true` and `detail.dueTime`. The latter fires once per card and day; if the moment falls into a downtime, it is caught up on the next start on the same day. Scripts that only care about exact times filter on `ev.detail && ev.detail.exact`.
+- **`cardDue` comes in two flavours:** the **daily** reminder at the configured reminder time (day-based, including lead time and overdue cards, `detail.overdue` may be `true`). The second one needs the instance option "Fire 'card due' at the card's time of day" and is a **card-precise** event at the card's time with `detail.exact: true` and `detail.dueTime`. The latter fires once per card and day; if the moment falls into a downtime, it is caught up on the next start on the same day. Scripts that only care about exact times filter on `ev.detail && ev.detail.exact`.
 
 **Trash events (from 0.3.0):** `cardDeleted` now means "moved to the trash" - the card can be restored for 30 days. `cardRestored` fires when it is brought back, `cardPurged` when it is removed permanently. During bulk actions, `detail` additionally carries `auto: true` and `reason`: `cleanup` (from done into the trash), `retention` (the 30-day deadline expired) or `emptyTrash` (trash emptied by hand). In all three cases e-mails are sent as **one summary per user** instead of one per card; the outbound webhooks still fire per card.
 **Recurrences (from 0.3.0):** completing a recurring card immediately creates the next instance. That fires `cardCreated` plus one `cardAssigned` per assignee, both carrying `detail.recurrence: true`. Without a filter your script therefore announces the follow-up card as "assigned to you" right after you tick the old one off. One line hides those events:
@@ -900,7 +900,7 @@ setState('kanban.0.action', JSON.stringify({
 
 The adapter executes the command and clears the state again.
 
-> **Access:** neither route uses a token — anyone allowed to run scripts or write states in ioBroker can do everything here, including `deleteBoard` and `emptyTrash`. That is intentional, as both are local ioBroker interfaces. From 0.3.0 the `action` state can be switched off under "Webhooks (in)" if no script writes to it, and irreversible commands are logged with their source. For access from outside, use the webhook route with its own token and board restriction.
+> **Access:** neither route uses a token: anyone allowed to run scripts or write states in ioBroker can do everything here, including `deleteBoard` and `emptyTrash`. That is intentional, as both are local ioBroker interfaces. From 0.3.0 the `action` state can be switched off under "Webhooks (in)" if no script writes to it, and irreversible commands are logged with their source. For access from outside, use the webhook route with its own token and board restriction.
 
 ### Live sync & deep links
 
@@ -908,7 +908,7 @@ The adapter executes the command and clears the state again.
 - **Polling fallback:** if the WebSocket is unavailable, the UI periodically checks for changes using `?rev=`.
 - **Deep link:** `…/?board=<id>&card=<id>` opens the given card directly, this is how notification e-mails link ("Open card in board").
 - **Simultaneous editing:** the card editor works **without locking**. If two people save the same card shortly after one another, the **last** save wins; the first person's change is lost without any notice. For cards several people maintain, it pays to agree briefly on who currently has it open.
-- **After an adapter restart:** an open page **reconnects on its own** – which also covers every save of the instance settings, since that restarts the adapter. On top of that the view syncs whenever you switch back to the tab, and once a minute. Should a view still look stale, a reload fixes it.
+- **After an adapter restart:** an open page **reconnects on its own**, which also covers every save of the instance settings, since that restarts the adapter. On top of that the view syncs whenever you switch back to the tab, and once a minute. Should a view still look stale, a reload fixes it.
 
 ### ioBroker states & objects
 
@@ -946,16 +946,16 @@ The `boards.*` and `users.*` mirror states are handy for dashboards ("Björn: 3 
 Without a valid token → HTTP `401`. The native setting `apiWriteProtection: false` disables the protection (then `/api` behaves as in 0.1.0).
 
 > **Also new in 0.3.0:**
-> - A token's **board restriction** ("allowed boards") applies on **both** routes — REST (`/api/boards/<id>/…`) and webhook commands (`addCard`, `moveCard`, `deleteBoard`, `transferCard`, …). What counts is the board the call **actually touches**: for REST the board in the path, plus the target board of a transfer, and for commands the field that this particular command evaluates. Another board yields `403`. A **writing** command that names no board at all — such as `addBoard`, or editing users and avatars — is closed to restricted tokens as well, no matter what else the body contains. Purely **reading** commands (`listBoards`, `getBoard`) stay open, as reading needs no token anyway.
+> - A token's **board restriction** ("allowed boards") applies on **both** routes: REST (`/api/boards/<id>/…`) and webhook commands (`addCard`, `moveCard`, `deleteBoard`, `transferCard`, …). What counts is the board the call **actually touches**: for REST the board in the path, plus the target board of a transfer, and for commands the field that this particular command evaluates. Another board yields `403`. A **writing** command that names no board at all, such as `addBoard` or editing users and avatars, is closed to restricted tokens as well, no matter what else the body contains. Purely **reading** commands (`listBoards`, `getBoard`) stay open, as reading needs no token anyway.
 > - Tokens are **no longer accepted as a URL parameter** (`?token=…`), because URLs end up in logs, browser history and referrers. Use the header or the body field.
 > - The **SPA secret now lives in the adapter's file storage** instead of the readable state `kanban.0.info.apiSecret`; the state remains but stays empty. An existing value is migrated on first start and then cleared.
 > - **Irreversible commands** (`deleteBoard`, `emptyTrash`, `purgeCard`) are logged together with their source.
 
 **Third-party websites cannot reach the API (CORS).** From 0.3.0 the adapter sends CORS permissions only on `/api` and `/webhook`, and only for origins you list under *Webhooks (in)* → **Allowed browser origins**. The default is empty, meaning same origin only.
 
-Up to 0.3.0 `Access-Control-Allow-Origin: *` sat on **every** route, including the page that hands out the write token in its `<meta>` tag. Any website you had open in your browser could therefore scan the network for your adapter in the background, read that page, extract the token and then change or delete cards and boards. That door is now shut. Only access **from a browser** was ever affected — scripts, Node-RED and `curl` know no origin check and keep working unchanged, with or without an entry.
+Up to 0.3.0 `Access-Control-Allow-Origin: *` sat on **every** route, including the page that hands out the write token in its `<meta>` tag. Any website you had open in your browser could therefore scan the network for your adapter in the background, read that page, extract the token and then change or delete cards and boards. That door is now shut. Only access **from a browser** was ever affected. Scripts, Node-RED and `curl` know no origin check and keep working unchanged, with or without an entry.
 
-You only need an entry if a website on a **different** address calls the API **from the browser**, for example your own dashboard at `https://dashboard.local:8123`. Separate several origins with commas. A `*` works too, but grants every website read access to all boards — prefer listing the actual addresses.
+You only need an entry if a website on a **different** address calls the API **from the browser**, for example your own dashboard at `https://dashboard.local:8123`. Separate several origins with commas. A `*` works too, but grants every website read access to all boards, so prefer listing the actual addresses.
 
 > **Honest limit of this protection:** because the UI works **without a login**, any device on the same network that loads the page can read the SPA secret. The token thus reliably blocks **third-party websites/CSRF** and naive scanners, but is **not** a substitute for network isolation. For hard isolation, bind the port to the LAN/`127.0.0.1` only and put an authenticating reverse proxy in front.
 
@@ -969,7 +969,7 @@ You only need an entry if a website on a **different** address calls the API **f
 
 The interface is **multilingual**. The default language follows the **system language configured in ioBroker**; the language can optionally be fixed in the instance settings.
 
-Translations live as **one file per language** under `www/i18n/` (e.g. `de.json`, `en.json`). Currently **eleven languages** are included: **German, English, French, Dutch, Italian, Spanish, Polish, Portuguese, Russian, Ukrainian and Chinese (simplified)** — all selectable in the instance "Language" dropdown, alongside "Auto". Further languages can be added simply by dropping in another JSON file with the same keys. If no file exists for the requested language, English is used as fallback.
+Translations live as **one file per language** under `www/i18n/` (e.g. `de.json`, `en.json`). Currently **eleven languages** are included: **German, English, French, Dutch, Italian, Spanish, Polish, Portuguese, Russian, Ukrainian and Chinese (simplified)**, all selectable in the instance "Language" dropdown, alongside "Auto". Further languages can be added simply by dropping in another JSON file with the same keys. If no file exists for the requested language, English is used as fallback.
 
 ### FAQ & pitfalls
 
@@ -995,7 +995,7 @@ Translations live as **one file per language** under `www/i18n/` (e.g. `de.json`
 - **"Close" in the settings dialog discards changes.** The board manager only applies changes on **Save**; "Close" discards them without asking.
 - **The date in the edit dialog looks different from the card.** The input is the browser's native date field and follows the browser language; the display on the cards follows the instance's configured **date format**. Both mean the same date.
 - **A webhook command fails with "card 'undefined' does not exist".** Almost always the wrong ID field: it is `cardId` or `id`, **not** `card`.
-- **"Spalte '…' existiert nicht in Board '…'" when creating a card.** Since 0.3.0 an unknown `columnId` returns a `404` instead of silently dropping the card into the first column. The valid [column IDs](#columns) are listed by `GET /api/boards/<id>` – careful: a column's title is **not** its ID.
+- **"Spalte '…' existiert nicht in Board '…'" when creating a card.** Since 0.3.0 an unknown `columnId` returns a `404` instead of silently dropping the card into the first column. The valid [column IDs](#columns) are listed by `GET /api/boards/<id>`. Careful: a column's title is **not** its ID.
 - **"due muss im Format YYYY-MM-DD vorliegen".** The due date is only accepted as `YYYY-MM-DD` (e.g. `2026-07-20`), not as `20/07/2026` or a timestamp. An invalid date used to be discarded without comment; today the call fails with `400`.
 - **"priority kennt nur 0, 1 oder 2".** Priority knows exactly three values: `0` = normal, `1` = high, `2` = urgent. Text such as `"high"` or larger numbers are rejected with `400`.
 - **New columns missing in a shared URL.** The `columns=` filter is static. If a column is added later, the view must be shared again. In the "Views" dialog itself, columns are detected live.
