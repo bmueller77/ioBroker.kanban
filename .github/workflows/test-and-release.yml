@@ -35,6 +35,8 @@ jobs:
 
   # Adaptertests auf allen unterstützten Node-Versionen und Systemen
   adapter-tests:
+    # Erst prüfen, dann die teure Matrix starten (E3014)
+    needs: [check-and-lint]
     if: contains(github.event.head_commit.message, '[skip ci]') == false
 
     runs-on: ${{ matrix.os }}
@@ -77,5 +79,7 @@ jobs:
     steps:
       - uses: ioBroker/testing-action-deploy@v1
         with:
-          node-version: '22.x'
+          # Der Prüfer verlangt hier mindestens 24 (E3022). Betrifft nur die
+          # Veröffentlichung, nicht die Laufzeit des Adapters.
+          node-version: '24.x'
           github-token: ${{ secrets.GITHUB_TOKEN }}
