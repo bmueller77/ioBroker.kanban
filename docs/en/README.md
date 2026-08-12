@@ -2,7 +2,7 @@
 
 A **Kanban board as a dedicated ioBroker adapter**. It ships its own web server, serves a single-page app with no framework (plain JavaScript) and keeps every open view in sync over a WebSocket. Cards move by drag & drop, boards and columns are freely configurable, tasks can recur, and notifications go out by e-mail, with a calendar invite if you want one. Everything is reachable from outside over REST, webhooks and `sendTo`.
 
-> **Who is it for?** Households that manage tasks together, whether that is a family, a flat-share or the maintenance plan for a house, and want those tasks where ioBroker already runs: readable from scripts, embeddable in Lovelace, controllable from Node-RED.
+> **Who is it for?** Households that manage tasks together, whether that is a family, a flat-share or the maintenance plan for a house, and want those tasks where ioBroker already runs. Every event lands in a state that scripts and Node-RED can read, and the board embeds into Lovelace as a webpage card.
 
 > **Version 0.3.0**, Per-board trash (restorable for 30 days), automatic cleanup of old done cards, per-column sorting with five modes and a direction toggle, done cards with strikethrough title, completion timestamp and copy button, moving or copying cards between boards, new events `cardRestored`/`cardPurged` and `dueAt` (due date incl. time) in every event, reworked board settings and card editor, confirmation dialogs inside the UI.
 >
