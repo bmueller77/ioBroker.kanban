@@ -33,9 +33,15 @@ die funktionieren:
 
 | Gesucht | Anfrage, die trifft |
 |---|---|
+| Expertenmodus-Schalter | `expert mode toggle button in the top toolbar` — heißt „Expertenmodus umschalten". **Nicht** der Schraubenschlüssel: der öffnet die Basiseinstellungen |
 | Octocat-Symbol in der Adapter-Leiste | `button to install adapter from custom URL` (heißt dort „Installieren aus eigener URL") |
 | Speichern-Knopf unten | `SPEICHERN button in the bottom action bar` — im Baum steht **„Save"**, nicht „Speichern" |
 | Feld in einer Tabellenzeile | über den **Inhalt**: `textbox containing the value team-board` |
+
+**Der erste Klick auf ein Symbol in der oberen Leiste landet oft nur als
+Hover** — es erscheint der Tooltip, aber nichts passiert. Dann einfach denselben
+`ref` noch einmal klicken und mit `find` nach dem erwarteten Dialogknopf suchen,
+statt blind weiterzumachen.
 
 `computer{action:"wait"}` nimmt höchstens **10** Sekunden je Aufruf.
 
@@ -155,6 +161,27 @@ curl -s -w "\n%{http_code}\n" -X POST "$H/webhook/$T/action" \
 ```
 
 Angelegte Testkarten hinterher wieder entfernen (`deleteCard`, dann `purgeCard`).
+
+## Fehler auf dem Tablet: messen statt raten
+
+Am Tablet gibt es keine erreichbare Konsole, und im Kiosk-Modus lässt sich auch
+die URL nicht ändern — ein Debug-Parameter hilft dort also nicht. Bei einem
+Fehler, der sich nur dort zeigt, ist der schnellste Weg eine Messung, die das
+Board **von selbst an den Adapter schickt**:
+
+1. Im Frontend die fraglichen Ereignisse mitschreiben (Zeitstempel ab Beginn).
+2. Am Ende per `api('api/debug/…', { method: 'POST', body })` hinschicken — das
+   läuft über den bestehenden Schreib-Token, es entsteht also keine offene
+   Schnittstelle.
+3. Im Server eine gedeckelte Ablage im Speicher plus eine GET-Route, die sich von
+   außen per `curl` abholen lässt.
+
+Björn muss dann nur einmal die Aktion ausführen; der Rest kommt hierher. Nach
+der Diagnose wieder ausbauen.
+
+So kam der Kontextmenü-Fehler heraus: `contextmenu` nach 251 ms, `pointercancel`
+nach 749 ms, danach lag die Karte zurück an ihrem Platz. Zwei vorher geratene
+Erklärungen (waagerechtes Scrollen, Textmarkierung) waren beide falsch.
 
 ## Fallen
 
