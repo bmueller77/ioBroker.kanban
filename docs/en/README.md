@@ -137,7 +137,7 @@ Add a row with the **"+"** in the table header; the bin icon at the end of a row
 
 Notifications are triggered on card events and delivered via **e-mail** (through the ioBroker `email` adapter) and/or **outbound webhooks**. In addition, every event is written to the state `kanban.0.lastEvent` (as a script trigger).
 
-![Instance settings – Email](img/admin-email.png)
+![Instance settings – Notifications](img/admin-email.png)
 
 | Setting | Meaning |
 |---|---|
@@ -480,7 +480,7 @@ Which people exist at all comes from the instance settings ([Tab "Users"](#tab-u
 
 On narrow screens the board stacks the columns vertically; each column collapses as an accordion (state is remembered per device). The card, board and views dialogs open full-screen with a fixed action bar at the bottom. To move a card, press and hold briefly, while dragging, a quick-move menu with the target columns appears.
 
-<img src="img/mobile.jpg" alt="Mobile view, stacked columns" width="330"> <img src="img/mobile-drag.png" alt="Mobile view, quick-move menu while dragging a card" width="330">
+<img src="img/mobile.png" alt="Mobile view, stacked columns" width="330"> <img src="img/mobile-drag.png" alt="Mobile view, quick-move menu while dragging a card" width="330">
 
 *Left: columns stacked as an accordion. Right: the quick-move menu that appears over the target columns while dragging a card.*
 

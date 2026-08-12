@@ -137,7 +137,7 @@ Eine neue Zeile legst du über das **„+"** in der Kopfzeile der Tabelle an, da
 
 Benachrichtigungen werden bei Karten-Ereignissen ausgelöst und per **E-Mail** (über den ioBroker-`email`-Adapter) und/oder **ausgehende Webhooks** verteilt. Zusätzlich wird jedes Ereignis in den State `kanban.0.lastEvent` geschrieben (als Skript-Trigger).
 
-![Instanzeinstellungen – E-Mail](img/admin-email.png)
+![Instanzeinstellungen – Benachrichtigungen](img/admin-email.png)
 
 | Einstellung | Bedeutung |
 |---|---|
@@ -480,7 +480,7 @@ Welche Personen es überhaupt gibt, kommt aus den Instanzeinstellungen ([Tab „
 
 Auf schmalen Bildschirmen stapelt das Board die Spalten untereinander; jede Spalte lässt sich als Akkordeon ein-/ausklappen (Zustand wird je Gerät gemerkt). Karten-, Board- und Ansichten-Dialog öffnen im Vollbild mit fester Aktionsleiste unten. Zum Verschieben eine Karte kurz gedrückt halten, beim Ziehen erscheint ein Schnellmenü mit den Zielspalten.
 
-<img src="img/mobile.jpg" alt="Mobile Ansicht, gestapelte Spalten" width="330"> <img src="img/mobile-drag.png" alt="Mobile Ansicht, Schnellmenü beim Ziehen einer Karte" width="330">
+<img src="img/mobile.png" alt="Mobile Ansicht, gestapelte Spalten" width="330"> <img src="img/mobile-drag.png" alt="Mobile Ansicht, Schnellmenü beim Ziehen einer Karte" width="330">
 
 *Links: gestapelte Spalten als Akkordeon. Rechts: das Schnellmenü, das beim Ziehen einer Karte über den Zielspalten erscheint.*
 
