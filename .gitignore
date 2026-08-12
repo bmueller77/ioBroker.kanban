@@ -10,7 +10,8 @@ tarballs/
 Thumbs.db
 *.log
 .idea/
-.vscode/
+.vscode/*
+!.vscode/settings.json
 
 # Lokales Dev-Sync-Skript (enthält persönliche Pfade)
 deploy.sh

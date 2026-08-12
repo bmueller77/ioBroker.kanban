@@ -49,8 +49,33 @@ jobs:
           node-version: ${{ matrix.node-version }}
           os: ${{ matrix.os }}
 
-# Der deploy-Job fehlt bewusst. Er würde bei jedem v*-Tag automatisch auf npm
-# veröffentlichen und dafür Trusted Publishing im npm-Konto brauchen
-# (https://docs.npmjs.com/trusted-publishers). Das ändert den Release-Ablauf und
-# ist deshalb eine eigene Entscheidung. Solange er fehlt, bleiben die
-# Checker-Punkte E3012 (deploy) und E2008 (Provenance) offen.
+  # Veröffentlicht auf npm, sobald ein Commit mit einem v*-Tag versehen wird,
+  # und legt dabei das GitHub-Release an.
+  #
+  # ACHTUNG: Ohne npm-token läuft die Anmeldung über Trusted Publishing. Das
+  # muss auf npmjs.com für dieses Paket eingerichtet sein (Package settings ->
+  # Trusted publisher: Repository bmueller77/ioBroker.kanban, Workflow
+  # test-and-release.yml). Fehlt das, schlägt der Job beim nächsten Tag fehl.
+  # Dafür wird die Veröffentlichung signiert (Provenance), was der
+  # Repository-Checker unter E2008 verlangt.
+  deploy:
+    needs: [check-and-lint, adapter-tests]
+
+    # Nur bei einem Tag, der mit v beginnt
+    if: |
+      contains(github.event.head_commit.message, '[skip ci]') == false &&
+      github.event_name == 'push' &&
+      startsWith(github.ref, 'refs/tags/v')
+
+    runs-on: ubuntu-latest
+
+    # id-token für Trusted Publishing, contents für das GitHub-Release
+    permissions:
+      id-token: write
+      contents: write
+
+    steps:
+      - uses: ioBroker/testing-action-deploy@v1
+        with:
+          node-version: '22.x'
+          github-token: ${{ secrets.GITHUB_TOKEN }}

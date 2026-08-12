@@ -1,0 +1,26 @@
+// Diese Datei kompiliert nichts. Sie schaltet nur die Typprüfung für die
+// JavaScript-Quellen ein, damit Editoren und "npx tsc --noEmit" Fehler finden.
+{
+    // Passend zu engines.node: >=22
+    "extends": "@tsconfig/node22/tsconfig.json",
+    "compilerOptions": {
+        "noEmit": true,
+
+        "allowJs": true,
+        "checkJs": true,
+
+        // notwendig für die automatische Typisierung der Adapter-Konfiguration
+        "resolveJsonModule": true,
+
+        "strict": false,
+        "noImplicitAny": false,
+        "useUnknownInCatchVariables": false,
+
+        "lib": ["ES2023"]
+    },
+    "include": ["**/*.js", "**/*.d.ts"],
+    // Geprüft wird der Adapter. Die Single-Page-App unter www/ ist
+    // Browser-Code, dessen DOM-Zugriffe eine Node-Typprüfung nur mit
+    // Hunderten Scheinfehlern quittiert - dort bringt sie nichts.
+    "exclude": ["node_modules/**", "www/**", "test/**"]
+}
