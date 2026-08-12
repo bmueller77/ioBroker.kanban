@@ -278,6 +278,16 @@ img.avatar, .avatar img { object-fit: cover; width: 100%; height: 100%; border-r
     -webkit-touch-callout: none;
 }
 
+/* touch-action vererbt sich nicht: Der Finger liegt beim Ziehen meist auf einem
+   Kind der Karte (Titel, Badge, Symbol), nicht auf der Karte selbst. Ohne diese
+   Zeile gilt dort wieder die Voreinstellung. Symbole ausserdem nicht als Bild
+   behandeln, damit die WebView beim langen Druck nicht ihr Bildmenue anbietet. */
+.card * {
+    touch-action: pan-y;
+    -webkit-touch-callout: none;
+    -webkit-user-drag: none;
+}
+
 /* Farbstreifen links - unabhaengig vom Kartenrahmen (nutzt --card-color) */
 .card::before {
     content: '';

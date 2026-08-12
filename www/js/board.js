@@ -124,6 +124,19 @@ let dragDebugReady = false;
 function initDragTrace() {
     if (dragDebugReady) return;
     dragDebugReady = true;
+
+    // Ziehen heisst auf dem Touchscreen aufliegen und halten — fuer Android ist
+    // das zugleich ein langer Druck. Liegt der Finger dabei auf einem Symbol
+    // (Prioritaet, Faelligkeit, Ort sind SVGs) oder einem Link, oeffnet die
+    // WebView ihr Kontextmenue, schickt pointercancel und der Zug ist vorbei.
+    // Gemessen auf einem Galaxy Tab S5e: contextmenu nach 251 ms, pointercancel
+    // nach 749 ms, danach lag die Karte wieder an ihrem Platz. Auf dem Titel
+    // passierte das nicht — deshalb ging es mal und mal nicht, je nachdem wo
+    // man die Karte angefasst hat.
+    document.addEventListener('contextmenu', ev => {
+        const onCard = ev.target && ev.target.closest && ev.target.closest('.card');
+        if (onCard || dragActive) ev.preventDefault();
+    }, true);
     for (const type of ['touchcancel', 'pointercancel', 'contextmenu', 'selectstart',
         'touchend', 'pointerup', 'dragstart', 'dragend', 'scroll', 'visibilitychange',
         'touchstart', 'pointerdown']) {
