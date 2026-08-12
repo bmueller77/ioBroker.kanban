@@ -345,29 +345,6 @@
           "lg": 4,
           "xl": 4
         },
-        "_otherServicesHint": {
-          "type": "staticText",
-          "text": "emailTab__otherServicesHint_text",
-          "sm": 12,
-          "xs": 12,
-          "lg": 12,
-          "xl": 12,
-          "md": 12
-        },
-        "_otherServicesLink": {
-          "type": "staticLink",
-          "label": "emailTab__otherServicesLink_label",
-          "href": "https://github.com/bmueller77/iobroker.kanban/blob/main/docs/de/README.md#benachrichtigungen-an-beliebige-dienste-telegram-pushover-",
-          "target": "_blank",
-          "button": true,
-          "variant": "outlined",
-          "icon": "book",
-          "sm": 12,
-          "md": 6,
-          "xs": 12,
-          "lg": 6,
-          "xl": 6
-        },
         "reminderTime": {
           "type": "text",
           "label": "emailTab_reminderTime_label",
@@ -490,6 +467,39 @@
           "xs": 12,
           "lg": 2,
           "xl": 2
+        },
+        "_otherHdr": {
+          "type": "header",
+          "size": 5,
+          "text": "emailTab__otherHdr_text",
+          "sm": 12,
+          "md": 12,
+          "xs": 12,
+          "lg": 12,
+          "xl": 12
+        },
+        "_otherServicesHint": {
+          "type": "staticText",
+          "text": "emailTab__otherServicesHint_text",
+          "sm": 12,
+          "xs": 12,
+          "lg": 12,
+          "xl": 12,
+          "md": 12
+        },
+        "_otherServicesLink": {
+          "type": "staticLink",
+          "label": "emailTab__otherServicesLink_label",
+          "href": "https://github.com/bmueller77/iobroker.kanban/blob/main/docs/de/README.md#benachrichtigungen-an-beliebige-dienste-telegram-pushover-",
+          "target": "_blank",
+          "button": true,
+          "variant": "outlined",
+          "icon": "book",
+          "sm": 12,
+          "md": 6,
+          "xs": 12,
+          "lg": 6,
+          "xl": 6
         }
       }
     },

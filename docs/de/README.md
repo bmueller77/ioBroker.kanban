@@ -26,7 +26,7 @@ Ein vollwertiges **Kanban-Board als eigener ioBroker-Adapter**. Der Adapter brin
 - **[Teil A: Instanzeinstellungen (ioBroker-Admin)](#teil-a-instanzeinstellungen-iobroker-admin)**
   - [Tab „Allgemein"](#tab-allgemein)
   - [Tab „Benutzer"](#tab-benutzer)
-  - [Tab „E-Mail" – Benachrichtigungen](#tab-e-mail--benachrichtigungen)
+  - [Tab „Benachrichtigungen"](#tab-benachrichtigungen)
   - [Tab „Webhooks (eingehend)"](#tab-webhooks-eingehend)
   - [Tab „Webhooks (ausgehend)"](#tab-webhooks-ausgehend)
 - **[Teil B: Das Board (Weboberfläche)](#teil-b-das-board-weboberfläche)**
@@ -124,7 +124,7 @@ Hier wird festgelegt, **welche Personen es gibt**, die Liste gilt für die gesam
 | **ID** (`name`) | Interne ID, klein geschrieben, ohne Umlaute (z. B. `bjoern`). Wird in URL-Parametern und Zuweisungen verwendet. |
 | **Anzeigename** (`displayName`) | Anzeigename (z. B. `Björn`). |
 | **E-Mail** (`email`) | Optional. Zieladresse für E-Mail-Benachrichtigungen. |
-| **notify…** | Neun Checkboxen je Benutzer für die Benachrichtigungssteuerung, siehe [Tab „E-Mail", Benachrichtigungen](#tab-e-mail--benachrichtigungen). |
+| **notify…** | Neun Checkboxen je Benutzer für die Benachrichtigungssteuerung, siehe [Tab „Benachrichtigungen"](#tab-benachrichtigungen). |
 
 Eine neue Zeile legst du über das **„+"** in der Kopfzeile der Tabelle an, das Papierkorb-Symbol am Zeilenende entfernt sie wieder (ohne Rückfrage). Zeilen ohne ID werden beim Speichern verworfen. Eine frische Instanz bringt zwei Beispielbenutzer `user1` und `user2` mit.
 
@@ -133,7 +133,7 @@ Eine neue Zeile legst du über das **„+"** in der Kopfzeile der Tabelle an, da
 
 > **Nicht hier:** Benutzerfarbe, Avatarbild und die Zuordnung zu einzelnen Boards werden seit 0.2.0 direkt in der Weboberfläche gepflegt – siehe [Benutzer im Board](#benutzer-im-board).
 
-### Tab „E-Mail" – Benachrichtigungen
+### Tab „Benachrichtigungen"
 
 Benachrichtigungen werden bei Karten-Ereignissen ausgelöst und per **E-Mail** (über den ioBroker-`email`-Adapter) und/oder **ausgehende Webhooks** verteilt. Zusätzlich wird jedes Ereignis in den State `kanban.0.lastEvent` geschrieben (als Skript-Trigger).
 
@@ -176,7 +176,7 @@ Der Kern-Unterschied zwischen **Zugew.** und **Neu**: „Zugew." ist die **pers�
 
 Für die meisten Setups genügt daher **„Zugew." allein**. „Neu" lohnt sich, wenn du auch über Karten informiert werden willst, die *andere* anlegen und bei denen du mitzuständig bist.
 
-**Fallback:** Hat ein Benutzer bei einem Ereignis nichts eingestellt, greift die **globale Vorgabe** (Tab „E-Mail", Abschnitt „Standard-Vorgabe"). So bekommen bestehende Benutzer weiterhin Benachrichtigungen, ohne dass für jeden alles einzeln gesetzt werden muss.
+**Fallback:** Hat ein Benutzer bei einem Ereignis nichts eingestellt, greift die **globale Vorgabe** (Tab „Benachrichtigungen", Abschnitt „Standard-Vorgabe"). So bekommen bestehende Benutzer weiterhin Benachrichtigungen, ohne dass für jeden alles einzeln gesetzt werden muss.
 
 **Kein Selbst-Spam:** Wer eine Änderung auslöst, wird über genau diese Änderung nicht selbst benachrichtigt.
 

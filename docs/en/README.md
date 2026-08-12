@@ -26,7 +26,7 @@ A full-featured **Kanban board as a dedicated ioBroker adapter**. The adapter sh
 - **[Part A: Instance settings (ioBroker admin)](#part-a-instance-settings-iobroker-admin)**
   - [Tab "General"](#tab-general)
   - [Tab "Users"](#tab-users)
-  - [Tab "Email" – notifications](#tab-email--notifications)
+  - [Tab "Notifications"](#tab-notifications)
   - [Tab "Webhooks (in)"](#tab-webhooks-in)
   - [Tab "Webhooks (out)"](#tab-webhooks-out)
 - **[Part B: The board (web UI)](#part-b-the-board-web-ui)**
@@ -124,7 +124,7 @@ This is where you define **which people exist**, the list applies to the entire 
 | **ID** (`name`) | Internal ID, lowercase, no special characters (e.g. `bjoern`). Used in URL parameters and assignments. |
 | **Display name** (`displayName`) | Display name (e.g. `Björn`). |
 | **E-mail** (`email`) | Optional. Target address for e-mail notifications. |
-| **notify…** | Nine per-user checkboxes controlling notifications, see [Tab "Email", notifications](#tab-email--notifications). |
+| **notify…** | Nine per-user checkboxes controlling notifications, see [Tab "Notifications"](#tab-notifications). |
 
 Add a row with the **"+"** in the table header; the bin icon at the end of a row removes it again (without asking). Rows without an ID are dropped when saving. A fresh instance ships with two example users, `user1` and `user2`.
 
@@ -133,7 +133,7 @@ Add a row with the **"+"** in the table header; the bin icon at the end of a row
 
 > **Not here:** user colour, avatar image and the assignment to individual boards are maintained directly in the web UI since 0.2.0 – see [Users in the board](#users-in-the-board).
 
-### Tab "Email" – notifications
+### Tab "Notifications"
 
 Notifications are triggered on card events and delivered via **e-mail** (through the ioBroker `email` adapter) and/or **outbound webhooks**. In addition, every event is written to the state `kanban.0.lastEvent` (as a script trigger).
 
