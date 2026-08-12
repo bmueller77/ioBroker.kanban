@@ -70,98 +70,25 @@ export function mdiIcon(pathData) {
     return svg;
 }
 
-// ---- Diagnose: wer beendet einen laufenden Zug? --------------------------
-// Mit ?debugDrag=1 blendet die Seite unten ein Protokoll ein. Auf einem Tablet
-// gibt es keine erreichbare Entwicklerkonsole, und ohne Messung bleibt nur
-// Raten, warum eine Karte mitten in der Bewegung zurueckfaellt. Ohne den
-// Parameter wird nichts registriert und nichts angezeigt.
-let dragDebugEl = null;
-let dragT0 = 0;
-
-// Der Ablauf wird immer mitgeschrieben und am Ende eines Zuges an den Adapter
-// geschickt (GET /api/debug/drag holt ihn wieder). So laesst er sich auch von
-// einem Tablet im Kiosk-Modus einsammeln, wo weder URL noch Konsole erreichbar
-// sind. Aufgezeichnet wird nur waehrend eines laufenden Zuges.
-const dragTrace = [];
+// ---- Kontextmenue waehrend des Ziehens unterdruecken ---------------------
+// Ziehen heisst auf dem Touchscreen aufliegen und halten — fuer Android ist das
+// zugleich ein langer Druck. Liegt der Finger dabei auf einem Symbol
+// (Prioritaet, Faelligkeit und Ort sind SVGs) oder einem Link, oeffnet die
+// WebView ihr Kontextmenue, schickt pointercancel und der Zug ist vorbei.
+// Gemessen auf einem Galaxy Tab S5e: contextmenu nach 251 ms, pointercancel
+// nach 749 ms, danach lag die Karte wieder an ihrem Platz. Auf dem Titel
+// passierte das nicht — deshalb ging es mal und mal nicht, je nachdem wo man
+// die Karte angefasst hat.
 let dragActive = false;
+let ctxGuardReady = false;
 
-function dragDebugOn() {
-    try { return new URLSearchParams(location.search).get('debugDrag') === '1'; } catch (e) { return false; }
-}
-
-function traceAdd(what) {
-    if (!dragActive) return;
-    if (dragTrace.length > 60) return;
-    dragTrace.push(`${String(Math.round(performance.now() - dragT0)).padStart(5)} ms  ${what}`);
-}
-
-async function sendTrace(reason) {
-    if (!dragTrace.length) return;
-    const payload = {
-        reason,
-        ua: navigator.userAgent,
-        screen: `${window.innerWidth}x${window.innerHeight}`,
-        coarse: window.matchMedia('(pointer: coarse)').matches,
-        trace: dragTrace.slice(0, 60),
-    };
-    dragTrace.length = 0;
-    try { await api('api/debug/drag', { method: 'POST', body: payload }); } catch (e) { /* Diagnose darf nie stoeren */ }
-}
-
-function dragLog(what) {
-    if (!dragDebugEl) return;
-    const dt = dragT0 ? Math.round(performance.now() - dragT0) : 0;
-    const line = document.createElement('div');
-    line.textContent = `${String(dt).padStart(5)} ms  ${what}`;
-    dragDebugEl.appendChild(line);
-    while (dragDebugEl.childElementCount > 14) dragDebugEl.removeChild(dragDebugEl.firstChild);
-    dragDebugEl.scrollTop = dragDebugEl.scrollHeight;
-}
-
-let dragDebugReady = false;
-
-/** Ereignisse mitschreiben — immer. Das Einblenden bleibt an ?debugDrag=1. */
-function initDragTrace() {
-    if (dragDebugReady) return;
-    dragDebugReady = true;
-
-    // Ziehen heisst auf dem Touchscreen aufliegen und halten — fuer Android ist
-    // das zugleich ein langer Druck. Liegt der Finger dabei auf einem Symbol
-    // (Prioritaet, Faelligkeit, Ort sind SVGs) oder einem Link, oeffnet die
-    // WebView ihr Kontextmenue, schickt pointercancel und der Zug ist vorbei.
-    // Gemessen auf einem Galaxy Tab S5e: contextmenu nach 251 ms, pointercancel
-    // nach 749 ms, danach lag die Karte wieder an ihrem Platz. Auf dem Titel
-    // passierte das nicht — deshalb ging es mal und mal nicht, je nachdem wo
-    // man die Karte angefasst hat.
+function initCtxGuard() {
+    if (ctxGuardReady || typeof document === 'undefined') return;
+    ctxGuardReady = true;
     document.addEventListener('contextmenu', ev => {
         const onCard = ev.target && ev.target.closest && ev.target.closest('.card');
         if (onCard || dragActive) ev.preventDefault();
     }, true);
-    for (const type of ['touchcancel', 'pointercancel', 'contextmenu', 'selectstart',
-        'touchend', 'pointerup', 'dragstart', 'dragend', 'scroll', 'visibilitychange',
-        'touchstart', 'pointerdown']) {
-        document.addEventListener(type, ev => {
-            const cls = ev.target && ev.target.className ? String(ev.target.className).slice(0, 28) : '';
-            traceAdd(`${type}  ${cls}`);
-            dragLog(`${type}  ${cls}`);
-        }, true);
-    }
-}
-
-function initDragDebug() {
-    initDragTrace();
-    if (dragDebugEl || !dragDebugOn()) return;
-    dragDebugEl = document.createElement('div');
-    dragDebugEl.id = 'dragDebug';
-    Object.assign(dragDebugEl.style, {
-        position: 'fixed', left: '8px', bottom: '8px', zIndex: '2000',
-        maxHeight: '38vh', overflowY: 'auto', width: 'calc(100% - 16px)',
-        background: 'rgba(0,0,0,.82)', color: '#0f0', font: '12px/1.35 monospace',
-        padding: '6px 8px', borderRadius: '8px', pointerEvents: 'none',
-        whiteSpace: 'pre',
-    });
-    document.body.appendChild(dragDebugEl);
-    dragLog('Protokoll bereit — jetzt eine Karte ziehen');
 }
 
 // ---- Schnellablage-Ziele beim Ziehen (v.a. schmale Screens) --------------
@@ -196,23 +123,14 @@ function saveCheckExpanded() {
 /**
  * Landezonen beim Ziehen anbieten?
  *
- * Auf Touch-Geraeten immer: Sobald mehr Spalten nebeneinander liegen, als in
- * den Bildschirm passen, scrollt das Board waagerecht — und eine Karte mit dem
- * Finger quer ueber einen scrollenden Bereich in eine andere Spalte zu ziehen,
- * ist kaum machbar. Genau dafuer gibt es die Zonen.
- *
- * Die Breite allein taugt als Kriterium nicht: Ein Tablet im Querformat (Tab
- * S5e: 1280x800 CSS-Pixel) lag ueber der frueheren 820px-Grenze und bekam
- * deshalb keine Zonen, obwohl es genau der Fall ist, fuer den sie gedacht sind.
- * Hochkant (800px) erschienen sie — Verschieben zwischen Spalten funktionierte
- * also je nach Haltung des Geraets oder eben nicht.
- *
- * Die Breiten-Regel bleibt zusaetzlich bestehen, damit auch ein schmales
- * Fenster mit Maus die Zonen bekommt.
+ * Nur auf schmalen Schirmen, wo die Spalten untereinander stehen und ein Ziel
+ * sonst ausserhalb des Bildes laege. Auf grossen Schirmen liegen die Spalten
+ * nebeneinander und lassen sich direkt anziehen — auch mit dem Finger, seit das
+ * Kontextmenue der WebView den Zug nicht mehr abbricht (siehe initDragTrace).
+ * Dort waeren die Zonen nur im Weg.
  */
 function wantsQuickMove() {
-    return window.matchMedia('(pointer: coarse)').matches
-        || window.matchMedia('(max-width: 820px)').matches;
+    return window.matchMedia('(max-width: 820px)').matches;
 }
 
 function buildQuickMove(evt, sourceCol, board) {
@@ -820,7 +738,7 @@ const _widthWatcher = typeof ResizeObserver === 'function' ? new ResizeObserver(
 }) : null;
 
 export function renderBoard(container, state, actions) {
-    initDragDebug();   // tut nur etwas bei ?debugDrag=1
+    initCtxGuard();
     // Scrollpositionen merken: das Board wird bei jeder Änderung komplett neu
     // aufgebaut (z. B. nach dem Abhaken eines Checklisten-Punkts), sonst springt
     // die Ansicht dabei an den Anfang.
@@ -1020,18 +938,11 @@ export function renderBoard(container, state, actions) {
             preventOnFilter: false,              // damit deren Klick normal durchkommt
 
             onStart: evt => {
-                dragT0 = performance.now();
                 dragActive = true;
-                dragTrace.length = 0;
-                traceAdd(`Sortable onStart — Spalte ${col.id}`);
-                dragLog('Sortable onStart — Zug laeuft');
                 if (wantsQuickMove()) buildQuickMove(evt, col, board);
             },
             onEnd: evt => {
-                traceAdd(`Sortable onEnd — von ${evt.from && evt.from.dataset.colId} nach ${evt.to && evt.to.dataset.colId}, Zone ${quickTarget && quickTarget.dataset.colId}`);
-                dragLog(`Sortable onEnd — von ${evt.from && evt.from.dataset.colId} nach ${evt.to && evt.to.dataset.colId}`);
                 dragActive = false;
-                sendTrace('onEnd');
                 const cardId = evt.item.dataset.cardId;
                 // Ueber einer Landezone losgelassen? Dann zaehlt deren Spalte,
                 // egal wohin SortableJS die Karte gelegt hat.
