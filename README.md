@@ -1,4 +1,11 @@
-# iobroker.kanban
+# ioBroker.kanban
+
+[![NPM version](https://img.shields.io/npm/v/iobroker.kanban.svg)](https://www.npmjs.com/package/iobroker.kanban)
+[![Downloads](https://img.shields.io/npm/dm/iobroker.kanban.svg)](https://www.npmjs.com/package/iobroker.kanban)
+![Number of Installations](https://iobroker.live/badges/kanban-installed.svg)
+![Current version in stable repository](https://iobroker.live/badges/kanban-stable.svg)
+[![Test and Release](https://github.com/bmueller77/ioBroker.kanban/actions/workflows/test-and-release.yml/badge.svg)](https://github.com/bmueller77/ioBroker.kanban/actions/workflows/test-and-release.yml)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 Kanban board adapter for ioBroker with its **own web server**, live sync, webhooks, multi-user support and e-mail notifications (including calendar invites) via the `email` adapter.
 
@@ -187,8 +194,6 @@ Details: [Security & access control](docs/en/README.md#security--access-control)
 - **0.1.2**, "Share view": `doneLimit` distinguishes empty=all / 0=none; label filter is now a blacklist (new labels stay visible)
 - **0.1.1**, Security: token-protected write API, sanitized Markdown preview, CSP, safe link schemes
 - **0.1.0**, Initial release
-
-[Older changelogs can be found there](CHANGELOG_OLD.md)
 
 ## Acknowledgements
 

@@ -49,9 +49,9 @@
     "mode": "daemon",
     "compact": true,
     "messagebox": true,
-    "readme": "https://github.com/bmueller77/iobroker.kanban/blob/main/README.md",
+    "readme": "https://github.com/bmueller77/ioBroker.kanban/blob/main/README.md",
     "icon": "kanban.png",
-    "extIcon": "https://raw.githubusercontent.com/bmueller77/iobroker.kanban/main/admin/kanban.png",
+    "extIcon": "https://raw.githubusercontent.com/bmueller77/ioBroker.kanban/main/admin/kanban.png",
     "enabled": true,
     "adminUI": {
       "config": "json"

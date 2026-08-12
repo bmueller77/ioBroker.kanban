@@ -9,12 +9,12 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/bmueller77/iobroker.kanban.git"
+    "url": "https://github.com/bmueller77/ioBroker.kanban.git"
   },
   "bugs": {
-    "url": "https://github.com/bmueller77/iobroker.kanban/issues"
+    "url": "https://github.com/bmueller77/ioBroker.kanban/issues"
   },
-  "homepage": "https://github.com/bmueller77/iobroker.kanban#readme",
+  "homepage": "https://github.com/bmueller77/ioBroker.kanban#readme",
   "keywords": [
     "ioBroker",
     "kanban",
