@@ -1,29 +1,56 @@
 name: Test and Release
 
+# Läuft bei jedem Push und Pull Request sowie bei Tags mit einer Versionsnummer.
+# Der Tag-Trigger ist Vorgabe des ioBroker-Repository-Checkers (E3008); er wird
+# gebraucht, sobald der deploy-Job dazukommt.
 on:
   push:
-    branches: [ main ]
+    branches:
+      - 'main'
+    tags:
+      # normale Versionen
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+      # Vorabversionen
+      - 'v[0-9]+.[0-9]+.[0-9]+-**'
   pull_request: {}
 
+# Ältere Läufe desselben Zweigs abbrechen, wenn ein neuer Commit kommt
+concurrency:
+  group: ${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  check-and-test:
+  # Schnelle Prüfungen vor den teuren Testläufen: Paketstruktur und Lint
+  check-and-lint:
+    if: contains(github.event.head_commit.message, '[skip ci]') == false
+
     runs-on: ubuntu-latest
+
+    steps:
+      - uses: ioBroker/testing-action-check@v1
+        with:
+          # Der Adapter verlangt Node 22, die Vorlage prüft mit 20
+          node-version: '22.x'
+          lint: true
+
+  # Adaptertests auf allen unterstützten Node-Versionen und Systemen
+  adapter-tests:
+    if: contains(github.event.head_commit.message, '[skip ci]') == false
+
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         node-version: [22.x, 24.x]
-    steps:
-      - uses: actions/checkout@v7
+        os: [ubuntu-latest, windows-latest, macos-latest]
 
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v7
+    steps:
+      - uses: ioBroker/testing-action-adapter@v1
         with:
           node-version: ${{ matrix.node-version }}
+          os: ${{ matrix.os }}
 
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Run unit tests
-        run: npm test
-
-      - name: Run integration tests
-        run: npm run test:integration
+# Der deploy-Job fehlt bewusst. Er würde bei jedem v*-Tag automatisch auf npm
+# veröffentlichen und dafür Trusted Publishing im npm-Konto brauchen
+# (https://docs.npmjs.com/trusted-publishers). Das ändert den Release-Ablauf und
+# ist deshalb eine eigene Entscheidung. Solange er fehlt, bleiben die
+# Checker-Punkte E3012 (deploy) und E2008 (Provenance) offen.
