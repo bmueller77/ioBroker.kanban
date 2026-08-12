@@ -18,3 +18,6 @@ deploy.sh
 
 # ioBroker-Bot legt diese Datei beim Release an
 .commitinfo
+
+# Arbeitsanleitungen für Claude - lokal, nicht im öffentlichen Repo
+.claude/
