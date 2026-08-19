@@ -122,6 +122,12 @@ Details: [Security & access control](docs/en/README.md#security--access-control)
 <!-- Der Platzhalter bleibt stehen. release-script trägt hier die
      nächste Version ein und ersetzt die Überschrift. -->
 ### **WORK IN PROGRESS**
+* (bmueller77) Releases are now built and published by CI when a version tag is pushed, signed with provenance through npm trusted publishing. The 0.3.0 package was published by hand and carries no signature, which is what the repository checker flags as E2008 and E3032
+* (bmueller77) The workflow follows the ioBroker standard now: separate `check-and-lint` and `adapter-tests` jobs, a trigger for `v*` tags, a concurrency group per branch, and a `deploy` job that also creates the GitHub release. Adapter tests run on Node 22 and 24 across Linux, Windows and macOS instead of Linux alone
+* (bmueller77) Type checking for the adapter sources (`tsconfig.json` on `@tsconfig/node22`), with `lib/adapter-config.d.ts` declaring the 29 fields of the instance configuration, so a typo in `adapter.config.<field>` surfaces instead of silently reading `undefined`
+* (bmueller77) `npm run lint` is usable again. Prettier flagged every line of every file on a Windows checkout because the repository stores LF and git checks out CRLF; it now accepts the line ending a file arrives with
+* (bmueller77) `common.news` lists only the versions that actually exist on npm, so the changelog shown in the admin matches what can be installed
+* (bmueller77) Internal: the day difference of the "every X days" recurrence is computed from `getTime()` on both dates rather than subtracting the Date objects. Same result, without the implicit conversion
 
 ### 0.3.0 (2026-08-04)
 * (bmueller77) **Trash**: deleting a card no longer removes it immediately, it moves to a per-board **Trash** column and can be restored for **30 days**, after which it is deleted permanently. The trash column is hidden by default and can be shown per device (board settings). It has its own fixed grey styling, is sorted by deletion time and shows the remaining days per card
