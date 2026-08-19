@@ -121,7 +121,7 @@ Details: [Security & access control](docs/en/README.md#security--access-control)
 
 <!-- Der Platzhalter bleibt stehen. release-script trägt hier die
      nächste Version ein und ersetzt die Überschrift. -->
-### **WORK IN PROGRESS**
+### 0.3.1 (2026-08-19)
 * (bmueller77) Releases are now built and published by CI when a version tag is pushed, signed with provenance through npm trusted publishing. The 0.3.0 package was published by hand and carries no signature, which is what the repository checker flags as E2008 and E3032
 * (bmueller77) The workflow follows the ioBroker standard now: separate `check-and-lint` and `adapter-tests` jobs, a trigger for `v*` tags, a concurrency group per branch, and a `deploy` job that also creates the GitHub release. Adapter tests run on Node 22 and 24 across Linux, Windows and macOS instead of Linux alone
 * (bmueller77) Type checking for the adapter sources (`tsconfig.json` on `@tsconfig/node22`), with `lib/adapter-config.d.ts` declaring the 29 fields of the instance configuration, so a typo in `adapter.config.<field>` surfaces instead of silently reading `undefined`
