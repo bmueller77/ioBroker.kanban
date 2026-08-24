@@ -66,7 +66,42 @@ class Kanban extends utils.Adapter {
         } else {
             await this.subscribeStatesAsync('action');
         }
+        await this._reportOrphanedAssignees();
         this.log.info(`Kanban ready - UI: ${this._baseUrl()}/`);
+    }
+
+    /**
+     * Zustaendige melden, die es als Benutzer nicht mehr gibt.
+     *
+     * Typischer Auslöser: Eine Benutzer-ID wurde in den Instanzeinstellungen
+     * umbenannt. Karten speichern die ID, also zeigen sie danach ins Leere. Der
+     * Adapter raet nicht, welche alte ID zu welcher neuen gehoert - er meldet
+     * den Zustand, umgehaengt wird ausdruecklich mit reassignUser.
+     */
+    async _reportOrphanedAssignees() {
+        await this.setObjectNotExistsAsync('info.orphanedAssignees', {
+            type: 'state',
+            common: {
+                name: 'Assignees without a matching user',
+                type: 'string',
+                role: 'json',
+                read: true,
+                write: false,
+                def: '[]',
+            },
+            native: {},
+        });
+        const verwaist = this.store.findOrphanedAssignees();
+        await this.setStateAsync('info.orphanedAssignees', JSON.stringify(verwaist), true);
+        if (!verwaist.length) {
+            return;
+        }
+        const liste = verwaist.map(o => `'${o.name}' (${o.cards} card(s))`).join(', ');
+        this.log.warn(
+            `Cards are assigned to users that no longer exist: ${liste}. ` +
+                'This usually follows renaming a user ID in the instance settings. ' +
+                'Move them over with the command reassignUser {from, to} - the adapter does not guess.',
+        );
     }
 
     /**
@@ -270,6 +305,10 @@ class Kanban extends utils.Adapter {
                 return card(this.store.purgeCard(boardId, cardId, source));
             case 'emptyTrash':
                 return this.store.emptyTrash(boardId, source);
+            case 'listOrphanedAssignees':
+                return { orphaned: this.store.findOrphanedAssignees() };
+            case 'reassignUser':
+                return this.store.reassignUser(payload.from, payload.to, source);
             case 'transferCard':
                 return card(
                     this.store.transferCard(

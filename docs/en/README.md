@@ -130,6 +130,15 @@ Add a row with the **"+"** in the table header; the bin icon at the end of a row
 
 > **The ID is the key.** Boards and cards find their people through the *ID* column. If you change it later, the user counts as a **new** person for existing boards, and the board loses that entry from its member list. So that this is not a dead end, **all** users are assignable in a board whose member list points nowhere, so you can keep working and re-tick the members under ⚙ → *Board* whenever you like. Cards keep their existing assignees, but those no longer show up in the person filter.
 > *Recommendation:* settle the user IDs before creating the first board. The **display name** can be changed at any time.
+>
+> <a id="renaming-a-user"></a>
+> **If it happened anyway:** on start the adapter reports which assignees point nowhere, in the log and in the state `info.orphanedAssignees`. Moving them over is explicit rather than guessed, because a rename cannot be told apart from "deleted and newly created":
+>
+> ```bash
+> curl -X POST "http://<host>:8095/webhook/<TOKEN>/action" >   -H 'Content-Type: application/json' >   -d '{"cmd":"reassignUser","from":"bjoern_old","to":"bjoern"}'
+> ```
+>
+> This carries over the assignees of every card **and** the member lists of the boards. If the new ID was already on a card, no duplicate entry appears. The target ID has to exist in the instance settings, otherwise the call fails with `400`.
 
 > **Not here:** user colour, avatar image and the assignment to individual boards are maintained directly in the web UI since 0.2.0. See [Users in the board](#users-in-the-board).
 
@@ -624,6 +633,8 @@ The body contains `cmd` plus the appropriate fields. The same **command vocabula
 | `purgeCard` | `board`, `cardId`\|`id` |, (removes permanently) |
 | `emptyTrash` | `board` |, (empties the trash) |
 | `transferCard` | `board`, `cardId`\|`id`, `toBoard` | `toColumn`, `mode` (`move` or `copy`, default `move`), `assignees`. With `mode: "copy"`, `toBoard` may be the card's own board (clone) |
+| `listOrphanedAssignees` | none | none |
+| `reassignUser` | `from`, `to` | moves every assignment from `from` to `to`, see [Renaming a user](#renaming-a-user) |
 | `listBoards` / `getBoards` | none | none |
 | `getBoard` | `board` | none |
 
@@ -936,6 +947,7 @@ Besides the UI, the adapter creates states you can use in scripts, VIS/Lovelace 
 | `kanban.0.info.connection` | bool | Web server running. |
 | `kanban.0.lastEvent` | json | Last triggered event (`{event, ts, board, card, detail, link, dueAt}`), ideal as a script trigger. |
 | `kanban.0.action` | json (writable) | Command input, see [sendTo & action state](#sendto--action-state). |
+| `kanban.0.info.orphanedAssignees` | json | Assignees that no longer exist as users, each with the number of cards and boards. Empty while everything matches. See [Renaming a user](#renaming-a-user). |
 | `kanban.0.info.apiSecret` | string | From 0.3.0 the internal write token lives in the adapter's file storage, no longer in this state. On instances **upgraded from an older version** the state remains and stays **empty**; on **newly created** 0.3.0 instances it is **not created at all**. For scripts, use the tokens from "Webhooks (in)". |
 | `kanban.0.boards.<id>.data` | json | Full board (cards, columns, labels). |
 | `kanban.0.boards.<id>.rev` | number | Revision (increments on every change, for polling). |

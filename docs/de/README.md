@@ -130,6 +130,15 @@ Eine neue Zeile legst du über das **„+"** in der Kopfzeile der Tabelle an, da
 
 > **Die ID ist der Schlüssel.** Über die Spalte *ID* finden Boards und Karten ihre Personen. Änderst du sie nachträglich, gilt der Benutzer für bestehende Boards als **neue** Person: Das Board verliert diesen Eintrag aus seiner Mitgliederliste. Damit daraus keine Sackgasse wird, sind in einem Board, dessen Mitgliederliste ins Leere zeigt, **alle** Benutzer zuweisbar – du kannst also weiterarbeiten und die Mitglieder in Ruhe unter ⚙ → *Board* wieder anhaken. Karten behalten ihre alten Zuständigen; diese erscheinen dann aber nicht mehr im Personenfilter.
 > *Empfehlung:* Benutzer-IDs vor dem ersten Board festlegen. Der **Anzeigename** lässt sich jederzeit gefahrlos ändern.
+>
+> <a id="benutzer-umbenennen"></a>
+> **Wenn es doch passiert ist:** Der Adapter meldet beim Start, welche Zuständigen ins Leere zeigen, im Log und im State `info.orphanedAssignees`. Umgehängt wird ausdrücklich, nicht geraten — eine Umbenennung ist technisch nicht von „gelöscht und neu angelegt" zu unterscheiden:
+>
+> ```bash
+> curl -X POST "http://<host>:8095/webhook/<TOKEN>/action" >   -H 'Content-Type: application/json' >   -d '{"cmd":"reassignUser","from":"bjoern_alt","to":"bjoern"}'
+> ```
+>
+> Das zieht die Zuständigen aller Karten **und** die Mitgliederlisten der Boards mit. War die neue ID an einer Karte schon eingetragen, entsteht kein doppelter Eintrag. Die Zielkennung muss in den Instanzeinstellungen existieren, sonst bricht der Aufruf mit `400` ab.
 
 > **Nicht hier:** Benutzerfarbe, Avatarbild und die Zuordnung zu einzelnen Boards werden seit 0.2.0 direkt in der Weboberfläche gepflegt – siehe [Benutzer im Board](#benutzer-im-board).
 
@@ -627,6 +636,8 @@ Der Body enthält `cmd` plus die passenden Felder. Es gilt dasselbe **Kommando-V
 | `purgeCard` | `board`, `cardId`\|`id` |, (entfernt endgültig) |
 | `emptyTrash` | `board` |, (leert den Papierkorb) |
 | `transferCard` | `board`, `cardId`\|`id`, `toBoard` | `toColumn`, `mode` (`move` oder `copy`, Standard `move`), `assignees` – `toBoard` darf mit `mode: "copy"` auch das eigene Board sein (Klon) |
+| `listOrphanedAssignees` | – | – |
+| `reassignUser` | `from`, `to` | hängt alle Zuständigkeiten von `from` auf `to` um, siehe [Benutzer umbenennen](#benutzer-umbenennen) |
 | `listBoards` / `getBoards` | – | – |
 | `getBoard` | `board` | – |
 
@@ -940,6 +951,7 @@ Neben der Oberfläche legt der Adapter States an, die sich in Skripten, VIS/Love
 | `kanban.0.info.connection` | bool | Webserver läuft. |
 | `kanban.0.lastEvent` | json | Zuletzt ausgelöstes Ereignis (`{event, ts, board, card, detail, link, dueAt}`), ideal als Skript-Trigger. |
 | `kanban.0.action` | json (beschreibbar) | Kommando-Eingang, siehe [sendTo & action-State](#sendto--action-state). |
+| `kanban.0.info.orphanedAssignees` | json | Zuständige, die es als Benutzer nicht mehr gibt, je Eintrag mit Anzahl Karten und Boards. Leer, solange alles zusammenpasst. Siehe [Benutzer umbenennen](#benutzer-umbenennen). |
 | `kanban.0.info.apiSecret` | string | Der interne Schreib-Token liegt ab 0.3.0 im Dateispeicher des Adapters, nicht mehr in diesem State. Bei Instanzen, die von einer **älteren Version aktualisiert** wurden, bleibt der State bestehen und ist **leer**; bei **neu angelegten** 0.3.0-Instanzen wird er **gar nicht mehr erzeugt**. Für Skripte sind die Tokens aus „Webhooks (eingehend)" der richtige Weg. |
 | `kanban.0.boards.<id>.data` | json | Vollständiges Board (Karten, Spalten, Labels). |
 | `kanban.0.boards.<id>.rev` | number | Revision (steigt bei jeder Änderung, für Polling). |

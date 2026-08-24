@@ -81,3 +81,66 @@ describe('Spiegel-States: Board-Zaehler', () => {
         assert.equal(states['boards.b.overdueCount'], 0);
     });
 });
+
+describe('Verwaiste Zuständige', () => {
+    it('findet Zuständige, die es als Benutzer nicht mehr gibt', async () => {
+        // Regression: Wird eine Benutzer-ID umbenannt, zeigen die Karten ins
+        // Leere - sie speichern die ID, nicht den Anzeigenamen.
+        const { store } = newStore();          // kennt nur 'anna'
+        await store.createBoard({ id: 'b', title: 'B' });
+        store.addCard('b', { title: 'Alt', columnId: 'todo', assignees: ['bjoern'] }, 'test');
+        store.addCard('b', { title: 'Auch alt', columnId: 'todo', assignees: ['bjoern', 'anna'] }, 'test');
+        store.addCard('b', { title: 'Sauber', columnId: 'todo', assignees: ['anna'] }, 'test');
+
+        const verwaist = store.findOrphanedAssignees();
+
+        assert.equal(verwaist.length, 1);
+        assert.equal(verwaist[0].name, 'bjoern');
+        assert.equal(verwaist[0].cards, 2);
+        assert.deepEqual(verwaist[0].boards, ['b']);
+    });
+
+    it('lässt Karten im Papierkorb außen vor', async () => {
+        const { store } = newStore();
+        await store.createBoard({ id: 'b', title: 'B' });
+        const weg = store.addCard('b', { title: 'Weg', columnId: 'todo', assignees: ['bjoern'] }, 'test');
+        store.deleteCard('b', weg.id, 'test');
+
+        assert.deepEqual(store.findOrphanedAssignees(), []);
+    });
+
+    it('hängt Zuständigkeiten und Mitgliedschaft um', async () => {
+        const { store } = newStore();
+        await store.createBoard({ id: 'b', title: 'B' });
+        const board = store.getBoard('b');
+        board.members = ['bjoern'];
+        const c = store.addCard('b', { title: 'Karte', columnId: 'todo', assignees: ['bjoern'] }, 'test');
+
+        const res = store.reassignUser('bjoern', 'anna', 'test');
+
+        assert.equal(res.cards, 1);
+        assert.deepEqual(store.getBoard('b').cards.find(x => x.id === c.id).assignees, ['anna']);
+        assert.deepEqual(store.getBoard('b').members, ['anna']);
+        assert.deepEqual(store.findOrphanedAssignees(), []);
+    });
+
+    it('erzeugt keinen doppelten Eintrag, wenn beide schon zuständig waren', async () => {
+        const { store } = newStore();
+        await store.createBoard({ id: 'b', title: 'B' });
+        const c = store.addCard('b', { title: 'Karte', columnId: 'todo', assignees: ['bjoern', 'anna'] }, 'test');
+
+        store.reassignUser('bjoern', 'anna', 'test');
+
+        assert.deepEqual(store.getBoard('b').cards.find(x => x.id === c.id).assignees, ['anna']);
+    });
+
+    it('weist ein unbekanntes Ziel ab, statt ins Leere umzuhängen', async () => {
+        const { store } = newStore();
+        await store.createBoard({ id: 'b', title: 'B' });
+        store.addCard('b', { title: 'Karte', columnId: 'todo', assignees: ['bjoern'] }, 'test');
+
+        assert.throws(() => store.reassignUser('bjoern', 'gibtsnicht', 'test'), /existiert nicht/);
+        assert.throws(() => store.reassignUser('bjoern', 'bjoern', 'test'), /identisch/);
+        assert.throws(() => store.reassignUser('', 'anna', 'test'), /Pflichtfeld/);
+    });
+});

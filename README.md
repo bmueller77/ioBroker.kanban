@@ -84,7 +84,7 @@ curl -X POST http://<host>:8095/webhook/<token>/action \
   -d '{"cmd":"addCard","board":"family","title":"Buy milk","assignees":["user1"],"due":"2026-07-15"}'
 ```
 
-Commands: `listBoards`, `getBoard`, `addBoard`, `deleteBoard`, `addCard`, `updateCard`, `moveCard`, `doneCard`, `deleteCard`. From ioBroker scripts:
+Commands: `listBoards`, `getBoard`, `addBoard`, `deleteBoard`, `addCard`, `updateCard`, `moveCard`, `doneCard`, `deleteCard`, `reassignUser`. From ioBroker scripts:
 
 ```js
 sendTo('kanban.0', 'addCard', { board: 'family', title: 'From a script' }, res => log(JSON.stringify(res)));
@@ -101,6 +101,7 @@ setState('kanban.0.action', JSON.stringify({ cmd: 'doneCard', board: 'family', c
 | `kanban.0.boards.<id>.rev` / `.cardCount` / `.overdueCount` | revision & counters |
 | `kanban.0.users.<name>.assignedCount` / `.overdueCount` / `.overdueList` | per user |
 | `kanban.0.lastEvent` | last event as JSON (can trigger scripts) |
+| `kanban.0.info.orphanedAssignees` | assignees that no longer exist as users, after a user ID was renamed |
 | `kanban.0.action` | command input (write JSON, cleared after processing) |
 
 ## Security
