@@ -46,9 +46,10 @@
     "test:trash": "mocha test/trash --exit",
     "test:ui": "mocha test/ui.mjs --exit",
     "test:integration": "mocha test/integration --exit",
-    "test": "npm run test:package && npm run test:guards && npm run test:cron && npm run test:trash && npm run test:ui",
+    "test": "npm run test:package && npm run test:guards && npm run test:cron && npm run test:trash && npm run test:mirrors && npm run test:ui",
     "lint": "eslint .",
-    "release": "release-script"
+    "release": "release-script",
+    "test:mirrors": "mocha test/mirrors --exit"
   },
   "devDependencies": {
     "@alcalzone/release-script": "^5.2.1",
