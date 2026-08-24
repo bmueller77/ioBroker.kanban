@@ -122,6 +122,15 @@ Details: [Security & access control](docs/en/README.md#security--access-control)
 
 <!-- Der Platzhalter bleibt stehen. release-script trägt hier die
      nächste Version ein und ersetzt die Überschrift. -->
+### **WORK IN PROGRESS**
+* (bmueller77) **Due dates are coloured in three steps now**: red once the moment has passed, orange for due today, yellow within the reminder lead time. Today and tomorrow used to share the same colour, so a card due tomorrow looked like a warning. The yellow window follows the instance setting **Remind X days before due** instead of a hardcoded single day, so the colour says the same thing as the reminder mail. It counts in calendar days, not as a rolling 24 hour window, so tomorrow stays tomorrow all day
+* (bmueller77) A card that carries a **time of day** now turns red once that time has passed. Until now the colour only changed at midnight, although 0.3.0 introduced the minute precise `cardDue` event, so the event and the colour contradicted each other. The badges are refreshed in place every minute rather than by re-rendering the board, which leaves the scroll position and a drag in progress untouched
+* (bmueller77) Fix: **`boards.<id>.overdueCount` went stale.** The minute tick only refreshed the per-user states; the board counters were written by the persist path, which runs on changes. A card that becomes overdue purely because the date rolled over triggers no change, so on an untouched board the counter kept its old value
+* (bmueller77) **Renaming a user ID no longer leaves cards silently orphaned.** Cards store the user ID, so a rename made every assignment point nowhere. On start the adapter now reports the affected assignees in the log and in the new state `info.orphanedAssignees`, and the new command `reassignUser {from, to}` moves them over, including the member lists of the boards. It does not guess: a rename cannot be told apart from "deleted and newly created"
+* (bmueller77) New commands `reassignUser` and `listOrphanedAssignees`, plus `POST /api/users/<name>/reassign` and `GET /api/users/orphaned`. Both touch every board, so they stay closed to board-restricted tokens
+* (bmueller77) `/api/config` now also carries `reminderDaysBefore`, which the web UI needs for the colour window
+* (bmueller77) New CSS variables `--due-upcoming` and `--due-upcoming-text` for the yellow step, defined for both themes and referenced with a fallback so existing custom themes keep working
+
 ### 0.3.1 (2026-08-19)
 * (bmueller77) Releases are now built and published by CI when a version tag is pushed, signed with provenance through npm trusted publishing. The 0.3.0 package was published by hand and carries no signature, which is what the repository checker flags as E2008 and E3032
 * (bmueller77) The workflow follows the ioBroker standard now: separate `check-and-lint` and `adapter-tests` jobs, a trigger for `v*` tags, a concurrency group per branch, and a `deploy` job that also creates the GitHub release. Adapter tests run on Node 22 and 24 across Linux, Windows and macOS instead of Linux alone
