@@ -10,6 +10,10 @@
     --border: #d4d4d8;
     --danger: #d32f2f;
     --warn: #ef6c00;
+    /* Dritte Stufe der Faelligkeit: im Vorlauf, standardmaessig morgen. Gelb
+       vertraegt keine weisse Schrift, deshalb eine eigene Textfarbe. */
+    --due-upcoming: #f5c518;
+    --due-upcoming-text: #1c1a17;
     --shadow: 0 1px 3px rgba(0, 0, 0, .12);
     --radius: 10px;
     /* Plastik: eine Lichtquelle links oben. Aufliegende Flaechen werfen ihren
@@ -34,6 +38,8 @@ html[data-theme="dark"] {
     --muted: #9d9da8;
     --border: #3c3c46;
     --shadow: 0 1px 3px rgba(0, 0, 0, .5);
+    --due-upcoming: #d4a80f;
+    --due-upcoming-text: #1c1a17;
 }
 
 * { box-sizing: border-box; }
@@ -432,7 +438,11 @@ a.link-badge {
     color: var(--muted);
 }
 a.link-badge:hover { color: var(--accent, #7E57C2); }
-.badge.due-soon { background: var(--warn); color: #fff; }
+/* Heute faellig, Uhrzeit noch nicht erreicht */
+.badge.due-today { background: var(--warn); color: #fff; }
+/* Im Vorlauf. Der Rueckfallwert haelt eigene Themes am Leben, die die neue
+   Variable nicht kennen. */
+.badge.due-soon { background: var(--due-upcoming, #f5c518); color: var(--due-upcoming-text, #1c1a17); }
 .badge.due-done { background: #2e7d32; color: #fff; }   /* erledigt → grün */
 .badge.prio-1 { background: var(--warn); color: #fff; font-weight: 700; }
 .badge.prio-2 { background: var(--danger); color: #fff; font-weight: 700; }

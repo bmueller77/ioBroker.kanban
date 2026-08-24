@@ -337,7 +337,7 @@ Eine Karte hat folgende inhaltliche Felder (per API unter denselben Namen setzba
 |---|---|---|
 | **title** | Text | Titel der Aufgabe (Pflichtfeld). |
 | **description** | Markdown | Beschreibung; wird als Markdown gerendert (Links, Bilder, Listen …). Der Editor blendet **unter dem Eingabefeld eine Live-Vorschau** des gerenderten Markdowns ein, sobald etwas im Feld steht – du siehst das Ergebnis also beim Tippen. Eingebettetes HTML wird vor der Anzeige bereinigt (XSS-Schutz). |
-| **due** | `YYYY-MM-DD` | Fälligkeitsdatum. Überfällige/bald fällige Karten werden farblich hervorgehoben. |
+| **due** | `YYYY-MM-DD` | Fälligkeitsdatum. Das Badge färbt sich je nach Zustand, siehe [Farben der Fälligkeit](#farben-der-fälligkeit). |
 | **dueTime** | `HH:MM` | Optionale Uhrzeit. Wird über eine Checkbox aktiviert und erscheint auf der Karte hinter dem Datum. Nur wirksam zusammen mit `due`. |
 | **priority** | `0`/`1`/`2` | Normal / Hoch / Dringend. Auf der Karte zeigt sich das als Badge unter dem Titel (vor Fälligkeit und Ort): bei **Normal** erscheint nichts, bei **Hoch** ein oranges `!`, bei **Dringend** ein rotes `!!`. Andere Werte werden abgelehnt, per API mit einem Fehler – siehe [Antworten & Fehler](#antworten--fehler). |
 | **assignees** | Liste von Benutzer-IDs | Zuständige. Steuern, wer Benachrichtigungen erhält. **Pflichtfeld:** In der Oberfläche muss mindestens ein Zuständiger gewählt sein, sonst lässt sich die Karte nicht speichern. Pflichtfelder sind mit einem roten `*` markiert. Über API/Webhook angelegte Karten dürfen ohne Zuständigen bleiben. Zeigt die **Mitgliederliste eines Boards ins Leere** (z. B. nach dem Umbenennen einer Benutzer-ID), sind seit 0.3.0 **alle** Benutzer zuweisbar – so entsteht kein toter Zustand, in dem sich keine Karte mehr speichern lässt. |
@@ -407,7 +407,24 @@ Ein paar Feinheiten, damit das Umkehren berechenbar bleibt: Umgedreht wird immer
 
 **Sortiermodus und Richtung werden pro Gerät gespeichert** (wie das Augen-Symbol), sie gelten also nur für dich. In den automatischen Modi ist das eigene Umsortieren innerhalb der Spalte deaktiviert, weil es wirkungslos wäre; das Verschieben in eine andere Spalte funktioniert weiterhin. Schaltest du zurück auf „Drag & Drop" oder „Anfasser", erscheint deine gespeicherte eigene Reihenfolge unverändert.
 
-Unabhängig davon werden überfällige und bald fällige Karten farblich hervorgehoben, sodass Dringendes auffällt, egal an welcher Position es steht.
+Unabhängig davon färbt sich das Fälligkeits-Badge, sodass Dringendes auffällt, egal an welcher Position es steht.
+
+<a id="farben-der-fälligkeit"></a>
+#### Farben der Fälligkeit
+
+| Farbe | Zustand |
+|---|---|
+| **rot** | vorbei: Datum in der Vergangenheit, oder die Uhrzeit der Karte ist verstrichen |
+| **orange** | heute fällig, Uhrzeit noch nicht erreicht |
+| **gelb** | innerhalb der Vorlaufzeit, mit der Vorgabe also morgen |
+| neutral | später fällig |
+| **grün** | erledigt |
+
+Dahinter stehen zwei verschieden gerechnete Fragen. Das **Vorwarnfenster** (gelb) ist Planung und zählt in **Kalendertagen**. Es folgt der Instanz-Einstellung [**Erinnern X Tage vor Fälligkeit**](#tab-benachrichtigungen), damit die Farbe dasselbe sagt wie die Erinnerungsmail: Steht dort `3`, ist alles bis übermorgen gelb. Kein rollendes 24-Stunden-Fenster — „morgen" bleibt den ganzen Tag morgen.
+
+Die Grenze zu **rot** ist dagegen eine Tatsache. Trägt die Karte eine **Uhrzeit**, zählt sie: Um 17:01 ist 17:00 vorbei, und genau dann feuert auch das Ereignis `cardDue` mit `detail.exact`. Ohne Uhrzeit wechselt die Farbe um Mitternacht.
+
+Die Farben lassen sich über [eigenes CSS](#faq--fallstricke) ändern: `--danger` für rot, `--warn` für orange und `--due-upcoming` samt `--due-upcoming-text` für gelb.
 
 ### Wiederholungen
 

@@ -331,14 +331,75 @@ function openSortMenu(btn, state, board, col, actions) {
     setTimeout(() => document.addEventListener('click', onDocClickSort, true), 0);
 }
 
+/**
+ * Fälligkeitszustand einer Karte.
+ *
+ * Zwei verschiedene Fragen, bewusst unterschiedlich gerechnet:
+ *
+ *  - Das Vorwarnfenster (soon) ist Planung und zählt in Kalendertagen. Es folgt
+ *    der Instanz-Einstellung „X Tage vor Fälligkeit erinnern“, damit die Farbe
+ *    dasselbe sagt wie die Erinnerungsmail. Vorgabe 1, also morgen.
+ *  - Die Grenze zu „vorbei“ ist eine Tatsache. Trägt die Karte eine Uhrzeit,
+ *    zählt sie: 17:00 ist um 17:01 vorbei, genau dann feuert auch cardDue.
+ *
+ * @param due Fälligkeitsdatum als YYYY-MM-DD
+ * @param dueTime Uhrzeit als HH:MM oder leer
+ * @param cfg Konfiguration der Oberfläche
+ * @returns 'overdue', 'today', 'soon' oder '' für später
+ */
+export function dueState(due, dueTime, cfg) {
+    if (!due) return '';
+    const today = todayStr();
+    if (due < today) return 'overdue';
+    if (due === today) {
+        if (dueTime && /^\d{2}:\d{2}$/.test(dueTime)) {
+            const now = new Date();
+            const jetzt = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+            if (dueTime < jetzt) return 'overdue';
+        }
+        return 'today';
+    }
+    // Karten ohne Datum sind oben schon raus; ab hier liegt due in der Zukunft
+    const vorlauf = Number(cfg && cfg.reminderDaysBefore);
+    const tage = Number.isFinite(vorlauf) && vorlauf >= 0 ? vorlauf : 1;
+    return due <= todayStr(tage) ? 'soon' : '';
+}
+
 function dueBadge(due, dueTime, done, cfg) {
     const b = el('span', 'badge date-badge');
     b.appendChild(mdiIcon(MDI.calendar));
     b.appendChild(document.createTextNode(' ' + fmtDate(due, cfg && cfg.dateFormat) + (dueTime ? ' ' + fmtTime(dueTime, cfg && cfg.timeFormat) : '')));
-    if (done) b.classList.add('due-done');            // erledigt → grün, keine Überfällig-Warnung
-    else if (due < todayStr()) b.classList.add('due-overdue');
-    else if (due <= todayStr(1)) b.classList.add('due-soon');
+    if (done) {
+        b.classList.add('due-done');                  // erledigt → grün, keine Überfällig-Warnung
+    } else {
+        // Die Daten am Element behalten: So kann der Minutentakt die Farbe
+        // nachziehen, ohne das Board neu aufzubauen - das würde Scrollposition
+        // und einen laufenden Ziehvorgang stören.
+        b.dataset.due = due;
+        b.dataset.dueTime = dueTime || '';
+        const st = dueState(due, dueTime, cfg);
+        if (st) b.classList.add('due-' + st);
+    }
     return b;
+}
+
+/**
+ * Fälligkeitsfarben nachziehen, ohne neu zu rendern.
+ *
+ * Nötig, weil der Zustand auch ohne Änderung am Board wechselt: um Mitternacht
+ * und, bei Karten mit Uhrzeit, sobald diese verstreicht. Das Polling merkt das
+ * nicht, es fragt mit ?rev= und bekommt „unverändert“ zurück.
+ *
+ * @param cfg Konfiguration der Oberfläche
+ */
+export function refreshDueBadges(cfg) {
+    if (typeof document === 'undefined') return;
+    for (const b of document.querySelectorAll('.badge.date-badge[data-due]')) {
+        const st = dueState(b.dataset.due, b.dataset.dueTime, cfg);
+        b.classList.toggle('due-overdue', st === 'overdue');
+        b.classList.toggle('due-today', st === 'today');
+        b.classList.toggle('due-soon', st === 'soon');
+    }
 }
 
 /** Icon je Linkart (Muster: Link-Button der Lovelace-ToDo-Karte,

@@ -337,7 +337,7 @@ A card has the following content fields (settable via the API under the same nam
 |---|---|---|
 | **title** | text | Task title (required). |
 | **description** | Markdown | Description, rendered as Markdown (links, images, lists …). As soon as the field contains something, the editor shows a **live preview** of the rendered Markdown **below the input**, so you see the result while typing. Embedded HTML is sanitized before display (XSS protection). |
-| **due** | `YYYY-MM-DD` | Due date. Overdue / soon-due cards are highlighted. |
+| **due** | `YYYY-MM-DD` | Due date. The badge is coloured by state, see [Due date colours](#due-date-colours). |
 | **dueTime** | `HH:MM` | Optional time of day. Enabled via a checkbox, shown on the card after the date. Only effective together with `due`. |
 | **priority** | `0`/`1`/`2` | Normal / High / Urgent. On the card this shows as a badge below the title (before due date and location): **Normal** shows nothing, **High** an orange `!`, **Urgent** a red `!!`. Other values are rejected, via the API with an error (see [Responses & errors](#responses--errors)). |
 | **assignees** | list of user IDs | Assignees. Determine who receives notifications. **Required:** the UI needs at least one assignee before a card can be saved. Required fields are marked with a red `*`. Cards created via API/webhook may stay unassigned. If a board's **member list no longer matches any existing user** (e.g. after renaming a user ID), **all** users are assignable since 0.3.0, so you are never left unable to save a card. |
@@ -407,7 +407,24 @@ A few details keep reversing predictable: only the main criterion is flipped. Ca
 
 **Mode and direction are stored per device** (like the eye icon), so they only affect your own view. In the automatic modes, reordering within the column is disabled because it would have no effect; moving cards to another column still works. Switching back to "drag & drop" or "drag handles" brings back your saved manual order unchanged.
 
-Independently of all this, overdue and soon-due cards are highlighted in colour, so anything urgent stands out regardless of its position.
+Independently of all this, the due badge is coloured, so anything urgent stands out regardless of its position.
+
+<a id="due-date-colours"></a>
+#### Due date colours
+
+| Colour | State |
+|---|---|
+| **red** | past: the date has gone by, or the card's time of day has passed |
+| **orange** | due today, time of day not reached yet |
+| **yellow** | within the reminder lead time, so tomorrow by default |
+| neutral | due later |
+| **green** | done |
+
+Two differently computed questions sit behind this. The **lead-time window** (yellow) is planning and counts in **calendar days**. It follows the instance setting [**Remind X days before due**](#tab-webhooks-in), so the colour says the same thing as the reminder mail: set it to `3` and everything up to the day after tomorrow turns yellow. Not a rolling 24 hour window, so tomorrow stays tomorrow all day.
+
+The boundary to **red** is a fact instead. When the card carries a **time of day**, that time counts: at 17:01 the 17:00 slot has passed, which is exactly when the `cardDue` event fires with `detail.exact`. Without a time, the colour changes at midnight.
+
+The colours can be changed through [custom CSS](#faq--pitfalls): `--danger` for red, `--warn` for orange, and `--due-upcoming` with `--due-upcoming-text` for yellow.
 
 ### Recurrence
 

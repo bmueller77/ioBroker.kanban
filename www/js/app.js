@@ -1,7 +1,7 @@
 // Bootstrap: Konfiguration laden, URL-Parameter, Theme, Live-Sync, Aktionen
 
 import { api, liveSync } from './api.js';
-import { renderBoard, userAvatar, boardUsers, contrastText, mdiIcon } from './board.js';
+import { renderBoard, userAvatar, boardUsers, contrastText, mdiIcon, refreshDueBadges } from './board.js';
 import { initDialogs } from './dialogs.js';
 import { initI18n, applyStatic, t } from './i18n.js';
 
@@ -399,6 +399,12 @@ async function init() {
         // und darf den naechsten Versuch nicht verhindern.
         () => refreshCurrent().catch(() => {}),
     );
+
+    // Die Faelligkeitsfarbe wechselt auch ohne Aenderung am Board: um Mitternacht
+    // und, bei Karten mit Uhrzeit, sobald diese verstreicht. Das Polling merkt
+    // das nicht, es bekommt bei unveraendertem Board „unveraendert“ zurueck.
+    setInterval(() => { if (!document.hidden) refreshDueBadges(state.cfg); }, 60000);
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) refreshDueBadges(state.cfg); });
 
     render();
 }

@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { absoluteOrder, boardMembers } from '../www/js/board.js';
+import { absoluteOrder, boardMembers, dueState } from '../www/js/board.js';
 
 /**
  * Reine Hilfsfunktionen der Oberfläche — ohne Browser prüfbar.
@@ -73,5 +73,63 @@ describe('Wirksame Board-Mitglieder', () => {
 
     it('lässt unbekannte Namen aus einer sonst gültigen Liste weg', () => {
         assert.deepEqual(boardMembers({ members: ['anna', 'weg'] }, users), ['anna']);
+    });
+});
+
+/**
+ * Datum als YYYY-MM-DD, um n Tage verschoben.
+ *
+ * @param n Verschiebung in Tagen
+ * @returns Datum als Zeichenkette
+ */
+function tag(n) {
+    const d = new Date();
+    d.setDate(d.getDate() + n);
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+describe('Fälligkeit: dreistufige Einfärbung', () => {
+    // Vorgabe der Instanz: einen Tag vorher erinnern
+    const cfg = { reminderDaysBefore: 1 };
+
+    it('färbt Vergangenes als überfällig', () => {
+        assert.equal(dueState(tag(-1), '', cfg), 'overdue');
+    });
+
+    it('trennt heute von morgen', () => {
+        // Genau der Punkt aus dem Forum: beides war vorher orange
+        assert.equal(dueState(tag(0), '', cfg), 'today');
+        assert.equal(dueState(tag(1), '', cfg), 'soon');
+    });
+
+    it('lässt später Fälliges ungefärbt', () => {
+        assert.equal(dueState(tag(2), '', cfg), '');
+    });
+
+    it('folgt der eingestellten Vorlaufzeit', () => {
+        assert.equal(dueState(tag(3), '', { reminderDaysBefore: 3 }), 'soon');
+        assert.equal(dueState(tag(4), '', { reminderDaysBefore: 3 }), '');
+        // Vorlauf 0: nur heute und Vergangenes sind gefärbt
+        assert.equal(dueState(tag(1), '', { reminderDaysBefore: 0 }), '');
+    });
+
+    it('nimmt ohne Angabe einen Tag Vorlauf an', () => {
+        assert.equal(dueState(tag(1), '', {}), 'soon');
+        assert.equal(dueState(tag(1), '', undefined), 'soon');
+    });
+
+    it('zählt die Uhrzeit, sobald sie verstrichen ist', () => {
+        // Eine Karte, die heute um 00:01 fällig war, ist mittags vorbei
+        assert.equal(dueState(tag(0), '00:01', cfg), 'overdue');
+        // Eine um 23:59 noch nicht
+        assert.equal(dueState(tag(0), '23:59', cfg), 'today');
+    });
+
+    it('ignoriert eine unbrauchbare Uhrzeit, statt zu raten', () => {
+        assert.equal(dueState(tag(0), 'kaputt', cfg), 'today');
+    });
+
+    it('gibt für Karten ohne Datum nichts zurück', () => {
+        assert.equal(dueState('', '', cfg), '');
     });
 });
