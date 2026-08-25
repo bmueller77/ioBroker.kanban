@@ -128,16 +128,16 @@ This is where you define **which people exist**, the list applies to the entire 
 
 Add a row with the **"+"** in the table header; the bin icon at the end of a row removes it again (without asking). Rows without an ID are dropped when saving. A fresh instance ships with two example users, `user1` and `user2`.
 
-> **The ID is the key — and it is locked once created.** Boards and cards find their people through the *ID* column; the avatar pictures and the addresses of shared views hang on it as well. Changing it later would leave all of that pointing nowhere, and the adapter could not even clean up afterwards: a rename cannot be told apart from "deleted and newly created". The field is therefore locked as soon as the user has been saved once. The adapter writes a marker into the instance configuration on the next start and restarts once while doing so — once per new user, never again after that.
+> **The ID is the key, and it is locked once created.** Boards and cards find their people through the *ID* column; the avatar pictures and the addresses of shared views hang on it as well. Changing it later would leave all of that pointing nowhere, and the adapter could not even clean up afterwards: a rename cannot be told apart from "deleted and newly created". The field is therefore locked as soon as the user has been saved once. The adapter writes a marker into the instance configuration on the next start and restarts once while doing so. That happens once per new user, never again after that.
 >
 > The **display name** stays freely editable. "Tom Reich" becomes "Tommy Reich" without a single card noticing.
 >
-> *Recommendation:* give the ID a moment's thought when you create it — lower case, no umlauts, and readable enough to survive in a shared address (`?users=bjoern`).
+> *Recommendation:* give the ID a moment's thought when you create it. Lower case, no umlauts, and readable enough to survive in a shared address (`?users=bjoern`).
 >
 > <a id="renaming-a-user"></a>
-> **If cards do point nowhere** — because an ID was renamed in an earlier version, because someone was deleted and created again, or because a card came in through the API with a foreign ID — the adapter reports it on start in the log and in the state `info.orphanedAssignees`, and the gear icon in the board header gets a small dot.
+> **If cards do point nowhere**, the adapter reports it on start in the log and in the state `info.orphanedAssignees`, and the gear icon in the board header gets a small dot. That happens when an ID was renamed in an earlier version, when someone was deleted and created again, or when a card came in through the API with a foreign ID.
 >
-> The repair lives under **⚙ → Users → Orphaned assignees**. Each orphaned ID gets a row with its extent and the boards involved; the card count expands into the list of cards, so you can look before you move anything. Next to it a dropdown with the existing people and a button that asks first. The trash stays out of it — what is on its way to deletion does not need to belong to anyone.
+> The repair lives under **⚙ → Users → Orphaned assignees**. Each orphaned ID gets a row with its extent and the boards involved; the card count expands into the list of cards, so you can look before you move anything. Next to it a dropdown with the existing people and a button that asks first. The trash stays out of it: what is on its way to deletion does not need to belong to anyone.
 >
 > The same thing works through the interface:
 >
@@ -145,7 +145,7 @@ Add a row with the **"+"** in the table header; the bin icon at the end of a row
 > curl -X POST "http://<host>:8095/webhook/<TOKEN>/action" >   -H 'Content-Type: application/json' >   -d '{"cmd":"reassignUser","from":"bjoern_old","to":"bjoern"}'
 > ```
 >
-> This carries over the assignees of every card, the member lists of the boards **and** the avatar picture — the latter only if the target person does not have one yet. If the new ID was already on a card, no duplicate entry appears. The target ID must exist in the instance settings, otherwise the call fails with `400`.
+> This carries over the assignees of every card, the member lists of the boards **and** the avatar picture. The picture only if the target person does not have one yet. If the new ID was already on a card, no duplicate entry appears. The target ID must exist in the instance settings, otherwise the call fails with `400`.
 
 > **Not here:** user colour, avatar image and the assignment to individual boards are maintained directly in the web UI since 0.2.0. See [Users in the board](#users-in-the-board).
 
@@ -356,7 +356,7 @@ A card has the following content fields (settable via the API under the same nam
 | **due** | `YYYY-MM-DD` | Due date. The badge is coloured by state, see [Due date colours](#due-date-colours). |
 | **dueTime** | `HH:MM` | Optional time of day. Enabled via a checkbox, shown on the card after the date. Only effective together with `due`. |
 | **priority** | `0`/`1`/`2` | Normal / High / Urgent. On the card this shows as a badge below the title (before due date and location): **Normal** shows nothing, **High** an orange `!`, **Urgent** a red `!!`. Other values are rejected, via the API with an error (see [Responses & errors](#responses--errors)). |
-| **assignees** | list of user IDs | Assignees. Determine who receives notifications. **Required, through the API as well:** at least one person must be given, and every ID must exist in the instance settings – otherwise the interface answers with `400` and names the IDs it knows. Until now the API accepted anything, placeholders like `default` included; that produced cards the editor could never have created and which stay invisible behind a `users` filter. An ID that is **already on the card** remains allowed when editing, even if the user no longer exists – otherwise the orphaned card would be the one you cannot touch. If a board's **member list no longer matches any existing user**, **all** users are assignable since 0.3.0. |
+| **assignees** | list of user IDs | Assignees. Determine who receives notifications. **Required, through the API as well:** at least one person must be given, and every ID must exist in the instance settings. Otherwise the interface answers with `400` and names the IDs it knows. Until now the API accepted anything, placeholders like `default` included; that produced cards the editor could never have created and which stay invisible behind a `users` filter. An ID that is **already on the card** remains allowed when editing, even if the user no longer exists. Otherwise the orphaned card would be the one you cannot touch. If a board's **member list no longer matches any existing user**, **all** users are assignable since 0.3.0. |
 | **labels** | list of label IDs | Colored tags. Labels are managed per board (create, rename, recolor, delete). If a label arrives through the API that the board does not know, it is **created** rather than rejected (green, title = ID; both editable afterwards). Otherwise the card would carry a label the board does not list, which makes it invisible behind an `onlyLabel` filter. |
 | **color** | hex color | Colored bar on the left edge of the card. Chosen via an embedded color picker (color field + hue slider + hex input) or presets. |
 | **link** | URL | A link. The card shows a **type-dependent icon** (see [Link types](#link-types)). |

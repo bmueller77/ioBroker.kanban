@@ -1,7 +1,7 @@
 # Screenshots für die Doku
 
 Sprache je Ordner: deutsche Screenshots nach `docs/de/img/`, englische nach `docs/en/img/`.
-Aufnahme über die laufende Instanz; für Englisch die Instanz-Sprache auf `en` stellen (bzw. `&lang=en` anhängen). Für die Admin-Screenshots die Sprache der **admin.0-Instanz** umstellen (Instanzen → admin.0 → „Sprache" — sie übersteuert die Systemsprache).
+Aufnahme über die laufende Instanz; für Englisch die Instanz-Sprache auf `en` stellen (bzw. `&lang=en` anhängen). Für die Admin-Screenshots die Sprache der **admin.0-Instanz** umstellen (Instanzen → admin.0 → „Sprache". Sie übersteuert die Systemsprache).
 
 | Datei | Ansicht | Quelle |
 |---|---|---|
