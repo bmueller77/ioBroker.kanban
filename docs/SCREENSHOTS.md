@@ -16,9 +16,9 @@ Aufnahme über die laufende Instanz; für Englisch die Instanz-Sprache auf `en` 
 | `admin-users.png` | Instanzeinstellungen, Tab *Benutzer* | ioBroker-Admin |
 | `admin-email.png` | Instanzeinstellungen, Tab *Benachrichtigungen* | ioBroker-Admin |
 | `mobile.png` | Mobile Ansicht (gestapelte Spalten) | Smartphone (360×780, Faktor 2) |
-| `mobile-drag.png` | Mobile Ansicht – Schnellmenü beim Ziehen einer Karte | Smartphone (360×780, Faktor 2) |
+| `mobile-drag.png` | Mobile Ansicht - Schnellmenü beim Ziehen einer Karte | Smartphone (360×780, Faktor 2) |
 
-Empfohlen: Fensterbreite ~1200–1450 px (Board), heller **oder** dunkler Modus konsistent.
+Empfohlen: Fensterbreite ~1200-1450 px (Board), heller **oder** dunkler Modus konsistent.
 
 ## Maße
 
