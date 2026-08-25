@@ -22,6 +22,12 @@ class Kanban extends utils.Adapter {
     async onReady() {
         await this.setStateAsync('info.connection', false, true);
 
+        // Vor allem anderen: Benutzer-IDs festschreiben. Schreibt der Adapter
+        // dabei seine eigene Konfiguration, startet ihn der js-controller kurz
+        // darauf neu - der Rest des Starts laeuft trotzdem weiter, damit die
+        // Instanz nicht tot liegenbleibt, falls der Neustart ausbleibt.
+        await this._freezeUserIds();
+
         this.bus = new EventBus();
         this.store = new Store(this, this.bus);
         this.notifier = new Notifier(
@@ -68,6 +74,81 @@ class Kanban extends utils.Adapter {
         }
         await this._reportOrphanedAssignees();
         this.log.info(`Kanban ready - UI: ${this._baseUrl()}/`);
+    }
+
+    /**
+     * Bereits vergebene Benutzer-IDs festschreiben.
+     *
+     * Karten, Avatar-Dateien und geteilte Ansichten haengen an der Benutzer-ID.
+     * Wird sie in den Einstellungen geaendert, zeigen sie alle ins Leere, und
+     * eine Umbenennung laesst sich nicht von "geloescht und neu angelegt"
+     * unterscheiden - der Adapter koennte also nicht einmal automatisch
+     * aufraeumen. Deshalb sperrt die Tabelle das Feld, sobald `fixed` gesetzt
+     * ist. Gesetzt wird es hier, beim ersten Start nach dem Anlegen.
+     *
+     * @returns {Promise<boolean>} true, wenn die Konfiguration geschrieben wurde
+     */
+    async _freezeUserIds() {
+        const users = Array.isArray(this.config.users) ? this.config.users : [];
+        const offen = users.filter(u => u && u.name && !u.fixed).map(u => u.name);
+        if (!offen.length) {
+            return false;
+        }
+
+        // Schutz gegen eine Neustartschleife: Sollte die Admin-Tabelle das
+        // Merkmal beim Speichern verwerfen, kaeme es sonst bei jedem Start
+        // erneut. Wer schon einmal festgeschrieben wurde, wird nicht noch
+        // einmal geschrieben - stattdessen gibt es eine Warnung.
+        await this.setObjectNotExistsAsync('info.frozenUserIds', {
+            type: 'state',
+            common: {
+                name: 'User IDs that have been frozen',
+                type: 'string',
+                role: 'json',
+                read: true,
+                write: false,
+                def: '[]',
+            },
+            native: {},
+        });
+        const bekannt = await this._frozenUserIds();
+        const frisch = offen.filter(n => !bekannt.includes(n));
+        if (!frisch.length) {
+            this.log.warn(
+                `Could not freeze the user ID(s) ${offen.join(', ')}: the marker is not kept by the settings table. ` +
+                    'The ID stays editable, and renaming it will detach cards, avatars and shared views.',
+            );
+            return false;
+        }
+
+        await this.setStateAsync('info.frozenUserIds', JSON.stringify([...bekannt, ...frisch]), true);
+
+        // Lesen und ganz zurueckschreiben statt extendObject: Bei Arrays
+        // mischen die Varianten von extendObject je nach Version indexweise.
+        const id = `system.adapter.${this.namespace}`;
+        const obj = await this.getForeignObjectAsync(id);
+        if (!obj || !obj.native || !Array.isArray(obj.native.users)) {
+            this.log.warn('Could not freeze user IDs: the instance object carries no user list.');
+            return false;
+        }
+        obj.native.users = obj.native.users.map(u => (u && u.name ? { ...u, fixed: true } : u));
+        await this.setForeignObjectAsync(id, obj);
+        this.log.info(
+            `User ID(s) ${frisch.join(', ')} are now fixed and can no longer be renamed in the settings. ` +
+                'The adapter restarts once to pick up the change.',
+        );
+        return true;
+    }
+
+    /** Liste der bereits festgeschriebenen IDs aus dem State lesen. */
+    async _frozenUserIds() {
+        try {
+            const st = await this.getStateAsync('info.frozenUserIds');
+            const v = JSON.parse((st && st.val) || '[]');
+            return Array.isArray(v) ? v : [];
+        } catch {
+            return [];
+        }
     }
 
     /**

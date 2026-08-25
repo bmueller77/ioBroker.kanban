@@ -191,10 +191,21 @@
           "sm": 12,
           "items": [
             {
+              "type": "checkbox",
+              "attr": "fixed",
+              "width": "1%",
+              "title": " ",
+              "hidden": "true",
+              "filter": false,
+              "sort": false
+            },
+            {
               "type": "text",
               "attr": "name",
               "width": "10%",
               "title": "usersTab_users_0_title",
+              "tooltip": "usersTab_users_0_tooltip",
+              "disabled": "!!data.fixed",
               "filter": false,
               "sort": false
             },

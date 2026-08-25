@@ -56,6 +56,7 @@
   "usersTab__notifyLegend_text": "<div style='font-size:0.85rem;line-height:1.5;opacity:0.85'><b>各列的含义</b><table style='border-collapse:collapse'><tr><td style='padding:1px 12px 1px 0;white-space:nowrap'><b>→ 已指派</b></td><td>有卡片被指派给该用户，包括后来在已有卡片上指派</td></tr><tr><td style='padding:1px 12px 1px 0;white-space:nowrap'><b>→ 到期</b></td><td>该用户有未完成的卡片到期、逾期，或进入设定的提前提醒天数。提醒会在每天的提醒时间重复</td></tr><tr><td style='padding:1px 12px 1px 0;white-space:nowrap'><b>→ 已修改</b></td><td>该用户的卡片被编辑</td></tr><tr><td style='padding:1px 12px 1px 0;white-space:nowrap'><b>→ 已移动</b></td><td>该用户的卡片被移动到其他列</td></tr><tr><td style='padding:1px 12px 1px 0;white-space:nowrap'><b>→ 已完成</b></td><td>该用户的卡片被标记为已完成</td></tr><tr><td style='padding:1px 12px 1px 0;white-space:nowrap'><b>→ 新建</b></td><td>在该用户所属的看板上创建了新卡片，无论指派给谁。这也包括从其他看板复制的卡片以及重复任务生成的后续卡片</td></tr><tr><td style='padding:1px 12px 1px 0;white-space:nowrap'><b>→ 回收站</b></td><td>该用户的卡片进入了回收站，可能是手动删除或自动清理所致。卡片在 30 天内仍可恢复</td></tr><tr><td style='padding:1px 12px 1px 0;white-space:nowrap'><b>→ 已恢复</b></td><td>该用户的卡片已从回收站恢复</td></tr><tr><td style='padding:1px 12px 1px 0;white-space:nowrap'><b>→ 已删除</b></td><td>该用户的卡片在 30 天后被永久删除</td></tr></table></div>",
   "usersTab_label": "用户",
   "usersTab_users_0_title": "ID（小写）",
+  "usersTab_users_0_tooltip": "创建后不可更改：卡片、头像和共享视图都绑定到此 ID。如需转移，请使用 reassignUser 命令。",
   "usersTab_users_10_title": "→ 已恢复",
   "usersTab_users_10_tooltip": "当该用户的卡片从回收站恢复时发送邮件",
   "usersTab_users_11_title": "→ 已删除",
