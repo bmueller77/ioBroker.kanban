@@ -13,7 +13,7 @@ function newStore() {
     const adapter = {
         _language: 'de',
         namespace: 'kanban.9',
-        config: {},
+        config: { users: [{ name: 'anna' }] },
         log: { warn: m => warnings.push(m), info() {}, error() {}, debug() {} },
         // ioBroker-Objektschicht: für diesen Test ohne Belang
         setObjectNotExistsAsync: async () => {},
@@ -31,7 +31,7 @@ function newStore() {
 async function boardWithCard() {
     const store = newStore();
     const board = await store.createBoard({ id: 'b', title: 'B' });
-    const card = store.addCard('b', { title: 'Karte', columnId: 'todo' }, 'test');
+    const card = store.addCard('b', { title: 'Karte', columnId: 'todo', assignees: ['anna'] }, 'test');
     return { store, board: store.getBoard('b'), card };
 }
 

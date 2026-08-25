@@ -3,7 +3,7 @@
 import { openColorPicker, closeColorPicker, colorPickerOpen } from './colorpicker.js';
 import { api } from './api.js';
 import { t } from './i18n.js';
-import { boardUsers, boardMembers, contrastText, mdiIcon, MDI } from './board.js';
+import { boardUsers, boardMembers, contrastText, mdiIcon, MDI, fmtDate } from './board.js';
 
 const CARD_COLORS = ['', '#e57373', '#ffb74d', '#fff176', '#aed581', '#4fc3f7', '#9575cd', '#f06292', '#a1887f'];
 const WEEKDAYS = [['Mo', 1], ['Di', 2], ['Mi', 3], ['Do', 4], ['Fr', 5], ['Sa', 6], ['So', 7]];
@@ -1132,7 +1132,11 @@ export function initDialogs(state, actions) {
             auf.type = 'button';
             const pfeil = el('span', 'orphan-caret');
             pfeil.appendChild(mdiIcon(MDI.chevronRight));
-            const boards = (eintrag.boards || []).join(', ');
+            // Board-Titel statt IDs - die Zuordnung liegt im Frontend schon vor,
+            // dafuer muss die Schnittstelle nichts Zusaetzliches liefern.
+            const boards = (eintrag.boards || [])
+                .map(id => { const b = (state.boards || []).find(x => x.id === id); return (b && b.title) || id; })
+                .join(', ');
             auf.append(pfeil, el('span', null, t('orphan.count', { n: eintrag.cards, boards })));
             links.appendChild(auf);
 
@@ -1236,7 +1240,7 @@ export function initDialogs(state, actions) {
                 );
                 z.appendChild(txt);
                 if (c.due) {
-                    z.appendChild(el('span', 'orphan-card-due', c.due));
+                    z.appendChild(el('span', 'orphan-card-due', fmtDate(c.due, state.cfg && state.cfg.dateFormat)));
                 }
                 const oeffnen = el('button', 'linkbtn');
                 oeffnen.type = 'button';

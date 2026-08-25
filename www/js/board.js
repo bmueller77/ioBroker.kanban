@@ -213,7 +213,7 @@ function todayStr(offsetDays = 0) {
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
 
-function fmtDate(iso, fmt) {
+export function fmtDate(iso, fmt) {
     const [Y, M, D] = String(iso).split('-');
     if (!Y || !M || !D) return String(iso);
     const dt = new Date(+Y, +M - 1, +D);

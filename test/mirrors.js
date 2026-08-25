@@ -18,7 +18,7 @@ function newStore() {
     const adapter = {
         _language: 'de',
         namespace: 'kanban.9',
-        config: { users: [{ name: 'anna' }] },
+        config: { users: [{ name: 'anna' }, { name: 'bjoern' }] },
         log: { warn() {}, info() {}, error() {}, debug() {} },
         setObjectNotExistsAsync: async () => {},
         setStateAsync: async (id, val) => { states[id] = val; },
@@ -33,7 +33,12 @@ function newStore() {
     };
     const store = new Store(adapter, { emitEvent() {} });
     store._schedulePersist = () => {};
-    return { store, states, dateien };
+    // Benutzer entfernen: erzeugt genau den Zustand, den eine geloeschte oder
+    // umbenannte ID hinterlaesst - die Karten zeigen weiter auf sie.
+    const entferne = name => {
+        adapter.config.users = adapter.config.users.filter(u => u.name !== name);
+    };
+    return { store, states, dateien, entferne };
 }
 
 /**
@@ -55,7 +60,7 @@ describe('Spiegel-States: Board-Zaehler', () => {
         // Auf einem unberuehrten Board blieb overdueCount deshalb stehen.
         const { store, states } = newStore();
         await store.createBoard({ id: 'b', title: 'B' });
-        store.addCard('b', { title: 'Gestern faellig', columnId: 'todo', due: tag(-1) }, 'test');
+        store.addCard('b', { title: 'Gestern faellig', columnId: 'todo', assignees: ['anna'], due: tag(-1) }, 'test');
 
         await store.updateMirrors();
 
@@ -66,11 +71,11 @@ describe('Spiegel-States: Board-Zaehler', () => {
     it('laesst erledigte Karten und den Papierkorb aussen vor', async () => {
         const { store, states } = newStore();
         await store.createBoard({ id: 'b', title: 'B' });
-        const done = store.addCard('b', { title: 'Erledigt', columnId: 'todo', due: tag(-1) }, 'test');
+        const done = store.addCard('b', { title: 'Erledigt', columnId: 'todo', assignees: ['anna'], due: tag(-1) }, 'test');
         store.moveCard('b', done.id, 'done', 0, 'test');
-        const weg = store.addCard('b', { title: 'Papierkorb', columnId: 'todo', due: tag(-1) }, 'test');
+        const weg = store.addCard('b', { title: 'Papierkorb', columnId: 'todo', assignees: ['anna'], due: tag(-1) }, 'test');
         store.deleteCard('b', weg.id, 'test');
-        store.addCard('b', { title: 'Offen', columnId: 'todo', due: tag(-1) }, 'test');
+        store.addCard('b', { title: 'Offen', columnId: 'todo', assignees: ['anna'], due: tag(-1) }, 'test');
 
         await store.updateMirrors();
 
@@ -80,7 +85,7 @@ describe('Spiegel-States: Board-Zaehler', () => {
     it('zaehlt heute faellige Karten nicht als ueberfaellig', async () => {
         const { store, states } = newStore();
         await store.createBoard({ id: 'b', title: 'B' });
-        store.addCard('b', { title: 'Heute', columnId: 'todo', due: tag(0) }, 'test');
+        store.addCard('b', { title: 'Heute', columnId: 'todo', assignees: ['anna'], due: tag(0) }, 'test');
 
         await store.updateMirrors();
 
@@ -92,11 +97,12 @@ describe('Verwaiste Zuständige', () => {
     it('findet Zuständige, die es als Benutzer nicht mehr gibt', async () => {
         // Regression: Wird eine Benutzer-ID umbenannt, zeigen die Karten ins
         // Leere - sie speichern die ID, nicht den Anzeigenamen.
-        const { store } = newStore();          // kennt nur 'anna'
+        const { store, entferne } = newStore();
         await store.createBoard({ id: 'b', title: 'B' });
         store.addCard('b', { title: 'Alt', columnId: 'todo', assignees: ['bjoern'] }, 'test');
         store.addCard('b', { title: 'Auch alt', columnId: 'todo', assignees: ['bjoern', 'anna'] }, 'test');
         store.addCard('b', { title: 'Sauber', columnId: 'todo', assignees: ['anna'] }, 'test');
+        entferne('bjoern');
 
         const verwaist = store.findOrphanedAssignees();
 
@@ -107,10 +113,11 @@ describe('Verwaiste Zuständige', () => {
     });
 
     it('lässt Karten im Papierkorb außen vor', async () => {
-        const { store } = newStore();
+        const { store, entferne } = newStore();
         await store.createBoard({ id: 'b', title: 'B' });
         const weg = store.addCard('b', { title: 'Weg', columnId: 'todo', assignees: ['bjoern'] }, 'test');
         store.deleteCard('b', weg.id, 'test');
+        entferne('bjoern');
 
         assert.deepEqual(store.findOrphanedAssignees(), []);
     });
@@ -236,5 +243,73 @@ describe('Verwaiste Zustaendige: Kartenliste', () => {
     it('gibt fuer eine leere Anfrage nichts zurueck', async () => {
         const { store } = newStore();
         assert.deepEqual(store.orphanedCards(''), { name: '', total: 0, cards: [] });
+    });
+});
+
+describe('API-Pruefung: Zustaendige und Labels', () => {
+    it('weist eine Karte ohne Zustaendigen ab', async () => {
+        const { store } = newStore();
+        await store.createBoard({ id: 'b', title: 'B' });
+
+        assert.throws(() => store.addCard('b', { title: 'Ohne', columnId: 'todo' }, 'test'), /assignees fehlt/);
+        assert.throws(
+            () => store.addCard('b', { title: 'Leer', columnId: 'todo', assignees: [] }, 'test'),
+            /assignees fehlt/,
+        );
+    });
+
+    it('weist eine unbekannte Person ab und nennt die moeglichen', async () => {
+        const { store } = newStore();
+        await store.createBoard({ id: 'b', title: 'B' });
+
+        assert.throws(
+            () => store.addCard('b', { title: 'Karte', columnId: 'todo', assignees: ['default'] }, 'test'),
+            /unbekannte zustaendige Person: default.*anna/s,
+        );
+    });
+
+    it('laesst eine verwaiste Karte weiter bearbeiten', async () => {
+        // Sonst waere ausgerechnet die Karte gesperrt, die man retten will.
+        const { store, entferne } = newStore();
+        await store.createBoard({ id: 'b', title: 'B' });
+        const c = store.addCard('b', { title: 'Karte', columnId: 'todo', assignees: ['bjoern'] }, 'test');
+        entferne('bjoern');
+
+        store.updateCard('b', c.id, { title: 'Neuer Titel', assignees: ['bjoern'] }, 'test');
+
+        assert.equal(store.getBoard('b').cards[0].title, 'Neuer Titel');
+    });
+
+    it('nimmt eine unbekannte Person beim Bearbeiten trotzdem nicht neu auf', async () => {
+        const { store } = newStore();
+        await store.createBoard({ id: 'b', title: 'B' });
+        const c = store.addCard('b', { title: 'Karte', columnId: 'todo', assignees: ['anna'] }, 'test');
+
+        assert.throws(() => store.updateCard('b', c.id, { assignees: ['gustav'] }, 'test'), /unbekannte/);
+    });
+
+    it('legt ein unbekanntes Label am Board an, statt es abzulehnen', async () => {
+        const { store } = newStore();
+        await store.createBoard({ id: 'b', title: 'B' });
+
+        const c = store.addCard(
+            'b',
+            { title: 'Karte', columnId: 'todo', assignees: ['anna'], labels: ['garten', 'garten'] },
+            'test',
+        );
+
+        assert.deepEqual(c.labels, ['garten']);
+        const label = store.getBoard('b').labels.find(l => l.id === 'garten');
+        assert.ok(label, 'Label wurde nicht am Board angelegt');
+        assert.equal(label.title, 'garten');
+    });
+
+    it('legt ein vorhandenes Label nicht doppelt an', async () => {
+        const { store } = newStore();
+        await store.createBoard({ id: 'b', title: 'B' });
+        store.addCard('b', { title: 'Eins', columnId: 'todo', assignees: ['anna'], labels: ['garten'] }, 'test');
+        store.addCard('b', { title: 'Zwei', columnId: 'todo', assignees: ['anna'], labels: ['garten'] }, 'test');
+
+        assert.equal(store.getBoard('b').labels.filter(l => l.id === 'garten').length, 1);
     });
 });
