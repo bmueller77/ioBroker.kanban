@@ -429,7 +429,7 @@ Independently of all this, the due badge is coloured, so anything urgent stands 
 | neutral | due later |
 | **green** | done |
 
-Two differently computed questions sit behind this. The **lead-time window** (yellow) is planning and counts in **calendar days**. It follows the instance setting [**Remind X days before due**](#tab-webhooks-in), so the colour says the same thing as the reminder mail: set it to `3` and everything up to the day after tomorrow turns yellow. Not a rolling 24 hour window, so tomorrow stays tomorrow all day.
+Two differently computed questions sit behind this. The **lead-time window** (yellow) is planning and counts in **calendar days**. It follows the instance setting [**Remind X days before due**](#tab-notifications), so the colour says the same thing as the reminder mail: set it to `3` and everything up to the day after tomorrow turns yellow. Not a rolling 24 hour window, so tomorrow stays tomorrow all day.
 
 The boundary to **red** is a fact instead. When the card carries a **time of day**, that time counts: at 17:01 the 17:00 slot has passed, which is exactly when the `cardDue` event fires with `detail.exact`. Without a time, the colour changes at midnight.
 
