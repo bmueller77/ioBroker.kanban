@@ -137,6 +137,34 @@ describe('Verwaiste Zuständige', () => {
         assert.deepEqual(store.findOrphanedAssignees(), []);
     });
 
+    it('macht die Zielperson zum Mitglied, wenn die alte ID keines war', async () => {
+        // Kommt vor, wenn eine Karte ueber die API mit einer fremden ID angelegt
+        // wurde: Sonst waere die Zielperson zustaendig, taeuchte aber im
+        // Personenfilter des Boards nicht auf.
+        const { store, entferne } = newStore();
+        store.adapter.config.users.push({ name: 'carla' });
+        await store.createBoard({ id: 'b', title: 'B' });
+        store.getBoard('b').members = ['anna'];
+        store.addCard('b', { title: 'Karte', columnId: 'todo', assignees: ['bjoern'] }, 'test');
+        entferne('bjoern');
+
+        await store.reassignUser('bjoern', 'carla', 'test');
+
+        assert.deepEqual(store.getBoard('b').members, ['anna', 'carla']);
+    });
+
+    it('laesst eine leere Mitgliederliste leer - sie bedeutet "alle"', async () => {
+        const { store, entferne } = newStore();
+        await store.createBoard({ id: 'b', title: 'B' });
+        store.getBoard('b').members = [];
+        store.addCard('b', { title: 'Karte', columnId: 'todo', assignees: ['bjoern'] }, 'test');
+        entferne('bjoern');
+
+        await store.reassignUser('bjoern', 'anna', 'test');
+
+        assert.deepEqual(store.getBoard('b').members, []);
+    });
+
     it('erzeugt keinen doppelten Eintrag, wenn beide schon zuständig waren', async () => {
         const { store } = newStore();
         await store.createBoard({ id: 'b', title: 'B' });

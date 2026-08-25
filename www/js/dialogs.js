@@ -1215,6 +1215,8 @@ export function initDialogs(state, actions) {
                 // leerer Rahmen mit "nichts zu tun".
                 if (!wrap.querySelector('.orphan-row')) {
                     wrap.remove();
+                    const zahnrad = document.getElementById('settingsBtn');
+                    if (zahnrad) { zahnrad.classList.remove('has-todo'); }
                 }
             });
 
