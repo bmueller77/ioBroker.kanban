@@ -11,7 +11,7 @@ Kanban board adapter for ioBroker with its **own web server**, live sync, webhoo
 
 ![Kanban board](docs/en/img/board.png)
 
-📖 **Full documentation:** [English](docs/en/README.md) · [Deutsch](docs/de/README.md)
+**Full documentation:** [English](docs/en/README.md) · [Deutsch](docs/de/README.md)
 
 ## Installation
 
@@ -114,7 +114,7 @@ Details: [Security & access control](docs/en/README.md#security--access-control)
 
 ## Requirements
 
-- js-controller ≥ 6.0.11, Node.js ≥ 22
+- js-controller >= 6.0.11, Node.js >= 22
 - For e-mail notifications: a configured `iobroker.email` instance
 - Optional: `iobroker.feiertage` for region-accurate public-holiday calculation of the working-day recurrences
 
@@ -178,7 +178,7 @@ Details: [Security & access control](docs/en/README.md#security--access-control)
 * (bmueller77) **Security: the write token was readable by any website.** `Access-Control-Allow-Origin: *` sat on every route, including the one that hands the token to the UI in a `<meta>` tag, so any page open in your browser could scan the network for the adapter, read that page cross-origin, take the token and then change or delete boards. CORS is now limited to `/api` and `/webhook` and to origins listed in the new **"Allowed browser origins"** setting (empty by default = same origin only). Only browser access was affected; scripts, Node-RED and curl are unchanged
 * (bmueller77) **Security: a board-restricted token could still escape its boards.** It was only checked for board-specific webhook calls and could change any board via `/api`. On the command route the guard accepted any allowed board named anywhere in the body as proof, even for commands that ignore that field: `addBoard` with `"board":"<allowed>"` created boards elsewhere, and the same trick worked on the user and avatar routes. What counts now is the board the call actually touches: the path board for REST plus a transfer's target, and per command the field that command really evaluates. A writing command that names no board is refused for restricted tokens; reading commands (`listBoards`, `getBoard`) stay open
 * (bmueller77) **Security: an empty token row opened the API.** A row added in the token table but left blank matched every request that carried no token at all, because a missing token fell back to the empty string. Blank tokens are now rejected outright. In the same vein, an empty **"allowed boards"** field counted as `*`, so clearing it to take rights away in fact granted them for every board. Empty now means no board; enter `*` explicitly for all
-* (bmueller77) Tokens are **no longer accepted as a URL parameter** (`?token=…`), only in the `X-Kanban-Token` header or as `_token` in the body, so they stop showing up in logs, browser history and referrers
+* (bmueller77) Tokens are **no longer accepted as a URL parameter** (`?token=...`), only in the `X-Kanban-Token` header or as `_token` in the body, so they stop showing up in logs, browser history and referrers
 * (bmueller77) The **SPA write secret moved into the adapter's file storage**; the state `kanban.0.info.apiSecret` stays but is kept empty. An existing value is migrated on first start. Object access no longer implies write access to the API
 * (bmueller77) The **`action` state can be switched off** in the instance settings ("Webhooks (in)"). It executes the full command vocabulary without a token, so installations that do not use it can close that door
 * (bmueller77) **Irreversible commands** (`deleteBoard`, `emptyTrash`, `purgeCard`) are logged with their source, no matter which route they came in through
