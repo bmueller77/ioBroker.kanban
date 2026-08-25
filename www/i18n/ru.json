@@ -234,5 +234,17 @@
   "cron.wed": "среда",
   "cron.thu": "четверг",
   "cron.fri": "пятница",
-  "cron.sat": "суббота"
+  "cron.sat": "суббота",
+  "orphan.title": "Осиротевшие ответственные",
+  "orphan.hint": "Эти карточки назначены на людей, которых больше нет среди пользователей.",
+  "orphan.count": "{n} карточек · {boards}",
+  "orphan.pick": "выбрать …",
+  "orphan.apply": "Перенести",
+  "orphan.open": "Открыть карточку",
+  "orphan.more": "ещё {n}",
+  "orphan.loading": "Загрузка …",
+  "orphan.loadFailed": "Не удалось загрузить: {msg}",
+  "orphan.confirmTitle": "Перенос ответственности",
+  "orphan.confirmBody": "{n} карточек на {boards} перейдут с {from} на {to}. Отменить это нельзя.",
+  "orphan.failed": "Не удалось: {msg}"
 }

@@ -234,5 +234,17 @@
   "cron.wed": "mercoledì",
   "cron.thu": "giovedì",
   "cron.fri": "venerdì",
-  "cron.sat": "sabato"
+  "cron.sat": "sabato",
+  "orphan.title": "Responsabili orfani",
+  "orphan.hint": "Queste schede sono assegnate a persone che non esistono più come utenti.",
+  "orphan.count": "{n} schede · {boards}",
+  "orphan.pick": "seleziona …",
+  "orphan.apply": "Riassegna",
+  "orphan.open": "Apri scheda",
+  "orphan.more": "altre {n}",
+  "orphan.loading": "Caricamento …",
+  "orphan.loadFailed": "Impossibile caricare: {msg}",
+  "orphan.confirmTitle": "Riassegna schede",
+  "orphan.confirmBody": "{n} schede su {boards} passano da {from} a {to}. Non è possibile annullare.",
+  "orphan.failed": "Non riuscito: {msg}"
 }

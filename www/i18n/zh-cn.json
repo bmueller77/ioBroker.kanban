@@ -234,5 +234,17 @@
   "cron.wed": "星期三",
   "cron.thu": "星期四",
   "cron.fri": "星期五",
-  "cron.sat": "星期六"
+  "cron.sat": "星期六",
+  "orphan.title": "无主负责人",
+  "orphan.hint": "这些卡片指派给了已不存在的用户。",
+  "orphan.count": "{n} 张卡片 · {boards}",
+  "orphan.pick": "请选择 …",
+  "orphan.apply": "转移",
+  "orphan.open": "打开卡片",
+  "orphan.more": "还有 {n} 张",
+  "orphan.loading": "加载中 …",
+  "orphan.loadFailed": "无法加载：{msg}",
+  "orphan.confirmTitle": "转移负责人",
+  "orphan.confirmBody": "{boards} 上的 {n} 张卡片将从 {from} 转到 {to}。此操作无法撤销。",
+  "orphan.failed": "失败：{msg}"
 }

@@ -234,5 +234,17 @@
   "cron.wed": "середа",
   "cron.thu": "четвер",
   "cron.fri": "п'ятниця",
-  "cron.sat": "субота"
+  "cron.sat": "субота",
+  "orphan.title": "Осиротілі відповідальні",
+  "orphan.hint": "Ці картки призначено людям, яких більше немає серед користувачів.",
+  "orphan.count": "{n} карток · {boards}",
+  "orphan.pick": "вибрати …",
+  "orphan.apply": "Перенести",
+  "orphan.open": "Відкрити картку",
+  "orphan.more": "ще {n}",
+  "orphan.loading": "Завантаження …",
+  "orphan.loadFailed": "Не вдалося завантажити: {msg}",
+  "orphan.confirmTitle": "Перенесення відповідальності",
+  "orphan.confirmBody": "{n} карток на {boards} перейдуть з {from} на {to}. Скасувати це неможливо.",
+  "orphan.failed": "Не вдалося: {msg}"
 }

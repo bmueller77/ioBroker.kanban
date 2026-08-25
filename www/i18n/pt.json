@@ -234,5 +234,17 @@
   "cron.wed": "quarta-feira",
   "cron.thu": "quinta-feira",
   "cron.fri": "sexta-feira",
-  "cron.sat": "sábado"
+  "cron.sat": "sábado",
+  "orphan.title": "Responsáveis órfãos",
+  "orphan.hint": "Estes cartões estão atribuídos a pessoas que já não existem como utilizadores.",
+  "orphan.count": "{n} cartões · {boards}",
+  "orphan.pick": "selecionar …",
+  "orphan.apply": "Transferir",
+  "orphan.open": "Abrir cartão",
+  "orphan.more": "mais {n}",
+  "orphan.loading": "A carregar …",
+  "orphan.loadFailed": "Não foi possível carregar: {msg}",
+  "orphan.confirmTitle": "Transferir responsabilidade",
+  "orphan.confirmBody": "{n} cartões em {boards} passam de {from} para {to}. Isto não pode ser anulado.",
+  "orphan.failed": "Falhou: {msg}"
 }

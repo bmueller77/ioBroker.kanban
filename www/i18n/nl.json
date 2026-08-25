@@ -234,5 +234,17 @@
   "cron.wed": "woensdag",
   "cron.thu": "donderdag",
   "cron.fri": "vrijdag",
-  "cron.sat": "zaterdag"
+  "cron.sat": "zaterdag",
+  "orphan.title": "Verweesde verantwoordelijken",
+  "orphan.hint": "Deze kaarten zijn toegewezen aan personen die niet meer als gebruiker bestaan.",
+  "orphan.count": "{n} kaarten · {boards}",
+  "orphan.pick": "kiezen …",
+  "orphan.apply": "Overnemen",
+  "orphan.open": "Kaart openen",
+  "orphan.more": "nog {n}",
+  "orphan.loading": "Laden …",
+  "orphan.loadFailed": "Kon niet worden geladen: {msg}",
+  "orphan.confirmTitle": "Kaarten overzetten",
+  "orphan.confirmBody": "{n} kaarten op {boards} gaan van {from} naar {to}. Dit kan niet ongedaan worden gemaakt.",
+  "orphan.failed": "Mislukt: {msg}"
 }

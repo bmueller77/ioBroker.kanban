@@ -234,5 +234,17 @@
   "cron.wed": "Mittwoch",
   "cron.thu": "Donnerstag",
   "cron.fri": "Freitag",
-  "cron.sat": "Samstag"
+  "cron.sat": "Samstag",
+  "orphan.title": "Verwaiste Zuständige",
+  "orphan.hint": "Diese Karten sind Personen zugeordnet, die es als Benutzer nicht mehr gibt.",
+  "orphan.count": "{n} Karten · {boards}",
+  "orphan.pick": "auswählen …",
+  "orphan.apply": "Übernehmen",
+  "orphan.open": "Karte öffnen",
+  "orphan.more": "{n} weitere",
+  "orphan.loading": "Wird geladen …",
+  "orphan.loadFailed": "Konnte nicht geladen werden: {msg}",
+  "orphan.confirmTitle": "Zuständigkeit übernehmen",
+  "orphan.confirmBody": "{n} Karten auf {boards} werden von {from} auf {to} umgestellt. Das lässt sich nicht rückgängig machen.",
+  "orphan.failed": "Fehlgeschlagen: {msg}"
 }

@@ -14,6 +14,7 @@ const { Store } = require('../lib/store');
  */
 function newStore() {
     const states = {};
+    const dateien = {};
     const adapter = {
         _language: 'de',
         namespace: 'kanban.9',
@@ -24,10 +25,15 @@ function newStore() {
         setStateChangedAsync: async (id, val) => { states[id] = val; },
         getStateAsync: async () => null,
         delObjectAsync: async () => {},
+        // Dateispeicher fuer die Avatare, damit der Umzug pruefbar ist
+        fileExistsAsync: async (_ns, name) => Object.hasOwn(dateien, name),
+        readFileAsync: async (_ns, name) => ({ file: dateien[name], mimeType: 'image/png' }),
+        writeFileAsync: async (_ns, name, data) => { dateien[name] = data; },
+        delFileAsync: async (_ns, name) => { delete dateien[name]; },
     };
     const store = new Store(adapter, { emitEvent() {} });
     store._schedulePersist = () => {};
-    return { store, states };
+    return { store, states, dateien };
 }
 
 /**
@@ -116,7 +122,7 @@ describe('Verwaiste Zuständige', () => {
         board.members = ['bjoern'];
         const c = store.addCard('b', { title: 'Karte', columnId: 'todo', assignees: ['bjoern'] }, 'test');
 
-        const res = store.reassignUser('bjoern', 'anna', 'test');
+        const res = await store.reassignUser('bjoern', 'anna', 'test');
 
         assert.equal(res.cards, 1);
         assert.deepEqual(store.getBoard('b').cards.find(x => x.id === c.id).assignees, ['anna']);
@@ -129,7 +135,7 @@ describe('Verwaiste Zuständige', () => {
         await store.createBoard({ id: 'b', title: 'B' });
         const c = store.addCard('b', { title: 'Karte', columnId: 'todo', assignees: ['bjoern', 'anna'] }, 'test');
 
-        store.reassignUser('bjoern', 'anna', 'test');
+        await store.reassignUser('bjoern', 'anna', 'test');
 
         assert.deepEqual(store.getBoard('b').cards.find(x => x.id === c.id).assignees, ['anna']);
     });
@@ -139,8 +145,96 @@ describe('Verwaiste Zuständige', () => {
         await store.createBoard({ id: 'b', title: 'B' });
         store.addCard('b', { title: 'Karte', columnId: 'todo', assignees: ['bjoern'] }, 'test');
 
-        assert.throws(() => store.reassignUser('bjoern', 'gibtsnicht', 'test'), /existiert nicht/);
-        assert.throws(() => store.reassignUser('bjoern', 'bjoern', 'test'), /identisch/);
-        assert.throws(() => store.reassignUser('', 'anna', 'test'), /Pflichtfeld/);
+        await assert.rejects(() => store.reassignUser('bjoern', 'gibtsnicht', 'test'), /existiert nicht/);
+        await assert.rejects(() => store.reassignUser('bjoern', 'bjoern', 'test'), /identisch/);
+        await assert.rejects(() => store.reassignUser('', 'anna', 'test'), /Pflichtfeld/);
+    });
+
+    it('laesst Karten im Papierkorb unangetastet', async () => {
+        const { store } = newStore();
+        await store.createBoard({ id: 'b', title: 'B' });
+        const bleibt = store.addCard('b', { title: 'Weg', columnId: 'todo', assignees: ['bjoern'] }, 'test');
+        store.deleteCard('b', bleibt.id, 'test');
+        const zieht = store.addCard('b', { title: 'Bleibt', columnId: 'todo', assignees: ['bjoern'] }, 'test');
+
+        const res = await store.reassignUser('bjoern', 'anna', 'test');
+
+        assert.equal(res.cards, 1);
+        const karten = store.getBoard('b').cards;
+        assert.deepEqual(karten.find(x => x.id === zieht.id).assignees, ['anna']);
+        assert.deepEqual(karten.find(x => x.id === bleibt.id).assignees, ['bjoern']);
+    });
+
+    it('nimmt das Avatarbild mit', async () => {
+        const { store, dateien } = newStore();
+        await store.createBoard({ id: 'b', title: 'B' });
+        store.addCard('b', { title: 'Karte', columnId: 'todo', assignees: ['bjoern'] }, 'test');
+        dateien['avatars/bjoern.png'] = 'BILD';
+
+        const res = await store.reassignUser('bjoern', 'anna', 'test');
+
+        assert.equal(res.avatar, true);
+        assert.equal(dateien['avatars/anna.png'], 'BILD');
+        assert.equal(Object.hasOwn(dateien, 'avatars/bjoern.png'), false);
+    });
+
+    it('ueberschreibt ein vorhandenes Bild der Zielperson nicht', async () => {
+        const { store, dateien } = newStore();
+        await store.createBoard({ id: 'b', title: 'B' });
+        store.addCard('b', { title: 'Karte', columnId: 'todo', assignees: ['bjoern'] }, 'test');
+        dateien['avatars/bjoern.png'] = 'ALT';
+        dateien['avatars/anna.png'] = 'SCHON DA';
+
+        const res = await store.reassignUser('bjoern', 'anna', 'test');
+
+        assert.equal(res.avatar, false);
+        assert.equal(dateien['avatars/anna.png'], 'SCHON DA');
+    });
+});
+
+describe('Verwaiste Zustaendige: Kartenliste', () => {
+    it('nennt Board und Spalte zu jeder Karte', async () => {
+        const { store } = newStore();
+        await store.createBoard({ id: 'b', title: 'Board B' });
+        store.addCard('b', { title: 'Zwei', columnId: 'todo', assignees: ['bjoern'] }, 'test');
+        store.addCard('b', { title: 'Eins', columnId: 'todo', assignees: ['bjoern'] }, 'test');
+
+        const res = store.orphanedCards('bjoern');
+
+        assert.equal(res.total, 2);
+        assert.deepEqual(res.cards.map(c => c.title), ['Eins', 'Zwei']);
+        assert.equal(res.cards[0].boardTitle, 'Board B');
+        assert.ok(res.cards[0].columnTitle);
+    });
+
+    it('laesst den Papierkorb aus', async () => {
+        const { store } = newStore();
+        await store.createBoard({ id: 'b', title: 'B' });
+        const weg = store.addCard('b', { title: 'Weg', columnId: 'todo', assignees: ['bjoern'] }, 'test');
+        store.deleteCard('b', weg.id, 'test');
+        store.addCard('b', { title: 'Da', columnId: 'todo', assignees: ['bjoern'] }, 'test');
+
+        const res = store.orphanedCards('bjoern');
+
+        assert.equal(res.total, 1);
+        assert.equal(res.cards[0].title, 'Da');
+    });
+
+    it('kuerzt auf das Limit, nennt aber die volle Zahl', async () => {
+        const { store } = newStore();
+        await store.createBoard({ id: 'b', title: 'B' });
+        for (const t of ['A', 'B', 'C']) {
+            store.addCard('b', { title: t, columnId: 'todo', assignees: ['bjoern'] }, 'test');
+        }
+
+        const res = store.orphanedCards('bjoern', 2);
+
+        assert.equal(res.total, 3);
+        assert.equal(res.cards.length, 2);
+    });
+
+    it('gibt fuer eine leere Anfrage nichts zurueck', async () => {
+        const { store } = newStore();
+        assert.deepEqual(store.orphanedCards(''), { name: '', total: 0, cards: [] });
     });
 });

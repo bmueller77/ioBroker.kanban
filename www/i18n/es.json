@@ -234,5 +234,17 @@
   "cron.wed": "miércoles",
   "cron.thu": "jueves",
   "cron.fri": "viernes",
-  "cron.sat": "sábado"
+  "cron.sat": "sábado",
+  "orphan.title": "Responsables huérfanos",
+  "orphan.hint": "Estas tarjetas están asignadas a personas que ya no existen como usuarios.",
+  "orphan.count": "{n} tarjetas · {boards}",
+  "orphan.pick": "seleccionar …",
+  "orphan.apply": "Reasignar",
+  "orphan.open": "Abrir tarjeta",
+  "orphan.more": "{n} más",
+  "orphan.loading": "Cargando …",
+  "orphan.loadFailed": "No se pudo cargar: {msg}",
+  "orphan.confirmTitle": "Reasignar tarjetas",
+  "orphan.confirmBody": "{n} tarjetas en {boards} pasan de {from} a {to}. Esto no se puede deshacer.",
+  "orphan.failed": "Error: {msg}"
 }

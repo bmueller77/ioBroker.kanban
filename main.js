@@ -389,7 +389,7 @@ class Kanban extends utils.Adapter {
             case 'listOrphanedAssignees':
                 return { orphaned: this.store.findOrphanedAssignees() };
             case 'reassignUser':
-                return this.store.reassignUser(payload.from, payload.to, source);
+                return await this.store.reassignUser(payload.from, payload.to, source);
             case 'transferCard':
                 return card(
                     this.store.transferCard(

@@ -355,6 +355,19 @@ async function init() {
         if (b) { b.textContent = ''; b.appendChild(mdiIcon(path)); }
     }
 
+    // Punkt am Zahnrad, solange Karten auf Benutzer zeigen, die es nicht mehr
+    // gibt. Einmal beim Laden, nicht bei jedem Poll - der Zustand entsteht
+    // nicht im laufenden Betrieb. In eingebetteten Ansichten entfaellt er mit
+    // dem Zahnrad.
+    if (!state.hideSettings) {
+        api('api/users/orphaned')
+            .then(res => {
+                const btn = document.getElementById('settingsBtn');
+                if (btn && res && (res.orphaned || []).length) { btn.classList.add('has-todo'); }
+            })
+            .catch(() => {});
+    }
+
     await loadBoards();
     const wanted = qs.get('board');
     const first = state.boards.find(b => b.id === wanted) || state.boards[0];

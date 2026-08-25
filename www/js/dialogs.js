@@ -1078,7 +1078,186 @@ export function initDialogs(state, actions) {
                     row.append(prev, nm, colorTrig, pick, file, rm);
                     panel.appendChild(row);
                 }
+                buildOrphanSection(panel);
             });
+        }
+
+        /**
+         * Abschnitt "Verwaiste Zustaendige".
+         *
+         * Erscheint nur, wenn es welche gibt - auf einem gesunden Board ist
+         * hier nichts zu sehen. Der Papierkorb bleibt aussen vor, weil eine
+         * Karte auf dem Weg zur Loeschung niemandem mehr gehoeren muss.
+         *
+         * @param panel Ziel-Element im Reiter "Benutzer"
+         */
+        async function buildOrphanSection(panel) {
+            let liste = [];
+            try {
+                const res = await api('api/users/orphaned');
+                liste = (res && res.orphaned) || [];
+            } catch {
+                return; // Kein Grund, den Reiter wegen des Zusatzes scheitern zu lassen
+            }
+            if (!liste.length) {
+                return;
+            }
+
+            const wrap = el('div', 'orphan-section');
+            const head = el('div', 'orphan-head');
+            head.append(mdiIcon(MDI.alert), el('span', null, t('orphan.title')));
+            wrap.append(head, el('p', 'orphan-hint', t('orphan.hint')));
+            for (const eintrag of liste) {
+                wrap.appendChild(buildOrphanRow(eintrag, wrap));
+            }
+            panel.appendChild(wrap);
+        }
+
+        /**
+         * Eine Zeile: verwaiste ID, Umfang, Ziel-Auswahl und Uebernehmen.
+         *
+         * @param eintrag ein Element aus /api/users/orphaned
+         * @param wrap umgebender Abschnitt, damit er sich am Ende entfernen kann
+         * @returns Zeilen-Element
+         */
+        function buildOrphanRow(eintrag, wrap) {
+            const zeile = el('div', 'orphan-row');
+            const kopf = el('div', 'orphan-main');
+            const links = el('div', 'orphan-id');
+            links.appendChild(el('code', null, eintrag.name));
+
+            // Die Kartenzahl klappt die Liste auf: "13 Karten" allein ist als
+            // Entscheidungsgrundlage zu duenn.
+            const auf = el('button', 'linkbtn orphan-count');
+            auf.type = 'button';
+            const pfeil = el('span', 'orphan-caret');
+            pfeil.appendChild(mdiIcon(MDI.chevronRight));
+            const boards = (eintrag.boards || []).join(', ');
+            auf.append(pfeil, el('span', null, t('orphan.count', { n: eintrag.cards, boards })));
+            links.appendChild(auf);
+
+            const sel = document.createElement('select');
+            const leer = document.createElement('option');
+            leer.value = '';
+            leer.textContent = t('orphan.pick');
+            sel.appendChild(leer);
+            for (const u of state.users || []) {
+                if (u.name === eintrag.name) {
+                    continue;
+                }
+                const o = document.createElement('option');
+                o.value = u.name;
+                o.textContent = u.displayName || u.name;
+                sel.appendChild(o);
+            }
+
+            const ok = el('button', null, t('orphan.apply'));
+            ok.type = 'button';
+            ok.disabled = true;
+            sel.addEventListener('change', () => {
+                ok.disabled = !sel.value;
+            });
+
+            const details = el('div', 'orphan-cards');
+            details.hidden = true;
+            let geladen = false;
+            auf.addEventListener('click', async () => {
+                details.hidden = !details.hidden;
+                pfeil.textContent = '';
+                pfeil.appendChild(mdiIcon(details.hidden ? MDI.chevronRight : MDI.chevronDown));
+                if (details.hidden || geladen) {
+                    return;
+                }
+                geladen = true;
+                details.textContent = t('orphan.loading');
+                try {
+                    const res = await api(`api/users/orphaned/${encodeURIComponent(eintrag.name)}?limit=10`);
+                    fillOrphanCards(details, res);
+                } catch (e) {
+                    details.textContent = t('orphan.loadFailed', { msg: e.message });
+                    geladen = false;
+                }
+            });
+
+            ok.addEventListener('click', async () => {
+                const ziel = (state.users || []).find(u => u.name === sel.value);
+                const jetzt = await confirmDialog({
+                    title: t('orphan.confirmTitle'),
+                    message: t('orphan.confirmBody', {
+                        n: eintrag.cards,
+                        boards,
+                        to: (ziel && (ziel.displayName || ziel.name)) || sel.value,
+                        from: eintrag.name,
+                    }),
+                    ok: t('orphan.apply'),
+                });
+                if (!jetzt) {
+                    return;
+                }
+                ok.disabled = true;
+                try {
+                    await api(`api/users/${encodeURIComponent(eintrag.name)}/reassign`, {
+                        method: 'POST',
+                        body: { to: sel.value },
+                    });
+                } catch (e) {
+                    ok.disabled = false;
+                    alert(t('orphan.failed', { msg: e.message }));
+                    return;
+                }
+                zeile.remove();
+                await actions.avatarsChanged();
+                // War es die letzte, verschwindet der ganze Abschnitt - kein
+                // leerer Rahmen mit "nichts zu tun".
+                if (!wrap.querySelector('.orphan-row')) {
+                    wrap.remove();
+                }
+            });
+
+            kopf.append(links, sel, ok);
+            zeile.append(kopf, details);
+            return zeile;
+        }
+
+        /**
+         * Kartenliste unter einer aufgeklappten Zeile fuellen.
+         *
+         * @param box Ziel-Element
+         * @param res Antwort von /api/users/orphaned/<name>
+         */
+        function fillOrphanCards(box, res) {
+            box.textContent = '';
+            for (const c of res.cards || []) {
+                const z = el('div', 'orphan-card');
+                const txt = el('div', 'orphan-card-main');
+                txt.append(
+                    el('div', 'orphan-card-title' + (c.done ? ' done' : ''), c.title),
+                    el('div', 'orphan-card-meta', `${c.boardTitle} · ${c.columnTitle}`),
+                );
+                z.appendChild(txt);
+                if (c.due) {
+                    z.appendChild(el('span', 'orphan-card-due', c.due));
+                }
+                const oeffnen = el('button', 'linkbtn');
+                oeffnen.type = 'button';
+                oeffnen.title = t('orphan.open');
+                oeffnen.appendChild(mdiIcon(MDI.openInNew));
+                oeffnen.addEventListener('click', async () => {
+                    // Der Karteneditor kennt nur das aktive Board, also erst
+                    // dorthin wechseln. Der Einstellungsdialog schliesst dabei.
+                    bdlg.close();
+                    if (!state.board || state.board.id !== c.boardId) {
+                        await actions.switchBoard(c.boardId);
+                    }
+                    actions.openCard(c.id);
+                });
+                z.appendChild(oeffnen);
+                box.appendChild(z);
+            }
+            const rest = (res.total || 0) - (res.cards || []).length;
+            if (rest > 0) {
+                box.appendChild(el('div', 'orphan-more', t('orphan.more', { n: rest })));
+            }
         }
 
         // ---- Fester Footer: Schliessen + Speichern ----

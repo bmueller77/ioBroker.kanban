@@ -234,5 +234,17 @@
   "cron.wed": "środa",
   "cron.thu": "czwartek",
   "cron.fri": "piątek",
-  "cron.sat": "sobota"
+  "cron.sat": "sobota",
+  "orphan.title": "Osierocone przypisania",
+  "orphan.hint": "Te karty są przypisane do osób, które już nie istnieją jako użytkownicy.",
+  "orphan.count": "{n} kart · {boards}",
+  "orphan.pick": "wybierz …",
+  "orphan.apply": "Przenieś",
+  "orphan.open": "Otwórz kartę",
+  "orphan.more": "jeszcze {n}",
+  "orphan.loading": "Wczytywanie …",
+  "orphan.loadFailed": "Nie udało się wczytać: {msg}",
+  "orphan.confirmTitle": "Przeniesienie przypisań",
+  "orphan.confirmBody": "{n} kart na {boards} przechodzi z {from} na {to}. Tego nie można cofnąć.",
+  "orphan.failed": "Niepowodzenie: {msg}"
 }

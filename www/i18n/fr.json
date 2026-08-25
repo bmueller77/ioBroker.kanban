@@ -234,5 +234,17 @@
   "cron.wed": "mercredi",
   "cron.thu": "jeudi",
   "cron.fri": "vendredi",
-  "cron.sat": "samedi"
+  "cron.sat": "samedi",
+  "orphan.title": "Responsables orphelins",
+  "orphan.hint": "Ces cartes sont attribuées à des personnes qui n'existent plus comme utilisateurs.",
+  "orphan.count": "{n} cartes · {boards}",
+  "orphan.pick": "sélectionner …",
+  "orphan.apply": "Réattribuer",
+  "orphan.open": "Ouvrir la carte",
+  "orphan.more": "{n} de plus",
+  "orphan.loading": "Chargement …",
+  "orphan.loadFailed": "Chargement impossible : {msg}",
+  "orphan.confirmTitle": "Réattribuer les cartes",
+  "orphan.confirmBody": "{n} cartes sur {boards} passent de {from} à {to}. Cette action est irréversible.",
+  "orphan.failed": "Échec : {msg}"
 }

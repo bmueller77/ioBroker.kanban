@@ -234,5 +234,17 @@
   "cron.wed": "Wednesday",
   "cron.thu": "Thursday",
   "cron.fri": "Friday",
-  "cron.sat": "Saturday"
+  "cron.sat": "Saturday",
+  "orphan.title": "Orphaned assignees",
+  "orphan.hint": "These cards are assigned to people who no longer exist as users.",
+  "orphan.count": "{n} cards · {boards}",
+  "orphan.pick": "select …",
+  "orphan.apply": "Reassign",
+  "orphan.open": "Open card",
+  "orphan.more": "{n} more",
+  "orphan.loading": "Loading …",
+  "orphan.loadFailed": "Could not be loaded: {msg}",
+  "orphan.confirmTitle": "Reassign cards",
+  "orphan.confirmBody": "{n} cards on {boards} move from {from} to {to}. This cannot be undone.",
+  "orphan.failed": "Failed: {msg}"
 }
