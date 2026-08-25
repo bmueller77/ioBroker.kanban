@@ -128,17 +128,24 @@ Hier wird festgelegt, **welche Personen es gibt**, die Liste gilt für die gesam
 
 Eine neue Zeile legst du über das **„+"** in der Kopfzeile der Tabelle an, das Papierkorb-Symbol am Zeilenende entfernt sie wieder (ohne Rückfrage). Zeilen ohne ID werden beim Speichern verworfen. Eine frische Instanz bringt zwei Beispielbenutzer `user1` und `user2` mit.
 
-> **Die ID ist der Schlüssel.** Über die Spalte *ID* finden Boards und Karten ihre Personen. Änderst du sie nachträglich, gilt der Benutzer für bestehende Boards als **neue** Person: Das Board verliert diesen Eintrag aus seiner Mitgliederliste. Damit daraus keine Sackgasse wird, sind in einem Board, dessen Mitgliederliste ins Leere zeigt, **alle** Benutzer zuweisbar – du kannst also weiterarbeiten und die Mitglieder in Ruhe unter ⚙ → *Board* wieder anhaken. Karten behalten ihre alten Zuständigen; diese erscheinen dann aber nicht mehr im Personenfilter.
-> *Empfehlung:* Benutzer-IDs vor dem ersten Board festlegen. Der **Anzeigename** lässt sich jederzeit gefahrlos ändern.
+> **Die ID ist der Schlüssel — und nach dem Anlegen gesperrt.** Über die Spalte *ID* finden Boards und Karten ihre Personen; auch die Avatarbilder und die Adressen geteilter Ansichten hängen daran. Eine nachträgliche Änderung ließe all das ins Leere zeigen, und der Adapter könnte nicht einmal aufräumen: Eine Umbenennung ist technisch nicht von „gelöscht und neu angelegt" zu unterscheiden. Deshalb ist das Feld gesperrt, sobald der Benutzer einmal gespeichert wurde. Der Adapter trägt dafür beim nächsten Start ein Merkmal in die Instanzkonfiguration ein und startet dabei einmal neu — einmal je neuem Benutzer, danach nie wieder.
+>
+> Der **Anzeigename** bleibt frei änderbar. Aus „Tom Reich" wird also gefahrlos „Tommy Reich", ohne dass eine Karte etwas davon merkt.
+>
+> *Empfehlung:* Beim Anlegen kurz überlegen — kleingeschrieben, ohne Umlaute, und so, dass die Kennung auch in einer geteilten Adresse (`?users=bjoern`) noch lesbar ist.
 >
 > <a id="benutzer-umbenennen"></a>
-> **Wenn es doch passiert ist:** Der Adapter meldet beim Start, welche Zuständigen ins Leere zeigen, im Log und im State `info.orphanedAssignees`. Umgehängt wird ausdrücklich, nicht geraten — eine Umbenennung ist technisch nicht von „gelöscht und neu angelegt" zu unterscheiden:
+> **Wenn Karten doch ins Leere zeigen** — weil eine ID in einer früheren Version umbenannt wurde, weil jemand gelöscht und neu angelegt wurde, oder weil eine Karte über die API mit einer fremden Kennung entstand —, meldet der Adapter das beim Start im Log und im State `info.orphanedAssignees`, und das Zahnrad in der Board-Kopfzeile bekommt einen kleinen Punkt.
+>
+> Reparieren lässt sich das unter **⚙ → Benutzer → Verwaiste Zuständige**. Dort steht je verwaister Kennung eine Zeile mit Umfang und betroffenen Boards; die Kartenzahl klappt die Liste der Karten auf, damit du vor dem Umhängen hineinsehen kannst. Daneben ein Auswahlfeld mit den vorhandenen Personen und ein Knopf mit Rückfrage. Der Papierkorb bleibt außen vor — was auf dem Weg zur Löschung ist, muss niemandem mehr gehören.
+>
+> Ohne Oberfläche geht dasselbe über die Schnittstelle:
 >
 > ```bash
 > curl -X POST "http://<host>:8095/webhook/<TOKEN>/action" >   -H 'Content-Type: application/json' >   -d '{"cmd":"reassignUser","from":"bjoern_alt","to":"bjoern"}'
 > ```
 >
-> Das zieht die Zuständigen aller Karten **und** die Mitgliederlisten der Boards mit. War die neue ID an einer Karte schon eingetragen, entsteht kein doppelter Eintrag. Die Zielkennung muss in den Instanzeinstellungen existieren, sonst bricht der Aufruf mit `400` ab.
+> Das zieht die Zuständigen aller Karten, die Mitgliederlisten der Boards **und** das Avatarbild mit — Letzteres nur, wenn die Zielperson noch keines hat. War die neue ID an einer Karte schon eingetragen, entsteht kein doppelter Eintrag. Die Zielkennung muss in den Instanzeinstellungen existieren, sonst bricht der Aufruf mit `400` ab.
 
 > **Nicht hier:** Benutzerfarbe, Avatarbild und die Zuordnung zu einzelnen Boards werden seit 0.2.0 direkt in der Weboberfläche gepflegt – siehe [Benutzer im Board](#benutzer-im-board).
 
@@ -349,8 +356,8 @@ Eine Karte hat folgende inhaltliche Felder (per API unter denselben Namen setzba
 | **due** | `YYYY-MM-DD` | Fälligkeitsdatum. Das Badge färbt sich je nach Zustand, siehe [Farben der Fälligkeit](#farben-der-fälligkeit). |
 | **dueTime** | `HH:MM` | Optionale Uhrzeit. Wird über eine Checkbox aktiviert und erscheint auf der Karte hinter dem Datum. Nur wirksam zusammen mit `due`. |
 | **priority** | `0`/`1`/`2` | Normal / Hoch / Dringend. Auf der Karte zeigt sich das als Badge unter dem Titel (vor Fälligkeit und Ort): bei **Normal** erscheint nichts, bei **Hoch** ein oranges `!`, bei **Dringend** ein rotes `!!`. Andere Werte werden abgelehnt, per API mit einem Fehler – siehe [Antworten & Fehler](#antworten--fehler). |
-| **assignees** | Liste von Benutzer-IDs | Zuständige. Steuern, wer Benachrichtigungen erhält. **Pflichtfeld:** In der Oberfläche muss mindestens ein Zuständiger gewählt sein, sonst lässt sich die Karte nicht speichern. Pflichtfelder sind mit einem roten `*` markiert. Über API/Webhook angelegte Karten dürfen ohne Zuständigen bleiben. Zeigt die **Mitgliederliste eines Boards ins Leere** (z. B. nach dem Umbenennen einer Benutzer-ID), sind seit 0.3.0 **alle** Benutzer zuweisbar – so entsteht kein toter Zustand, in dem sich keine Karte mehr speichern lässt. |
-| **labels** | Liste von Label-IDs | Farbige Schlagworte. Labels werden pro Board verwaltet (anlegen, umbenennen, umfärben, löschen). |
+| **assignees** | Liste von Benutzer-IDs | Zuständige. Steuern, wer Benachrichtigungen erhält. **Pflichtfeld, auch über die API:** Mindestens eine Person muss angegeben sein, und jede angegebene ID muss in den Instanzeinstellungen existieren – sonst antwortet die Schnittstelle mit `400` und nennt die vorhandenen Kennungen. Bis dahin nahm die API alles an, auch Platzhalter wie `default`; so entstanden Karten, die sich über den Editor gar nicht anlegen ließen und die hinter einem `users`-Filter unsichtbar blieben. Eine ID, die **bereits auf der Karte steht**, bleibt beim Bearbeiten erlaubt, auch wenn es den Benutzer nicht mehr gibt – sonst wäre ausgerechnet die verwaiste Karte gesperrt. Zeigt die **Mitgliederliste eines Boards ins Leere**, sind seit 0.3.0 **alle** Benutzer zuweisbar. |
+| **labels** | Liste von Label-IDs | Farbige Schlagworte. Labels werden pro Board verwaltet (anlegen, umbenennen, umfärben, löschen). Kommt über die API ein Label an, das das Board nicht kennt, wird es **angelegt** statt abgelehnt (grün, Titel = Kennung; beides danach änderbar). Andernfalls trüge die Karte ein Label, das das Board nicht führt – hinter einem `onlyLabel`-Filter bliebe sie damit unsichtbar. |
 | **color** | Hex-Farbe | Farbiger Balken links an der Karte. Wählbar über einen eingebetteten Colorpicker (Farbfeld + Farbton-Regler + Hex-Eingabe) oder Presets. |
 | **link** | URL | Verknüpfung. Auf der Karte erscheint ein **typabhängiges Icon** – siehe [Link-Typen](#link-typen). |
 | **location** | Text | Ort. Erscheint als Orts-Badge (Pin-Symbol) auf der Karte und wird als `LOCATION` in die Kalender-Einladung übernommen. |
@@ -585,6 +592,7 @@ Für Integrationen im gleichen Netz steht eine REST-API bereit (dieselbe, die di
 | `POST /api/boards/<id>/cards/<cardId>/restore` | Karte aus dem Papierkorb zurückholen (`{ columnId? }`, sonst erste offene Spalte). |
 | `POST /api/boards/<id>/cards/<cardId>/purge` | Karte **endgültig** entfernen. |
 | `POST /api/boards/<id>/trash/empty` | Papierkorb des Boards komplett leeren. |
+| `GET /api/users/orphaned/<name>` | Die Karten hinter einer verwaisten Kennung: Titel, Board, Spalte, Fälligkeit, erledigt ja/nein. `?limit=<n>` kürzt die Liste, die Gesamtzahl steht trotzdem in `total`. Der Papierkorb bleibt außen vor. |
 | `POST /api/boards/<id>/cards/<cardId>/transfer` | Karte auf ein anderes Board übertragen (`{ toBoard, toColumn?, mode: "move"\|"copy", assignees? }`). Mit `toBoard` = eigenes Board und `mode: "copy"` wird die Karte im selben Board geklont. |
 
 > **Schreibzugriffe** auf `/api` brauchen ab 0.1.1 einen Token (`X-Kanban-Token`; die Web-UI schickt ihn automatisch mit), **Lesen** bleibt im LAN offen. Details und Grenzen: [Sicherheit & Zugriffsschutz](#sicherheit--zugriffsschutz). Für Zugriffe von außen die tokenbasierten [Webhooks](#webhooks--eingehend) verwenden.
