@@ -533,13 +533,17 @@ dialog {
 #boardDialog,
 #shareDialog {
     width: min(calc(100vw - 32px), max(600px, 80vw));
-    height: calc(100vh - 48px);
     /* Gescrollt wird innen, nicht am Dialog selbst: sonst liegt der Rollbalken
        in der abgerundeten Ecke und macht sie eckig. */
     overflow: hidden;
     display: flex;
     flex-direction: column;
 }
+/* Karteneditor und Einstellungen stehen fest, damit beim Reiterwechsel und
+   beim Auf- und Zuklappen nichts springt. Die Ansichten richten sich nach
+   ihrem Inhalt - dort gibt es nichts, was die Hoehe veraendern koennte. */
+#cardDialog,
+#boardDialog { height: calc(100vh - 48px); }
 #cardForm,
 #boardDialog > div,
 #shareDialog > div {
