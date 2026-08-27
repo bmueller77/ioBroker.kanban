@@ -248,5 +248,15 @@
   "orphan.confirmBody": "{n} карточек на {boards} перейдут с {from} на {to}. Отменить это нельзя.",
   "orphan.failed": "Не удалось: {msg}",
   "dialog.close": "Закрыть",
-  "card.classification": "Метки и цвет карточки"
+  "card.classification": "Метки и цвет карточки",
+  "link.web": "Веб-ссылка",
+  "link.lan": "Внутренний адрес",
+  "link.email": "Эл. почта",
+  "link.phone": "Телефон",
+  "link.youtube": "YouTube",
+  "link.pdf": "PDF",
+  "link.image": "Изображение",
+  "link.route": "Маршрут",
+  "link.place": "Место",
+  "card.linkInvalid": "Этот адрес нельзя открыть как ссылку. Допустимы http(s), mailto:, tel:, geo:, относительный путь или адрес вида example.com."
 }

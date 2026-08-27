@@ -248,5 +248,15 @@
   "orphan.confirmBody": "{n} kart na {boards} przechodzi z {from} na {to}. Tego nie można cofnąć.",
   "orphan.failed": "Niepowodzenie: {msg}",
   "dialog.close": "Zamknij",
-  "card.classification": "Etykiety i kolor karty"
+  "card.classification": "Etykiety i kolor karty",
+  "link.web": "Link internetowy",
+  "link.lan": "Adres wewnętrzny",
+  "link.email": "E-mail",
+  "link.phone": "Telefon",
+  "link.youtube": "YouTube",
+  "link.pdf": "PDF",
+  "link.image": "Obraz",
+  "link.route": "Trasa",
+  "link.place": "Miejsce",
+  "card.linkInvalid": "Tego adresu nie można otworzyć jako linku. Dozwolone są http(s), mailto:, tel:, geo:, ścieżka względna lub adres w rodzaju example.com."
 }

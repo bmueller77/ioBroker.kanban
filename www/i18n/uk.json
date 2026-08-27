@@ -248,5 +248,15 @@
   "orphan.confirmBody": "{n} карток на {boards} перейдуть з {from} на {to}. Скасувати це неможливо.",
   "orphan.failed": "Не вдалося: {msg}",
   "dialog.close": "Закрити",
-  "card.classification": "Мітки та колір картки"
+  "card.classification": "Мітки та колір картки",
+  "link.web": "Веб-посилання",
+  "link.lan": "Внутрішня адреса",
+  "link.email": "Ел. пошта",
+  "link.phone": "Телефон",
+  "link.youtube": "YouTube",
+  "link.pdf": "PDF",
+  "link.image": "Зображення",
+  "link.route": "Маршрут",
+  "link.place": "Місце",
+  "card.linkInvalid": "Цю адресу не можна відкрити як посилання. Дозволені http(s), mailto:, tel:, geo:, відносний шлях або адреса на кшталт example.com."
 }

@@ -248,5 +248,15 @@
   "orphan.confirmBody": "{n} schede su {boards} passano da {from} a {to}. Non è possibile annullare.",
   "orphan.failed": "Non riuscito: {msg}",
   "dialog.close": "Chiudi",
-  "card.classification": "Etichette e colore scheda"
+  "card.classification": "Etichette e colore scheda",
+  "link.web": "Link web",
+  "link.lan": "Indirizzo interno",
+  "link.email": "E-mail",
+  "link.phone": "Telefono",
+  "link.youtube": "YouTube",
+  "link.pdf": "PDF",
+  "link.image": "Immagine",
+  "link.route": "Percorso",
+  "link.place": "Luogo",
+  "card.linkInvalid": "Questo indirizzo non si può aprire come link. Sono ammessi http(s), mailto:, tel:, geo:, un percorso relativo o un indirizzo come example.com."
 }

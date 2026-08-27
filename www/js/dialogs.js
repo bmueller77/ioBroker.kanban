@@ -3,7 +3,7 @@
 import { openColorPicker, closeColorPicker, colorPickerOpen } from './colorpicker.js';
 import { api } from './api.js';
 import { t } from './i18n.js';
-import { boardUsers, boardMembers, contrastText, mdiIcon, MDI, fmtDate, linkIcon } from './board.js';
+import { boardUsers, boardMembers, contrastText, mdiIcon, MDI, fmtDate, linkIcon, safeHref } from './board.js';
 
 const CARD_COLORS = ['', '#e57373', '#ffb74d', '#fff176', '#aed581', '#4fc3f7', '#9575cd', '#f06292', '#a1887f'];
 const WEEKDAYS = [['Mo', 1], ['Di', 2], ['Mi', 3], ['Do', 4], ['Fr', 5], ['Sa', 6], ['So', 7]];
@@ -80,19 +80,21 @@ function makeRoving(box, auswahl) {
     });
 }
 
-// Die neun Linkarten in der Reihenfolge, in der linkIcon() sie prueft. Der Text
-// ist zugleich Titel und Platzhalter: PDF und Bild erkennt der Adapter an der
-// Dateiendung, dort steht deshalb ein Beispiel statt eines Praefixes.
+// Die neun Linkarten in der Reihenfolge der Leiste - die haeufigsten zuerst.
+// Das ist eine Anzeigereihenfolge; erkannt wird weiterhin in der Reihenfolge,
+// die linkIcon() vorgibt. `vorlage` wird als Platzhalter ins Feld gesetzt: PDF
+// und Bild erkennt der Adapter an der Dateiendung, dort steht deshalb ein
+// vollstaendiges Beispiel statt eines Praefixes.
 const LINK_TYPES = [
-    { art: 'email', vorlage: 'mailto:' },
-    { art: 'phone', vorlage: 'tel:' },
-    { art: 'youtube', vorlage: 'https://youtu.be/' },
-    { art: 'pdf', vorlage: 'https://example.com/anleitung.pdf' },
-    { art: 'image', vorlage: 'https://example.com/bild.png' },
-    { art: 'navigation', vorlage: 'https://www.waze.com/ul?ll=' },
-    { art: 'mapMarker', vorlage: 'geo:' },
-    { art: 'link', vorlage: 'http://192.168.' },
-    { art: 'web', vorlage: 'https://' },
+    { art: 'web', text: 'link.web', vorlage: 'https://' },
+    { art: 'link', text: 'link.lan', vorlage: 'http://192.168.' },
+    { art: 'email', text: 'link.email', vorlage: 'mailto:' },
+    { art: 'phone', text: 'link.phone', vorlage: 'tel:' },
+    { art: 'youtube', text: 'link.youtube', vorlage: 'https://youtu.be/' },
+    { art: 'pdf', text: 'link.pdf', vorlage: 'https://example.com/anleitung.pdf' },
+    { art: 'image', text: 'link.image', vorlage: 'https://example.com/bild.png' },
+    { art: 'navigation', text: 'link.route', vorlage: 'https://www.waze.com/ul?ll=' },
+    { art: 'mapMarker', text: 'link.place', vorlage: 'geo:' },
 ];
 
 function el(tag, cls, text) {
@@ -397,8 +399,8 @@ export function initDialogs(state, actions) {
             const b = el('span', 'link-type');
             b.setAttribute('role', 'button');
             b.dataset.art = typ.art;
-            b.title = typ.vorlage;
-            b.setAttribute('aria-label', typ.vorlage);
+            b.title = t(typ.text);
+            b.setAttribute('aria-label', t(typ.text));
             b.appendChild(mdiIcon(MDI[typ.art]));
             b.addEventListener('click', () => {
                 form.elements.link.placeholder = typ.vorlage;
@@ -418,6 +420,19 @@ export function initDialogs(state, actions) {
      * Dieselbe Erkennung wie auf der Karte, damit die Leiste nicht etwas
      * anderes behauptet als das Board spaeter anzeigt.
      */
+    /**
+     * Das Link-Feld genauso pruefen, wie der Adapter es spaeter darstellt.
+     *
+     * Frueher war das Feld ein type="url" und verlangte damit ein Schema -
+     * `example.com` oder ein relativer Pfad wurden abgewiesen, obwohl
+     * safeHref() beides annimmt. Jetzt entscheidet dieselbe Funktion.
+     */
+    function updateLinkValidity() {
+        const f = form.elements.link;
+        const wert = String(f.value || '').trim();
+        f.setCustomValidity(!wert || safeHref(wert) ? '' : t('card.linkInvalid'));
+    }
+
     function syncLinkType() {
         const box = document.getElementById('linkTypes');
         if (!box) {
@@ -727,6 +742,7 @@ export function initDialogs(state, actions) {
         updatePreview();
         renderLinkTypes();
         syncLinkType();
+        updateLinkValidity();
         applyFolds();
         dlg.showModal();
     }
@@ -742,6 +758,7 @@ export function initDialogs(state, actions) {
     form.addEventListener('input', () => {
         updateFoldInfo();
         syncLinkType();
+        updateLinkValidity();
     });
     form.addEventListener('change', () => updateFoldInfo());
 
@@ -779,6 +796,7 @@ export function initDialogs(state, actions) {
         updatePreview();
         renderLinkTypes();
         syncLinkType();
+        updateLinkValidity();
         applyFolds();
         dlg.showModal();
     }

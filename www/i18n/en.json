@@ -248,5 +248,15 @@
   "orphan.confirmBody": "{n} cards on {boards} move from {from} to {to}. This cannot be undone.",
   "orphan.failed": "Failed: {msg}",
   "dialog.close": "Close",
-  "card.classification": "Labels and card color"
+  "card.classification": "Labels and card color",
+  "link.web": "Web link",
+  "link.lan": "Internal address",
+  "link.email": "E-mail",
+  "link.phone": "Phone",
+  "link.youtube": "YouTube",
+  "link.pdf": "PDF",
+  "link.image": "Image",
+  "link.route": "Route",
+  "link.place": "Location",
+  "card.linkInvalid": "This address cannot be opened as a link. Allowed are http(s), mailto:, tel:, geo:, a relative path, or an address like example.com."
 }

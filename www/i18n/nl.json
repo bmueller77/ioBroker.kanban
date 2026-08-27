@@ -248,5 +248,15 @@
   "orphan.confirmBody": "{n} kaarten op {boards} gaan van {from} naar {to}. Dit kan niet ongedaan worden gemaakt.",
   "orphan.failed": "Mislukt: {msg}",
   "dialog.close": "Sluiten",
-  "card.classification": "Labels en kaartkleur"
+  "card.classification": "Labels en kaartkleur",
+  "link.web": "Weblink",
+  "link.lan": "Intern adres",
+  "link.email": "E-mail",
+  "link.phone": "Telefoon",
+  "link.youtube": "YouTube",
+  "link.pdf": "PDF",
+  "link.image": "Afbeelding",
+  "link.route": "Route",
+  "link.place": "Locatie",
+  "card.linkInvalid": "Dit adres kan niet als link worden geopend. Toegestaan zijn http(s), mailto:, tel:, geo:, een relatief pad of een adres als example.com."
 }

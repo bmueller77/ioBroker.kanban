@@ -248,5 +248,15 @@
   "orphan.confirmBody": "{n} cartes sur {boards} passent de {from} à {to}. Cette action est irréversible.",
   "orphan.failed": "Échec : {msg}",
   "dialog.close": "Fermer",
-  "card.classification": "Labels et couleur de la carte"
+  "card.classification": "Labels et couleur de la carte",
+  "link.web": "Lien web",
+  "link.lan": "Adresse interne",
+  "link.email": "E-mail",
+  "link.phone": "Téléphone",
+  "link.youtube": "YouTube",
+  "link.pdf": "PDF",
+  "link.image": "Image",
+  "link.route": "Itinéraire",
+  "link.place": "Lieu",
+  "card.linkInvalid": "Cette adresse ne peut pas être ouverte comme lien. Sont autorisés http(s), mailto:, tel:, geo:, un chemin relatif ou une adresse comme example.com."
 }

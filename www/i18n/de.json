@@ -248,5 +248,15 @@
   "orphan.confirmBody": "{n} Karten auf {boards} werden von {from} auf {to} umgestellt. Das lässt sich nicht rückgängig machen.",
   "orphan.failed": "Fehlgeschlagen: {msg}",
   "dialog.close": "Schließen",
-  "card.classification": "Labels und Kartenfarbe"
+  "card.classification": "Labels und Kartenfarbe",
+  "link.web": "Weblink",
+  "link.lan": "Interne Adresse",
+  "link.email": "E-Mail",
+  "link.phone": "Telefon",
+  "link.youtube": "YouTube",
+  "link.pdf": "PDF",
+  "link.image": "Bild",
+  "link.route": "Route",
+  "link.place": "Ort",
+  "card.linkInvalid": "Diese Adresse lässt sich nicht als Link öffnen. Erlaubt sind http(s), mailto:, tel:, geo:, ein relativer Pfad oder eine Adresse wie example.com."
 }

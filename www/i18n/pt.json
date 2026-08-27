@@ -248,5 +248,15 @@
   "orphan.confirmBody": "{n} cartões em {boards} passam de {from} para {to}. Isto não pode ser anulado.",
   "orphan.failed": "Falhou: {msg}",
   "dialog.close": "Fechar",
-  "card.classification": "Etiquetas e cor do cartão"
+  "card.classification": "Etiquetas e cor do cartão",
+  "link.web": "Ligação web",
+  "link.lan": "Endereço interno",
+  "link.email": "E-mail",
+  "link.phone": "Telefone",
+  "link.youtube": "YouTube",
+  "link.pdf": "PDF",
+  "link.image": "Imagem",
+  "link.route": "Rota",
+  "link.place": "Local",
+  "card.linkInvalid": "Este endereço não pode ser aberto como ligação. São permitidos http(s), mailto:, tel:, geo:, um caminho relativo ou um endereço como example.com."
 }

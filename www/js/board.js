@@ -423,7 +423,7 @@ export function linkIcon(url) {
 
 /** Nur sichere Schemata als klickbaren Link zulassen. Wehrt javascript:/data: u.ä. ab
  *  (Karten sind auch über die API beschreibbar → Link-Inhalt ist nicht vertrauenswürdig). */
-function safeHref(url) {
+export function safeHref(url) {
     const u = String(url || '').trim();
     if (/^(https?:|mailto:|tel:|geo:)/i.test(u)) return u;               // erlaubte Schemata
     if (/^(\/|\.\/|\.\.\/)/.test(u)) return u;                            // relative Pfade

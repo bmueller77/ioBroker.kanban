@@ -248,5 +248,15 @@
   "orphan.confirmBody": "{n} tarjetas en {boards} pasan de {from} a {to}. Esto no se puede deshacer.",
   "orphan.failed": "Error: {msg}",
   "dialog.close": "Cerrar",
-  "card.classification": "Etiquetas y color de la tarjeta"
+  "card.classification": "Etiquetas y color de la tarjeta",
+  "link.web": "Enlace web",
+  "link.lan": "Dirección interna",
+  "link.email": "Correo",
+  "link.phone": "Teléfono",
+  "link.youtube": "YouTube",
+  "link.pdf": "PDF",
+  "link.image": "Imagen",
+  "link.route": "Ruta",
+  "link.place": "Ubicación",
+  "card.linkInvalid": "Esta dirección no se puede abrir como enlace. Se permiten http(s), mailto:, tel:, geo:, una ruta relativa o una dirección como example.com."
 }
