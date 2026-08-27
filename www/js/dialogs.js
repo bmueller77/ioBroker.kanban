@@ -170,6 +170,23 @@ export function initDialogs(state, actions) {
      * @param zu Was beim Klick geschehen soll
      * @returns der Knopf
      */
+    /**
+     * Nach dem Oeffnen sinnvoll fokussieren.
+     *
+     * Ohne das landet der Fokus auf dem Schliesskreuz: Es steht in der
+     * Ueberschrift und ist damit das erste erreichbare Element im Dialog.
+     *
+     * @param dlg das Dialogelement
+     */
+    function focusFirst(dlg) {
+        const ziel = dlg.querySelector(
+            'input:not([type="hidden"]):not(.req-proxy), select, textarea, button:not(.dlg-x)',
+        );
+        if (ziel) {
+            ziel.focus();
+        }
+    }
+
     function addCloseX(h3, zu) {
         const x = el('button', 'dlg-x');
         x.type = 'button';
@@ -1605,6 +1622,7 @@ export function initDialogs(state, actions) {
         };
         bdlg.addEventListener('cancel', bdlgCancel);
         bdlg.showModal();
+        focusFirst(bdlg);
     }
     // ---------------------------------------------------------- Ansicht teilen
     async function openShareDialog() {
@@ -1763,6 +1781,7 @@ export function initDialogs(state, actions) {
         await Promise.all([fillUsers(opt.board), fillLabels(opt.board), fillColumns(opt.board)]);
         update();
         sdlg.showModal();
+        focusFirst(sdlg);
     }
 
     // ---------------------------------------------------------- In-App-Bestätigung (Feature 61)
@@ -1913,6 +1932,7 @@ export function initDialogs(state, actions) {
         if (others.length) boardSel.value = others[0].id;
         setMode('clone');
         tdlg.showModal();
+        focusFirst(tdlg);
     }
 
     return { openCard, copyCard, openDescription, openBoardManager, openShareDialog, confirm: confirmDialog };
