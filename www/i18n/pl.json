@@ -248,5 +248,5 @@
   "orphan.confirmBody": "{n} kart na {boards} przechodzi z {from} na {to}. Tego nie można cofnąć.",
   "orphan.failed": "Niepowodzenie: {msg}",
   "dialog.close": "Zamknij",
-  "card.classification": "Etykiety i kolor"
+  "card.classification": "Etykiety i kolor karty"
 }

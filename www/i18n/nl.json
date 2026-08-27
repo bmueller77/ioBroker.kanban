@@ -248,5 +248,5 @@
   "orphan.confirmBody": "{n} kaarten op {boards} gaan van {from} naar {to}. Dit kan niet ongedaan worden gemaakt.",
   "orphan.failed": "Mislukt: {msg}",
   "dialog.close": "Sluiten",
-  "card.classification": "Labels en kleur"
+  "card.classification": "Labels en kaartkleur"
 }

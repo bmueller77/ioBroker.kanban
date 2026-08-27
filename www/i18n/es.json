@@ -248,5 +248,5 @@
   "orphan.confirmBody": "{n} tarjetas en {boards} pasan de {from} a {to}. Esto no se puede deshacer.",
   "orphan.failed": "Error: {msg}",
   "dialog.close": "Cerrar",
-  "card.classification": "Etiquetas y color"
+  "card.classification": "Etiquetas y color de la tarjeta"
 }

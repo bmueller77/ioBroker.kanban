@@ -248,5 +248,5 @@
   "orphan.confirmBody": "{n} cards on {boards} move from {from} to {to}. This cannot be undone.",
   "orphan.failed": "Failed: {msg}",
   "dialog.close": "Close",
-  "card.classification": "Labels and colour"
+  "card.classification": "Labels and card color"
 }

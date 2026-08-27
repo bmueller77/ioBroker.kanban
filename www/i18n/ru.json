@@ -248,5 +248,5 @@
   "orphan.confirmBody": "{n} карточек на {boards} перейдут с {from} на {to}. Отменить это нельзя.",
   "orphan.failed": "Не удалось: {msg}",
   "dialog.close": "Закрыть",
-  "card.classification": "Метки и цвет"
+  "card.classification": "Метки и цвет карточки"
 }

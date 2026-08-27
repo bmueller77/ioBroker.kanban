@@ -248,5 +248,5 @@
   "orphan.confirmBody": "{n} schede su {boards} passano da {from} a {to}. Non è possibile annullare.",
   "orphan.failed": "Non riuscito: {msg}",
   "dialog.close": "Chiudi",
-  "card.classification": "Etichette e colore"
+  "card.classification": "Etichette e colore scheda"
 }

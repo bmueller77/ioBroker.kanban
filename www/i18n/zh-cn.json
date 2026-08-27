@@ -248,5 +248,5 @@
   "orphan.confirmBody": "{boards} 上的 {n} 张卡片将从 {from} 转到 {to}。此操作无法撤销。",
   "orphan.failed": "失败：{msg}",
   "dialog.close": "关闭",
-  "card.classification": "标签和颜色"
+  "card.classification": "标签和卡片颜色"
 }

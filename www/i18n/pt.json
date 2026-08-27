@@ -248,5 +248,5 @@
   "orphan.confirmBody": "{n} cartões em {boards} passam de {from} para {to}. Isto não pode ser anulado.",
   "orphan.failed": "Falhou: {msg}",
   "dialog.close": "Fechar",
-  "card.classification": "Etiquetas e cor"
+  "card.classification": "Etiquetas e cor do cartão"
 }
