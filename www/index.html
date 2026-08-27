@@ -105,11 +105,11 @@
             </div>
         </details>
         <details class="fold" data-fold="rec">
-            <summary><span data-i18n="card.recurrence">Wiederholung</span><span class="fold-info"></span></summary>
+            <summary><span id="capRec" data-i18n="card.recurrence">Wiederholung</span><span class="fold-info"></span></summary>
             <div class="fold-body">
         <div class="row">
-            <label data-i18n="card.recurrence">Wiederholung
-                <select name="recType" id="recType">
+            <label>
+                <select name="recType" id="recType" aria-labelledby="capRec">
                     <option value="none" data-i18n="rec.none">Keine</option>
                     <option value="daily" data-i18n="rec.daily">Täglich</option>
                     <option value="weekly" data-i18n="rec.weekly">Wöchentlich</option>
