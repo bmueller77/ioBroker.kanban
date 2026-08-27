@@ -546,7 +546,7 @@ export function initDialogs(state, actions) {
         const src = state.board && state.board.cards.find(c => c.id === cardId);
         if (!src) return;
         editingCardId = null;
-        document.getElementById('cardDialogTitle').textContent = t('card.titleNew');
+        document.getElementById('cardDialogTitleText').textContent = t('card.titleNew');
         document.getElementById('deleteCardBtn').hidden = true;
         document.getElementById('transferCardBtn').hidden = true;
         form.elements.title.value = src.title || '';
@@ -591,7 +591,7 @@ export function initDialogs(state, actions) {
     function openCard(cardId, defaultColumnId) {
         const card = cardId && state.board ? state.board.cards.find(c => c.id === cardId) : null;
         editingCardId = card ? card.id : null;
-        document.getElementById('cardDialogTitle').textContent = card ? t('card.titleEdit') : t('card.titleNew');
+        document.getElementById('cardDialogTitleText').textContent = card ? t('card.titleEdit') : t('card.titleNew');
         document.getElementById('deleteCardBtn').hidden = !card;
         // Auch bei nur einem Board sinnvoll: der Dialog kann die Karte klonen
         document.getElementById('transferCardBtn').hidden = !card;
