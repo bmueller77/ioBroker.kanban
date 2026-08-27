@@ -945,7 +945,7 @@ button.mini {
     dialog .row { flex-direction: column; }
     .fold-pair { grid-template-columns: 1fr; gap: 0; }
     .fold-outer > summary { display: none; }
-    .fold-outer > .fold-body { display: flex; padding: 0; }
+    .fold-outer > .fold-body { display: grid; padding: 0; }
     .fold-outer { border-top: 0; }
     .fold-inner > summary { display: flex; }
     .fold-inner { border-top: 1px solid var(--border); }
