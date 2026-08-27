@@ -221,6 +221,13 @@ export function initDialogs(state, actions) {
             }
             det._fold = true;
             det.addEventListener('toggle', () => {
+                // Ein Abschnitt ohne sichtbare Kopfzeile ist gerade nur Traeger
+                // (siehe unten). Sein Zustand ist keine Entscheidung des
+                // Nutzers und gehoert deshalb nicht gespeichert.
+                const kopf = det.querySelector(':scope > summary');
+                if (kopf && getComputedStyle(kopf).display === 'none') {
+                    return;
+                }
                 const z = readFolds();
                 z[name] = det.open;
                 try {
@@ -230,7 +237,38 @@ export function initDialogs(state, actions) {
                 }
             });
         }
+        holdCarrier();
         updateFoldInfo();
+    }
+
+    /**
+     * Den jeweils unsichtbaren Traeger offen halten.
+     *
+     * Labels und Farbe stecken auf breiten Schirmen in einem gemeinsamen
+     * Abschnitt, darunter tragen sie eigene Kopfzeilen. Der jeweils andere ist
+     * dann nur noch Huelle - und muss offen stehen: Ein zugeklapptes <details>
+     * blendet seinen Inhalt aus, und zwar ueber content-visibility, was sich
+     * per CSS nicht zurueckholen laesst.
+     */
+    function holdCarrier() {
+        const aussen = document.querySelector('#cardForm .fold-outer');
+        if (!aussen) {
+            return;
+        }
+        const schmal = window.matchMedia('(max-width: 600px)').matches;
+        aussen.open = schmal ? true : aussen.open;
+        for (const innen of aussen.querySelectorAll('.fold-inner')) {
+            if (!schmal) {
+                innen.open = true;
+            }
+        }
+        if (schmal) {
+            const z = readFolds();
+            for (const innen of aussen.querySelectorAll('.fold-inner')) {
+                const n = innen.dataset.fold;
+                innen.open = n in z ? !!z[n] : false;
+            }
+        }
     }
 
     /**
@@ -288,7 +326,15 @@ export function initDialogs(state, actions) {
             }
         }
 
-        setz('link', String(f.link.value || '').trim());
+        // Nur der Host: eine volle Adresse mit Parametern sprengt die Kopfzeile
+        const roh = String(f.link.value || '').trim();
+        let kurz = roh;
+        try {
+            kurz = roh ? new URL(roh).host : '';
+        } catch {
+            kurz = roh.length > 30 ? `${roh.slice(0, 30)}...` : roh;
+        }
+        setz('link', kurz);
         setz('loc', String(f.location.value || '').trim());
 
         const rt = f.recType;
@@ -603,6 +649,12 @@ export function initDialogs(state, actions) {
 
     // Die Kopfzeilen der Abschnitte muessen mitlaufen, sonst behauptet ein
     // zugeklappter Abschnitt "leer", obwohl gerade etwas eingetippt wurde.
+    window.matchMedia('(max-width: 600px)').addEventListener('change', () => {
+        if (document.getElementById('cardDialog').open) {
+            holdCarrier();
+        }
+    });
+
     form.addEventListener('input', () => updateFoldInfo());
     form.addEventListener('change', () => updateFoldInfo());
 
