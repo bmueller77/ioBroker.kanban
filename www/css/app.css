@@ -569,7 +569,15 @@ dialog {
     overflow-y: auto;
     padding-right: 4px;
 }
-.dlg-scroll { display: flex; flex-direction: column; gap: 10px; }
+.dlg-scroll {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    /* Nach links ueber den Inhalt hinaus und wieder zurueckgepolstert: sonst
+       schneidet overflow den Fokusrahmen der Felder am Rand ab. */
+    margin-left: -16px;
+    padding-left: 16px;
+}
 dialog > form > h3,
 #boardDialogBody > h3,
 #shareBody > h3 { flex: none; }
@@ -604,7 +612,10 @@ dialog h3 { margin: 0 0 12px; }
 
 dialog form { display: flex; flex-direction: column; gap: 10px; }
 
-dialog label { display: flex; flex-direction: column; gap: 10px; font-size: 13px; font-weight: 600; color: var(--text); flex: 1; }
+dialog label { display: flex; flex-direction: column; gap: 10px; font-size: 13px; font-weight: 600; color: var(--text); }
+/* flex:1 nur in einer Zeile, wo es die Breite verteilt. In einer Spalte wuerde
+   es die Hoehe aufblaehen und alles Folgende nach unten schieben. */
+dialog .row > label { flex: 1; }
 /* [hidden] muss das display:flex der Labels schlagen, sonst bleiben nicht
    relevante Wiederholungs-Felder sichtbar */
 dialog [hidden] { display: none !important; }
@@ -646,10 +657,11 @@ dialog .row { display: flex; gap: 10px; flex-wrap: wrap; }
    tragen im Formular zu schwer auf. */
 .fold { border-top: 1px solid var(--border); }
 .fold > summary {
+    position: relative;
     display: flex;
     align-items: baseline;
     gap: 8px;
-    padding: 8px 2px;
+    padding: 8px 2px 8px 0;
     cursor: pointer;
     font-size: 13px;
     font-weight: 600;
@@ -659,18 +671,20 @@ dialog .row { display: flex; gap: 10px; flex-wrap: wrap; }
 /* Eigenes Dreieck, damit es links steht und sich mitdreht */
 .fold > summary::before {
     content: '';
-    flex: 0 0 auto;
+    position: absolute;
+    left: -12px;
+    top: 50%;
     width: 0;
     height: 0;
     border-left: 5px solid currentColor;
     border-top: 4px solid transparent;
     border-bottom: 4px solid transparent;
+    transform: translateY(-50%);
     transform-origin: 2px 50%;
     transition: transform .12s;
-    align-self: center;
     opacity: .6;
 }
-.fold[open] > summary::before { transform: rotate(90deg); }
+.fold[open] > summary::before { transform: translateY(-50%) rotate(90deg); }
 .fold > summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
 .fold > summary:hover .fold-info { color: var(--text); }
 /* Zusammenfassung rechts: verraet bei zugeklapptem Abschnitt, was drinsteckt */
@@ -705,8 +719,7 @@ dialog .row { display: flex; gap: 10px; flex-wrap: wrap; }
 .link-type:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
 .fold-dot { display: inline-block; width: 12px; height: 12px; border-radius: 50%; vertical-align: -1px; margin-left: 10px; }
-/* Eingerueckt, damit der Inhalt sichtbar zur Kopfzeile gehoert */
-.fold-body { display: flex; flex-direction: column; gap: 10px; padding: 0 0 12px 18px; }
+.fold-body { display: flex; flex-direction: column; gap: 10px; padding: 0 0 12px; }
 .fold-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 18px; align-items: start; }
 
 /* Labels und Kartenfarbe: auf breiten Schirmen ein gemeinsamer Abschnitt, die
@@ -1001,7 +1014,7 @@ button.mini {
     .fold-inner > summary { display: flex; }
     .fold-inner { border-top: 1px solid var(--border); }
     .fold-inner:not([open]) > .fold-body { display: none; }
-    .fold-inner > .fold-body { padding: 0 0 12px 18px; }
+    .fold-inner > .fold-body { padding: 0 0 12px; }
     .share-url { flex-direction: column; }
     .tab-panels { height: auto; max-height: none; overflow: visible; }
     .tabbar { position: sticky; top: 0; background: var(--surface); z-index: 3; }
