@@ -3,7 +3,7 @@
 import { openColorPicker, closeColorPicker, colorPickerOpen } from './colorpicker.js';
 import { api } from './api.js';
 import { t } from './i18n.js';
-import { boardUsers, boardMembers, contrastText, mdiIcon, MDI, fmtDate } from './board.js';
+import { boardUsers, boardMembers, contrastText, mdiIcon, MDI, fmtDate, linkIcon } from './board.js';
 
 const CARD_COLORS = ['', '#e57373', '#ffb74d', '#fff176', '#aed581', '#4fc3f7', '#9575cd', '#f06292', '#a1887f'];
 const WEEKDAYS = [['Mo', 1], ['Di', 2], ['Mi', 3], ['Do', 4], ['Fr', 5], ['Sa', 6], ['So', 7]];
@@ -79,6 +79,21 @@ function makeRoving(box, auswahl) {
         }
     });
 }
+
+// Die neun Linkarten in der Reihenfolge, in der linkIcon() sie prueft. Der Text
+// ist zugleich Titel und Platzhalter: PDF und Bild erkennt der Adapter an der
+// Dateiendung, dort steht deshalb ein Beispiel statt eines Praefixes.
+const LINK_TYPES = [
+    { art: 'email', vorlage: 'mailto:' },
+    { art: 'phone', vorlage: 'tel:' },
+    { art: 'youtube', vorlage: 'https://youtu.be/' },
+    { art: 'pdf', vorlage: 'https://example.com/anleitung.pdf' },
+    { art: 'image', vorlage: 'https://example.com/bild.png' },
+    { art: 'navigation', vorlage: 'https://www.waze.com/ul?ll=' },
+    { art: 'mapMarker', vorlage: 'geo:' },
+    { art: 'link', vorlage: 'http://192.168.' },
+    { art: 'web', vorlage: 'https://' },
+];
 
 function el(tag, cls, text) {
     const e = document.createElement(tag);
@@ -363,6 +378,56 @@ export function initDialogs(state, actions) {
             return cb && cb.checked;
         }).length;
         setz('check', punkte.length ? `${fertig}/${punkte.length}` : '');
+    }
+
+    /**
+     * Die Linkarten als Symbolleiste ueber dem Feld anlegen.
+     *
+     * Ein Klick setzt den Platzhalter des Feldes auf das passende Praefix -
+     * der eingetippte Wert bleibt unangetastet. Die Symbole sind dieselben,
+     * die die Karte spaeter im Board zeigt, in derselben Groesse.
+     */
+    function renderLinkTypes() {
+        const box = document.getElementById('linkTypes');
+        if (!box) {
+            return;
+        }
+        box.textContent = '';
+        for (const typ of LINK_TYPES) {
+            const b = el('span', 'link-type');
+            b.setAttribute('role', 'button');
+            b.dataset.art = typ.art;
+            b.title = typ.vorlage;
+            b.setAttribute('aria-label', typ.vorlage);
+            b.appendChild(mdiIcon(MDI[typ.art]));
+            b.addEventListener('click', () => {
+                form.elements.link.placeholder = typ.vorlage;
+                for (const x of box.children) {
+                    x.classList.toggle('selected', x === b);
+                }
+                form.elements.link.focus();
+            });
+            box.appendChild(b);
+        }
+        makeRoving(box, '.link-type');
+    }
+
+    /**
+     * Die Art hervorheben, die zur eingetragenen Adresse passt.
+     *
+     * Dieselbe Erkennung wie auf der Karte, damit die Leiste nicht etwas
+     * anderes behauptet als das Board spaeter anzeigt.
+     */
+    function syncLinkType() {
+        const box = document.getElementById('linkTypes');
+        if (!box) {
+            return;
+        }
+        const wert = String(form.elements.link.value || '').trim();
+        const pfad = wert ? linkIcon(wert) : null;
+        for (const b of box.children) {
+            b.classList.toggle('selected', !!pfad && MDI[b.dataset.art] === pfad);
+        }
     }
 
     function renderAssigneePick() {
@@ -660,6 +725,8 @@ export function initDialogs(state, actions) {
         updateCheckGrips();
         loadRecurrence(src.recurrence);
         updatePreview();
+        renderLinkTypes();
+        syncLinkType();
         applyFolds();
         dlg.showModal();
     }
@@ -672,7 +739,10 @@ export function initDialogs(state, actions) {
         }
     });
 
-    form.addEventListener('input', () => updateFoldInfo());
+    form.addEventListener('input', () => {
+        updateFoldInfo();
+        syncLinkType();
+    });
     form.addEventListener('change', () => updateFoldInfo());
 
     function openCard(cardId, defaultColumnId) {
@@ -707,6 +777,8 @@ export function initDialogs(state, actions) {
         updateCheckGrips();
         loadRecurrence(card && card.recurrence);
         updatePreview();
+        renderLinkTypes();
+        syncLinkType();
         applyFolds();
         dlg.showModal();
     }

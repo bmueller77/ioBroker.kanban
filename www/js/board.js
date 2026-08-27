@@ -407,7 +407,7 @@ export function refreshDueBadges(cfg) {
 
 /** Icon je Linkart (Muster: Link-Button der Lovelace-ToDo-Karte,
  *  hier mit typabhängigen Icons im Emoji-Stil der App) */
-function linkIcon(url) {
+export function linkIcon(url) {
     const u = String(url || '').toLowerCase();
     if (u.startsWith('mailto:')) return MDI.email;
     if (u.startsWith('tel:')) return MDI.phone;
