@@ -8,6 +8,78 @@ import { boardUsers, boardMembers, contrastText, mdiIcon, MDI, fmtDate } from '.
 const CARD_COLORS = ['', '#e57373', '#ffb74d', '#fff176', '#aed581', '#4fc3f7', '#9575cd', '#f06292', '#a1887f'];
 const WEEKDAYS = [['Mo', 1], ['Di', 2], ['Mi', 3], ['Do', 4], ['Fr', 5], ['Sa', 6], ['So', 7]];
 
+/**
+ * Eine Chip- oder Farbgruppe mit der Tastatur bedienbar machen.
+ *
+ * Die Elemente sind <span> und damit von sich aus nicht fokussierbar: Tab
+ * sprang bisher ueber Zustaendige und Labels hinweg, und beim Farbwaehler war
+ * nur das letzte Feld erreichbar, weil allein das eigene Farbrad ein tabIndex
+ * trug. Umgesetzt als "roving tabindex" - die Gruppe ist ein einziger
+ * Tab-Halt, innerhalb bewegen die Pfeiltasten den Fokus, Leertaste und Enter
+ * loesen aus, Pos1 und Ende springen an die Raender.
+ *
+ * @param box Container der Gruppe
+ * @param auswahl CSS-Auswahl der bedienbaren Elemente darin
+ */
+function makeRoving(box, auswahl) {
+    if (!box) {
+        return;
+    }
+    box.setAttribute('role', 'group');
+    const teile = () => [...box.querySelectorAll(auswahl)];
+    const setzeHalt = ziel => {
+        for (const e of teile()) {
+            e.tabIndex = e === ziel ? 0 : -1;
+        }
+    };
+    const liste = teile();
+    setzeHalt(liste.find(e => e.tabIndex === 0) || liste[0]);
+
+    if (box._roving) {
+        return; // Handler nur einmal haengen, der Inhalt wird oefter neu gebaut
+    }
+    box._roving = true;
+
+    box.addEventListener('keydown', ev => {
+        // Das Anlege-Formular fuer neue Labels enthaelt ein Textfeld. Dort
+        // gehoeren Pfeiltasten und Leertaste dem Text, nicht der Gruppe.
+        if (ev.target.closest('input, textarea, select, .label-new')) {
+            return;
+        }
+        const alle = teile();
+        const i = alle.indexOf(document.activeElement);
+        if (i < 0) {
+            return;
+        }
+        const springe = ziel => {
+            ev.preventDefault();
+            setzeHalt(ziel);
+            ziel.focus();
+        };
+        if (ev.key === 'ArrowRight' || ev.key === 'ArrowDown') {
+            springe(alle[(i + 1) % alle.length]);
+        } else if (ev.key === 'ArrowLeft' || ev.key === 'ArrowUp') {
+            springe(alle[(i - 1 + alle.length) % alle.length]);
+        } else if (ev.key === 'Home') {
+            springe(alle[0]);
+        } else if (ev.key === 'End') {
+            springe(alle[alle.length - 1]);
+        } else if (ev.key === ' ' || ev.key === 'Enter') {
+            ev.preventDefault();
+            document.activeElement.click();
+        }
+    });
+
+    // Ein Mausklick setzt den Tab-Halt mit: sonst kehrt Tab spaeter an eine
+    // andere Stelle der Gruppe zurueck als die zuletzt bediente.
+    box.addEventListener('click', ev => {
+        const teil = ev.target.closest(auswahl);
+        if (teil && box.contains(teil)) {
+            setzeHalt(teil);
+        }
+    });
+}
+
 function el(tag, cls, text) {
     const e = document.createElement(tag);
     if (cls) e.className = cls;
@@ -94,14 +166,24 @@ export function initDialogs(state, actions) {
         for (const u of (state.users || [])) if (selAssignees.has(u.name) && !list.some(x => x.name === u.name)) list.push(u);
         for (const u of list) {
             const chip = el('span', 'pick-chip', u.displayName);
-            chip.style.borderColor = selAssignees.has(u.name) ? (u.color || '') : '';
-            if (selAssignees.has(u.name)) chip.classList.add('selected');
+            chip.setAttribute('role', 'button');
+            // An Ort und Stelle umfaerben statt neu zu rendern: sonst ist der
+            // Tastaturfokus nach jedem Umschalten weg.
+            const male = () => {
+                const an = selAssignees.has(u.name);
+                chip.classList.toggle('selected', an);
+                chip.style.borderColor = an ? (u.color || '') : '';
+                chip.setAttribute('aria-pressed', an ? 'true' : 'false');
+            };
+            male();
             chip.addEventListener('click', () => {
                 selAssignees.has(u.name) ? selAssignees.delete(u.name) : selAssignees.add(u.name);
-                renderAssigneePick();
+                male();
+                updateAssigneeValidity();
             });
             box.appendChild(chip);
         }
+        makeRoving(box, '.pick-chip');
         updateAssigneeValidity();
     }
 
@@ -117,20 +199,26 @@ export function initDialogs(state, actions) {
         box.textContent = '';
         for (const l of (state.board && state.board.labels) || []) {
             const chip = el('span', 'pick-chip', l.title);
-            if (selLabels.has(l.id)) {
-                chip.classList.add('selected');
-                chip.style.background = l.color || '';
-                chip.style.color = contrastText(l.color || '#888');
-            }
+            chip.setAttribute('role', 'button');
+            const male = () => {
+                const an = selLabels.has(l.id);
+                chip.classList.toggle('selected', an);
+                chip.style.background = an ? l.color || '' : '';
+                chip.style.color = an ? contrastText(l.color || '#888') : '';
+                chip.setAttribute('aria-pressed', an ? 'true' : 'false');
+            };
+            male();
             chip.addEventListener('click', () => {
                 selLabels.has(l.id) ? selLabels.delete(l.id) : selLabels.add(l.id);
-                renderLabelPick();
+                male();
             });
             box.appendChild(chip);
         }
         const add = el('span', 'pick-chip', t('label.new'));
+        add.setAttribute('role', 'button');
         add.addEventListener('click', () => showLabelCreator(box));
         box.appendChild(add);
+        makeRoving(box, '.pick-chip');
     }
 
     // Inline-Mini-Form zum Anlegen eines Labels (Name + echter Colorpicker)
@@ -173,6 +261,8 @@ export function initDialogs(state, actions) {
             const sw = el('span', 'color-swatch' + (c ? '' : ' none'));
             if (c) sw.style.background = c;
             sw.dataset.color = c;
+            sw.setAttribute('role', 'button');
+            sw.title = c ? c : t('color.none');
             sw.addEventListener('click', () => { selColor = c; updateSelection(); });
             box.appendChild(sw);
             swatches.push(sw);
@@ -180,16 +270,23 @@ export function initDialogs(state, actions) {
         // Freie Farbwahl (voller Farbraum) über den eigenen Colorpicker
         const custom = el('span', 'color-swatch custom');
         custom.title = t('color.own');
-        custom.tabIndex = 0;
+        custom.setAttribute('role', 'button');
         const openCustom = () => openColorPicker(custom, selColor, col => { selColor = col; updateSelection(); }, { presets: CARD_COLORS });
         custom.addEventListener('click', openCustom);
-        custom.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openCustom(); } });
         box.appendChild(custom);
+        // Kein eigenes tabIndex mehr: die Gruppe vergibt den Tab-Halt, sonst
+        // waere ausgerechnet das letzte Feld der einzige Einstieg.
+        makeRoving(box, '.color-swatch');
 
         function updateSelection() {
             const isCustom = selColor && !CARD_COLORS.includes(selColor);
-            for (const sw of swatches) sw.classList.toggle('selected', sw.dataset.color === selColor);
+            for (const sw of swatches) {
+                const an = sw.dataset.color === selColor;
+                sw.classList.toggle('selected', an);
+                sw.setAttribute('aria-pressed', an ? 'true' : 'false');
+            }
             custom.classList.toggle('selected', !!isCustom);
+            custom.setAttribute('aria-pressed', isCustom ? 'true' : 'false');
             custom.style.background = isCustom ? selColor : '';
         }
         updateSelection();

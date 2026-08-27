@@ -565,6 +565,10 @@ dialog input, dialog textarea, dialog select {
 }
 
 dialog input:focus, dialog textarea:focus, dialog select:focus { outline: 2px solid var(--accent); border-color: transparent; }
+/* Chips und Farbfelder sind per Pfeiltaste erreichbar - ohne sichtbaren Fokus
+   waere nicht zu erkennen, wo man gerade steht. */
+.pick-chip:focus-visible,
+.color-swatch:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
 dialog .row { display: flex; gap: 10px; flex-wrap: wrap; }
 
