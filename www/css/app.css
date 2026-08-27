@@ -526,6 +526,10 @@ dialog {
     max-height: calc(100vh - 48px);
 }
 
+/* Der Karteneditor stellt seine Felder paarweise nebeneinander und profitiert
+   deshalb von mehr Breite als die uebrigen Dialoge. */
+#cardDialog { width: min(calc(100vw - 32px), max(600px, 80vw)); }
+
 dialog::backdrop { background: rgba(0, 0, 0, .45); }
 
 dialog h3 { margin: 0 0 12px; }
