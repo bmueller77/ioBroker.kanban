@@ -88,9 +88,9 @@ function makeRoving(box, auswahl) {
 const LINK_TYPES = [
     { art: 'web', text: 'link.web', vorlage: 'https://github.com/bmueller77/ioBroker.kanban' },
     { art: 'link', text: 'link.lan', vorlage: 'http://127.0.0.1:8095/' },
-    { art: 'email', text: 'link.email', vorlage: 'mailto:' },
-    { art: 'phone', text: 'link.phone', vorlage: 'tel:' },
-    { art: 'youtube', text: 'link.youtube', vorlage: 'https://youtu.be/' },
+    { art: 'email', text: 'link.email', vorlage: 'mailto:name@example.com' },
+    { art: 'phone', text: 'link.phone', vorlage: 'tel:+49123456789' },
+    { art: 'youtube', text: 'link.youtube', vorlage: 'https://youtu.be/xxxxxxxxxxx' },
     { art: 'pdf', text: 'link.pdf', vorlage: 'https://example.com/anleitung.pdf' },
     { art: 'image', text: 'link.image', vorlage: 'https://example.com/bild.png' },
     { art: 'navigation', text: 'link.route', vorlage: 'https://www.waze.com/ul?ll=51.5074,-0.1278' },
