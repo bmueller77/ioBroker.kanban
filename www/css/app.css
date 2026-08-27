@@ -11,11 +11,11 @@
     --danger: #d32f2f;
     --warn: #ef6c00;
     /* Dritte Stufe der Faelligkeit: im Vorlauf, standardmaessig morgen. Sattes
-       Sonnengelb, damit es sich klar vom Orange absetzt - es liegt 23 Grad
+       Sonnengelb, damit es sich klar vom Orange absetzt - es liegt 24 Grad
        daneben im Farbkreis. Gelb vertraegt keine weisse Schrift, deshalb eine
        eigene Textfarbe. Gilt fuer beide Themes: ein abgedunkeltes Gelb wirkt
        auf Schwarz nur schmutzig. */
-    --due-upcoming: #ffd60a;
+    --due-upcoming: #ffd800;
     --due-upcoming-text: #1c1a17;
     --shadow: 0 1px 3px rgba(0, 0, 0, .12);
     --radius: 10px;
@@ -479,7 +479,7 @@ a.link-badge:hover { color: var(--accent, #7E57C2); }
 .badge.due-today { background: var(--warn); color: #fff; }
 /* Im Vorlauf. Der Rueckfallwert haelt eigene Themes am Leben, die die neue
    Variable nicht kennen. */
-.badge.due-soon { background: var(--due-upcoming, #ffd60a); color: var(--due-upcoming-text, #1c1a17); }
+.badge.due-soon { background: var(--due-upcoming, #ffd800); color: var(--due-upcoming-text, #1c1a17); }
 .badge.due-done { background: #2e7d32; color: #fff; }   /* erledigt → grün */
 .badge.prio-1 { background: var(--warn); color: #fff; font-weight: 700; }
 .badge.prio-2 { background: var(--danger); color: #fff; font-weight: 700; }
