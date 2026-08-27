@@ -653,7 +653,7 @@ dialog .row { display: flex; gap: 10px; flex-wrap: wrap; }
     white-space: nowrap;
     max-width: 55%;
 }
-.fold-dot { display: inline-block; width: 12px; height: 12px; border-radius: 50%; vertical-align: -1px; }
+.fold-dot { display: inline-block; width: 12px; height: 12px; border-radius: 50%; vertical-align: -1px; margin-left: 10px; }
 /* Eingerueckt, damit der Inhalt sichtbar zur Kopfzeile gehoert */
 .fold-body { display: flex; flex-direction: column; gap: 10px; padding: 0 0 12px 18px; }
 .fold-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 18px; align-items: start; }
