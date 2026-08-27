@@ -549,10 +549,29 @@ dialog {
 #shareDialog > div {
     flex: 1 1 auto;
     min-height: 0;
-    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
 }
-/* Die Knopfleiste bleibt unten stehen, auch wenn der Inhalt kuerzer ist */
-#cardForm > footer { margin-top: auto; }
+/* Derselbe Aufbau in allen drei Dialogen: Ueberschrift fest oben, ein
+   scrollender Bereich dazwischen, Fusszeile fest unten. */
+.dlg-scroll,
+.tab-panels {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    padding-right: 4px;
+}
+.dlg-scroll { display: flex; flex-direction: column; gap: 10px; }
+dialog > form > h3,
+#boardDialogBody > h3,
+#shareBody > h3 { flex: none; }
+#cardForm > footer,
+#boardDialogBody > footer {
+    flex: none;
+    border-top: 1px solid var(--border);
+    padding-top: 10px;
+    margin-top: 10px;
+}
 
 /* Schliesskreuz oben rechts */
 dialog h3.has-x { display: flex; align-items: center; gap: 8px; }
@@ -823,7 +842,7 @@ dialog footer > button { overflow: hidden; text-overflow: ellipsis; white-space:
 
 /* Board-Verwaltung */
 
-#boardDialogBody { display: flex; flex-direction: column; gap: 10px; max-height: calc(100vh - 84px); }
+#boardDialogBody { display: flex; flex-direction: column; gap: 10px; }
 
 /* Tab-Layout im Einstellungen-Dialog: Kopf + Tabs fest, Inhalt scrollt, Footer fest */
 .tabbar { display: flex; gap: 2px; border-bottom: 1px solid var(--border); flex: none; }
@@ -839,9 +858,9 @@ dialog footer > button { overflow: hidden; text-overflow: ellipsis; white-space:
 }
 .tab-btn:hover { background: none; color: var(--text); }
 .tab-btn.active { color: var(--text); border-bottom-color: var(--accent); }
-.tab-panels { height: 380px; max-height: calc(100vh - 210px); overflow-y: auto; padding-right: 4px; }
+/* Hoehe kommt jetzt vom Dialog, nicht mehr als fester Deckel von 380 px */
 .tab-panel { display: flex; flex-direction: column; gap: 10px; }
-#boardDialogBody > footer { flex: none; border-top: 1px solid var(--border); padding-top: 10px; }
+
 
 .col-edit {
     display: flex;

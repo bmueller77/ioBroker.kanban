@@ -30,6 +30,7 @@
 <dialog id="cardDialog">
     <form method="dialog" id="cardForm">
         <h3 id="cardDialogTitle"><span id="cardDialogTitleText">Karte</span></h3>
+        <div class="dlg-scroll">
         <label>
             <span class="req-cap"><span data-i18n="card.title">Titel</span><span class="req-star" aria-hidden="true">*</span></span>
             <input type="text" name="title" required autocomplete="off" autofocus>
@@ -166,6 +167,7 @@
             </div>
         </details>
         <p class="req-legend"><span class="req-star" aria-hidden="true">*</span> <span data-i18n="card.requiredLegend">Pflichtfeld</span></p>
+        </div>
         <footer>
             <button type="button" id="deleteCardBtn" class="danger" hidden data-i18n="card.delete">Löschen</button>
             <button type="button" id="transferCardBtn" hidden data-i18n="card.manage" data-i18n-title="card.manageTitle">Verwalten</button>
