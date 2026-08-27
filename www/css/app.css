@@ -533,6 +533,9 @@ dialog {
 #boardDialog,
 #shareDialog {
     width: min(calc(100vw - 32px), max(600px, 80vw));
+    /* Links etwas mehr Innenabstand: Darin sitzt das Klappdreieck, und zwar so,
+       dass sein Abstand zum Rand dem zum Text rechts davon entspricht. */
+    padding-left: 24px;
     /* Gescrollt wird innen, nicht am Dialog selbst: sonst liegt der Rollbalken
        in der abgerundeten Ecke und macht sie eckig. */
     overflow: hidden;
@@ -672,7 +675,7 @@ dialog .row { display: flex; gap: 10px; flex-wrap: wrap; }
 .fold > summary::before {
     content: '';
     position: absolute;
-    left: -12px;
+    left: -15px;
     top: 50%;
     width: 0;
     height: 0;
