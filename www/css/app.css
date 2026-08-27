@@ -536,14 +536,22 @@ dialog {
     /* Gescrollt wird innen, nicht am Dialog selbst: sonst liegt der Rollbalken
        in der abgerundeten Ecke und macht sie eckig. */
     overflow: hidden;
+}
+/* display nur im geoeffneten Zustand. Ohne [open] schlaegt diese ID-Regel die
+   Browser-Vorgabe dialog:not([open]) { display: none }: Der geschlossene
+   Dialog bliebe sichtbar liegen, und weil er dann nicht mehr in der obersten
+   Ebene ist, zeichnet das Board durch ihn hindurch. */
+#cardDialog[open],
+#boardDialog[open],
+#shareDialog[open] {
     display: flex;
     flex-direction: column;
 }
 /* Karteneditor und Einstellungen stehen fest, damit beim Reiterwechsel und
    beim Auf- und Zuklappen nichts springt. Die Ansichten richten sich nach
    ihrem Inhalt - dort gibt es nichts, was die Hoehe veraendern koennte. */
-#cardDialog,
-#boardDialog { height: calc(100vh - 48px); }
+#cardDialog[open],
+#boardDialog[open] { height: calc(100vh - 48px); }
 #cardForm,
 #boardDialog > div,
 #shareDialog > div {
