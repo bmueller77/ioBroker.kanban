@@ -86,15 +86,15 @@ function makeRoving(box, auswahl) {
 // und Bild erkennt der Adapter an der Dateiendung, dort steht deshalb ein
 // vollstaendiges Beispiel statt eines Praefixes.
 const LINK_TYPES = [
-    { art: 'web', text: 'link.web', vorlage: 'https://' },
-    { art: 'link', text: 'link.lan', vorlage: 'http://192.168.' },
+    { art: 'web', text: 'link.web', vorlage: 'https://github.com/bmueller77/ioBroker.kanban' },
+    { art: 'link', text: 'link.lan', vorlage: 'http://127.0.0.1:8095/' },
     { art: 'email', text: 'link.email', vorlage: 'mailto:' },
     { art: 'phone', text: 'link.phone', vorlage: 'tel:' },
     { art: 'youtube', text: 'link.youtube', vorlage: 'https://youtu.be/' },
     { art: 'pdf', text: 'link.pdf', vorlage: 'https://example.com/anleitung.pdf' },
     { art: 'image', text: 'link.image', vorlage: 'https://example.com/bild.png' },
-    { art: 'navigation', text: 'link.route', vorlage: 'https://www.waze.com/ul?ll=' },
-    { art: 'mapMarker', text: 'link.place', vorlage: 'geo:' },
+    { art: 'navigation', text: 'link.route', vorlage: 'https://www.waze.com/ul?ll=51.5074,-0.1278' },
+    { art: 'mapMarker', text: 'link.place', vorlage: 'geo:51.5074,-0.1278' },
 ];
 
 function el(tag, cls, text) {
