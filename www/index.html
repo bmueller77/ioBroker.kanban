@@ -75,29 +75,33 @@
                 <input type="time" name="calendarDuration" step="60" value="01:00">
             </label>
         </div>
-        <div class="fold-pair">
-            <details class="fold" data-fold="labels">
-                <summary><span data-i18n="card.labels">Labels</span><span class="fold-info"></span></summary>
-                <div class="fold-body">
-                    <div id="labelPick" class="chip-pick"></div>
-                </div>
-            </details>
-            <details class="fold" data-fold="color">
-                <summary><span data-i18n="card.color">Kartenfarbe</span><span class="fold-info"></span></summary>
-                <div class="fold-body">
-                    <div id="colorPick" class="color-pick"></div>
-                </div>
-            </details>
-        </div>
-        <details class="fold" data-fold="linkloc">
-            <summary><span data-i18n="card.linkLocation">Link und Ort</span><span class="fold-info"></span></summary>
+        <details class="fold fold-outer" data-fold="class">
+            <summary><span data-i18n="card.classification">Labels und Farbe</span><span class="fold-info"></span></summary>
+            <div class="fold-body fold-pair">
+                <details class="fold fold-inner" data-fold="labels">
+                    <summary><span data-i18n="card.labels">Labels</span><span class="fold-info"></span></summary>
+                    <div class="fold-body">
+                        <div id="labelPick" class="chip-pick"></div>
+                    </div>
+                </details>
+                <details class="fold fold-inner" data-fold="color">
+                    <summary><span data-i18n="card.color">Kartenfarbe</span><span class="fold-info"></span></summary>
+                    <div class="fold-body">
+                        <div id="colorPick" class="color-pick"></div>
+                    </div>
+                </details>
+            </div>
+        </details>
+        <details class="fold" data-fold="link">
+            <summary><span id="capLink" data-i18n="card.link">Link</span><span class="fold-info"></span></summary>
             <div class="fold-body">
-                <label data-i18n="card.link">Link
-                    <input type="url" name="link" placeholder="https://...">
-                </label>
-                <label data-i18n="card.location">Ort
-                    <input type="text" name="location" data-i18n-ph="card.locationPlaceholder" placeholder="z.B. Rathaus, Musterstr. 1">
-                </label>
+                <input type="url" name="link" placeholder="https://..." aria-labelledby="capLink">
+            </div>
+        </details>
+        <details class="fold" data-fold="loc">
+            <summary><span id="capLoc" data-i18n="card.location">Ort</span><span class="fold-info"></span></summary>
+            <div class="fold-body">
+                <input type="text" name="location" data-i18n-ph="card.locationPlaceholder" placeholder="z.B. Rathaus, Musterstr. 1" aria-labelledby="capLoc">
             </div>
         </details>
         <details class="fold" data-fold="rec">

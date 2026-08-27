@@ -247,7 +247,6 @@
   "orphan.confirmTitle": "Zuständigkeit übernehmen",
   "orphan.confirmBody": "{n} Karten auf {boards} werden von {from} auf {to} umgestellt. Das lässt sich nicht rückgängig machen.",
   "orphan.failed": "Fehlgeschlagen: {msg}",
-  "card.linkLocation": "Link und Ort",
-  "fold.empty": "leer",
-  "dialog.close": "Schließen"
+  "dialog.close": "Schließen",
+  "card.classification": "Labels und Farbe"
 }

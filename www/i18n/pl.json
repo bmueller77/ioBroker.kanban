@@ -247,7 +247,6 @@
   "orphan.confirmTitle": "Przeniesienie przypisań",
   "orphan.confirmBody": "{n} kart na {boards} przechodzi z {from} na {to}. Tego nie można cofnąć.",
   "orphan.failed": "Niepowodzenie: {msg}",
-  "card.linkLocation": "Link i miejsce",
-  "fold.empty": "puste",
-  "dialog.close": "Zamknij"
+  "dialog.close": "Zamknij",
+  "card.classification": "Etykiety i kolor"
 }

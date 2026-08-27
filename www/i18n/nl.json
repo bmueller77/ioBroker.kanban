@@ -247,7 +247,6 @@
   "orphan.confirmTitle": "Kaarten overzetten",
   "orphan.confirmBody": "{n} kaarten op {boards} gaan van {from} naar {to}. Dit kan niet ongedaan worden gemaakt.",
   "orphan.failed": "Mislukt: {msg}",
-  "card.linkLocation": "Link en locatie",
-  "fold.empty": "leeg",
-  "dialog.close": "Sluiten"
+  "dialog.close": "Sluiten",
+  "card.classification": "Labels en kleur"
 }

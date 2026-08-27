@@ -247,7 +247,6 @@
   "orphan.confirmTitle": "Reasignar tarjetas",
   "orphan.confirmBody": "{n} tarjetas en {boards} pasan de {from} a {to}. Esto no se puede deshacer.",
   "orphan.failed": "Error: {msg}",
-  "card.linkLocation": "Enlace y lugar",
-  "fold.empty": "vacío",
-  "dialog.close": "Cerrar"
+  "dialog.close": "Cerrar",
+  "card.classification": "Etiquetas y color"
 }

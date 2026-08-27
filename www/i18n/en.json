@@ -247,7 +247,6 @@
   "orphan.confirmTitle": "Reassign cards",
   "orphan.confirmBody": "{n} cards on {boards} move from {from} to {to}. This cannot be undone.",
   "orphan.failed": "Failed: {msg}",
-  "card.linkLocation": "Link and location",
-  "fold.empty": "empty",
-  "dialog.close": "Close"
+  "dialog.close": "Close",
+  "card.classification": "Labels and colour"
 }

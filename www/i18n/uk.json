@@ -247,7 +247,6 @@
   "orphan.confirmTitle": "Перенесення відповідальності",
   "orphan.confirmBody": "{n} карток на {boards} перейдуть з {from} на {to}. Скасувати це неможливо.",
   "orphan.failed": "Не вдалося: {msg}",
-  "card.linkLocation": "Посилання та місце",
-  "fold.empty": "порожньо",
-  "dialog.close": "Закрити"
+  "dialog.close": "Закрити",
+  "card.classification": "Мітки та колір"
 }

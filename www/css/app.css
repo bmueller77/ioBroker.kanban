@@ -644,9 +644,15 @@ dialog .row { display: flex; gap: 10px; flex-wrap: wrap; }
 .fold-dot { display: inline-block; width: 12px; height: 12px; border-radius: 50%; vertical-align: -1px; }
 /* Eingerueckt, damit der Inhalt sichtbar zur Kopfzeile gehoert */
 .fold-body { display: flex; flex-direction: column; gap: 10px; padding: 0 0 12px 18px; }
-/* Labels und Kartenfarbe nebeneinander, unter 600 px untereinander - und in
-   beiden Faellen einzeln klappbar. */
-.fold-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; align-items: start; }
+.fold-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 18px; align-items: start; }
+
+/* Labels und Kartenfarbe: auf breiten Schirmen ein gemeinsamer Abschnitt, die
+   beiden inneren Kopfzeilen sind ausgeblendet und ihr Inhalt dauerhaft
+   sichtbar. Unter 600 px genau umgekehrt - dann traegt jeder seine eigene
+   Kopfzeile und laesst sich einzeln klappen. */
+.fold-inner > summary { display: none; }
+.fold-inner > .fold-body { display: flex; padding: 0; }
+.fold-inner { border-top: 0; }
 
 dialog footer { display: flex; gap: 8px; margin-top: 8px; }
 /* Beschriftungen werden bei wenig Platz mit … gekuerzt statt umzubrechen */
@@ -925,7 +931,14 @@ button.mini {
         min-height: 0; flex: 1 1 auto; max-height: none;
     }
     dialog .row { flex-direction: column; }
-    .fold-pair { grid-template-columns: 1fr; }
+    .fold-pair { grid-template-columns: 1fr; gap: 0; }
+    .fold-outer > summary { display: none; }
+    .fold-outer > .fold-body { display: flex; padding: 0; }
+    .fold-outer { border-top: 0; }
+    .fold-inner > summary { display: flex; }
+    .fold-inner { border-top: 1px solid var(--border); }
+    .fold-inner:not([open]) > .fold-body { display: none; }
+    .fold-inner > .fold-body { padding: 0 0 12px 18px; }
     .share-url { flex-direction: column; }
     .tab-panels { height: auto; max-height: none; overflow: visible; }
     .tabbar { position: sticky; top: 0; background: var(--surface); z-index: 3; }

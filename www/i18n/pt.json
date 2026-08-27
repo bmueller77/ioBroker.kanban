@@ -247,7 +247,6 @@
   "orphan.confirmTitle": "Transferir responsabilidade",
   "orphan.confirmBody": "{n} cartões em {boards} passam de {from} para {to}. Isto não pode ser anulado.",
   "orphan.failed": "Falhou: {msg}",
-  "card.linkLocation": "Ligação e local",
-  "fold.empty": "vazio",
-  "dialog.close": "Fechar"
+  "dialog.close": "Fechar",
+  "card.classification": "Etiquetas e cor"
 }

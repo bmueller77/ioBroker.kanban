@@ -247,7 +247,6 @@
   "orphan.confirmTitle": "Riassegna schede",
   "orphan.confirmBody": "{n} schede su {boards} passano da {from} a {to}. Non è possibile annullare.",
   "orphan.failed": "Non riuscito: {msg}",
-  "card.linkLocation": "Link e luogo",
-  "fold.empty": "vuoto",
-  "dialog.close": "Chiudi"
+  "dialog.close": "Chiudi",
+  "card.classification": "Etichette e colore"
 }

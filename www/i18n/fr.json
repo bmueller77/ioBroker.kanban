@@ -247,7 +247,6 @@
   "orphan.confirmTitle": "Réattribuer les cartes",
   "orphan.confirmBody": "{n} cartes sur {boards} passent de {from} à {to}. Cette action est irréversible.",
   "orphan.failed": "Échec : {msg}",
-  "card.linkLocation": "Lien et lieu",
-  "fold.empty": "vide",
-  "dialog.close": "Fermer"
+  "dialog.close": "Fermer",
+  "card.classification": "Labels et couleur"
 }

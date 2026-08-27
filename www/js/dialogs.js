@@ -241,10 +241,12 @@ export function initDialogs(state, actions) {
      */
     function updateFoldInfo() {
         const feld = name => document.querySelector(`#cardForm details.fold[data-fold="${name}"] .fold-info`);
+        // Leer bleibt leer: eine Kopfzeile ohne Inhalt sagt nichts, also steht
+        // rechts auch nichts.
         const setz = (name, text) => {
             const e = feld(name);
             if (e) {
-                e.textContent = text || t('fold.empty');
+                e.textContent = text || '';
             }
         };
         const f = form.elements;
@@ -256,22 +258,38 @@ export function initDialogs(state, actions) {
             .map(id => ((state.board && state.board.labels) || []).find(l => l.id === id))
             .filter(Boolean)
             .map(l => l.title);
-        setz('labels', titel.length > 3 ? `${titel.slice(0, 3).join(', ')} +${titel.length - 3}` : titel.join(', '));
+        const labelText =
+            titel.length > 3 ? `${titel.slice(0, 3).join(', ')} +${titel.length - 3}` : titel.join(', ');
+        setz('labels', labelText);
 
         // Farbe als Tupfer statt als Hex-Wert: die Zahl sagt niemandem etwas
+        const punkt = () => {
+            const e = el('span', 'fold-dot');
+            e.style.background = selColor;
+            return e;
+        };
         const farbe = feld('color');
         if (farbe) {
             farbe.textContent = '';
             if (selColor) {
-                const punkt = el('span', 'fold-dot');
-                punkt.style.background = selColor;
-                farbe.appendChild(punkt);
-            } else {
-                farbe.textContent = t('fold.empty');
+                farbe.appendChild(punkt());
+            }
+        }
+        // Gemeinsame Kopfzeile von Labels und Farbe. Auf breiten Schirmen ist
+        // sie die einzige sichtbare, darunter uebernehmen die beiden inneren.
+        const beides = feld('class');
+        if (beides) {
+            beides.textContent = '';
+            if (labelText) {
+                beides.appendChild(document.createTextNode(labelText));
+            }
+            if (selColor) {
+                beides.appendChild(punkt());
             }
         }
 
-        setz('linkloc', String(f.location.value || '').trim() || String(f.link.value || '').trim());
+        setz('link', String(f.link.value || '').trim());
+        setz('loc', String(f.location.value || '').trim());
 
         const rt = f.recType;
         setz('rec', rt.value === 'none' ? '' : rt.options[rt.selectedIndex].textContent);

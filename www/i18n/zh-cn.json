@@ -247,7 +247,6 @@
   "orphan.confirmTitle": "转移负责人",
   "orphan.confirmBody": "{boards} 上的 {n} 张卡片将从 {from} 转到 {to}。此操作无法撤销。",
   "orphan.failed": "失败：{msg}",
-  "card.linkLocation": "链接和地点",
-  "fold.empty": "空",
-  "dialog.close": "关闭"
+  "dialog.close": "关闭",
+  "card.classification": "标签和颜色"
 }
