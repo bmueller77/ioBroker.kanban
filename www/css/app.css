@@ -583,8 +583,26 @@ dialog footer > button { overflow: hidden; text-overflow: ellipsis; white-space:
 }
 
 .pick-chip.selected { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent) inset; }
+/* Unausgewaehlt: eigene Farbe nur als Rand und Tupfer, damit die Auswahl
+   trotzdem auf einen Blick erkennbar bleibt. */
+.pick-chip.tinted { border-color: var(--chip); }
+.pick-chip.tinted::before {
+    content: '';
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--chip);
+    margin-right: 6px;
+    vertical-align: 1px;
+}
+.pick-chip.tinted.selected::before { display: none; }
 .req-star { color: var(--danger); margin-left: 2px; font-weight: 700; }
+.cap,
 .req-cap { display: inline-flex; align-items: baseline; align-self: flex-start; }
+/* Nur die einfache Beschriftung braucht Abstand; bei req-cap klebt der
+   Pflicht-Stern absichtlich am Wort. */
+.cap { gap: 5px; }
 .req-legend { color: var(--danger); font-size: 10px; margin: 6px 0 0; }
 .req-proxy { display: block; width: 100%; height: 1px; margin: -1px 0 0; padding: 0; border: 0; opacity: 0; pointer-events: none; }
 
@@ -1038,7 +1056,8 @@ button.mini {
 .card.card-trash .card-action:hover { color: var(--accent); }
 
 /* ---- 0.3.0: gepaarte Editor-Felder (Feature 62) ---- */
-dialog .row .field { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 8px; }
+dialog .field { display: flex; flex-direction: column; gap: 8px; }
+dialog .row .field { flex: 1; min-width: 0; }
 dialog .icon-btn { padding: 5px 8px; line-height: 1; }
 dialog .icon-btn svg { display: block; }
 dialog label.inline-num { flex-direction: row; align-items: center; gap: 6px; }

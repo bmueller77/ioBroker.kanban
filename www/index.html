@@ -34,7 +34,13 @@
             <span class="req-cap"><span data-i18n="card.title">Titel</span><span class="req-star" aria-hidden="true">*</span></span>
             <input type="text" name="title" required autocomplete="off">
         </label>
-        <label><span data-i18n="card.description">Beschreibung</span> <span class="hint" data-i18n="card.markdown">(Markdown)</span>
+        <div class="field">
+            <label><span class="req-cap"><span data-i18n="card.assignees">Zuständig</span><span class="req-star" aria-hidden="true">*</span></span></label>
+            <div id="assigneePick" class="chip-pick"></div>
+            <input id="assigneeValidity" class="req-proxy" tabindex="-1" aria-hidden="true">
+        </div>
+        <label>
+            <span class="cap"><span data-i18n="card.description">Beschreibung</span> <span class="hint" data-i18n="card.markdown">(Markdown)</span></span>
             <textarea name="description" rows="4"></textarea>
         </label>
         <div id="descPreview" class="md-preview" hidden></div>
@@ -67,26 +73,21 @@
                 <input type="time" name="calendarDuration" step="60" value="01:00">
             </label>
         </div>
-        <label data-i18n="card.location">Ort
-            <input type="text" name="location" data-i18n-ph="card.locationPlaceholder" placeholder="z.B. Rathaus, Musterstr. 1">
-        </label>
         <div class="row">
-            <div class="field">
-                <label><span class="req-cap"><span data-i18n="card.assignees">Zuständig</span><span class="req-star" aria-hidden="true">*</span></span></label>
-                <div id="assigneePick" class="chip-pick"></div>
-                <input id="assigneeValidity" class="req-proxy" tabindex="-1" aria-hidden="true">
-            </div>
             <div class="field">
                 <label data-i18n="card.labels">Labels</label>
                 <div id="labelPick" class="chip-pick"></div>
             </div>
-        </div>
-        <div class="row">
             <label data-i18n="card.color">Kartenfarbe
                 <div id="colorPick" class="color-pick"></div>
             </label>
+        </div>
+        <div class="row">
             <label data-i18n="card.link">Link
-                <input type="url" name="link" placeholder="https://&hellip;">
+                <input type="url" name="link" placeholder="https://...">
+            </label>
+            <label data-i18n="card.location">Ort
+                <input type="text" name="location" data-i18n-ph="card.locationPlaceholder" placeholder="z.B. Rathaus, Musterstr. 1">
             </label>
         </div>
         <div class="row">

@@ -117,6 +117,12 @@ export function initDialogs(state, actions) {
         box.textContent = '';
         for (const l of (state.board && state.board.labels) || []) {
             const chip = el('span', 'pick-chip', l.title);
+            // Auch unausgewaehlt die Labelfarbe zeigen: sonst sieht man erst
+            // nach dem Klick, wie das Label auf der Karte aussehen wird.
+            if (l.color) {
+                chip.classList.add('tinted');
+                chip.style.setProperty('--chip', l.color);
+            }
             if (selLabels.has(l.id)) {
                 chip.classList.add('selected');
                 chip.style.background = l.color || '';
