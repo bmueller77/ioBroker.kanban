@@ -587,20 +587,6 @@ dialog footer > button { overflow: hidden; text-overflow: ellipsis; white-space:
 }
 
 .pick-chip.selected { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent) inset; }
-/* Unausgewaehlt: eigene Farbe nur als Rand und Tupfer, damit die Auswahl
-   trotzdem auf einen Blick erkennbar bleibt. */
-.pick-chip.tinted { border-color: var(--chip); }
-.pick-chip.tinted::before {
-    content: '';
-    display: inline-block;
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: var(--chip);
-    margin-right: 6px;
-    vertical-align: 1px;
-}
-.pick-chip.tinted.selected::before { display: none; }
 .req-star { color: var(--danger); margin-left: 2px; font-weight: 700; }
 .cap,
 .req-cap { display: inline-flex; align-items: baseline; align-self: flex-start; }
