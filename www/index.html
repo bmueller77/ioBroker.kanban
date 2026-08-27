@@ -39,11 +39,13 @@
             <div id="assigneePick" class="chip-pick"></div>
             <input id="assigneeValidity" class="req-proxy" tabindex="-1" aria-hidden="true">
         </div>
-        <label>
-            <span class="cap"><span data-i18n="card.description">Beschreibung</span> <span class="hint" data-i18n="card.markdown">(Markdown)</span></span>
-            <textarea name="description" rows="4"></textarea>
-        </label>
-        <div id="descPreview" class="md-preview" hidden></div>
+        <details class="fold" data-fold="desc">
+            <summary><span class="cap"><span id="capDesc" data-i18n="card.description">Beschreibung</span> <span class="hint" data-i18n="card.markdown">(Markdown)</span></span><span class="fold-info"></span></summary>
+            <div class="fold-body">
+                <textarea name="description" rows="4" aria-labelledby="capDesc"></textarea>
+                <div id="descPreview" class="md-preview" hidden></div>
+            </div>
+        </details>
         <div class="row">
             <label data-i18n="card.dueDate">Fällig am
                 <input type="date" name="due">
@@ -73,23 +75,34 @@
                 <input type="time" name="calendarDuration" step="60" value="01:00">
             </label>
         </div>
-        <div class="row">
-            <div class="field">
-                <label data-i18n="card.labels">Labels</label>
-                <div id="labelPick" class="chip-pick"></div>
+        <div class="fold-pair">
+            <details class="fold" data-fold="labels">
+                <summary><span data-i18n="card.labels">Labels</span><span class="fold-info"></span></summary>
+                <div class="fold-body">
+                    <div id="labelPick" class="chip-pick"></div>
+                </div>
+            </details>
+            <details class="fold" data-fold="color">
+                <summary><span data-i18n="card.color">Kartenfarbe</span><span class="fold-info"></span></summary>
+                <div class="fold-body">
+                    <div id="colorPick" class="color-pick"></div>
+                </div>
+            </details>
+        </div>
+        <details class="fold" data-fold="linkloc">
+            <summary><span data-i18n="card.linkLocation">Link und Ort</span><span class="fold-info"></span></summary>
+            <div class="fold-body">
+                <label data-i18n="card.link">Link
+                    <input type="url" name="link" placeholder="https://...">
+                </label>
+                <label data-i18n="card.location">Ort
+                    <input type="text" name="location" data-i18n-ph="card.locationPlaceholder" placeholder="z.B. Rathaus, Musterstr. 1">
+                </label>
             </div>
-            <label data-i18n="card.color">Kartenfarbe
-                <div id="colorPick" class="color-pick"></div>
-            </label>
-        </div>
-        <div class="row">
-            <label data-i18n="card.link">Link
-                <input type="url" name="link" placeholder="https://...">
-            </label>
-            <label data-i18n="card.location">Ort
-                <input type="text" name="location" data-i18n-ph="card.locationPlaceholder" placeholder="z.B. Rathaus, Musterstr. 1">
-            </label>
-        </div>
+        </details>
+        <details class="fold" data-fold="rec">
+            <summary><span data-i18n="card.recurrence">Wiederholung</span><span class="fold-info"></span></summary>
+            <div class="fold-body">
         <div class="row">
             <label data-i18n="card.recurrence">Wiederholung
                 <select name="recType" id="recType">
@@ -138,10 +151,16 @@
         <div id="recWeekdayWrap" class="chip-pick" hidden></div>
         <div id="recCronInfo" class="rec-cron-info" hidden></div>
         <div id="recHint" class="hint" hidden></div>
+            </div>
+        </details>
 
-        <label data-i18n="card.checklist">Checkliste</label>
-        <div id="checklistEdit"></div>
-        <button type="button" id="addCheckItem" class="linkbtn" data-i18n="card.addCheckItem">+ Punkt hinzufügen</button>
+        <details class="fold" data-fold="check">
+            <summary><span data-i18n="card.checklist">Checkliste</span><span class="fold-info"></span></summary>
+            <div class="fold-body">
+                <div id="checklistEdit"></div>
+                <button type="button" id="addCheckItem" class="linkbtn" data-i18n="card.addCheckItem">+ Punkt hinzufügen</button>
+            </div>
+        </details>
         <p class="req-legend"><span class="req-star" aria-hidden="true">*</span> <span data-i18n="card.requiredLegend">Pflichtfeld</span></p>
         <footer>
             <button type="button" id="deleteCardBtn" class="danger" hidden data-i18n="card.delete">Löschen</button>

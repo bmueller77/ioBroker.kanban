@@ -246,5 +246,8 @@
   "orphan.loadFailed": "Konnte nicht geladen werden: {msg}",
   "orphan.confirmTitle": "Zuständigkeit übernehmen",
   "orphan.confirmBody": "{n} Karten auf {boards} werden von {from} auf {to} umgestellt. Das lässt sich nicht rückgängig machen.",
-  "orphan.failed": "Fehlgeschlagen: {msg}"
+  "orphan.failed": "Fehlgeschlagen: {msg}",
+  "card.linkLocation": "Link und Ort",
+  "fold.empty": "leer",
+  "dialog.close": "Schließen"
 }

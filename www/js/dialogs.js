@@ -159,6 +159,131 @@ export function initDialogs(state, actions) {
 
     // ---------------------------------------------------------- Karten-Dialog
 
+    /**
+     * Schliesskreuz oben rechts in eine Dialog-Ueberschrift setzen.
+     *
+     * Die Dialoge hatten bisher nur ihre Knoepfe unten. Auf einem grossen
+     * Schirm ist das weit weg vom Blick, und bei einem hohen Dialog muss man
+     * dafuer scrollen.
+     *
+     * @param h3 Ueberschrift des Dialogs
+     * @param zu Was beim Klick geschehen soll
+     * @returns der Knopf
+     */
+    function addCloseX(h3, zu) {
+        const x = el('button', 'dlg-x');
+        x.type = 'button';
+        x.title = t('dialog.close');
+        x.setAttribute('aria-label', t('dialog.close'));
+        x.appendChild(mdiIcon(MDI.close));
+        x.addEventListener('click', zu);
+        h3.classList.add('has-x');
+        h3.appendChild(x);
+        return x;
+    }
+
+    const FOLD_KEY = 'kanban.folds';
+
+    /**
+     * Zustand der Abschnitte lesen.
+     *
+     * Vorgabe auf einem frischen Geraet: nur die Beschreibung offen. Der Rest
+     * ist optional, und die Kopfzeile verraet ohnehin, ob etwas drinsteht.
+     *
+     * @returns Zuordnung Abschnitt -> offen
+     */
+    function readFolds() {
+        try {
+            const v = JSON.parse(localStorage.getItem(FOLD_KEY) || 'null');
+            if (v && typeof v === 'object') {
+                return v;
+            }
+        } catch {
+            /* kaputter Eintrag: Vorgabe */
+        }
+        return { desc: true };
+    }
+
+    /**
+     * Abschnitte oeffnen bzw. schliessen und den Wechsel merken.
+     *
+     * Der Zustand gilt geraeteweit und nicht je Karte: Wer die Wiederholung nie
+     * braucht, klappt sie einmal zu und hat dann Ruhe - auch bei der naechsten
+     * neuen Karte.
+     */
+    function applyFolds() {
+        const zustand = readFolds();
+        for (const det of document.querySelectorAll('#cardForm details.fold')) {
+            const name = det.dataset.fold;
+            det.open = name in zustand ? !!zustand[name] : name === 'desc';
+            if (det._fold) {
+                continue;
+            }
+            det._fold = true;
+            det.addEventListener('toggle', () => {
+                const z = readFolds();
+                z[name] = det.open;
+                try {
+                    localStorage.setItem(FOLD_KEY, JSON.stringify(z));
+                } catch {
+                    /* privater Modus: dann eben nicht gemerkt */
+                }
+            });
+        }
+        updateFoldInfo();
+    }
+
+    /**
+     * Kopfzeilen der Abschnitte beschriften.
+     *
+     * Ohne das verbirgt ein zugeklappter Abschnitt seinen Inhalt. Rechts steht
+     * deshalb, was darin steckt, oder "leer".
+     */
+    function updateFoldInfo() {
+        const feld = name => document.querySelector(`#cardForm details.fold[data-fold="${name}"] .fold-info`);
+        const setz = (name, text) => {
+            const e = feld(name);
+            if (e) {
+                e.textContent = text || t('fold.empty');
+            }
+        };
+        const f = form.elements;
+
+        const beschr = String(f.description.value || '').trim().replace(/\s+/g, ' ');
+        setz('desc', beschr.length > 40 ? `${beschr.slice(0, 40)}...` : beschr);
+
+        const titel = [...selLabels]
+            .map(id => ((state.board && state.board.labels) || []).find(l => l.id === id))
+            .filter(Boolean)
+            .map(l => l.title);
+        setz('labels', titel.length > 3 ? `${titel.slice(0, 3).join(', ')} +${titel.length - 3}` : titel.join(', '));
+
+        // Farbe als Tupfer statt als Hex-Wert: die Zahl sagt niemandem etwas
+        const farbe = feld('color');
+        if (farbe) {
+            farbe.textContent = '';
+            if (selColor) {
+                const punkt = el('span', 'fold-dot');
+                punkt.style.background = selColor;
+                farbe.appendChild(punkt);
+            } else {
+                farbe.textContent = t('fold.empty');
+            }
+        }
+
+        setz('linkloc', String(f.location.value || '').trim() || String(f.link.value || '').trim());
+
+        const rt = f.recType;
+        setz('rec', rt.value === 'none' ? '' : rt.options[rt.selectedIndex].textContent);
+
+        const punkte = [...document.querySelectorAll('#checklistEdit .check-item')];
+        const fertig = punkte.filter(z => {
+            const cb = z.querySelector('input[type="checkbox"]');
+            return cb && cb.checked;
+        }).length;
+        setz('check', punkte.length ? `${fertig}/${punkte.length}` : '');
+    }
+
     function renderAssigneePick() {
         const box = document.getElementById('assigneePick');
         box.textContent = '';
@@ -211,6 +336,7 @@ export function initDialogs(state, actions) {
             chip.addEventListener('click', () => {
                 selLabels.has(l.id) ? selLabels.delete(l.id) : selLabels.add(l.id);
                 male();
+                updateFoldInfo();
             });
             box.appendChild(chip);
         }
@@ -288,6 +414,7 @@ export function initDialogs(state, actions) {
             custom.classList.toggle('selected', !!isCustom);
             custom.setAttribute('aria-pressed', isCustom ? 'true' : 'false');
             custom.style.background = isCustom ? selColor : '';
+            updateFoldInfo();
         }
         updateSelection();
     }
@@ -310,6 +437,7 @@ export function initDialogs(state, actions) {
     function updateCheckGrips() {
         const box = document.getElementById('checklistEdit');
         if (box) box.classList.toggle('multi', box.querySelectorAll('.check-item').length > 1);
+        updateFoldInfo();
     }
 
     function addCheckRow(item) {
@@ -392,7 +520,9 @@ export function initDialogs(state, actions) {
         const dd = document.getElementById('descDialog');
         const body = document.getElementById('descDialogBody');
         body.textContent = '';
-        body.appendChild(el('h3', 'desc-title', card.title || ''));
+        const descH3 = el('h3', 'desc-title', card.title || '');
+        addCloseX(descH3, () => dd.close());
+        body.appendChild(descH3);
         const md = el('div', 'md-preview desc-body');
         renderMarkdownInto(md, card.description);
         body.appendChild(md);
@@ -449,8 +579,14 @@ export function initDialogs(state, actions) {
         updateCheckGrips();
         loadRecurrence(src.recurrence);
         updatePreview();
+        applyFolds();
         dlg.showModal();
     }
+
+    // Die Kopfzeilen der Abschnitte muessen mitlaufen, sonst behauptet ein
+    // zugeklappter Abschnitt "leer", obwohl gerade etwas eingetippt wurde.
+    form.addEventListener('input', () => updateFoldInfo());
+    form.addEventListener('change', () => updateFoldInfo());
 
     function openCard(cardId, defaultColumnId) {
         const card = cardId && state.board ? state.board.cards.find(c => c.id === cardId) : null;
@@ -484,6 +620,7 @@ export function initDialogs(state, actions) {
         updateCheckGrips();
         loadRecurrence(card && card.recurrence);
         updatePreview();
+        applyFolds();
         dlg.showModal();
     }
 
@@ -672,6 +809,7 @@ export function initDialogs(state, actions) {
         addCheckRow().querySelector('input[type=text]').focus();
     });
     document.getElementById('cancelCardBtn').addEventListener('click', () => dlg.close());
+    addCloseX(document.getElementById('cardDialogTitle'), () => dlg.close());
     document.getElementById('deleteCardBtn').addEventListener('click', async () => {
         if (!editingCardId) return;
         if (!await confirmDialog({ title: t('card.delete'), message: t('confirm.deleteCard'), danger: true, ok: t('card.delete') })) return;
@@ -732,7 +870,13 @@ export function initDialogs(state, actions) {
     async function openBoardManager() {
         const body = document.getElementById('boardDialogBody');
         body.textContent = '';
-        body.appendChild(el('h3', null, t('settings.title')));
+        const settingsH3 = el('h3', null, t('settings.title'));
+        addCloseX(settingsH3, async () => {
+            if (await guardUnsaved()) {
+                bdlg.close();
+            }
+        });
+        body.appendChild(settingsH3);
 
         const tabbar = el('div', 'tabbar');
         const panels = el('div', 'tab-panels');
@@ -1397,7 +1541,9 @@ export function initDialogs(state, actions) {
         const sdlg = document.getElementById('shareDialog');
         const body = document.getElementById('shareBody');
         body.textContent = '';
-        body.appendChild(el('h3', null, t('share.title')));
+        const shareH3 = el('h3', null, t('share.title'));
+        addCloseX(shareH3, () => sdlg.close());
+        body.appendChild(shareH3);
         body.appendChild(el('p', 'hint', t('share.hint')));
 
         const opt = {
@@ -1584,7 +1730,9 @@ export function initDialogs(state, actions) {
         const tdlg = document.getElementById('transferDialog');
         const body = document.getElementById('transferBody');
         body.textContent = '';
-        body.appendChild(el('h3', null, t('transfer.title')));
+        const transferH3 = el('h3', null, t('transfer.title'));
+        addCloseX(transferH3, () => tdlg.close());
+        body.appendChild(transferH3);
         const others = state.boards.filter(b => b.id !== state.board.id);
         const foot = el('footer');
         const cancel = el('button', null, t('boards.close')); cancel.type = 'button';

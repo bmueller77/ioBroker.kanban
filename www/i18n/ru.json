@@ -246,5 +246,8 @@
   "orphan.loadFailed": "Не удалось загрузить: {msg}",
   "orphan.confirmTitle": "Перенос ответственности",
   "orphan.confirmBody": "{n} карточек на {boards} перейдут с {from} на {to}. Отменить это нельзя.",
-  "orphan.failed": "Не удалось: {msg}"
+  "orphan.failed": "Не удалось: {msg}",
+  "card.linkLocation": "Ссылка и место",
+  "fold.empty": "пусто",
+  "dialog.close": "Закрыть"
 }
