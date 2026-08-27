@@ -343,7 +343,15 @@ Per board you can choose where the "open card" link in notification e-mails poin
 
 **Card anatomy (since 0.3.0):** the **assignees** sit as a stack of avatars in the top right corner and the title text flows around them. Hovering or tapping the stack fans the faces out to the left without changing the line breaks. Long titles are cut off after **two lines** with an ellipsis, the full title stays available as a tooltip. The **card footer** holds the checklist progress on the left, the expand chevron in the middle and the icons for **description, link and recurrence** on the right, in that order. Clicking the description icon opens the description in a **read-only window** with rendered Markdown; links inside always open in a new tab. The chevron's hit area is deliberately wider and taller than the symbol itself so it is easy to hit by touch. Whether a checklist is expanded or collapsed is **remembered per device and board**, just like the column sort modes, and survives a reload.
 
-Since 0.3.0 the editor opens **only via the pencil icon right next to the end of the title**; clicking anywhere on the card no longer opens it. That keeps the editor from popping up by accident while scrolling or tapping. Cards can still be grabbed and dragged anywhere. Inside the editor the fields are arranged like this: title, description, then the row with due date, time, priority and column, directly below it the calendar invite and the location (both belong to scheduling), then assignees and labels side by side, card colour and link side by side, followed by recurrence and checklist. On narrow screens the paired fields stack. The footer holds **Delete**, **Manage** (transfer/clone), **Cancel** and **Save**.
+Since 0.3.0 the editor opens **only via the pencil icon right next to the end of the title**; clicking anywhere on the card no longer opens it. That keeps the editor from popping up by accident while scrolling or tapping. Cards can still be grabbed and dragged anywhere.
+
+The two required fields come first: **title**, and directly below it **assignees**. Then the row with due date, time, priority and column, and below that the calendar invite. Everything else sits in **collapsible sections** since 0.3.2: description, labels and card colour, link, location, recurrence, checklist.
+
+The right-hand end of each section header says what is inside: an excerpt of the description, the chosen labels with a colour dot, the location, the recurrence pattern, the state of the checklist. A collapsed section therefore hides nothing, it summarises. Which sections are open is **remembered per device** and applies to the next new card as well; on a fresh install only the description is open. Labels and card colour share one header on wide screens; below 600 px each gets its own and collapses separately.
+
+The footer holds **Delete**, **Manage** (transfer/clone), **Cancel** and **Save**. A **×** in the top right closes the dialog, as in every dialog of the board.
+
+**The keyboard reaches everything.** Tab moves from field to field and also onto the section headers; Enter or space opens a section. The chip groups (assignees, labels, card colour, link types) are a single tab stop each: inside them the arrow keys move, Home and End jump to the ends, space or Enter selects.
 
 A card has the following content fields (settable via the API under the same names):
 
@@ -399,7 +407,9 @@ The board derives a matching icon (Material Design Icons) from the address you e
 | <img src="../icons/lan.svg" width="22" alt="icon"> | internal address: private ranges (`10.`, `172.16.` to `172.31.`, `192.168.`), `127.`, `169.254.`, `localhost` plus host names ending in `.local` `.lan` `.home` `.internal` `.fritz.box` | `http://192.168.1.10:8123/` |
 | <img src="../icons/web.svg" width="22" alt="icon"> | everything else | `https://example.com` |
 
-Only the safe schemes `http(s)`, `mailto:`, `tel:` and `geo:` are clickable (see [Security & access control](#security--access-control)).
+Since 0.3.2 a **bar with these nine icons** sits above the link field, in the order web link, internal address, e-mail, phone, YouTube, PDF, image, route, location. Clicking one puts a matching example into the field as a placeholder, for example `tel:+49123456789` instead of `https://...`. Anything already typed stays untouched. The other way round, the bar highlights which type matches the address currently entered, and follows along while you type.
+
+Only the safe schemes `http(s)`, `mailto:`, `tel:` and `geo:` are clickable (see [Security & access control](#security--access-control)). **Since 0.3.2 the field accepts exactly what the board later renders:** on top of those schemes that means relative paths and addresses without a scheme such as `example.com`, which get `https://` prepended. Everything else, `javascript:` or `data:` for instance, is rejected on save instead of being silently ignored on display.
 
 ### Sorting & order
 

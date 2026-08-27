@@ -343,7 +343,15 @@ Je Board lässt sich festlegen, wohin der "Karte öffnen"-Link in den Benachrich
 
 **Aufbau einer Karte (seit 0.3.0):** Die **Zuständigen** stehen als Avatarstapel oben rechts, der Titeltext umfließt sie. Ein Zeigen mit der Maus oder ein Tipp auf den Stapel fächert die Gesichter nach links auf, ohne den Zeilenumbruch zu verändern. Lange Titel werden nach **zwei Zeilen** mit "..." abgeschnitten, der vollständige Titel steht im Tooltip. Im **Kartenfuß** steht links der Checklisten-Fortschritt, mittig der Chevron zum Auf- und Zuklappen und rechts die Symbole für **Beschreibung, Link und Wiederholung** in dieser Reihenfolge. Ein Klick auf das Beschreibungssymbol öffnet die Beschreibung in einem **Lesefenster** mit gerendertem Markdown; Links darin öffnen immer in einem neuen Tab. Die Klickfläche des Chevrons ist bewusst breiter und höher als das Symbol selbst, damit sie auch per Touch gut zu treffen ist. Ob eine Checkliste auf- oder zugeklappt ist, wird **pro Gerät und Board gemerkt** - genau wie die Sortierung der Spalten - und bleibt nach einem Neuladen erhalten.
 
-Der Editor öffnet sich seit 0.3.0 **ausschließlich über das Stift-Symbol direkt rechts neben dem Titel**; ein Klick irgendwo auf die Karte öffnet ihn nicht mehr. Das verhindert, dass der Editor beim Scrollen oder Antippen versehentlich aufgeht. Karten lassen sich weiterhin überall anfassen und ziehen. Im Editor sind die Felder so angeordnet: Titel, Beschreibung, dann die Zeile mit Fälligkeit, Uhrzeit, Priorität und Spalte, direkt darunter die Kalender-Einladung und der Ort (beide gehören inhaltlich zur Terminplanung), anschließend Zuständige und Labels nebeneinander, Kartenfarbe und Link nebeneinander, danach Wiederholung und Checkliste. Auf schmalen Bildschirmen rutschen die gepaarten Felder untereinander. In der Fußzeile stehen **Löschen**, **Verwalten** (übertragen/klonen), **Abbrechen** und **Speichern**.
+Der Editor öffnet sich seit 0.3.0 **ausschließlich über das Stift-Symbol direkt rechts neben dem Titel**; ein Klick irgendwo auf die Karte öffnet ihn nicht mehr. Das verhindert, dass der Editor beim Scrollen oder Antippen versehentlich aufgeht. Karten lassen sich weiterhin überall anfassen und ziehen.
+
+Oben stehen die beiden Pflichtfelder: **Titel**, direkt darunter **Zuständig**. Es folgt die Zeile mit Fälligkeit, Uhrzeit, Priorität und Spalte, darunter die Kalender-Einladung. Alles Weitere steckt seit 0.3.2 in **aufklappbaren Abschnitten**: Beschreibung, Labels und Kartenfarbe, Link, Ort, Wiederholung, Checkliste.
+
+Rechts in jeder Abschnittszeile steht, was darin steckt: ein Auszug der Beschreibung, die gewählten Labels samt Farbtupfer, der Ort, das Wiederholungsmuster, der Stand der Checkliste. Ein zugeklappter Abschnitt verbirgt also nichts, er fasst zusammen. Welche Abschnitte offen sind, **merkt sich das Gerät** und gilt auch für die nächste neue Karte; frisch installiert ist nur die Beschreibung offen. Labels und Kartenfarbe teilen sich auf breiten Bildschirmen eine Kopfzeile, unter 600 px trägt jedes seine eigene und lässt sich einzeln klappen.
+
+In der Fußzeile stehen **Löschen**, **Verwalten** (übertragen/klonen), **Abbrechen** und **Speichern**. Oben rechts schließt ein **×** den Dialog, wie in allen Dialogen des Boards.
+
+**Mit der Tastatur** lässt sich der Editor vollständig bedienen. Tab springt von Feld zu Feld und dabei auch auf die Abschnittsköpfe; Enter oder Leertaste klappt einen Abschnitt auf. Die Chip-Gruppen (Zuständige, Labels, Kartenfarbe, Linktypen) sind je ein einziger Tab-Halt: darin bewegen die Pfeiltasten, Pos1 und Ende springen an die Ränder, Leertaste oder Enter wählt aus.
 
 Eine Karte hat folgende inhaltliche Felder (per API unter denselben Namen setzbar):
 
@@ -399,7 +407,9 @@ Aus der eingetragenen Adresse leitet das Board automatisch ein passendes Icon ab
 | <img src="../icons/lan.svg" width="22" alt="Icon"> | interne Adresse: private Bereiche (`10.`, `172.16.`-`172.31.`, `192.168.`), `127.`, `169.254.`, `localhost` sowie Hostnamen auf `.local` `.lan` `.home` `.internal` `.fritz.box` | `http://192.168.1.10:8123/` |
 | <img src="../icons/web.svg" width="22" alt="Icon"> | alles Übrige | `https://example.com` |
 
-Anklickbar sind nur die sicheren Schemata `http(s)`, `mailto:`, `tel:` und `geo:` - siehe [Sicherheit & Zugriffsschutz](#sicherheit--zugriffsschutz).
+Über dem Link-Feld steht seit 0.3.2 eine **Leiste mit diesen neun Symbolen**, in der Reihenfolge Weblink, interne Adresse, E-Mail, Telefon, YouTube, PDF, Bild, Route, Ort. Ein Klick darauf setzt ein passendes Beispiel als Platzhalter ins Feld, etwa `tel:+49123456789` statt `https://...`. Der eingetippte Wert bleibt dabei unangetastet. Umgekehrt hebt die Leiste hervor, welche Art zu einer bereits eingetragenen Adresse passt, und läuft beim Tippen mit.
+
+Anklickbar sind nur die sicheren Schemata `http(s)`, `mailto:`, `tel:` und `geo:` - siehe [Sicherheit & Zugriffsschutz](#sicherheit--zugriffsschutz). **Das Feld nimmt seit 0.3.2 genau das an, was das Board später auch darstellt:** zusätzlich zu den Schemata also relative Pfade und Adressen ohne Schema wie `example.com`, die um `https://` ergänzt werden. Alles Übrige, etwa `javascript:` oder `data:`, wird schon beim Speichern abgewiesen statt erst beim Anzeigen ignoriert.
 
 ### Sortierung & Reihenfolge
 
