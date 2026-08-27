@@ -534,9 +534,21 @@ dialog {
 #shareDialog {
     width: min(calc(100vw - 32px), max(600px, 80vw));
     height: calc(100vh - 48px);
+    /* Gescrollt wird innen, nicht am Dialog selbst: sonst liegt der Rollbalken
+       in der abgerundeten Ecke und macht sie eckig. */
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
 }
+#cardForm,
 #boardDialog > div,
-#shareDialog > div { display: flex; flex-direction: column; height: 100%; }
+#shareDialog > div {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+}
+/* Die Knopfleiste bleibt unten stehen, auch wenn der Inhalt kuerzer ist */
+#cardForm > footer { margin-top: auto; }
 
 /* Schliesskreuz oben rechts */
 dialog h3.has-x { display: flex; align-items: center; gap: 8px; }
