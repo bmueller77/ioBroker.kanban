@@ -289,13 +289,39 @@ function applySort(cards, mode, rev) {
     if (mode === 'age') return cards.slice().sort((a, b) => cmpAge(a, b, rev));
     return cards.slice().sort((a, b) => a.order - b.order);   // manual + grid: eigene Reihenfolge
 }
-function colSortKey(board, col) { return `${board.id}:${col.id}`; }
+function colKey(board, col) { return `${board.id}:${col.id}`; }
 // Gespeichert wird "<modus>" oder "<modus>:rev" (umgekehrte Richtung).
 function getSortMode(state, board, col) {
-    const raw = String((state.sortModes && state.sortModes[colSortKey(board, col)]) || '');
+    const raw = String((state.sortModes && state.sortModes[colKey(board, col)]) || '');
     const [m, flag] = raw.split(':');
     return SORT_MODES.includes(m) ? { mode: m, rev: flag === 'rev' } : { mode: 'manual', rev: false };
 }
+// Welche Zahlen im Spaltenkopf stehen, je Board+Spalte und pro Geraet.
+// Reihenfolge im Menue wie im Kopf: erst die Gesamtzahl, dann nach Dringlichkeit.
+const COUNT_MODES = ['total', 'soon', 'today', 'overdue'];
+export function getCountModes(state, board, col) {
+    const roh = (state.countModes && state.countModes[colKey(board, col)]) || null;
+    const gewaehlt = Array.isArray(roh) ? COUNT_MODES.filter(m => roh.includes(m)) : [];
+    return gewaehlt.length ? gewaehlt : ['total'];
+}
+
+/**
+ * Faelligkeitsstufen zaehlen.
+ *
+ * @param liste Eintraege "JJJJ-MM-TT|hh:mm" (Uhrzeit darf leer sein)
+ * @param cfg Konfiguration der Oberflaeche (fuer den Vorlauf)
+ */
+export function countDues(liste, cfg) {
+    const z = { soon: 0, today: 0, overdue: 0 };
+    for (const e of liste) {
+        if (!e) continue;
+        const [d, tm] = e.split('|');
+        const st = dueState(d, tm, cfg);
+        if (st in z) z[st]++;
+    }
+    return z;
+}
+
 function trashDaysLeft(card, retention) {
     const ts = Date.parse(card.trashedAt || '');
     if (!ts) return retention;
@@ -305,13 +331,110 @@ function trashDaysLeft(card, retention) {
     return Math.max(0, Math.min(retention, left));
 }
 
+/**
+ * Tastaturbedienung der Kontextmenues im Spaltenkopf.
+ *
+ * Noetig, weil die Menues an body haengen: In der Tab-Reihenfolge stehen sie
+ * damit hinter dem gesamten Board, ein Tab vom oeffnenden Knopf spraenge also
+ * an ihnen vorbei mitten in die Karten.
+ *
+ * @param menu das Menue
+ * @param opener der Knopf, der es geoeffnet hat, oder eine Funktion, die ihn
+ *        heraussucht (er kann zwischendurch neu gezeichnet worden sein)
+ * @param close schliesst das Menue
+ */
+function menuKeys(menu, opener, close) {
+    menu.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            e.preventDefault();
+            close();
+            const zurueck = typeof opener === 'function' ? opener() : opener;
+            if (zurueck) zurueck.focus();
+            return;
+        }
+        if (e.key === 'Tab') { close(); return; }          // Fokus laeuft normal weiter
+        const liste = [...menu.querySelectorAll('button')];
+        const i = liste.indexOf(document.activeElement);
+        let ziel = null;
+        if (e.key === 'ArrowDown') ziel = liste[(i + 1) % liste.length];
+        else if (e.key === 'ArrowUp') ziel = liste[(i - 1 + liste.length) % liste.length];
+        else if (e.key === 'Home') ziel = liste[0];
+        else if (e.key === 'End') ziel = liste[liste.length - 1];
+        if (ziel) { e.preventDefault(); ziel.focus(); }
+    });
+}
+
+// Kontextmenue der Kopfzahlen. Anders als das Sortiermenue bleibt es offen:
+// hier werden mehrere Haken hintereinander gesetzt, jedes Mal neu aufklappen
+// waere laestig.
+let countMenuEl = null;
+function closeCountMenu() {
+    if (countMenuEl) { countMenuEl.remove(); countMenuEl = null; document.removeEventListener('click', onDocClickCount, true); }
+}
+function onDocClickCount(e) { if (countMenuEl && !countMenuEl.contains(e.target)) closeCountMenu(); }
+function openCountMenu(btn, state, board, col, actions, tastatur) {
+    closeCountMenu();
+    const menu = el('div', 'sort-menu count-menu');
+    const kopf = el('div', 'sort-menu-title', t('count.title'));
+    // Das Umschalten rendert das Board neu; das Menue haengt an body und
+    // ueberlebt das, muss seine Haken aber selbst nachziehen.
+    const zeichne = (fokus) => {
+        menu.textContent = '';
+        menu.appendChild(kopf);
+        const aktiv = getCountModes(state, board, col);
+        for (const mode of COUNT_MODES) {
+            const an = aktiv.includes(mode);
+            const item = el('button', 'sort-item count-item' + (an ? ' active' : ''));
+            item.type = 'button';
+            item.setAttribute('aria-pressed', an ? 'true' : 'false');
+            const box = el('span', 'count-check');
+            if (an) box.appendChild(mdiIcon(MDI.check));
+            item.appendChild(box);
+            item.appendChild(el('span', null, t('count.' + mode)));
+            if (mode !== 'total') item.appendChild(el('span', 'count-dot due-' + mode));
+            item.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const neu = an ? aktiv.filter(m => m !== mode) : COUNT_MODES.filter(m => aktiv.includes(m) || m === mode);
+                // Ohne jede Zahl bliebe kein Ziel, ueber das man das Menue wieder aufruft.
+                if (!neu.length) return;
+                actions.setCountModes(colKey(board, col), neu);
+                // Neu gezeichnet heisst neue Knoepfe: den Fokus zurueckholen,
+                // sonst faellt er bei jedem Haken auf body.
+                zeichne(COUNT_MODES.indexOf(mode));
+            });
+            menu.appendChild(item);
+        }
+        const knoepfe = [...menu.querySelectorAll('button')];
+        if (fokus != null && knoepfe[fokus]) knoepfe[fokus].focus();
+    };
+    zeichne();
+    document.body.appendChild(menu);
+    const r = btn.getBoundingClientRect();
+    menu.style.top = (r.bottom + 4) + 'px';
+    menu.style.left = Math.max(4, Math.min(r.left, window.innerWidth - menu.offsetWidth - 4)) + 'px';
+    countMenuEl = menu;
+    // Jeder Haken zeichnet das Board neu, der oeffnende Knopf von eben ist dann
+    // ein toter Verweis. Beim Schliessen also den aktuellen heraussuchen.
+    menuKeys(menu, () => {
+        const sp = [...document.querySelectorAll('.column')].find(e => e.dataset.colId === col.id);
+        return sp && sp.querySelector('.col-counts .count');
+    }, closeCountMenu);
+    // Nur bei Tastaturbedienung hineinspringen: nach einem Mausklick wuerde der
+    // Fokusrahmen im Menue stehen, ohne dass jemand danach gefragt hat.
+    if (tastatur) {
+        const erste = menu.querySelector('.count-item.active') || menu.querySelector('button');
+        if (erste) erste.focus();
+    }
+    setTimeout(() => document.addEventListener('click', onDocClickCount, true), 0);
+}
+
 // Kontextmenü des Sortier-Umschalters
 let sortMenuEl = null;
 function closeSortMenu() {
     if (sortMenuEl) { sortMenuEl.remove(); sortMenuEl = null; document.removeEventListener('click', onDocClickSort, true); }
 }
 function onDocClickSort(e) { if (sortMenuEl && !sortMenuEl.contains(e.target)) closeSortMenu(); }
-function openSortMenu(btn, state, board, col, actions) {
+function openSortMenu(btn, state, board, col, actions, tastatur) {
     closeSortMenu();
     const menu = el('div', 'sort-menu');
     menu.appendChild(el('div', 'sort-menu-title', t('sort.mode')));
@@ -323,7 +446,7 @@ function openSortMenu(btn, state, board, col, actions) {
         item.appendChild(mdiIcon(sortModeIcon(mode)));
         item.appendChild(el('span', null, labels[mode]));
         // Moduswechsel startet immer in der Standardrichtung
-        item.addEventListener('click', (e) => { e.stopPropagation(); closeSortMenu(); actions.setSortMode(colSortKey(board, col), mode); });
+        item.addEventListener('click', (e) => { e.stopPropagation(); closeSortMenu(); actions.setSortMode(colKey(board, col), mode); });
         menu.appendChild(item);
     }
     document.body.appendChild(menu);
@@ -331,6 +454,11 @@ function openSortMenu(btn, state, board, col, actions) {
     menu.style.top = (r.bottom + 4) + 'px';
     menu.style.left = Math.max(4, Math.min(r.left, window.innerWidth - menu.offsetWidth - 4)) + 'px';
     sortMenuEl = menu;
+    menuKeys(menu, btn, closeSortMenu);
+    if (tastatur) {
+        const erste = menu.querySelector('.sort-item.active') || menu.querySelector('button');
+        if (erste) erste.focus();
+    }
     setTimeout(() => document.addEventListener('click', onDocClickSort, true), 0);
 }
 
@@ -402,6 +530,17 @@ export function refreshDueBadges(cfg) {
         b.classList.toggle('due-overdue', st === 'overdue');
         b.classList.toggle('due-today', st === 'today');
         b.classList.toggle('due-soon', st === 'soon');
+    }
+    // Die Kopfzahlen hängen an denselben Stichtagen und müssen mitlaufen,
+    // sonst zeigt der Kopf um Mitternacht noch den Stand von gestern.
+    for (const box of document.querySelectorAll('.col-counts[data-dues]')) {
+        const z = countDues(String(box.dataset.dues || '').split(','), cfg);
+        for (const b of box.querySelectorAll('.count-due')) {
+            const st = b.dataset.state;
+            if (!(st in z)) continue;
+            b.textContent = String(z[st]);
+            b.classList.toggle('count-zero', !z[st]);
+        }
     }
 }
 
@@ -858,6 +997,9 @@ export function renderBoard(container, state, actions) {
         }
         // Zähler = sichtbare Karten des aktiven Filters (vor der doneLimit-Kürzung)
         const matchedCount = cards.length;
+        // Dieselbe Menge tragen auch die Fälligkeitszahlen: sie sollen den
+        // aktiven Filter abbilden, nicht die Kürzung der Anzeige.
+        const zaehlBasis = cards;
         if (col.isTrash) {
             // Papierkorb: fest nach trashedAt (älteste zuerst = am nächsten zur endgültigen Löschung)
             cards = cards.slice().sort((a, b) => String(a.trashedAt || '').localeCompare(String(b.trashedAt || '')));
@@ -889,8 +1031,36 @@ export function renderBoard(container, state, actions) {
         const allInCol = board.cards.filter(c => c.columnId === col.id).length;
         // Bei aktivem Personen-/Label-Filter zählt die Kopfzeile die gefilterten (sichtbaren) Karten
         const anyFilter = userSel || (state.labelFilter && state.labelFilter.length) || (state.labelOnly && state.labelOnly.length);
-        const count = el('span', 'count', (!anyFilter && col.wipLimit > 0) ? `${allInCol}/${col.wipLimit}` : String(anyFilter ? matchedCount : allInCol));
-        head.appendChild(count);
+        // In Erledigt- und Papierkorbspalten gilt jede Karte als erledigt: dort
+        // gäbe es keine Überfälligkeit zu zählen, also bleibt es bei der Zahl.
+        const dueFaehig = !col.isDone && !col.isTrash;
+        const counts = el('span', 'col-counts');
+        const dueListe = dueFaehig ? zaehlBasis.filter(c => c.due).map(c => `${c.due}|${c.dueTime || ''}`) : [];
+        const dueZahl = countDues(dueListe, state.cfg);
+        for (const mode of (dueFaehig ? getCountModes(state, board, col) : ['total'])) {
+            const zahl = mode === 'total'
+                ? ((!anyFilter && col.wipLimit > 0) ? `${allInCol}/${col.wipLimit}` : String(anyFilter ? matchedCount : allInCol))
+                : String(dueZahl[mode]);
+            const leer = mode !== 'total' && !dueZahl[mode];
+            const b = el(dueFaehig ? 'button' : 'span', 'count'
+                + (mode === 'total' ? '' : ` count-due due-${mode}`)
+                + (leer ? ' count-zero' : ''), zahl);
+            const name = t('count.' + mode);
+            if (mode !== 'total') b.dataset.state = mode;
+            if (dueFaehig) {
+                b.type = 'button';
+                b.title = `${name} (${t('count.title')})`;
+                b.setAttribute('aria-label', b.title);
+                b.addEventListener('click', (e) => { e.stopPropagation(); openCountMenu(b, state, board, col, actions, e.detail === 0); });
+            } else {
+                b.title = name;
+            }
+            counts.appendChild(b);
+        }
+        // Für den Minutentakt: der zieht die Farben nach, ohne neu zu rendern,
+        // und muss die Zahlen aus denselben Daten neu bilden können.
+        if (dueFaehig) counts.dataset.dues = dueListe.join(',');
+        head.appendChild(counts);
         if (col.wipLimit > 0 && allInCol > col.wipLimit) colEl.classList.add('over-wip');
 
         // Erledigt-Spalte: Auge-Toggle rechts oben (blendet erledigte Karten ein/aus)
@@ -914,7 +1084,7 @@ export function renderBoard(container, state, actions) {
                 dirBtn.setAttribute('aria-label', dirBtn.title);
                 dirBtn.addEventListener('click', (e) => {
                     e.stopPropagation();
-                    actions.setSortMode(colSortKey(board, col), curRev ? curMode : curMode + ':rev');
+                    actions.setSortMode(colKey(board, col), curRev ? curMode : curMode + ':rev');
                 });
                 head.appendChild(dirBtn);
             }
@@ -922,7 +1092,7 @@ export function renderBoard(container, state, actions) {
             sortBtn.appendChild(mdiIcon(sortModeIcon(curMode)));
             sortBtn.title = t('sort.mode');
             sortBtn.setAttribute('aria-label', sortBtn.title);
-            sortBtn.addEventListener('click', (e) => { e.stopPropagation(); openSortMenu(sortBtn, state, board, col, actions); });
+            sortBtn.addEventListener('click', (e) => { e.stopPropagation(); openSortMenu(sortBtn, state, board, col, actions, e.detail === 0); });
             head.appendChild(sortBtn);
         }
         // Papierkorb: Leeren-Button

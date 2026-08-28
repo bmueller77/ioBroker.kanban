@@ -25,6 +25,7 @@ const state = {
     embed: qs.get('embed') === '1',
     collapsedCols: new Set((localStorage.getItem('kanban.collapsedCols') || '').split(',').filter(Boolean)),
     sortModes: (() => { try { return JSON.parse(localStorage.getItem('kanban.sortModes') || '{}') || {}; } catch (e) { return {}; } })(),
+    countModes: (() => { try { return JSON.parse(localStorage.getItem('kanban.countModes') || '{}') || {}; } catch (e) { return {}; } })(),
 };
 
 // ------------------------------------------------------------ Theme
@@ -172,6 +173,13 @@ actions = {
     setSortMode(colKey, mode) {
         state.sortModes[colKey] = mode;
         try { localStorage.setItem('kanban.sortModes', JSON.stringify(state.sortModes)); } catch (e) { /* ignore */ }
+        render();
+    },
+
+    // Welche Zahlen im Spaltenkopf stehen, je Board+Spalte (pro Gerät)
+    setCountModes(colKey, modes) {
+        state.countModes[colKey] = modes;
+        try { localStorage.setItem('kanban.countModes', JSON.stringify(state.countModes)); } catch (e) { /* ignore */ }
         render();
     },
 

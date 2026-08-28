@@ -251,6 +251,9 @@ button.linkbtn.orphan-count { display: flex; align-items: center; gap: 2px; font
    mehrfach verteilt und z. B. das Auge landete in der Kopfmitte). */
 .column-head > button:first-of-type { margin-left: auto; }
 
+/* Mehrere Zahlen nebeneinander: Gesamt und die gewaehlten Faelligkeitsstufen */
+.column-head .col-counts { display: inline-flex; align-items: center; gap: 4px; }
+
 .column-head .count {
     font-size: 12px;
     font-weight: 600;
@@ -259,9 +262,25 @@ button.linkbtn.orphan-count { display: flex; align-items: center; gap: 2px; font
     border-radius: 999px;
     padding: 1px 8px;
     box-shadow: var(--count-emboss);
+    /* Der Zaehler oeffnet das Auswahlmenue, soll aber wie ein Abzeichen
+       aussehen und nicht wie ein Knopf. */
+    border: none;
+    font-family: inherit;
+    line-height: inherit;
 }
+button.count { cursor: pointer; }
+button.count:focus-visible { outline: 2px solid var(--accent, #7E57C2); outline-offset: 2px; }
 
-.column.over-wip .column-head, .column.over-wip .count { color: var(--danger); }
+/* Dieselben Farben wie die Faelligkeits-Abzeichen auf den Karten */
+.count.due-overdue { background: var(--danger); color: #fff; }
+.count.due-today { background: var(--warn); color: #fff; }
+.count.due-soon { background: var(--due-upcoming, #ffd800); color: var(--due-upcoming-text, #1c1a17); }
+/* Bei Null bleibt die Zahl stehen: sonst spraenge die Kopfzeile bei jeder
+   Aenderung, und ohne Abzeichen gaebe es kein Ziel fuer das Menue mehr. */
+.count.count-zero { background: var(--surface); color: var(--muted); }
+
+/* Die WIP-Warnfarbe gilt der Gesamtzahl; die Faelligkeitszahlen tragen ihre eigene */
+.column.over-wip .column-head, .column.over-wip .count:not(.count-due) { color: var(--danger); }
 
 .cards {
     padding: 4px 8px 8px;
@@ -1173,8 +1192,15 @@ button.mini {
     font-size: 13px;
 }
 .sort-item:hover { background: var(--bg); }
+.sort-item:focus-visible { outline: 2px solid var(--accent, #7E57C2); outline-offset: -2px; background: var(--bg); }
 .sort-item.active { color: var(--accent); }
 .sort-item svg { display: block; }
+/* Mehrfachauswahl: Haken links, Farbtupfer der Stufe rechts */
+.count-check { display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; flex: 0 0 auto; }
+.count-dot { margin-left: auto; width: 12px; height: 12px; border-radius: 999px; flex: 0 0 auto; }
+.count-dot.due-overdue { background: var(--danger); }
+.count-dot.due-today { background: var(--warn); }
+.count-dot.due-soon { background: var(--due-upcoming, #ffd800); }
 
 /* ---- 0.3.0: Grid-Sortiermodus - Anfasser links an der Karte ---- */
 .card.has-grip { padding-left: 28px; }

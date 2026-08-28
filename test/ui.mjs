@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { absoluteOrder, boardMembers, dueState } from '../www/js/board.js';
+import { absoluteOrder, boardMembers, countDues, dueState, getCountModes } from '../www/js/board.js';
 
 /**
  * Reine Hilfsfunktionen der Oberfläche — ohne Browser prüfbar.
@@ -131,5 +131,59 @@ describe('Fälligkeit: dreistufige Einfärbung', () => {
 
     it('gibt für Karten ohne Datum nichts zurück', () => {
         assert.equal(dueState('', '', cfg), '');
+    });
+});
+
+describe('Kopfzahlen der Spalten', () => {
+    const cfg = { reminderDaysBefore: 1 };
+    const board = { id: 'familie' };
+    const col = { id: 'todo' };
+
+    it('zählt je Fälligkeitsstufe', () => {
+        const liste = [`${tag(-3)}|`, `${tag(-1)}|`, `${tag(0)}|`, `${tag(1)}|`, `${tag(9)}|`];
+        assert.deepEqual(countDues(liste, cfg), { soon: 1, today: 1, overdue: 2 });
+    });
+
+    it('lässt später Fälliges aus jeder Stufe heraus', () => {
+        assert.deepEqual(countDues([`${tag(5)}|`, `${tag(30)}|`], cfg), { soon: 0, today: 0, overdue: 0 });
+    });
+
+    it('folgt der Vorlaufzeit der Instanz', () => {
+        const liste = [`${tag(2)}|`, `${tag(3)}|`];
+        assert.equal(countDues(liste, { reminderDaysBefore: 3 }).soon, 2);
+        assert.equal(countDues(liste, cfg).soon, 0);
+    });
+
+    it('wertet die Uhrzeit mit aus', () => {
+        assert.equal(countDues([`${tag(0)}|00:01`], cfg).overdue, 1);
+        assert.equal(countDues([`${tag(0)}|23:59`], cfg).today, 1);
+    });
+
+    it('stolpert nicht über leere Einträge', () => {
+        // Ohne fällige Karte steht im data-Attribut ein leerer String, den
+        // split(',') zu [''] macht.
+        assert.deepEqual(countDues([''], cfg), { soon: 0, today: 0, overdue: 0 });
+    });
+
+    it('zeigt ohne Einstellung nur die Gesamtzahl', () => {
+        assert.deepEqual(getCountModes({}, board, col), ['total']);
+        assert.deepEqual(getCountModes({ countModes: {} }, board, col), ['total']);
+    });
+
+    it('merkt sich die Auswahl je Board und Spalte', () => {
+        const state = { countModes: { 'familie:todo': ['total', 'overdue'] } };
+        assert.deepEqual(getCountModes(state, board, col), ['total', 'overdue']);
+        // andere Spalte, andere Einstellung
+        assert.deepEqual(getCountModes(state, board, { id: 'doing' }), ['total']);
+    });
+
+    it('bringt die Auswahl in die Reihenfolge der Anzeige', () => {
+        const state = { countModes: { 'familie:todo': ['overdue', 'total', 'soon'] } };
+        assert.deepEqual(getCountModes(state, board, col), ['total', 'soon', 'overdue']);
+    });
+
+    it('fällt bei unbrauchbarem Inhalt auf die Gesamtzahl zurück', () => {
+        assert.deepEqual(getCountModes({ countModes: { 'familie:todo': ['quatsch'] } }, board, col), ['total']);
+        assert.deepEqual(getCountModes({ countModes: { 'familie:todo': 'total' } }, board, col), ['total']);
     });
 });

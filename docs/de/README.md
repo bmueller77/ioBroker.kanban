@@ -32,6 +32,7 @@ Ein **Kanban-Board als eigener ioBroker-Adapter**. Er bringt seinen eigenen Webs
 - **[Teil B: Das Board (Weboberfläche)](#teil-b-das-board-weboberfläche)**
   - [Kopfleiste](#kopfleiste)
   - [Boards, Spalten & Labels](#boards-spalten--labels)
+    - [Zahlen im Spaltenkopf](#zahlen-im-spaltenkopf)
     - [Papierkorb](#papierkorb)
     - [Erledigte Karten in den Papierkorb](#erledigte-karten-in-den-papierkorb)
   - [Karten: alle Felder](#karten-alle-felder)
@@ -301,6 +302,26 @@ Spalten lassen sich anlegen, per Drag & Drop sortieren, umbenennen und löschen.
 - **Limit sichtbarer erledigter Karten:** Per URL-Parameter `doneLimit=N` (siehe [Ansichten teilen / URL-Parameter](#ansichten-teilen--url-parameter)) lassen sich nur die N zuletzt erledigten Karten anzeigen - praktisch für kompakte, geteilte Ansichten.
 - **Erledigte Karte kopieren:** Neben dem Titel einer erledigten Karte sitzt ein kleines Kopier-Symbol. Es öffnet den Editor mit denselben Inhalten als **neue** Karte. Sie landet beim Speichern in der ersten Spalte mit "Neu"-Häkchen, Checklisten-Punkte starten unerledigt, und als Fälligkeit wird das **heutige Datum** vorgeschlagen, sofern das Original überhaupt eines hatte (eine gesetzte Uhrzeit bleibt erhalten). Gedacht für wiederkehrende Aufgaben, die keine feste Wiederholung haben.
 
+<a id="zahlen-im-spaltenkopf"></a>
+#### Zahlen im Spaltenkopf (ab 0.3.2)
+
+Bis 0.3.1 stand neben dem Spaltentitel genau eine Zahl: die Kartenanzahl, bei gesetztem WIP-Limit als `7/5`. Seit 0.3.2 kannst du daneben anzeigen lassen, **wie dringend** der Inhalt der Spalte ist.
+
+Ein Klick auf eine der Zahlen öffnet ein kleines Menü mit vier Haken. Was du anhakst, steht anschließend als eigenes Abzeichen daneben.
+
+| Eintrag | Zeigt |
+|---|---|
+| **Gesamt** | die gewohnte Zahl, unverändert: alle Karten der Spalte, bei WIP-Limit als `7/5`, bei aktivem Filter die Treffer |
+| **Morgen** | Karten im Vorwarnfenster, gelb |
+| **Heute** | heute fällige Karten, orange |
+| **Überfällig** | Karten, deren Datum oder Uhrzeit vorbei ist, rot |
+
+Die drei Fälligkeitszahlen tragen **dieselben Farben wie die Abzeichen auf den Karten** und folgen derselben Rechnung, samt Uhrzeit und Vorlaufzeit aus den Instanzeinstellungen. Steht die Vorlaufzeit auf `3`, umfasst "Morgen" also alles bis übermorgen. Bei `0` bleibt das Abzeichen stehen und verliert nur die Warnfarbe; so springt die Kopfzeile nicht bei jeder Änderung, und du behältst das Menü in Reichweite.
+
+Die Auswahl gilt **je Spalte** und wird **pro Gerät** gespeichert, wie der Sortiermodus und das Augen-Symbol. Ein Personen- oder Label-Filter wirkt auf alle vier Zahlen gleich. In der Erledigt-Spalte und im Papierkorb fehlt das Menü: Dort gilt jede Karte als erledigt, es gäbe nichts einzufärben.
+
+Bedienen lässt sich das auch mit der Tastatur. Tab erreicht die Zahlen, Enter öffnet das Menü, die Pfeiltasten wandern darin, Enter setzt oder löscht einen Haken, Escape schließt und gibt den Fokus zurück. Dasselbe gilt seit 0.3.2 für das Sortiermenü, das vorher zwar aufging, dessen Einträge man mit der Tastatur aber nicht erreichte.
+
 <a id="papierkorb"></a>
 #### Papierkorb (ab 0.3.0)
 
@@ -450,7 +471,7 @@ Dahinter stehen zwei verschieden gerechnete Fragen. Das **Vorwarnfenster** (gelb
 
 Die Grenze zu **rot** ist dagegen eine Tatsache. Trägt die Karte eine **Uhrzeit**, zählt sie: Um 17:01 ist 17:00 vorbei, und genau dann feuert auch das Ereignis `cardDue` mit `detail.exact`. Ohne Uhrzeit wechselt die Farbe um Mitternacht.
 
-Die Farben lassen sich über [eigenes CSS](#faq--fallstricke) ändern: `--danger` für rot, `--warn` für orange und `--due-upcoming` samt `--due-upcoming-text` für gelb.
+Die Farben lassen sich über [eigenes CSS](#faq--fallstricke) ändern: `--danger` für rot, `--warn` für orange und `--due-upcoming` samt `--due-upcoming-text` für gelb. Dieselbe Einteilung steckt hinter den [Zahlen im Spaltenkopf](#zahlen-im-spaltenkopf).
 
 ### Wiederholungen
 

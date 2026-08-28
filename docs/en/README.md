@@ -32,6 +32,7 @@ A **Kanban board as a dedicated ioBroker adapter**. It ships its own web server,
 - **[Part B: The board (web UI)](#part-b-the-board-web-ui)**
   - [Header bar](#header-bar)
   - [Boards, columns & labels](#boards-columns--labels)
+    - [Counts in the column header](#counts-in-the-column-header)
     - [Trash](#trash)
     - [Move done cards to the trash](#cleanup)
   - [Cards: all fields](#cards-all-fields)
@@ -301,6 +302,26 @@ Above the column list sits a header row with the field names (**Title · Max · 
 - **Limit of visible done cards:** the URL parameter `doneLimit=N` (see [Sharing views / URL parameters](#sharing-views--url-parameters)) shows only the N most recently completed cards, which is handy for compact, shared views.
 - **Copy a completed card:** next to the title of a done card sits a small copy icon. It opens the editor with the same content as a **new** card. On save it lands in the first column flagged "New", checklist items start unticked, and the due date is prefilled with **today** if the original had one at all (a time of day is kept). Meant for recurring chores that have no fixed recurrence rule.
 
+<a id="counts-in-the-column-header"></a>
+#### Counts in the column header (since 0.3.2)
+
+Up to 0.3.1 exactly one number sat next to the column title: the card count, or `7/5` when a WIP limit was set. Since 0.3.2 you can have it show **how urgent** the column's content is, right beside it.
+
+Clicking one of the numbers opens a small menu with four checkmarks. Whatever you tick appears as its own badge next to the others.
+
+| Entry | Shows |
+|---|---|
+| **Total** | the familiar number, unchanged: all cards of the column, `7/5` with a WIP limit, the matches while a filter is active |
+| **Tomorrow** | cards inside the lead-time window, yellow |
+| **Today** | cards due today, orange |
+| **Overdue** | cards whose date or time has passed, red |
+
+The three due-date numbers carry **the same colours as the badges on the cards** and follow the same arithmetic, time of day and lead time from the instance settings included. Set the lead time to `3` and "tomorrow" covers everything up to the day after tomorrow. At `0` the badge stays in place and merely loses its warning colour, so the header does not jump on every change and the menu stays within reach.
+
+The selection applies **per column** and is stored **per device**, like the sort mode and the eye icon. A person or label filter affects all four numbers alike. The done column and the trash have no menu: every card there counts as completed, so there would be nothing to colour.
+
+The keyboard reaches all of it. Tab lands on the numbers, Enter opens the menu, the arrow keys move inside it, Enter ticks or unticks, Escape closes and hands the focus back. The same is true of the sort menu since 0.3.2, which used to open but whose entries the keyboard could not reach.
+
 <a id="trash"></a>
 #### Trash (since 0.3.0)
 
@@ -450,7 +471,7 @@ Two differently computed questions sit behind this. The **lead-time window** (ye
 
 The boundary to **red** is a fact instead. When the card carries a **time of day**, that time counts: at 17:01 the 17:00 slot has passed, which is exactly when the `cardDue` event fires with `detail.exact`. Without a time, the colour changes at midnight.
 
-The colours can be changed through [custom CSS](#faq--pitfalls): `--danger` for red, `--warn` for orange, and `--due-upcoming` with `--due-upcoming-text` for yellow.
+The colours can be changed through [custom CSS](#faq--pitfalls): `--danger` for red, `--warn` for orange, and `--due-upcoming` with `--due-upcoming-text` for yellow. The same grouping sits behind the [counts in the column header](#counts-in-the-column-header).
 
 ### Recurrence
 
