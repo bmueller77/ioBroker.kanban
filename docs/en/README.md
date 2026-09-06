@@ -354,7 +354,7 @@ The run happens **once a day** and **on adapter start**. It uses the completion 
 
 Labels are coloured tags and are managed **per board** in the *Board* tab (create, rename, recolour, delete). On a card they appear as a coloured badge with automatically contrasting text; in the [Views dialog](#sharing-views--url-parameters) they can be used as a blacklist to hide cards.
 
-Since 0.3.2 the **order** of the labels can be dragged by its handle, like the columns above, and that order applies everywhere: on the cards, in the picker inside the card editor, and in the summary of the section header. Before that a card listed its labels in the order someone had clicked them, so two cards carrying the same labels looked different. If you want them alphabetical, drag the list into that order once.
+Since 0.3.2 the labels carry a drag handle like the columns above, so their **order** is yours to set, and that order applies everywhere: on the cards, in the picker inside the card editor, and in the summary of the section header. Before that a card listed its labels in the order someone had clicked them, so two cards carrying the same labels looked different. If you want them alphabetical, drag the list into that order once.
 
 #### Link in notifications (from 0.2.0)
 
@@ -372,12 +372,12 @@ Per board you can choose where the "open card" link in notification e-mails poin
 |---|---|---|
 | Sheet with a pencil | right of the title | Open the card editor. The only way in. |
 | Two offset sheets | right of the title, done cards only | Take the content over into a **new** card, see [Copy a completed card](#boards-columns--labels) |
-| Arrow in a circle | in the trash, instead of the two above | Restore the card |
-| Waste bin | in the trash, next to it | Delete for good, with a confirmation |
+| Arrow in a circle | in the trash, in a row of its own at the bottom of the card | Restore the card. The remaining retention period sits above it. |
+| Waste bin | next to it | Delete for good, with a confirmation |
 | `!` orange, `!!` red | below the title | Priority high or urgent. Nothing appears for normal. |
 | Calendar sheet with a date | below the title | Due date, coloured by [Due date colours](#due-date-colours) |
 | Map marker | below the title | Location, shortened. The full text is in the tooltip. |
-| Note sheet | right of the badge or label row | The card has a description. Clicking opens it as a reading window with rendered Markdown. |
+| Note sheet | right of the label or badge row, or in the card footer when there is a checklist | The card has a description. Clicking opens it as a reading window with rendered Markdown. |
 | Varying link icon | next to it | The card has a link. Which icon appears depends on the address, see [Link types](#link-types). |
 | Circular arrows | next to it | Recurring task |
 | Check mark with `3/12` | bottom left of the card | State of the checklist. The triangle beside it expands it. |
@@ -489,7 +489,7 @@ Independently of all this, the due badge is coloured, so anything urgent stands 
 
 Two differently computed questions sit behind this. The **lead-time window** (yellow) is planning and counts in **calendar days**. It follows the instance setting [**Remind X days before due**](#tab-notifications), so the colour says the same thing as the reminder mail: set it to `3` and everything up to the day after tomorrow turns yellow. Not a rolling 24 hour window, so tomorrow stays tomorrow all day.
 
-The boundary to **red** is a fact instead. When the card carries a **time of day**, that time counts: at 17:01 the 17:00 slot has passed, which is exactly when the `cardDue` event fires with `detail.exact`. Without a time, the colour changes at midnight.
+The boundary to **red** is a fact instead. When the card carries a **time of day**, that time counts: at 17:01 the 17:00 slot has passed, which is exactly when the `cardDue` event fires with `detail.exact`. Without a time, the colour changes at midnight. Since 0.3.2 the states [`overdueCount` and `overdueList`](#iobroker-states--objects) follow the same rule, so colour and counter change in the same minute. Before that the counters compared dates only, and a card could be red while the counter kept its old value until midnight.
 
 The colours can be changed through [custom CSS](#faq--pitfalls): `--danger` for red, `--warn` for orange, and `--due-upcoming` with `--due-upcoming-text` for yellow. The same grouping sits behind the [counts in the column header](#counts-in-the-column-header).
 

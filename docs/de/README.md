@@ -372,12 +372,12 @@ Je Board lässt sich festlegen, wohin der "Karte öffnen"-Link in den Benachrich
 |---|---|---|
 | Blatt mit Stift | rechts neben dem Titel | Karteneditor öffnen. Der einzige Weg dorthin. |
 | Zwei versetzte Blätter | rechts neben dem Titel, nur auf erledigten Karten | Inhalt als **neue** Karte übernehmen, siehe [Erledigte Karte kopieren](#boards-spalten--labels) |
-| Pfeil im Kreis | im Papierkorb, statt der beiden oberen | Karte wiederherstellen |
-| Papierkorb | im Papierkorb, daneben | endgültig löschen, mit Rückfrage |
+| Pfeil im Kreis | im Papierkorb, in einer eigenen Zeile unten auf der Karte | Karte wiederherstellen. Darüber steht die verbleibende Aufbewahrungsfrist. |
+| Papierkorb | daneben | endgültig löschen, mit Rückfrage |
 | `!` orange, `!!` rot | unter dem Titel | Priorität Hoch beziehungsweise Dringend. Bei Normal steht dort nichts. |
 | Kalenderblatt mit Datum | unter dem Titel | Fälligkeit, eingefärbt nach [Farben der Fälligkeit](#farben-der-fälligkeit) |
 | Ortsmarke | unter dem Titel | Ort, gekürzt. Der vollständige Text steht im Tooltip. |
-| Notizblatt | rechts in der Abzeichen- oder Labelzeile | Die Karte hat eine Beschreibung. Ein Klick öffnet sie als Lesefenster mit gerendertem Markdown. |
+| Notizblatt | rechts in der Label- oder Abzeichenzeile, bei vorhandener Checkliste im Kartenfuß | Die Karte hat eine Beschreibung. Ein Klick öffnet sie als Lesefenster mit gerendertem Markdown. |
 | wechselndes Linksymbol | daneben | Die Karte hat einen Link. Welches Symbol erscheint, hängt an der Adresse, siehe [Link-Typen](#link-typen). |
 | Kreispfeil | daneben | Wiederkehrende Aufgabe |
 | Haken mit `3/12` | im Kartenfuß links | Stand der Checkliste. Das Dreieck daneben klappt sie auf. |
@@ -472,6 +472,8 @@ Bei den drei automatischen Modi erscheint links daneben ein **Richtungsumschalte
 
 Ein paar Feinheiten, damit das Umkehren berechenbar bleibt: Umgedreht wird immer nur das Hauptkriterium. Karten ohne Datum oder Zeitstempel bleiben unten, bei Gleichstand entscheidet der Titel, und innerhalb gleicher Priorität sortiert weiterhin die Fälligkeit aufsteigend.
 
+Das Menü lässt sich seit 0.3.2 auch mit der Tastatur bedienen: Tab erreicht den Knopf, Enter öffnet, die Pfeiltasten wandern im Menü, Escape schließt und gibt den Fokus zurück. Vorher ging es zwar auf, aber der nächste Tab sprang daran vorbei mitten in die Karten.
+
 **Sortiermodus und Richtung werden pro Gerät gespeichert** (wie das Augen-Symbol), sie gelten also nur für dich. In den automatischen Modi ist das eigene Umsortieren innerhalb der Spalte deaktiviert, weil es wirkungslos wäre; das Verschieben in eine andere Spalte funktioniert weiterhin. Schaltest du zurück auf "Drag & Drop" oder "Anfasser", erscheint deine gespeicherte eigene Reihenfolge unverändert.
 
 Unabhängig davon färbt sich das Fälligkeits-Badge, sodass Dringendes auffällt, egal an welcher Position es steht.
@@ -489,7 +491,7 @@ Unabhängig davon färbt sich das Fälligkeits-Badge, sodass Dringendes auffäll
 
 Dahinter stehen zwei verschieden gerechnete Fragen. Das **Vorwarnfenster** (gelb) ist Planung und zählt in **Kalendertagen**. Es folgt der Instanz-Einstellung [**Erinnern X Tage vor Fälligkeit**](#tab-benachrichtigungen), damit die Farbe dasselbe sagt wie die Erinnerungsmail: Steht dort `3`, ist alles bis übermorgen gelb. Kein rollendes 24-Stunden-Fenster: "morgen" bleibt den ganzen Tag morgen.
 
-Die Grenze zu **rot** ist dagegen eine Tatsache. Trägt die Karte eine **Uhrzeit**, zählt sie: Um 17:01 ist 17:00 vorbei, und genau dann feuert auch das Ereignis `cardDue` mit `detail.exact`. Ohne Uhrzeit wechselt die Farbe um Mitternacht.
+Die Grenze zu **rot** ist dagegen eine Tatsache. Trägt die Karte eine **Uhrzeit**, zählt sie: Um 17:01 ist 17:00 vorbei, und genau dann feuert auch das Ereignis `cardDue` mit `detail.exact`. Ohne Uhrzeit wechselt die Farbe um Mitternacht. Seit 0.3.2 rechnen die Zustände [`overdueCount` und `overdueList`](#iobroker-states--objekte) nach derselben Regel: Farbe und Datenpunkt springen zur selben Minute. Vorher verglichen die Zähler nur das Datum, eine Karte war also rot, während der Zähler noch bis Mitternacht auf dem alten Stand blieb.
 
 Die Farben lassen sich über [eigenes CSS](#faq--fallstricke) ändern: `--danger` für rot, `--warn` für orange und `--due-upcoming` samt `--due-upcoming-text` für gelb. Dieselbe Einteilung steckt hinter den [Zahlen im Spaltenkopf](#zahlen-im-spaltenkopf).
 
