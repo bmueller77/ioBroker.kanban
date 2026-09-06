@@ -366,6 +366,24 @@ Per board you can choose where the "open card" link in notification e-mails poin
 
 **Card anatomy (since 0.3.0):** the **assignees** sit as a stack of avatars in the top right corner and the title text flows around them. Hovering or tapping the stack fans the faces out to the left without changing the line breaks. Long titles are cut off after **two lines** with an ellipsis, the full title stays available as a tooltip. The **card footer** holds the checklist progress on the left, the expand chevron in the middle and the icons for **description, link and recurrence** on the right, in that order. Clicking the description icon opens the description in a **read-only window** with rendered Markdown; links inside always open in a new tab. The chevron's hit area is deliberately wider and taller than the symbol itself so it is easy to hit by touch. Whether a checklist is expanded or collapsed is **remembered per device and board**, just like the column sort modes, and survives a reload.
 
+**The icons on a card**, in the order they appear:
+
+| Icon | Where | Meaning |
+|---|---|---|
+| Sheet with a pencil | right of the title | Open the card editor. The only way in. |
+| Two offset sheets | right of the title, done cards only | Take the content over into a **new** card, see [Copy a completed card](#boards-columns--labels) |
+| Arrow in a circle | in the trash, instead of the two above | Restore the card |
+| Waste bin | in the trash, next to it | Delete for good, with a confirmation |
+| `!` orange, `!!` red | below the title | Priority high or urgent. Nothing appears for normal. |
+| Calendar sheet with a date | below the title | Due date, coloured by [Due date colours](#due-date-colours) |
+| Map marker | below the title | Location, shortened. The full text is in the tooltip. |
+| Note sheet | right of the badge or label row | The card has a description. Clicking opens it as a reading window with rendered Markdown. |
+| Varying link icon | next to it | The card has a link. Which icon appears depends on the address, see [Link types](#link-types). |
+| Circular arrows | next to it | Recurring task |
+| Check mark with `3/12` | bottom left of the card | State of the checklist. The triangle beside it expands it. |
+
+Up to 0.3.1 the copy button carried a sheet **with** a circular arrow and therefore looked like the recurrence icon on the same card. Since 0.3.2 it is two offset sheets.
+
 Since 0.3.0 the editor opens **only via the pencil icon right next to the end of the title**; clicking anywhere on the card no longer opens it. That keeps the editor from popping up by accident while scrolling or tapping. Cards can still be grabbed and dragged anywhere.
 
 The two required fields come first: **title**, and directly below it **assignees**. Then the row with due date, time, priority and column, and below that the calendar invite. Everything else sits in **collapsible sections** since 0.3.2: description, labels and card colour, link, location, recurrence, checklist.

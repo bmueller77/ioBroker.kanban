@@ -366,6 +366,24 @@ Je Board lässt sich festlegen, wohin der "Karte öffnen"-Link in den Benachrich
 
 **Aufbau einer Karte (seit 0.3.0):** Die **Zuständigen** stehen als Avatarstapel oben rechts, der Titeltext umfließt sie. Ein Zeigen mit der Maus oder ein Tipp auf den Stapel fächert die Gesichter nach links auf, ohne den Zeilenumbruch zu verändern. Lange Titel werden nach **zwei Zeilen** mit "..." abgeschnitten, der vollständige Titel steht im Tooltip. Im **Kartenfuß** steht links der Checklisten-Fortschritt, mittig der Chevron zum Auf- und Zuklappen und rechts die Symbole für **Beschreibung, Link und Wiederholung** in dieser Reihenfolge. Ein Klick auf das Beschreibungssymbol öffnet die Beschreibung in einem **Lesefenster** mit gerendertem Markdown; Links darin öffnen immer in einem neuen Tab. Die Klickfläche des Chevrons ist bewusst breiter und höher als das Symbol selbst, damit sie auch per Touch gut zu treffen ist. Ob eine Checkliste auf- oder zugeklappt ist, wird **pro Gerät und Board gemerkt** - genau wie die Sortierung der Spalten - und bleibt nach einem Neuladen erhalten.
 
+**Die Symbole auf einer Karte** in der Reihenfolge, in der sie auftauchen:
+
+| Symbol | Wo | Bedeutung |
+|---|---|---|
+| Blatt mit Stift | rechts neben dem Titel | Karteneditor öffnen. Der einzige Weg dorthin. |
+| Zwei versetzte Blätter | rechts neben dem Titel, nur auf erledigten Karten | Inhalt als **neue** Karte übernehmen, siehe [Erledigte Karte kopieren](#boards-spalten--labels) |
+| Pfeil im Kreis | im Papierkorb, statt der beiden oberen | Karte wiederherstellen |
+| Papierkorb | im Papierkorb, daneben | endgültig löschen, mit Rückfrage |
+| `!` orange, `!!` rot | unter dem Titel | Priorität Hoch beziehungsweise Dringend. Bei Normal steht dort nichts. |
+| Kalenderblatt mit Datum | unter dem Titel | Fälligkeit, eingefärbt nach [Farben der Fälligkeit](#farben-der-fälligkeit) |
+| Ortsmarke | unter dem Titel | Ort, gekürzt. Der vollständige Text steht im Tooltip. |
+| Notizblatt | rechts in der Abzeichen- oder Labelzeile | Die Karte hat eine Beschreibung. Ein Klick öffnet sie als Lesefenster mit gerendertem Markdown. |
+| wechselndes Linksymbol | daneben | Die Karte hat einen Link. Welches Symbol erscheint, hängt an der Adresse, siehe [Link-Typen](#link-typen). |
+| Kreispfeil | daneben | Wiederkehrende Aufgabe |
+| Haken mit `3/12` | im Kartenfuß links | Stand der Checkliste. Das Dreieck daneben klappt sie auf. |
+
+Bis 0.3.1 trug der Kopierknopf ein Blatt **mit** Kreispfeil und sah damit aus wie das Wiederholungszeichen auf derselben Karte. Seit 0.3.2 sind es zwei versetzte Blätter.
+
 Der Editor öffnet sich seit 0.3.0 **ausschließlich über das Stift-Symbol direkt rechts neben dem Titel**; ein Klick irgendwo auf die Karte öffnet ihn nicht mehr. Das verhindert, dass der Editor beim Scrollen oder Antippen versehentlich aufgeht. Karten lassen sich weiterhin überall anfassen und ziehen.
 
 Oben stehen die beiden Pflichtfelder: **Titel**, direkt darunter **Zuständig**. Es folgt die Zeile mit Fälligkeit, Uhrzeit, Priorität und Spalte, darunter die Kalender-Einladung. Alles Weitere steckt seit 0.3.2 in **aufklappbaren Abschnitten**: Beschreibung, Labels und Kartenfarbe, Link, Ort, Wiederholung, Checkliste.
