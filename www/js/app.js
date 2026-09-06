@@ -1,7 +1,7 @@
 // Bootstrap: Konfiguration laden, URL-Parameter, Theme, Live-Sync, Aktionen
 
 import { api, liveSync } from './api.js';
-import { renderBoard, userAvatar, boardUsers, contrastText, mdiIcon, refreshDueBadges } from './board.js';
+import { renderBoard, userAvatar, boardUsers, soloUser, contrastText, mdiIcon, refreshDueBadges } from './board.js';
 import { initDialogs } from './dialogs.js';
 import { initI18n, applyStatic, t } from './i18n.js';
 
@@ -76,7 +76,8 @@ function renderHeader() {
     const chips = document.getElementById('userChips');
     chips.textContent = '';
     // Chips = Board-Mitglieder als Mehrfach-Filter (angeklickt = nur Karten dieses Users; nichts gewaehlt = alle).
-    for (const u of boardUsers(state)) {
+    // Bei genau einem Benutzer filtern sie nichts und bleiben weg (#35).
+    for (const u of (soloUser(state) ? [] : boardUsers(state))) {
         const chip = document.createElement('span');
         const on = state.usersFilter.includes(u.name);
         chip.className = 'user-chip' + (on ? ' active' : '');

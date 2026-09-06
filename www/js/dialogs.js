@@ -3,7 +3,7 @@
 import { openColorPicker, closeColorPicker, colorPickerOpen } from './colorpicker.js';
 import { api } from './api.js';
 import { t } from './i18n.js';
-import { boardUsers, boardMembers, contrastText, mdiIcon, MDI, fmtDate, linkIcon, safeHref } from './board.js';
+import { boardUsers, boardMembers, soloUser, contrastText, mdiIcon, MDI, fmtDate, linkIcon, safeHref } from './board.js';
 
 const CARD_COLORS = ['', '#e57373', '#ffb74d', '#fff176', '#aed581', '#4fc3f7', '#9575cd', '#f06292', '#a1887f'];
 const WEEKDAYS = [['Mo', 1], ['Di', 2], ['Mi', 3], ['Do', 4], ['Fr', 5], ['Sa', 6], ['So', 7]];
@@ -449,6 +449,22 @@ export function initDialogs(state, actions) {
     function renderAssigneePick() {
         const box = document.getElementById('assigneePick');
         box.textContent = '';
+        // Genau ein Benutzer: nichts zu waehlen. Das Feld verschwindet, die
+        // Zustaendigkeit wird vorbelegt. Traegt die Karte bereits jemanden,
+        // etwa eine verwaiste Kennung, bleibt der stehen - stillschweigend
+        // umzuhaengen waere eine Datenaenderung hinter dem Ruecken (#35).
+        const solo = soloUser(state);
+        const feld = box.closest('.field');
+        if (feld) {
+            feld.hidden = !!solo;
+        }
+        if (solo) {
+            if (!selAssignees.size) {
+                selAssignees.add(solo);
+            }
+            updateAssigneeValidity();
+            return;
+        }
         const list = boardUsers(state).slice();
         for (const u of (state.users || [])) if (selAssignees.has(u.name) && !list.some(x => x.name === u.name)) list.push(u);
         for (const u of list) {
@@ -1755,6 +1771,12 @@ export function initDialogs(state, actions) {
         // Benutzer (Mehrfachauswahl, board-abhängig) – keine angehakt = alle
         const usersLabel = el('label', null, t('share.users'));
         const usersWrap = el('div', 'share-cols');
+        // Bei genau einem Benutzer filtert ein users=-Link nichts. Der Block
+        // bleibt weg, wie die Chips in der Kopfzeile (#35).
+        if (soloUser(state)) {
+            usersLabel.hidden = true;
+            usersWrap.hidden = true;
+        }
         const updateUsers = () => { opt.users = [...usersWrap.querySelectorAll('input:checked')].map(i => i.dataset.val); };
         /** Beim Board-Wechsel mitziehen: Die Liste blieb früher auf den Mitgliedern
          *  des angezeigten Boards stehen. Ein damit erzeugter `users=`-Link nannte

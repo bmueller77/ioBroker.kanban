@@ -382,3 +382,47 @@ describe('Ueberfaelligkeit: Datum und Uhrzeit', () => {
         assert.equal(isOverdue(null, heute, jetzt), false);
     });
 });
+
+describe('Ein einziger Benutzer', () => {
+    // #35: Arbeitet nur eine Person mit dem Board, gibt es bei der
+    // Zustaendigkeit nichts zu entscheiden. Sie einzufordern hiesse, ein Skript
+    // an einer Frage scheitern zu lassen, die sich von selbst beantwortet.
+    it('fuellt die Zustaendigkeit von selbst', async () => {
+        const { store, entferne } = newStore();
+        entferne('bjoern');
+        await store.createBoard({ id: 'b', title: 'B' });
+
+        const karte = store.addCard('b', { title: 'Ohne Angabe', columnId: 'todo' }, 'test');
+        assert.deepEqual(karte.assignees, ['anna']);
+
+        const leer = store.addCard('b', { title: 'Leere Liste', columnId: 'todo', assignees: [] }, 'test');
+        assert.deepEqual(leer.assignees, ['anna']);
+    });
+
+    it('fordert sie bei zwei Benutzern weiter ein', async () => {
+        const { store } = newStore();
+        await store.createBoard({ id: 'b', title: 'B' });
+        assert.throws(() => store.addCard('b', { title: 'Ohne', columnId: 'todo' }, 'test'), /assignees fehlt/);
+    });
+
+    it('fordert sie ohne jeden Benutzer weiter ein', async () => {
+        // Kein Benutzer heisst nicht: irgendjemand. Dann fehlt die Angabe wirklich.
+        const { store, entferne } = newStore();
+        entferne('anna');
+        entferne('bjoern');
+        await store.createBoard({ id: 'b', title: 'B' });
+        assert.throws(() => store.addCard('b', { title: 'Ohne', columnId: 'todo' }, 'test'), /assignees fehlt/);
+    });
+
+    it('prueft eine angegebene Kennung trotzdem', async () => {
+        // Das automatische Fuellen greift nur bei fehlender Angabe. Wer etwas
+        // angibt, bekommt es weiterhin geprueft.
+        const { store, entferne } = newStore();
+        entferne('bjoern');
+        await store.createBoard({ id: 'b', title: 'B' });
+        assert.throws(
+            () => store.addCard('b', { title: 'Karte', columnId: 'todo', assignees: ['default'] }, 'test'),
+            /unbekannte zustaendige Person: default/,
+        );
+    });
+});

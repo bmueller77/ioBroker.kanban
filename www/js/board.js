@@ -641,7 +641,7 @@ function renderCard(state, board, card, actions, opts = {}) {
     // Zustaendige stehen oben rechts im Titel und werden vom Titeltext umflossen
     // (float), damit sie auf jeder Karte an derselben Stelle sitzen, ohne dem
     // Titel pauschal Breite wegzunehmen.
-    if (card.assignees && card.assignees.length) {
+    if (card.assignees && card.assignees.length && !soloUser(state)) {
         const av = el('span', 'avatars');
         card.assignees.forEach((a, i) => {
             const one = userAvatar(state, a);
@@ -874,6 +874,21 @@ export function boardMembers(board, users) {
     const all = (users || []).map(u => u && u.name).filter(Boolean);
     const listed = (board && Array.isArray(board.members) ? board.members : []).filter(n => all.includes(n));
     return listed.length ? listed : all;
+}
+
+/**
+ * Name des einzigen Benutzers, sonst null.
+ *
+ * Arbeitet nur eine Person mit dem Board, gibt es nichts zu waehlen und nichts
+ * zu filtern: Der Avatar auf jeder Karte zeigt immer dieselbe Person, und die
+ * Chips in der Kopfzeile filtern nichts. Beides verschwindet dann (#35).
+ *
+ * @param state Zustand der Oberflaeche
+ * @returns Benutzername oder null
+ */
+export function soloUser(state) {
+    const alle = (state && state.users) || [];
+    return alle.length === 1 && alle[0] && alle[0].name ? alle[0].name : null;
 }
 
 export function boardUsers(state) {
