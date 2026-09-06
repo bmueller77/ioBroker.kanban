@@ -106,7 +106,7 @@
   "boards.allowAdd": "Новая",
   "boards.deleteColumnTitle": "Удалить столбец (карточки перейдут в первый)",
   "boards.addColumn": "+ Добавить столбец",
-  "boards.labels": "Метки",
+  "boards.labels": "Метки (перетащите для изменения порядка)",
   "boards.deleteLabelTitle": "Удалить метку",
   "boards.addLabel": "+ Добавить метку",
   "boards.linkTarget": "Ссылка в уведомлениях",

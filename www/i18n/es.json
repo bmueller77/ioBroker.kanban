@@ -106,7 +106,7 @@
   "boards.allowAdd": "Nueva",
   "boards.deleteColumnTitle": "Eliminar la columna (las tarjetas pasan a la primera)",
   "boards.addColumn": "+ Añadir columna",
-  "boards.labels": "Etiquetas",
+  "boards.labels": "Etiquetas (arrastra para reordenar)",
   "boards.deleteLabelTitle": "Eliminar la etiqueta",
   "boards.addLabel": "+ Añadir etiqueta",
   "boards.linkTarget": "Enlace en las notificaciones",

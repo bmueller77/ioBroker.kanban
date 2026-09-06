@@ -106,7 +106,7 @@
   "boards.allowAdd": "Neu",
   "boards.deleteColumnTitle": "Spalte löschen (Karten wandern in die erste Spalte)",
   "boards.addColumn": "+ Spalte hinzufügen",
-  "boards.labels": "Labels",
+  "boards.labels": "Labels (ziehen zum Sortieren)",
   "boards.deleteLabelTitle": "Label löschen",
   "boards.addLabel": "+ Label hinzufügen",
   "boards.linkTarget": "Link in Benachrichtigungen",

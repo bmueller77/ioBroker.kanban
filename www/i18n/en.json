@@ -106,7 +106,7 @@
   "boards.allowAdd": "New",
   "boards.deleteColumnTitle": "Delete column (cards move to the first column)",
   "boards.addColumn": "+ Add column",
-  "boards.labels": "Labels",
+  "boards.labels": "Labels (drag to reorder)",
   "boards.deleteLabelTitle": "Delete label",
   "boards.addLabel": "+ Add label",
   "boards.linkTarget": "Link in notifications",

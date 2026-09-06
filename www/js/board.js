@@ -619,10 +619,14 @@ function renderCard(state, board, card, actions, opts = {}) {
 
     // Labels in einer eigenen Zeile, damit sie immer unter Prioritaet,
     // Faelligkeit und Ort stehen und nicht dazwischenrutschen.
+    //
+    // Ausgegeben wird in der Reihenfolge des Boards, nicht in der, in der jemand
+    // im Editor daraufgeklickt hat. Sonst sehen zwei Karten mit denselben Labels
+    // verschieden aus, je nach Laune des Anlegenden (#32).
+    const gewaehlt = new Set(card.labels || []);
     const labelRow = el('div', 'badges labels-row');
-    for (const lid of card.labels || []) {
-        const label = (board.labels || []).find(l => l.id === lid);
-        if (!label) continue;
+    for (const label of board.labels || []) {
+        if (!gewaehlt.has(label.id)) continue;
         const pill = el('span', 'label-pill', label.title);
         pill.style.background = label.color || '#888';
         pill.style.color = contrastText(label.color || '#888');

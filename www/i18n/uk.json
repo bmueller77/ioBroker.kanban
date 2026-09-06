@@ -106,7 +106,7 @@
   "boards.allowAdd": "Нова",
   "boards.deleteColumnTitle": "Видалити стовпець (картки перейдуть до першого)",
   "boards.addColumn": "+ Додати стовпець",
-  "boards.labels": "Мітки",
+  "boards.labels": "Мітки (перетягніть, щоб змінити порядок)",
   "boards.deleteLabelTitle": "Видалити мітку",
   "boards.addLabel": "+ Додати мітку",
   "boards.linkTarget": "Посилання у сповіщеннях",

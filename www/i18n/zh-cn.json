@@ -106,7 +106,7 @@
   "boards.allowAdd": "新建",
   "boards.deleteColumnTitle": "删除该列（卡片将移到第一列）",
   "boards.addColumn": "+ 添加列",
-  "boards.labels": "标签",
+  "boards.labels": "标签（拖动可调整顺序）",
   "boards.deleteLabelTitle": "删除标签",
   "boards.addLabel": "+ 添加标签",
   "boards.linkTarget": "通知中的链接",

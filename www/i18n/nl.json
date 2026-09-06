@@ -106,7 +106,7 @@
   "boards.allowAdd": "Nieuw",
   "boards.deleteColumnTitle": "Kolom verwijderen (kaarten gaan naar de eerste kolom)",
   "boards.addColumn": "+ Kolom toevoegen",
-  "boards.labels": "Labels",
+  "boards.labels": "Labels (sleep om te ordenen)",
   "boards.deleteLabelTitle": "Label verwijderen",
   "boards.addLabel": "+ Label toevoegen",
   "boards.linkTarget": "Link in meldingen",

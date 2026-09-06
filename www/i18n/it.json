@@ -106,7 +106,7 @@
   "boards.allowAdd": "Nuovo",
   "boards.deleteColumnTitle": "Elimina colonna (le schede vanno nella prima colonna)",
   "boards.addColumn": "+ Aggiungi colonna",
-  "boards.labels": "Etichette",
+  "boards.labels": "Etichette (trascina per riordinare)",
   "boards.deleteLabelTitle": "Elimina etichetta",
   "boards.addLabel": "+ Aggiungi etichetta",
   "boards.linkTarget": "Link nelle notifiche",

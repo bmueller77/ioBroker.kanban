@@ -106,7 +106,7 @@
   "boards.allowAdd": "Nowa",
   "boards.deleteColumnTitle": "Usuń kolumnę (karty trafią do pierwszej)",
   "boards.addColumn": "+ Dodaj kolumnę",
-  "boards.labels": "Etykiety",
+  "boards.labels": "Etykiety (przeciągnij, aby zmienić kolejność)",
   "boards.deleteLabelTitle": "Usuń etykietę",
   "boards.addLabel": "+ Dodaj etykietę",
   "boards.linkTarget": "Odnośnik w powiadomieniach",

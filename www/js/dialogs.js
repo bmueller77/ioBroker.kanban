@@ -326,9 +326,10 @@ export function initDialogs(state, actions) {
         const beschr = String(f.description.value || '').trim().replace(/\s+/g, ' ');
         setz('desc', beschr.length > 40 ? `${beschr.slice(0, 40)}...` : beschr);
 
-        const titel = [...selLabels]
-            .map(id => ((state.board && state.board.labels) || []).find(l => l.id === id))
-            .filter(Boolean)
+        // Reihenfolge des Boards, damit die Zusammenfassung dasselbe sagt wie
+        // die Karte und wie die Auswahl darunter (#32)
+        const titel = ((state.board && state.board.labels) || [])
+            .filter(l => selLabels.has(l.id))
             .map(l => l.title);
         const labelText =
             titel.length > 3 ? `${titel.slice(0, 3).join(', ')} +${titel.length - 3}` : titel.join(', ');
@@ -1333,6 +1334,7 @@ export function initDialogs(state, actions) {
             const mkLabelRow = lab => {
                 const row = el('div', 'label-edit');
                 row.dataset.labelId = lab.id || '';
+                const drag = el('span', 'drag', '⠳');
                 const color = makeColorTrigger(lab.color || '#4CAF50', () => { dirty = true; });
                 const name = document.createElement('input');
                 name.type = 'text';
@@ -1342,11 +1344,15 @@ export function initDialogs(state, actions) {
                 rm.type = 'button';
                 rm.title = t('boards.deleteLabelTitle');
                 rm.addEventListener('click', () => { row.remove(); dirty = true; });
-                row.append(color, name, rm);
+                row.append(drag, color, name, rm);
                 return row;
             };
             for (const lab of editBoard.labels || []) labelBox.appendChild(mkLabelRow(lab));
             panel.appendChild(labelBox);
+            // Die Reihenfolge bestimmt, wie die Labels auf den Karten stehen.
+            // Gespeichert wird in DOM-Reihenfolge, Ziehen genuegt also.
+            // eslint-disable-next-line no-undef
+            Sortable.create(labelBox, { handle: '.drag', animation: 150, onEnd: () => { dirty = true; } });
             const addLabel = el('button', 'linkbtn', t('boards.addLabel'));
             addLabel.addEventListener('click', () => { labelBox.appendChild(mkLabelRow({ color: '#4CAF50' })); dirty = true; });
             panel.appendChild(addLabel);

@@ -354,6 +354,8 @@ Der Lauf startet **einmal täglich** sowie **beim Adapterstart**. Grundlage ist 
 
 Labels sind farbige Schlagworte und werden **pro Board** im Tab *Board* verwaltet (anlegen, umbenennen, umfärben, löschen). Auf der Karte erscheinen sie als farbiges Badge mit automatisch kontrastierender Schrift; im [Ansichten-Dialog](#ansichten-teilen--url-parameter) lassen sie sich als Blacklist zum Ausblenden nutzen.
 
+Seit 0.3.2 lässt sich die **Reihenfolge** der Labels wie die der Spalten am Anfasser ziehen, und diese Reihenfolge gilt überall: auf den Karten, in der Auswahl im Karteneditor und in der Zusammenfassung der Abschnittszeile. Vorher gab die Karte ihre Labels in der Reihenfolge aus, in der jemand sie angeklickt hatte, zwei Karten mit denselben Labels sahen also verschieden aus. Wer es alphabetisch will, zieht die Liste einmal in diese Reihenfolge.
+
 #### Link in Benachrichtigungen (ab 0.2.0)
 
 ![Board-Einstellungen - Labels und Link-Ziel](img/settings-labels.png)

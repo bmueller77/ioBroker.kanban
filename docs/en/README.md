@@ -354,6 +354,8 @@ The run happens **once a day** and **on adapter start**. It uses the completion 
 
 Labels are coloured tags and are managed **per board** in the *Board* tab (create, rename, recolour, delete). On a card they appear as a coloured badge with automatically contrasting text; in the [Views dialog](#sharing-views--url-parameters) they can be used as a blacklist to hide cards.
 
+Since 0.3.2 the **order** of the labels can be dragged by its handle, like the columns above, and that order applies everywhere: on the cards, in the picker inside the card editor, and in the summary of the section header. Before that a card listed its labels in the order someone had clicked them, so two cards carrying the same labels looked different. If you want them alphabetical, drag the list into that order once.
+
 #### Link in notifications (from 0.2.0)
 
 ![Board settings, labels and link target](img/settings-labels.png)

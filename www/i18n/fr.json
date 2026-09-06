@@ -106,7 +106,7 @@
   "boards.allowAdd": "Nouveau",
   "boards.deleteColumnTitle": "Supprimer la colonne (les cartes vont dans la première colonne)",
   "boards.addColumn": "+ Ajouter une colonne",
-  "boards.labels": "Étiquettes",
+  "boards.labels": "Étiquettes (glisser pour réordonner)",
   "boards.deleteLabelTitle": "Supprimer l'étiquette",
   "boards.addLabel": "+ Ajouter une étiquette",
   "boards.linkTarget": "Lien dans les notifications",
