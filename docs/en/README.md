@@ -991,7 +991,7 @@ Besides the UI, the adapter creates states you can use in scripts, VIS/Lovelace 
 | `kanban.0.boards.<id>.data` | json | Full board (cards, columns, labels). |
 | `kanban.0.boards.<id>.rev` | number | Revision (increments on every change, for polling). |
 | `kanban.0.boards.<id>.cardCount` | number | Number of cards in the board. |
-| `kanban.0.boards.<id>.overdueCount` | number | Overdue cards in the board. |
+| `kanban.0.boards.<id>.overdueCount` | number | Overdue cards in the board. Since 0.3.2 by the same rule as the red colouring: a time of day counts, without one the value changes at midnight. Done columns and the trash stay out of it. |
 | `kanban.0.users.<name>.assignedCount` | number | Open cards assigned to this person. |
 | `kanban.0.users.<name>.overdueCount` | number | Of those, overdue. |
 | `kanban.0.users.<name>.overdueList` | json | List of overdue cards (title + board/column). |

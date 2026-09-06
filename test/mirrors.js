@@ -1,5 +1,5 @@
 const assert = require('node:assert/strict');
-const { Store } = require('../lib/store');
+const { Store, isOverdue } = require('../lib/store');
 
 /**
  * Spiegel-States: Die Board-Zaehler haengen nicht nur an Aenderungen, sondern
@@ -339,5 +339,46 @@ describe('API-Pruefung: Zustaendige und Labels', () => {
         store.addCard('b', { title: 'Zwei', columnId: 'todo', assignees: ['anna'], labels: ['garten'] }, 'test');
 
         assert.equal(store.getBoard('b').labels.filter(l => l.id === 'garten').length, 1);
+    });
+});
+
+describe('Ueberfaelligkeit: Datum und Uhrzeit', () => {
+    // #31: Der Zaehler rechnete nur mit dem Datum, die Oberflaeche schon mit der
+    // Uhrzeit. Eine Karte war um 17:01 rot, waehrend overdueCount bis
+    // Mitternacht auf dem alten Stand blieb.
+    const karte = (due, dueTime = '') => ({ due, dueTime });
+    const heute = '2026-08-28';
+    const jetzt = '17:01';
+
+    it('zaehlt Vergangenes unabhaengig von der Uhrzeit', () => {
+        assert.equal(isOverdue(karte('2026-08-27'), heute, jetzt), true);
+        assert.equal(isOverdue(karte('2026-08-27', '23:59'), heute, jetzt), true);
+    });
+
+    it('zaehlt heute ohne Uhrzeit noch nicht', () => {
+        assert.equal(isOverdue(karte(heute), heute, jetzt), false);
+    });
+
+    it('zaehlt heute, sobald die Uhrzeit verstrichen ist', () => {
+        assert.equal(isOverdue(karte(heute, '17:00'), heute, jetzt), true);
+        assert.equal(isOverdue(karte(heute, '17:01'), heute, jetzt), false);
+        assert.equal(isOverdue(karte(heute, '17:02'), heute, jetzt), false);
+    });
+
+    it('ignoriert eine unbrauchbare Uhrzeit, statt zu raten', () => {
+        // Gleiche Entscheidung wie in der Anzeige: lieber nicht ueberfaellig als
+        // aufgrund eines Stringvergleichs mit Muell.
+        assert.equal(isOverdue(karte(heute, 'kaputt'), heute, jetzt), false);
+        assert.equal(isOverdue(karte(heute, '25:00'), heute, jetzt), false);
+    });
+
+    it('zaehlt Kuenftiges nie', () => {
+        assert.equal(isOverdue(karte('2026-08-29'), heute, jetzt), false);
+        assert.equal(isOverdue(karte('2026-08-29', '00:01'), heute, jetzt), false);
+    });
+
+    it('kommt ohne Datum und ohne Karte zurecht', () => {
+        assert.equal(isOverdue(karte(''), heute, jetzt), false);
+        assert.equal(isOverdue(null, heute, jetzt), false);
     });
 });

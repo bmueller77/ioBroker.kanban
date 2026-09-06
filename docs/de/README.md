@@ -995,7 +995,7 @@ Neben der Oberfläche legt der Adapter States an, die sich in Skripten, VIS/Love
 | `kanban.0.boards.<id>.data` | json | Vollständiges Board (Karten, Spalten, Labels). |
 | `kanban.0.boards.<id>.rev` | number | Revision (steigt bei jeder Änderung, für Polling). |
 | `kanban.0.boards.<id>.cardCount` | number | Anzahl Karten im Board. |
-| `kanban.0.boards.<id>.overdueCount` | number | Überfällige Karten im Board. |
+| `kanban.0.boards.<id>.overdueCount` | number | Überfällige Karten im Board. Seit 0.3.2 nach derselben Regel wie die rote Einfärbung: eine gesetzte Uhrzeit zählt mit, ohne Uhrzeit wechselt der Wert um Mitternacht. Erledigte Spalten und der Papierkorb bleiben außen vor. |
 | `kanban.0.users.<name>.assignedCount` | number | Offene, dieser Person zugewiesene Karten. |
 | `kanban.0.users.<name>.overdueCount` | number | Davon überfällig. |
 | `kanban.0.users.<name>.overdueList` | json | Liste der überfälligen Karten (Titel + Board/Spalte). |
