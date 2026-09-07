@@ -10,6 +10,11 @@ const { Scheduler } = require('./lib/scheduler');
 const { cardWithDueAt, boardWithDueAt } = require('./lib/dueat');
 const { Server } = require('./lib/server');
 
+// Wie oft der Adapter versucht, das Merkmal `fixed` in die Benutzerliste
+// zurueckzuschreiben, bevor er aufgibt. Mehr als einer, weil ein Speichern der
+// Instanzeinstellungen zum falschen Zeitpunkt das Merkmal einmalig verwirft.
+const FREEZE_MAX_RETRIES = 3;
+
 class Kanban extends utils.Adapter {
     constructor(options) {
         super({ ...options, name: 'kanban', useFormatDate: true });
@@ -92,13 +97,26 @@ class Kanban extends utils.Adapter {
         const users = Array.isArray(this.config.users) ? this.config.users : [];
         const offen = users.filter(u => u && u.name && !u.fixed).map(u => u.name);
         if (!offen.length) {
+            // Alles festgeschrieben: Der Zaehler darf wieder bei null anfangen,
+            // damit ein spaeterer Verlust erneut volle Versuche bekommt.
+            if (await this._freezeRetries()) {
+                await this.setStateAsync('info.freezeRetries', 0, true);
+            }
             return false;
         }
 
         // Schutz gegen eine Neustartschleife: Sollte die Admin-Tabelle das
-        // Merkmal beim Speichern verwerfen, kaeme es sonst bei jedem Start
-        // erneut. Wer schon einmal festgeschrieben wurde, wird nicht noch
-        // einmal geschrieben - stattdessen gibt es eine Warnung.
+        // Merkmal beim Speichern dauerhaft verwerfen, kaeme es sonst bei jedem
+        // Start erneut.
+        //
+        // Frueher gab dieser Schutz schon nach dem ersten verlorenen Merkmal
+        // endgueltig auf. Das traf den haeufigsten Fall ueberhaupt: Wer eine
+        // frische Instanz einrichtet, hat die Einstellungen offen, waehrend der
+        // Adapter das Merkmal schreibt. Sein naechstes Speichern schreibt den
+        // Stand von vorher zurueck, und die IDs blieben dann fuer immer
+        // editierbar - genau der Zustand, gegen den das Einfrieren gebaut ist.
+        // Jetzt sind es mehrere Versuche, und ein sauberer Start setzt den
+        // Zaehler zurueck.
         await this.setObjectNotExistsAsync('info.frozenUserIds', {
             type: 'state',
             common: {
@@ -111,17 +129,33 @@ class Kanban extends utils.Adapter {
             },
             native: {},
         });
-        const bekannt = await this._frozenUserIds();
-        const frisch = offen.filter(n => !bekannt.includes(n));
-        if (!frisch.length) {
+        await this.setObjectNotExistsAsync('info.freezeRetries', {
+            type: 'state',
+            common: {
+                name: 'Attempts to write the frozen marker back',
+                type: 'number',
+                role: 'value',
+                read: true,
+                write: false,
+                def: 0,
+            },
+            native: {},
+        });
+        const versuche = await this._freezeRetries();
+        if (versuche >= FREEZE_MAX_RETRIES) {
             this.log.warn(
-                `Could not freeze the user ID(s) ${offen.join(', ')}: the marker is not kept by the settings table. ` +
-                    'The ID stays editable, and renaming it will detach cards, avatars and shared views.',
+                `Could not freeze the user ID(s) ${offen.join(', ')} after ${versuche} attempts: ` +
+                    'the marker is not kept by the settings table. The ID stays editable, and renaming it ' +
+                    'will detach cards, avatars and shared views. Check the instance settings, then restart ' +
+                    'the instance to try again.',
             );
             return false;
         }
+        await this.setStateAsync('info.freezeRetries', versuche + 1, true);
 
-        await this.setStateAsync('info.frozenUserIds', JSON.stringify([...bekannt, ...frisch]), true);
+        const bekannt = await this._frozenUserIds();
+        const frisch = offen.filter(n => !bekannt.includes(n));
+        await this.setStateAsync('info.frozenUserIds', JSON.stringify([...new Set([...bekannt, ...frisch])]), true);
 
         // Lesen und ganz zurueckschreiben statt extendObject: Bei Arrays
         // mischen die Varianten von extendObject je nach Version indexweise.
@@ -134,13 +168,24 @@ class Kanban extends utils.Adapter {
         obj.native.users = obj.native.users.map(u => (u && u.name ? { ...u, fixed: true } : u));
         await this.setForeignObjectAsync(id, obj);
         this.log.info(
-            `User ID(s) ${frisch.join(', ')} are now fixed and can no longer be renamed in the settings. ` +
+            `User ID(s) ${offen.join(', ')} are now fixed and can no longer be renamed in the settings. ` +
                 'The adapter restarts once to pick up the change.',
         );
         return true;
     }
 
     /** Liste der bereits festgeschriebenen IDs aus dem State lesen. */
+    /** Bisherige Versuche, das Merkmal zurueckzuschreiben. */
+    async _freezeRetries() {
+        try {
+            const st = await this.getStateAsync('info.freezeRetries');
+            const n = Number(st && st.val);
+            return Number.isFinite(n) && n > 0 ? n : 0;
+        } catch {
+            return 0;
+        }
+    }
+
     async _frozenUserIds() {
         try {
             const st = await this.getStateAsync('info.frozenUserIds');
