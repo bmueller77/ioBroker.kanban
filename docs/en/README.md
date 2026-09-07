@@ -4,6 +4,10 @@ A **Kanban board as a dedicated ioBroker adapter**. It ships its own web server,
 
 > **Who is it for?** Households that manage tasks together, whether that is a family, a flat-share or the maintenance plan for a house, and want those tasks where ioBroker already runs. Every event lands in a state that scripts and Node-RED can read, and the board embeds into Lovelace as a webpage card.
 
+> **Version 0.3.2**, switchable counts in the column header (total, tomorrow, today, overdue), collapsible sections in the card editor with a summary, an icon bar above the link field, user IDs locked once created, repair for orphaned assignees in the UI, one label order everywhere plus a draggable label list, single-user mode without assignment fields, reworked keyboard operation.
+
+> **Version 0.3.1**, bug fixes and dependency maintenance.
+
 > **Version 0.3.0**, Per-board trash (restorable for 30 days), automatic cleanup of old done cards, per-column sorting with five modes and a direction toggle, done cards with strikethrough title, completion timestamp and copy button, moving or copying cards between boards, new events `cardRestored`/`cardPurged` and `dueAt` (due date incl. time) in every event, reworked board settings and card editor, confirmation dialogs inside the UI.
 >
 > **Version 0.2.1**: Express 5, fixed avatar upload (CSP blocked `blob:` URLs), Node.js 20+ and admin 7.8.23+, ready-to-use deep link in the event, notification routing via script (Telegram/Pushover, see below), updated dependencies and repository compliance.
@@ -130,6 +134,8 @@ This is where you define **which people exist**, the list applies to the entire 
 Add a row with the **"+"** in the table header; the bin icon at the end of a row removes it again (without asking). Rows without an ID are dropped when saving. A fresh instance ships with two example users, `user1` and `user2`.
 
 > **The ID is the key, and it is locked once created.** Boards and cards find their people through the *ID* column; the avatar pictures and the addresses of shared views hang on it as well. Changing it later would leave all of that pointing nowhere, and the adapter could not even clean up afterwards: a rename cannot be told apart from "deleted and newly created". The field is therefore locked as soon as the user has been saved once. The adapter writes a marker into the instance configuration on the next start and restarts once while doing so. That happens once per new user, never again after that.
+>
+> **If the field stays editable:** the adapter writes the marker back on start. Saving the instance settings at exactly that moment overwrites it again with what your form still held. The adapter then retries up to three times, after that it logs "Could not freeze the user ID(s)" and leaves the fields editable. You can tell by the *ID* column still being typeable. The remedy: restart the instance once and check that the fields are locked **before** creating any cards.
 >
 > The **display name** stays freely editable. "Tom Reich" becomes "Tommy Reich" without a single card noticing.
 >
@@ -318,6 +324,8 @@ Clicking one of the numbers opens a small menu with four checkmarks. Whatever yo
 
 The three due-date numbers carry **the same colours as the badges on the cards** and follow the same arithmetic, time of day and lead time from the instance settings included. Set the lead time to `3` and "tomorrow" covers everything up to the day after tomorrow. At `0` the badge stays in place and merely loses its warning colour, so the header does not jump on every change and the menu stays within reach.
 
+At least one number stays: the last remaining checkmark cannot be removed, because otherwise there would be nothing left to reopen the menu with. It is shown dimmed for that reason.
+
 The selection applies **per column** and is stored **per device**, like the sort mode and the eye icon. A person or label filter affects all four numbers alike. The done column and the trash have no menu: every card there counts as completed, so there would be nothing to colour.
 
 The keyboard reaches all of it. Tab lands on the numbers, Enter opens the menu, the arrow keys move inside it, Enter ticks or unticks, Escape closes and hands the focus back. The same is true of the sort menu since 0.3.2, which used to open but whose entries the keyboard could not reach.
@@ -364,7 +372,7 @@ Per board you can choose where the "open card" link in notification e-mails poin
 
 ### Cards: all fields
 
-**Card anatomy (since 0.3.0):** the **assignees** sit as a stack of avatars in the top right corner and the title text flows around them. Hovering or tapping the stack fans the faces out to the left without changing the line breaks. Long titles are cut off after **two lines** with an ellipsis, the full title stays available as a tooltip. The **card footer** holds the checklist progress on the left, the expand chevron in the middle and the icons for **description, link and recurrence** on the right, in that order. Clicking the description icon opens the description in a **read-only window** with rendered Markdown; links inside always open in a new tab. The chevron's hit area is deliberately wider and taller than the symbol itself so it is easy to hit by touch. Whether a checklist is expanded or collapsed is **remembered per device and board**, just like the column sort modes, and survives a reload.
+**Card anatomy (since 0.3.0):** the **assignees** sit as a stack of avatars in the top right corner and the title text flows around them. Hovering or tapping the stack fans the faces out to the left without changing the line breaks. Long titles are cut off after **two lines** with an ellipsis, the full title stays available as a tooltip. The **card footer** holds the checklist progress on the left, the expand chevron in the middle and the icons for **description, link and recurrence** on the right, in that order. Clicking the description icon opens the description in a **read-only window** with rendered Markdown; links inside always open in a new tab. The chevron's hit area is deliberately larger than the symbol itself so it is easy to hit by touch: 140 x 24 px against a symbol of 14 x 14 px. It sits as an invisible area on top, so the button itself measures only 90 x 11 px. Whether a checklist is expanded or collapsed is **remembered per device and board**, just like the column sort modes, and survives a reload.
 
 **The icons on a card**, in the order they appear:
 
@@ -495,7 +503,7 @@ The colours can be changed through [custom CSS](#faq--pitfalls): `--danger` for 
 
 ### Recurrence
 
-Recurring tasks work **on completion** (the Kanban way): as soon as a recurring card is moved to the "Done" column, a **fresh card** with the next matching due date is created automatically in the first non-done column (checklist items reset). Every content field of the template is carried over: title, description, assignees, labels, card colour, priority, link, **time of day**, **location** and the **calendar invite** flag. Cards with recurrence carry a recurrence badge (circular-arrows icon).
+Recurring tasks work **on completion** (the Kanban way): as soon as a recurring card is moved to the "Done" column, a **fresh card** with the next matching due date is created automatically in the first non-done column (checklist items reset). Every content field of the template is carried over: title, description, assignees, labels, card colour, priority, link, **time of day**, **location** and the **calendar invite** flag. Cards with recurrence carry a recurrence badge (circular-arrows icon). The **completed** card does not keep the rule: it moves over to the follow-up card entirely, so the badge disappears there.
 
 If a recurring card is created **without** a manual date, the adapter automatically sets the next matching date.
 

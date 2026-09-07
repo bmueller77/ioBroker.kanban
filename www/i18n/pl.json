@@ -15,6 +15,7 @@
   "badge.description": "Ma opis",
   "card.titleNew": "Nowa karta",
   "card.titleEdit": "Edytuj kartę",
+  "card.unsavedMsg": "Ta karta ma niezapisane zmiany. Zapisać czy odrzucić?",
   "card.title": "Tytuł",
   "card.titleRequired": "Podaj tytuł",
   "card.description": "Opis",

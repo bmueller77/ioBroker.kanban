@@ -160,6 +160,10 @@ function slugify(text) {
 
 export function initDialogs(state, actions) {
     const dlg = document.getElementById('cardDialog');
+    // Abzug des Formulars beim Oeffnen. Der Vergleich damit beantwortet die
+    // Frage "gibt es ungespeicherte Aenderungen?", ohne dass jedes einzelne
+    // Bedienelement ein Flag setzen muesste (Befund 2).
+    let cardStand = '';
     const form = document.getElementById('cardForm');
     // Monats-Select einmalig lokalisiert befüllen (defensiv: bricht nicht die
     // ganze App ab, falls veraltetes HTML gecacht wurde und das Feld fehlt)
@@ -761,6 +765,7 @@ export function initDialogs(state, actions) {
         syncLinkType();
         updateLinkValidity();
         applyFolds();
+        cardStand = JSON.stringify(readCard());
         dlg.showModal();
     }
 
@@ -815,6 +820,7 @@ export function initDialogs(state, actions) {
         syncLinkType();
         updateLinkValidity();
         applyFolds();
+        cardStand = JSON.stringify(readCard());
         dlg.showModal();
     }
 
@@ -1003,7 +1009,36 @@ export function initDialogs(state, actions) {
         addCheckRow().querySelector('input[type=text]').focus();
     });
     document.getElementById('cancelCardBtn').addEventListener('click', () => dlg.close());
-    addCloseX(document.getElementById('cardDialogTitle'), () => dlg.close());
+    /**
+     * Vor dem Schliessen nachfragen, wenn etwas geaendert wurde.
+     *
+     * "Abbrechen" fragt bewusst nicht: Wer auf einen Knopf mit diesem Namen
+     * drueckt, meint es auch. Escape und das Kreuz dagegen drueckt man
+     * reflexhaft, und dort war eine lange Beschreibung bisher weg.
+     *
+     * @returns true, wenn geschlossen werden darf
+     */
+    async function guardCard() {
+        let geaendert = false;
+        try { geaendert = JSON.stringify(readCard()) !== cardStand; } catch { geaendert = false; }
+        if (!geaendert) {
+            return true;
+        }
+        const r = await confirmDialog({
+            title: t('boards.unsavedTitle'), message: t('card.unsavedMsg'),
+            ok: t('boards.save'), extra: t('boards.discard'),
+        });
+        // Speichern laeuft ueber den regulaeren Weg: Der Submit-Handler prueft
+        // die Pflichtfelder und schliesst selbst, wenn es geklappt hat.
+        if (r === true) { form.requestSubmit(); return false; }
+        return r === 'extra';
+    }
+
+    addCloseX(document.getElementById('cardDialogTitle'), async () => { if (await guardCard()) dlg.close(); });
+    dlg.addEventListener('cancel', async ev => {
+        ev.preventDefault();
+        if (await guardCard()) dlg.close();
+    });
     document.getElementById('deleteCardBtn').addEventListener('click', async () => {
         if (!editingCardId) return;
         if (!await confirmDialog({ title: t('card.delete'), message: t('confirm.deleteCard'), danger: true, ok: t('card.delete') })) return;
@@ -1018,9 +1053,10 @@ export function initDialogs(state, actions) {
     form.elements.title.addEventListener('invalid', () => form.elements.title.setCustomValidity(t('card.titleRequired')));
     form.elements.title.addEventListener('input', () => form.elements.title.setCustomValidity(''));
 
-    form.addEventListener('submit', async ev => {
-        ev.preventDefault();
-        const data = {
+    /** Der Inhalt des Editors als einfaches Objekt - fuers Speichern und fuer
+     *  den Vergleich mit dem Stand beim Oeffnen. */
+    function readCard() {
+        return {
             title: form.elements.title.value.trim(),
             description: form.elements.description.value,
             due: form.elements.due.value,
@@ -1038,6 +1074,11 @@ export function initDialogs(state, actions) {
             recurrence: readRecurrence(),
             columnId: form.elements.columnId.value,
         };
+    }
+
+    form.addEventListener('submit', async ev => {
+        ev.preventDefault();
+        const data = readCard();
         if (!data.title) return;
         if (!data.assignees.length) { updateAssigneeValidity(); const p = document.getElementById('assigneeValidity'); if (p) p.reportValidity(); return; }
         try {

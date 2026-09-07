@@ -15,6 +15,7 @@
   "badge.description": "Tem descrição",
   "card.titleNew": "Novo cartão",
   "card.titleEdit": "Editar cartão",
+  "card.unsavedMsg": "Este cartão tem alterações não guardadas. Guardar ou descartar?",
   "card.title": "Título",
   "card.titleRequired": "Introduza um título",
   "card.description": "Descrição",

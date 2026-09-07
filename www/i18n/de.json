@@ -15,6 +15,7 @@
   "badge.description": "Hat eine Beschreibung",
   "card.titleNew": "Neue Karte",
   "card.titleEdit": "Karte bearbeiten",
+  "card.unsavedMsg": "Es gibt ungespeicherte Änderungen an dieser Karte. Speichern oder verwerfen?",
   "card.title": "Titel",
   "card.titleRequired": "Bitte einen Titel eingeben",
   "card.description": "Beschreibung",

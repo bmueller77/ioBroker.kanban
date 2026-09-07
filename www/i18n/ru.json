@@ -15,6 +15,7 @@
   "badge.description": "Есть описание",
   "card.titleNew": "Новая карточка",
   "card.titleEdit": "Изменить карточку",
+  "card.unsavedMsg": "В карточке есть несохранённые изменения. Сохранить или отменить?",
   "card.title": "Заголовок",
   "card.titleRequired": "Введите заголовок",
   "card.description": "Описание",

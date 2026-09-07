@@ -15,6 +15,7 @@
   "badge.description": "含描述",
   "card.titleNew": "新建卡片",
   "card.titleEdit": "编辑卡片",
+  "card.unsavedMsg": "此卡片有未保存的更改。保存还是放弃？",
   "card.title": "标题",
   "card.titleRequired": "请输入标题",
   "card.description": "描述",

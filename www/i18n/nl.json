@@ -15,6 +15,7 @@
   "badge.description": "Heeft een omschrijving",
   "card.titleNew": "Nieuwe kaart",
   "card.titleEdit": "Kaart bewerken",
+  "card.unsavedMsg": "Deze kaart heeft niet-opgeslagen wijzigingen. Opslaan of verwerpen?",
   "card.title": "Titel",
   "card.titleRequired": "Voer een titel in",
   "card.description": "Beschrijving",

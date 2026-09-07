@@ -15,6 +15,7 @@
   "badge.description": "Має опис",
   "card.titleNew": "Нова картка",
   "card.titleEdit": "Редагувати картку",
+  "card.unsavedMsg": "У картці є незбережені зміни. Зберегти чи скасувати?",
   "card.title": "Заголовок",
   "card.titleRequired": "Введіть заголовок",
   "card.description": "Опис",

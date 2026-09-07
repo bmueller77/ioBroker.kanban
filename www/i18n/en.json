@@ -15,6 +15,7 @@
   "badge.description": "Has a description",
   "card.titleNew": "New card",
   "card.titleEdit": "Edit card",
+  "card.unsavedMsg": "This card has unsaved changes. Save or discard?",
   "card.title": "Title",
   "card.titleRequired": "Please enter a title",
   "card.description": "Description",

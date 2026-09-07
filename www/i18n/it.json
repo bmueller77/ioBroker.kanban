@@ -15,6 +15,7 @@
   "badge.description": "Ha una descrizione",
   "card.titleNew": "Nuova scheda",
   "card.titleEdit": "Modifica scheda",
+  "card.unsavedMsg": "Questa scheda ha modifiche non salvate. Salvare o annullare?",
   "card.title": "Titolo",
   "card.titleRequired": "Inserisci un titolo",
   "card.description": "Descrizione",

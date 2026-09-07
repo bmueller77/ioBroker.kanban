@@ -15,6 +15,7 @@
   "badge.description": "Tiene descripción",
   "card.titleNew": "Nueva tarjeta",
   "card.titleEdit": "Editar tarjeta",
+  "card.unsavedMsg": "Esta tarjeta tiene cambios sin guardar. ¿Guardar o descartar?",
   "card.title": "Título",
   "card.titleRequired": "Introduce un título",
   "card.description": "Descripción",
