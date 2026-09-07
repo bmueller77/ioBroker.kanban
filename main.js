@@ -10,6 +10,8 @@ const { Scheduler } = require('./lib/scheduler');
 const { cardWithDueAt, boardWithDueAt } = require('./lib/dueat');
 const { Server } = require('./lib/server');
 
+const { freezePlan } = require('./lib/freeze');
+
 // Wie oft der Adapter versucht, das Merkmal `fixed` in die Benutzerliste
 // zurueckzuschreiben, bevor er aufgibt. Mehr als einer, weil ein Speichern der
 // Instanzeinstellungen zum falschen Zeitpunkt das Merkmal einmalig verwirft.
@@ -94,41 +96,8 @@ class Kanban extends utils.Adapter {
      * @returns {Promise<boolean>} true, wenn die Konfiguration geschrieben wurde
      */
     async _freezeUserIds() {
-        const users = Array.isArray(this.config.users) ? this.config.users : [];
-        const offen = users.filter(u => u && u.name && !u.fixed).map(u => u.name);
-        if (!offen.length) {
-            // Alles festgeschrieben: Der Zaehler darf wieder bei null anfangen,
-            // damit ein spaeterer Verlust erneut volle Versuche bekommt.
-            if (await this._freezeRetries()) {
-                await this.setStateAsync('info.freezeRetries', 0, true);
-            }
-            return false;
-        }
-
-        // Schutz gegen eine Neustartschleife: Sollte die Admin-Tabelle das
-        // Merkmal beim Speichern dauerhaft verwerfen, kaeme es sonst bei jedem
-        // Start erneut.
-        //
-        // Frueher gab dieser Schutz schon nach dem ersten verlorenen Merkmal
-        // endgueltig auf. Das traf den haeufigsten Fall ueberhaupt: Wer eine
-        // frische Instanz einrichtet, hat die Einstellungen offen, waehrend der
-        // Adapter das Merkmal schreibt. Sein naechstes Speichern schreibt den
-        // Stand von vorher zurueck, und die IDs blieben dann fuer immer
-        // editierbar - genau der Zustand, gegen den das Einfrieren gebaut ist.
-        // Jetzt sind es mehrere Versuche, und ein sauberer Start setzt den
-        // Zaehler zurueck.
-        await this.setObjectNotExistsAsync('info.frozenUserIds', {
-            type: 'state',
-            common: {
-                name: 'User IDs that have been frozen',
-                type: 'string',
-                role: 'json',
-                read: true,
-                write: false,
-                def: '[]',
-            },
-            native: {},
-        });
+        // Die Entscheidung steht in lib/freeze.js, damit sie ohne laufenden
+        // ioBroker pruefbar ist - an ihr hing Befund 22 aus dem Abnahmetest.
         await this.setObjectNotExistsAsync('info.freezeRetries', {
             type: 'state',
             common: {
@@ -142,7 +111,15 @@ class Kanban extends utils.Adapter {
             native: {},
         });
         const versuche = await this._freezeRetries();
-        if (versuche >= FREEZE_MAX_RETRIES) {
+        const plan = freezePlan(this.config.users, versuche, FREEZE_MAX_RETRIES);
+        const offen = plan.offen;
+        if (plan.zuruecksetzen) {
+            await this.setStateAsync('info.freezeRetries', 0, true);
+        }
+        if (plan.tun === 'nichts') {
+            return false;
+        }
+        if (plan.tun === 'aufgeben') {
             this.log.warn(
                 `Could not freeze the user ID(s) ${offen.join(', ')} after ${versuche} attempts: ` +
                     'the marker is not kept by the settings table. The ID stays editable, and renaming it ' +
@@ -151,6 +128,19 @@ class Kanban extends utils.Adapter {
             );
             return false;
         }
+
+        await this.setObjectNotExistsAsync('info.frozenUserIds', {
+            type: 'state',
+            common: {
+                name: 'User IDs that have been frozen',
+                type: 'string',
+                role: 'json',
+                read: true,
+                write: false,
+                def: '[]',
+            },
+            native: {},
+        });
         await this.setStateAsync('info.freezeRetries', versuche + 1, true);
 
         const bekannt = await this._frozenUserIds();
