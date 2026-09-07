@@ -192,6 +192,8 @@
   "due.later": "später fällig",
   "due.done": "erledigt",
   "count.lastOne": "Mindestens eine Zahl bleibt stehen",
+  "count.wipOver": "{n} Karten in der Spalte, das WIP-Limit ist {limit}",
+  "count.wipFiltered": "{n} Karten in der Spalte, das WIP-Limit ist {limit}. Der Filter zeigt davon {shown}.",
   "card.doneLabel": "Erledigt",
   "card.copy": "Karte kopieren",
   "card.edit": "Karte bearbeiten",

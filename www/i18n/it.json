@@ -192,6 +192,8 @@
   "due.later": "scade più tardi",
   "due.done": "completata",
   "count.lastOne": "Almeno un numero resta visibile",
+  "count.wipOver": "{n} schede nella colonna, il limite WIP è {limit}",
+  "count.wipFiltered": "{n} schede nella colonna, il limite WIP è {limit}. Il filtro ne mostra {shown}.",
   "card.doneLabel": "Completata",
   "card.copy": "Copia scheda",
   "card.edit": "Modifica scheda",

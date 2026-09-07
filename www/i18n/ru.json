@@ -192,6 +192,8 @@
   "due.later": "срок позже",
   "due.done": "выполнено",
   "count.lastOne": "Хотя бы одно число остаётся",
+  "count.wipOver": "{n} карточек в столбце, лимит WIP равен {limit}",
+  "count.wipFiltered": "{n} карточек в столбце, лимит WIP равен {limit}. Фильтр показывает {shown}.",
   "card.doneLabel": "Готово",
   "card.copy": "Копировать карточку",
   "card.edit": "Изменить карточку",

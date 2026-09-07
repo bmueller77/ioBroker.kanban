@@ -192,6 +192,8 @@
   "due.later": "due later",
   "due.done": "done",
   "count.lastOne": "At least one number stays",
+  "count.wipOver": "{n} cards in the column, the WIP limit is {limit}",
+  "count.wipFiltered": "{n} cards in the column, the WIP limit is {limit}. The filter shows {shown} of them.",
   "card.doneLabel": "Done",
   "card.copy": "Copy card",
   "card.edit": "Edit card",

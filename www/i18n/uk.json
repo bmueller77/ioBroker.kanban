@@ -192,6 +192,8 @@
   "due.later": "термін пізніше",
   "due.done": "виконано",
   "count.lastOne": "Принаймні одне число залишається",
+  "count.wipOver": "{n} карток у стовпці, ліміт WIP дорівнює {limit}",
+  "count.wipFiltered": "{n} карток у стовпці, ліміт WIP дорівнює {limit}. Фільтр показує {shown}.",
   "card.doneLabel": "Готово",
   "card.copy": "Копіювати картку",
   "card.edit": "Редагувати картку",

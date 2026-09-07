@@ -192,6 +192,8 @@
   "due.later": "later te doen",
   "due.done": "klaar",
   "count.lastOne": "Minstens één getal blijft staan",
+  "count.wipOver": "{n} kaarten in de kolom, de WIP-limiet is {limit}",
+  "count.wipFiltered": "{n} kaarten in de kolom, de WIP-limiet is {limit}. Het filter toont er {shown}.",
   "card.doneLabel": "Voltooid",
   "card.copy": "Kaart kopiëren",
   "card.edit": "Kaart bewerken",

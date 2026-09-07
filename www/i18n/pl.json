@@ -192,6 +192,8 @@
   "due.later": "termin później",
   "due.done": "ukończone",
   "count.lastOne": "Co najmniej jedna liczba pozostaje",
+  "count.wipOver": "{n} kart w kolumnie, limit WIP to {limit}",
+  "count.wipFiltered": "{n} kart w kolumnie, limit WIP to {limit}. Filtr pokazuje {shown}.",
   "card.doneLabel": "Gotowe",
   "card.copy": "Kopiuj kartę",
   "card.edit": "Edytuj kartę",

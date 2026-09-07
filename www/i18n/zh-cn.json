@@ -192,6 +192,8 @@
   "due.later": "稍后到期",
   "due.done": "已完成",
   "count.lastOne": "至少保留一个数字",
+  "count.wipOver": "该列共 {n} 张卡片，WIP 上限为 {limit}",
+  "count.wipFiltered": "该列共 {n} 张卡片，WIP 上限为 {limit}。筛选后显示 {shown} 张。",
   "card.doneLabel": "已完成",
   "card.copy": "复制卡片",
   "card.edit": "编辑卡片",

@@ -1078,15 +1078,26 @@ export function renderBoard(container, state, actions) {
         const counts = el('span', 'col-counts');
         const dueListe = dueFaehig ? zaehlBasis.filter(c => c.due).map(c => `${c.due}|${c.dueTime || ''}`) : [];
         const dueZahl = countDues(dueListe, state.cfg);
+        // Ueber dem WIP-Limit faerbt sich die Spalte. Das Limit gehoert dann in
+        // jedem Fall neben die Zahl, auch bei aktivem Filter: Sonst stand dort
+        // nur die Trefferzahl, und zwei Karten bei einem Limit von drei sahen
+        // aus wie ein Fehler statt wie eine Warnung (Befund 21).
+        const ueberWip = col.wipLimit > 0 && allInCol > col.wipLimit;
+        const wipHinweis = ueberWip
+            ? anyFilter
+                ? t('count.wipFiltered', { n: allInCol, limit: col.wipLimit, shown: matchedCount })
+                : t('count.wipOver', { n: allInCol, limit: col.wipLimit })
+            : '';
         for (const mode of (dueFaehig ? getCountModes(state, board, col) : ['total'])) {
+            const sichtbar = anyFilter ? matchedCount : allInCol;
             const zahl = mode === 'total'
-                ? ((!anyFilter && col.wipLimit > 0) ? `${allInCol}/${col.wipLimit}` : String(anyFilter ? matchedCount : allInCol))
+                ? (col.wipLimit > 0 && (!anyFilter || ueberWip) ? `${sichtbar}/${col.wipLimit}` : String(sichtbar))
                 : String(dueZahl[mode]);
             const leer = mode !== 'total' && !dueZahl[mode];
             const b = el(dueFaehig ? 'button' : 'span', 'count'
                 + (mode === 'total' ? '' : ` count-due due-${mode}`)
                 + (leer ? ' count-zero' : ''), zahl);
-            const name = t('count.' + mode);
+            const name = mode === 'total' && wipHinweis ? wipHinweis : t('count.' + mode);
             if (mode !== 'total') b.dataset.state = mode;
             if (dueFaehig) {
                 b.type = 'button';
@@ -1111,7 +1122,7 @@ export function renderBoard(container, state, actions) {
         // und muss die Zahlen aus denselben Daten neu bilden können.
         if (dueFaehig) counts.dataset.dues = dueListe.join(',');
         head.appendChild(counts);
-        if (col.wipLimit > 0 && allInCol > col.wipLimit) colEl.classList.add('over-wip');
+        if (ueberWip) colEl.classList.add('over-wip');
 
         // Erledigt-Spalte: Auge-Toggle rechts oben (blendet erledigte Karten ein/aus)
         const isDoneCol = !!col.isDone;

@@ -192,6 +192,8 @@
   "due.later": "vence mais tarde",
   "due.done": "concluída",
   "count.lastOne": "Pelo menos um número permanece",
+  "count.wipOver": "{n} cartões na coluna, o limite WIP é {limit}",
+  "count.wipFiltered": "{n} cartões na coluna, o limite WIP é {limit}. O filtro mostra {shown}.",
   "card.doneLabel": "Concluído",
   "card.copy": "Copiar cartão",
   "card.edit": "Editar cartão",
