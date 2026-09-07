@@ -526,7 +526,12 @@ Wird eine wiederkehrende Karte **ohne** manuelles Datum angelegt, setzt der Adap
 | `workday` | Erster/letzter/n-ter **Arbeitstag** im Monat | `workdayPos`: `first` / `last` / `nth` / `nth_last`, `n`: bei `nth`/`nth_last` |
 | `yearly` | Jährlich | `month`: `1..12`, `dayOfMonth`: `1..31` |
 | `every_n_days` | Alle X Tage ab Startdatum | `interval`: N, `startDate`: `YYYY-MM-DD` |
+| `every_n_days_done` | Alle X Tage **ab dem Erledigen** (seit 0.3.2) | `interval`: N |
 | `cron` | Cron-Ausdruck als Muster | `cron`: `"0 8 * * 1-5"` |
+
+Die beiden Arten mit **X Tagen** sehen sich ähnlich und rechnen doch verschieden. "Alle X Tage" hält ein festes Raster ab dem Startdatum ein: Ist eine Karte alle 30 Tage fällig und du erledigst sie zehn Tage zu spät, liegt der nächste Termin trotzdem auf dem Raster, also schon in 20 Tagen. "Alle X Tage (nach Erledigung des Vorgängers)" zählt dagegen ab dem Haken, hier wären es volle 30 Tage. Gedacht ist das für Wartungen, bei denen die Standzeit ab dem Handgriff zählt, etwa ein Filterwechsel.
+
+Für diese Art lässt sich **keine Kalenderserie** erzeugen: Wann der nächste Termin fällt, entscheidet erst das Erledigen. Eine [Kalender-Einladung](#karten-alle-felder) enthält deshalb nur den einzelnen Termin, so wie bei "Arbeitstag im Monat" auch.
 
 **Arbeitstag** heißt: kein Wochenende **und** kein gesetzlicher Feiertag (siehe unten). Beispiel: "erster Arbeitstag im Mai" landet auf dem 4.5., wenn der 1.5. auf einen Feiertag/Wochenende fällt.
 

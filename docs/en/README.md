@@ -524,7 +524,12 @@ If a recurring card is created **without** a manual date, the adapter automatica
 | `workday` | First/last/n-th **working day** of the month | `workdayPos`: `first` / `last` / `nth` / `nth_last`, `n`: for `nth`/`nth_last` |
 | `yearly` | Yearly | `month`: `1..12`, `dayOfMonth`: `1..31` |
 | `every_n_days` | Every X days from a start date | `interval`: N, `startDate`: `YYYY-MM-DD` |
+| `every_n_days_done` | Every X days **from completion** (since 0.3.2) | `interval`: N |
 | `cron` | Cron expression used as a pattern | `cron`: `"0 8 * * 1-5"` |
+
+The two **X days** kinds look alike and count differently. "Every X days" keeps a fixed grid from the start date: if a card is due every 30 days and you finish it ten days late, the next date still sits on that grid, so in 20 days. "Every X days (after the previous one is done)" counts from the moment you tick it off, which would be a full 30 days. It is meant for maintenance where the interval starts at the actual job, a filter change for instance.
+
+**No calendar series** can be built for this kind: when the next date falls is only decided by finishing the card. A [calendar invite](#cards-all-fields) therefore carries the single date only, the same as with "working day of the month".
 
 A **working day** means: not a weekend **and** not a public holiday (see below). Example: "first working day in May" lands on the 4th if May 1st is a holiday/weekend.
 

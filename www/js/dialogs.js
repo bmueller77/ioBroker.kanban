@@ -902,7 +902,7 @@ export function initDialogs(state, actions) {
         const type = form.elements.recType.value;
         const pos = form.elements.recWorkdayPos.value;
         document.getElementById('recWeekdayWrap').hidden = !(type === 'weekly' || type === 'monthly_weekday');
-        document.getElementById('recIntervalWrap').hidden = type !== 'every_n_days';
+        document.getElementById('recIntervalWrap').hidden = !(type === 'every_n_days' || type === 'every_n_days_done');
         document.getElementById('recDomWrap').hidden = !(type === 'monthly' || type === 'yearly');
         document.getElementById('recMonthWrap').hidden = type !== 'yearly';
         document.getElementById('recOrdinalWrap').hidden = type !== 'monthly_weekday';
@@ -1003,9 +1003,12 @@ export function initDialogs(state, actions) {
             }
         }
         if (t === 'cron') rec.cron = form.elements.recCron.value.trim();
-        if (t === 'every_n_days') {
+        if (t === 'every_n_days' || t === 'every_n_days_done') {
             rec.interval = Math.max(1, Number(form.elements.recInterval.value) || 1);
-            rec.startDate = form.elements.due.value || null;   // Referenzpunkt = Fälligkeit
+            // Referenzpunkt = Fälligkeit. Bei der Variante nach Erledigung gilt
+            // das nur für den ersten Durchlauf; danach hängt der Server das
+            // Startdatum beim Erledigen jedes Mal auf den Handgriff um.
+            rec.startDate = form.elements.due.value || null;
         }
         return rec;
     }
