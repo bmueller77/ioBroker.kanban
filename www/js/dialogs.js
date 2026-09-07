@@ -174,6 +174,10 @@ export function initDialogs(state, actions) {
     // Listener nur setzen, wenn das Feld existiert (robust gegen veraltetes HTML)
     const on = (name, ev, fn) => { const e = form.elements[name]; if (e) e.addEventListener(ev, fn); };
     let editingCardId = null;
+    // Vergabe reihum fuer neue Labels. Gut unterscheidbar und dunkel genug,
+    // dass die automatische Kontrastschrift darauf weiss bleibt.
+    const LABEL_FARBEN = ['#4CAF50', '#1E88E5', '#E53935', '#8E24AA', '#F9A825', '#00897B', '#6D4C41', '#3949AB'];
+
     let selAssignees = new Set();
     let selLabels = new Set();
     let selColor = '';
@@ -471,9 +475,19 @@ export function initDialogs(state, actions) {
         }
         const list = boardUsers(state).slice();
         for (const u of (state.users || [])) if (selAssignees.has(u.name) && !list.some(x => x.name === u.name)) list.push(u);
+        // Kennungen, die es als Benutzer gar nicht mehr gibt. Ohne sie sieht das
+        // Pflichtfeld leer aus, obwohl die Karte jemandem gehoert (Befund 16).
+        for (const n of selAssignees) {
+            if (!list.some(x => x.name === n)) {
+                list.push({ name: n, displayName: t('card.assigneeGone', { name: n }), verwaist: true });
+            }
+        }
         for (const u of list) {
-            const chip = el('span', 'pick-chip', u.displayName);
+            const chip = el('span', 'pick-chip' + (u.verwaist ? ' pick-chip-gone' : ''), u.displayName);
             chip.setAttribute('role', 'button');
+            if (u.verwaist) {
+                chip.title = t('card.assigneeGoneHint');
+            }
             // An Ort und Stelle umfaerben statt neu zu rendern: sonst ist der
             // Tastaturfokus nach jedem Umschalten weg.
             const male = () => {
@@ -638,6 +652,27 @@ export function initDialogs(state, actions) {
         txt.type = 'text';
         txt.value = (item && item.text) || '';
         txt.placeholder = t('card.checkPlaceholder');
+        // In jeder Checkliste legt Enter den naechsten Punkt an. Hier speicherte
+        // es bisher die ganze Karte und schloss den Dialog (Befund 3).
+        // Gespeichert wird von hier aus mit Strg und Enter.
+        txt.addEventListener('keydown', ev => {
+            if (ev.key !== 'Enter') {
+                return;
+            }
+            if (ev.ctrlKey || ev.metaKey) {
+                return;
+            }
+            ev.preventDefault();
+            const naechste = row.nextElementSibling;
+            if (naechste) {
+                const feld = naechste.querySelector('input[type=text]');
+                if (feld) { feld.focus(); return; }
+            }
+            if (!txt.value.trim()) {
+                return;
+            }
+            addCheckRow().querySelector('input[type=text]').focus();
+        });
         const rm = el('button', 'rm', '×');
         rm.type = 'button';
         rm.addEventListener('click', () => { row.remove(); updateCheckGrips(); });
@@ -1411,7 +1446,14 @@ export function initDialogs(state, actions) {
             // eslint-disable-next-line no-undef
             Sortable.create(labelBox, { handle: '.drag', animation: 150, onEnd: () => { dirty = true; } });
             const addLabel = el('button', 'linkbtn', t('boards.addLabel'));
-            addLabel.addEventListener('click', () => { labelBox.appendChild(mkLabelRow({ color: '#4CAF50' })); dirty = true; });
+            // Reihum aus der Palette statt immer gruen: Drei neue Labels sahen
+            // sonst gleich aus und trugen keine Information ausser ihrem Text
+            // (Befund 11).
+            addLabel.addEventListener('click', () => {
+                const naechste = LABEL_FARBEN[labelBox.children.length % LABEL_FARBEN.length];
+                labelBox.appendChild(mkLabelRow({ color: naechste }));
+                dirty = true;
+            });
             panel.appendChild(addLabel);
 
             // ---- Link-Ziel fuer Benachrichtigungen ----

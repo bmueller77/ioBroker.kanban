@@ -153,6 +153,23 @@ async function refreshCurrent() {
     }
 }
 
+/**
+ * Punkt am Zahnrad, solange Karten auf Benutzer zeigen, die es nicht mehr gibt.
+ *
+ * Frueher lief das nur einmal beim Laden, weil der Zustand angeblich nicht im
+ * laufenden Betrieb entsteht. Er entsteht doch: Eine Karte, die aus dem
+ * Papierkorb zurueckkommt, bringt ihre verwaiste Kennung mit (Befund 14).
+ * In eingebetteten Ansichten entfaellt der Punkt mit dem Zahnrad.
+ */
+function refreshOrphanHint() {
+    if (state.hideSettings) return;
+    const btn = document.getElementById('settingsBtn');
+    if (!btn) return;
+    api('api/users/orphaned')
+        .then(res => btn.classList.toggle('has-todo', !!(res && (res.orphaned || []).length)))
+        .catch(() => {});
+}
+
 // ------------------------------------------------------------ Aktionen (API + optimistisches Update)
 
 actions = {
@@ -192,6 +209,10 @@ actions = {
     async restoreCard(cardId, columnId) {
         await api(`api/boards/${state.board.id}/cards/${cardId}/restore`, { method: 'POST', body: { columnId, by: '' } });
         await refreshCurrent();
+        // Eine wiederhergestellte Karte kann eine verwaiste Kennung tragen, dann
+        // gibt es den Zustand wieder. Er entsteht also doch im laufenden
+        // Betrieb, anders als frueher angenommen (Befund 14).
+        refreshOrphanHint();
     },
 
     async purgeCard(cardId) {
@@ -364,18 +385,7 @@ async function init() {
         if (b) { b.textContent = ''; b.appendChild(mdiIcon(path)); }
     }
 
-    // Punkt am Zahnrad, solange Karten auf Benutzer zeigen, die es nicht mehr
-    // gibt. Einmal beim Laden, nicht bei jedem Poll - der Zustand entsteht
-    // nicht im laufenden Betrieb. In eingebetteten Ansichten entfaellt er mit
-    // dem Zahnrad.
-    if (!state.hideSettings) {
-        api('api/users/orphaned')
-            .then(res => {
-                const btn = document.getElementById('settingsBtn');
-                if (btn && res && (res.orphaned || []).length) { btn.classList.add('has-todo'); }
-            })
-            .catch(() => {});
-    }
+    refreshOrphanHint();
 
     await loadBoards();
     const wanted = qs.get('board');

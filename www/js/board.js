@@ -519,6 +519,7 @@ function dueBadge(due, dueTime, done, cfg) {
     b.appendChild(document.createTextNode(' ' + fmtDate(due, cfg && cfg.dateFormat) + (dueTime ? ' ' + fmtTime(dueTime, cfg && cfg.timeFormat) : '')));
     if (done) {
         b.classList.add('due-done');                  // erledigt → grün, keine Überfällig-Warnung
+        b.title = t('due.done');
     } else {
         // Die Daten am Element behalten: So kann der Minutentakt die Farbe
         // nachziehen, ohne das Board neu aufzubauen - das würde Scrollposition
@@ -527,6 +528,9 @@ function dueBadge(due, dueTime, done, cfg) {
         b.dataset.dueTime = dueTime || '';
         const st = dueState(due, dueTime, cfg);
         if (st) b.classList.add('due-' + st);
+        // Die Farbe allein sagt nicht, was sie bedeutet, und in der Oberflaeche
+        // gibt es keine Legende. Der Tooltip nennt den Zustand.
+        b.title = t('due.' + (st || 'later'));
     }
     return b;
 }
@@ -547,6 +551,7 @@ export function refreshDueBadges(cfg) {
         b.classList.toggle('due-overdue', st === 'overdue');
         b.classList.toggle('due-today', st === 'today');
         b.classList.toggle('due-soon', st === 'soon');
+        b.title = t('due.' + (st || 'later'));
     }
     // Die Kopfzahlen hängen an denselben Stichtagen und müssen mitlaufen,
     // sonst zeigt der Kopf um Mitternacht noch den Stand von gestern.

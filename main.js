@@ -515,11 +515,14 @@ class Kanban extends utils.Adapter {
             if (this.scheduler) {
                 this.scheduler.stop();
             }
-            if (this.webServer) {
-                await this.webServer.stop();
-            }
+            // Erst schreiben, dann den Server schliessen. Andersherum gingen bei
+            // einem haengenden close die letzten Aenderungen verloren, weil der
+            // Host nach einer Sekunde hart beendet (Befund 18).
             if (this.store) {
                 await this.store.flush();
+            }
+            if (this.webServer) {
+                await this.webServer.stop();
             }
             await this.setStateAsync('info.connection', false, true);
         } catch {
