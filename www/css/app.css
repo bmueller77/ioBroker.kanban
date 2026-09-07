@@ -1252,7 +1252,11 @@ button.mini {
 /* Erledigte Karten treten zurueck: gedaempfter Titel (hell -> heller, dunkel -> dunkler) */
 .card .title.title-done .title-text { text-decoration: line-through; color: var(--muted); }
 .card .done-stamp { font-size: 13px; font-weight: 400; color: var(--muted); margin: 2px 0 0; }
-.card-action { background: none; border: none; cursor: pointer; color: var(--muted); padding: 2px; opacity: 0.8; }
+.card-action { position: relative; background: none; border: none; cursor: pointer; color: var(--muted); padding: 2px; opacity: 0.8; }
+/* Der Stift ist der einzige Weg in den Karteneditor und war 16 x 16 px gross.
+   Ein Pseudoelement vergroessert die Trefferflaeche auf 24 x 24, ohne dass sich
+   die Lage des Symbols im Titel aendert (Befund 5). */
+.card-action::after { content: ''; position: absolute; inset: -4px; border-radius: 5px; }
 .card-action:hover { opacity: 1; color: var(--accent); }
 .card-action svg { display: block; }
 /* Kopier-Icon sitzt direkt hinter dem Kartentitel */
@@ -1296,7 +1300,11 @@ dialog button:disabled { opacity: 0.45; cursor: default; filter: grayscale(0.6);
 .board-toprow .icon-btn { flex: 0 0 auto; }
 .board-toprow .icon-btn:disabled { opacity: 0.4; cursor: default; }
 @media (max-width: 600px) {
-    .board-toprow { flex-direction: row; }
+    /* Die Ausnahme braucht dieselbe Gewichtung wie "dialog .row", sonst gewinnt
+       dort die Spaltenrichtung. Und in einer Spalte ist die Hauptachse
+       senkrecht: Aus dem "flex-basis: 140px" der Auswahl wurde dann eine Hoehe,
+       Auswahl und Eingabefeld standen 140 px hoch da (Befund 27). */
+    dialog .board-toprow { flex-direction: row; }
 }
 
 /* Cron-Wiederholung: Klartext, naechste Termine, Fehlermeldung */

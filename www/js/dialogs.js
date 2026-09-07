@@ -1660,7 +1660,9 @@ export function initDialogs(state, actions) {
             const boards = (eintrag.boards || [])
                 .map(id => { const b = (state.boards || []).find(x => x.id === id); return (b && b.title) || id; })
                 .join(', ');
-            auf.append(pfeil, el('span', null, t('orphan.count', { n: eintrag.cards, boards })));
+            // Einzahl statt "1 Karten" (Befund 20)
+            const zaehlText = eintrag.cards === 1 ? 'orphan.count1' : 'orphan.count';
+            auf.append(pfeil, el('span', null, t(zaehlText, { n: eintrag.cards, boards })));
             links.appendChild(auf);
 
             const sel = document.createElement('select');
@@ -1710,7 +1712,7 @@ export function initDialogs(state, actions) {
                 const ziel = (state.users || []).find(u => u.name === sel.value);
                 const jetzt = await confirmDialog({
                     title: t('orphan.confirmTitle'),
-                    message: t('orphan.confirmBody', {
+                    message: t(eintrag.cards === 1 ? 'orphan.confirmBody1' : 'orphan.confirmBody', {
                         n: eintrag.cards,
                         boards,
                         to: (ziel && (ziel.displayName || ziel.name)) || sel.value,

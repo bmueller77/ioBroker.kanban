@@ -73,6 +73,14 @@ function renderHeader() {
     }
     if (state.board) sel.value = state.board.id;
 
+    // Ohne Board gibt es nichts anzulegen. Der auffaelligste Knopf der Seite
+    // war vorher voll sichtbar und tat nichts (Befund 9).
+    const addBtn = document.getElementById('addCardBtn');
+    if (addBtn) {
+        addBtn.disabled = !state.board;
+        addBtn.title = state.board ? '' : t('topbar.addCardNoBoard');
+    }
+
     const chips = document.getElementById('userChips');
     chips.textContent = '';
     // Chips = Board-Mitglieder als Mehrfach-Filter (angeklickt = nur Karten dieses Users; nichts gewaehlt = alle).
@@ -361,8 +369,8 @@ async function init() {
         Promise.resolve(dialogs.openBoardManager()).catch(e => alert(t('error.loadFailed') + ': ' + e.message));
     });
     document.getElementById('shareBtn').addEventListener('click', () => dialogs.openShareDialog());
-    // Der fruehere „nur meine Karten"-Button entfaellt – Filtern geschieht ueber die Kopf-Chips.
-    document.getElementById('filterBtn').hidden = true;
+    // Der fruehere "nur meine Karten"-Knopf ist seit 0.3.0 ohne Funktion; gefiltert
+    // wird ueber die Chips in der Kopfzeile. Seit 0.3.2 ist er ganz weg.
     // Per URL ausblendbare Bedienelemente (geteilte Ansichten)
     if (state.hideSettings) document.getElementById('settingsBtn').hidden = true;
     document.getElementById('themeBtn').addEventListener('click', () => {
