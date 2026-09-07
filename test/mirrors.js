@@ -1,5 +1,5 @@
 const assert = require('node:assert/strict');
-const { Store, isOverdue } = require('../lib/store');
+const { Store, isOverdue, hasDateToken } = require('../lib/store');
 
 /**
  * Spiegel-States: Die Board-Zaehler haengen nicht nur an Aenderungen, sondern
@@ -424,5 +424,27 @@ describe('Ein einziger Benutzer', () => {
             () => store.addCard('b', { title: 'Karte', columnId: 'todo', assignees: ['default'] }, 'test'),
             /unbekannte zustaendige Person: default/,
         );
+    });
+});
+
+describe('Datumsformat: traegt es ueberhaupt ein Datum?', () => {
+    // Befund 17: Ein Vertipper stand danach wortwoertlich auf jeder Karte, und
+    // das Board war fuer alle unbrauchbar, bis jemand die Einstellung wiederfand.
+    it('nimmt uebliche Formate an', () => {
+        for (const f of ['DD.MM.', 'DD.MM.YYYY', 'ddd D. MMM YY', 'YYYY-MM-DD', 'D. MMMM']) {
+            assert.equal(hasDateToken(f), true, f);
+        }
+    });
+
+    it('weist Formate ohne Tag, Monat und Jahr ab', () => {
+        for (const f of ['QQQ ZZZ', 'hh:mm', 'kaputt', '<script>', '...']) {
+            assert.equal(hasDateToken(f), false, f);
+        }
+    });
+
+    it('kommt mit leer und fehlend zurecht', () => {
+        assert.equal(hasDateToken(''), false);
+        assert.equal(hasDateToken(null), false);
+        assert.equal(hasDateToken(undefined), false);
     });
 });

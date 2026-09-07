@@ -11,6 +11,7 @@ const { cardWithDueAt, boardWithDueAt } = require('./lib/dueat');
 const { Server } = require('./lib/server');
 
 const { freezePlan } = require('./lib/freeze');
+const { hasDateToken } = require('./lib/store');
 
 // Wie oft der Adapter versucht, das Merkmal `fixed` in die Benutzerliste
 // zurueckzuschreiben, bevor er aufgibt. Mehr als einer, weil ein Speichern der
@@ -33,6 +34,7 @@ class Kanban extends utils.Adapter {
         // dabei seine eigene Konfiguration, startet ihn der js-controller kurz
         // darauf neu - der Rest des Starts laeuft trotzdem weiter, damit die
         // Instanz nicht tot liegenbleibt, falls der Neustart ausbleibt.
+        this._checkDateFormat();
         await this._freezeUserIds();
 
         this.bus = new EventBus();
@@ -95,6 +97,22 @@ class Kanban extends utils.Adapter {
      *
      * @returns {Promise<boolean>} true, wenn die Konfiguration geschrieben wurde
      */
+    /**
+     * Ein Datumsformat ohne Tag, Monat und Jahr ist keines. Statt es auf jede
+     * Karte zu drucken, wird es verworfen und der Adapter faellt auf das
+     * Systemformat zurueck (Befund 17).
+     */
+    _checkDateFormat() {
+        const f = this.config.dateFormat;
+        if (f && !hasDateToken(f)) {
+            this.log.warn(
+                `The date format '${f}' contains no day, month or year token and is ignored. ` +
+                    'Use tokens like DD.MM.YYYY - see the manual, tab "General".',
+            );
+            this.config.dateFormat = '';
+        }
+    }
+
     async _freezeUserIds() {
         // Die Entscheidung steht in lib/freeze.js, damit sie ohne laufenden
         // ioBroker pruefbar ist - an ihr hing Befund 22 aus dem Abnahmetest.
