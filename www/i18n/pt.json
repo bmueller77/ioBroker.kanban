@@ -172,6 +172,8 @@
   "boards.dragTitle": "Arraste para reordenar",
   "board.moreCards": "+{n} mais",
   "board.moreCardsTitle": "Mais cartões ocultados pelo limite de apresentação",
+  "board.lessCards": "- ocultar {n} novamente",
+  "board.lessCardsTitle": "Voltar ao limite de exibição da coluna",
   "col.trash": "Lixeira",
   "sort.mode": "Ordenação",
   "sort.manual": "Arrastar e largar",

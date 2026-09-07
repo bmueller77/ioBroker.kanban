@@ -172,6 +172,8 @@
   "boards.dragTitle": "拖动可调整顺序",
   "board.moreCards": "还有 {n} 张",
   "board.moreCardsTitle": "更多卡片因显示上限而被隐藏",
+  "board.lessCards": "- 再次隐藏 {n} 张",
+  "board.lessCardsTitle": "回到该列的显示上限",
   "col.trash": "回收站",
   "sort.mode": "排序",
   "sort.manual": "拖放",

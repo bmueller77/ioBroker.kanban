@@ -26,6 +26,8 @@ const state = {
     collapsedCols: new Set((localStorage.getItem('kanban.collapsedCols') || '').split(',').filter(Boolean)),
     sortModes: (() => { try { return JSON.parse(localStorage.getItem('kanban.sortModes') || '{}') || {}; } catch (e) { return {}; } })(),
     countModes: (() => { try { return JSON.parse(localStorage.getItem('kanban.countModes') || '{}') || {}; } catch (e) { return {}; } })(),
+    // Spalten, in denen das Anzeige-Limit gerade aufgeklappt ist (pro Gerät)
+    expandedCols: new Set((localStorage.getItem('kanban.expandedCols') || '').split(',').filter(Boolean)),
 };
 
 // ------------------------------------------------------------ Theme
@@ -199,6 +201,18 @@ actions = {
     setSortMode(colKey, mode) {
         state.sortModes[colKey] = mode;
         try { localStorage.setItem('kanban.sortModes', JSON.stringify(state.sortModes)); } catch (e) { /* ignore */ }
+        render();
+    },
+
+    // Anzeige-Limit einer Spalte auf- oder zuklappen (pro Gerät). Das Limit
+    // selbst bleibt am Board, hier wird nur fuer dieses Geraet abgewichen.
+    toggleExpandCol(colKey) {
+        if (state.expandedCols.has(colKey)) {
+            state.expandedCols.delete(colKey);
+        } else {
+            state.expandedCols.add(colKey);
+        }
+        try { localStorage.setItem('kanban.expandedCols', [...state.expandedCols].join(',')); } catch (e) { /* ignore */ }
         render();
     },
 

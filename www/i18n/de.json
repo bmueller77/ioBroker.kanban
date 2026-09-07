@@ -172,6 +172,8 @@
   "boards.dragTitle": "Ziehen zum Umsortieren",
   "board.moreCards": "+{n} weitere",
   "board.moreCardsTitle": "Weitere Karten durch das Anzeige-Limit ausgeblendet",
+  "board.lessCards": "- {n} wieder ausblenden",
+  "board.lessCardsTitle": "Zurück zum Anzeige-Limit der Spalte",
   "col.trash": "Papierkorb",
   "sort.mode": "Sortierung",
   "sort.manual": "Drag & Drop",

@@ -172,6 +172,8 @@
   "boards.dragTitle": "Trascina per riordinare",
   "board.moreCards": "+{n} in più",
   "board.moreCardsTitle": "Altre schede nascoste dal limite di visualizzazione",
+  "board.lessCards": "- nascondi di nuovo {n}",
+  "board.lessCardsTitle": "Torna al limite di visualizzazione della colonna",
   "col.trash": "Cestino",
   "sort.mode": "Ordinamento",
   "sort.manual": "Trascina e rilascia",

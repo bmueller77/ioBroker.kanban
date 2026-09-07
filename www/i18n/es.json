@@ -172,6 +172,8 @@
   "boards.dragTitle": "Arrastra para reordenar",
   "board.moreCards": "+{n} más",
   "board.moreCardsTitle": "Más tarjetas ocultas por el límite de visualización",
+  "board.lessCards": "- ocultar {n} de nuevo",
+  "board.lessCardsTitle": "Volver al límite de visualización de la columna",
   "col.trash": "Papelera",
   "sort.mode": "Ordenación",
   "sort.manual": "Arrastrar y soltar",

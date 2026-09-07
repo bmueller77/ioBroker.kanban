@@ -172,6 +172,8 @@
   "boards.dragTitle": "Перетащите для изменения порядка",
   "board.moreCards": "+{n} ещё",
   "board.moreCardsTitle": "Остальные карточки скрыты лимитом показа",
+  "board.lessCards": "- снова скрыть {n}",
+  "board.lessCardsTitle": "Вернуться к лимиту отображения столбца",
   "col.trash": "Корзина",
   "sort.mode": "Сортировка",
   "sort.manual": "Перетаскивание",

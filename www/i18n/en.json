@@ -172,6 +172,8 @@
   "boards.dragTitle": "Drag to reorder",
   "board.moreCards": "+{n} more",
   "board.moreCardsTitle": "More cards hidden by the display limit",
+  "board.lessCards": "- hide {n} again",
+  "board.lessCardsTitle": "Back to the column display limit",
   "col.trash": "Trash",
   "sort.mode": "Sorting",
   "sort.manual": "Drag & drop",

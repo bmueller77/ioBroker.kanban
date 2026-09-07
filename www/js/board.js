@@ -1055,10 +1055,16 @@ export function renderBoard(container, state, actions) {
             cards = applySort(cards, sm.mode, sm.rev);
         }
         // Optionales Anzeige-Limit je Spalte (0 = alle); im Papierkorb nicht anwenden
+        // Aufgeklappt heisst: Das Anzeige-Limit gilt fuer dieses Geraet gerade
+        // nicht. Die Zahl der verborgenen Karten wird trotzdem gebraucht, sonst
+        // wuesste der Knopf unten nicht, wie viele er wieder verstecken wuerde.
+        const aufgeklappt = state.expandedCols && state.expandedCols.has(colKey(board, col));
         let hiddenByMax = 0;
         if (!col.isTrash && col.maxVisible > 0 && cards.length > col.maxVisible) {
             hiddenByMax = cards.length - col.maxVisible;
-            cards = cards.slice(0, col.maxVisible);
+            if (!aufgeklappt) {
+                cards = cards.slice(0, col.maxVisible);
+            }
         }
 
         const collapsed = state.collapsedCols && state.collapsedCols.has(col.id);
@@ -1195,8 +1201,21 @@ export function renderBoard(container, state, actions) {
         }
         colEl.appendChild(list);
         if (hiddenByMax > 0 && !hideCards) {
-            const more = el('div', 'col-more', t('board.moreCards', { n: hiddenByMax }));
-            more.title = t('board.moreCardsTitle');
+            // Sah immer schon aus wie ein Knopf. Jetzt ist es einer: Ein Klick
+            // zeigt die uebrigen Karten, ein zweiter versteckt sie wieder. Das
+            // Anzeige-Limit des Boards bleibt unangetastet, gemerkt wird die
+            // Abweichung pro Geraet.
+            const more = el('button', 'col-more');
+            more.type = 'button';
+            more.textContent = aufgeklappt
+                ? t('board.lessCards', { n: hiddenByMax })
+                : t('board.moreCards', { n: hiddenByMax });
+            more.title = aufgeklappt ? t('board.lessCardsTitle') : t('board.moreCardsTitle');
+            more.setAttribute('aria-expanded', aufgeklappt ? 'true' : 'false');
+            more.addEventListener('click', e => {
+                e.stopPropagation();
+                actions.toggleExpandCol(colKey(board, col));
+            });
             colEl.appendChild(more);
         }
 

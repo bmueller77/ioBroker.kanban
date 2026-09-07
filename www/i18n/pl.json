@@ -172,6 +172,8 @@
   "boards.dragTitle": "Przeciągnij, aby zmienić kolejność",
   "board.moreCards": "+{n} więcej",
   "board.moreCardsTitle": "Kolejne karty ukryte przez limit wyświetlania",
+  "board.lessCards": "- ukryj ponownie {n}",
+  "board.lessCardsTitle": "Powrót do limitu wyświetlania kolumny",
   "col.trash": "Kosz",
   "sort.mode": "Sortowanie",
   "sort.manual": "Przeciągnij i upuść",

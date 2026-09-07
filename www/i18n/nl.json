@@ -172,6 +172,8 @@
   "boards.dragTitle": "Sleep om te herordenen",
   "board.moreCards": "+{n} meer",
   "board.moreCardsTitle": "Meer kaarten verborgen door de weergavelimiet",
+  "board.lessCards": "- {n} weer verbergen",
+  "board.lessCardsTitle": "Terug naar de weergavelimiet van de kolom",
   "col.trash": "Prullenbak",
   "sort.mode": "Sortering",
   "sort.manual": "Slepen en neerzetten",

@@ -172,6 +172,8 @@
   "boards.dragTitle": "Glisser pour réordonner",
   "board.moreCards": "+{n} de plus",
   "board.moreCardsTitle": "Cartes supplémentaires masquées par la limite d'affichage",
+  "board.lessCards": "- masquer à nouveau {n}",
+  "board.lessCardsTitle": "Revenir à la limite d'affichage de la colonne",
   "col.trash": "Corbeille",
   "sort.mode": "Tri",
   "sort.manual": "Glisser-déposer",

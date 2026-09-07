@@ -172,6 +172,8 @@
   "boards.dragTitle": "Перетягніть, щоб змінити порядок",
   "board.moreCards": "+{n} ще",
   "board.moreCardsTitle": "Решта карток прихована лімітом показу",
+  "board.lessCards": "- знову сховати {n}",
+  "board.lessCardsTitle": "Повернутися до ліміту відображення стовпця",
   "col.trash": "Кошик",
   "sort.mode": "Сортування",
   "sort.manual": "Перетягування",
