@@ -144,6 +144,7 @@
   "confirm.deleteBoard": "¿Eliminar el tablero «{title}» con todas sus tarjetas?",
   "error.moveFailed": "Error al mover: {msg}",
   "error.saveFailed": "Error al guardar: {msg}",
+  "error.noAnswer": "El adaptador no responde. ¿Sigue funcionando la instancia?",
   "boards.avatars": "Avatares de usuario (imagen en vez de iniciales)",
   "avatar.choose": "Elegir imagen",
   "user.color": "Color",

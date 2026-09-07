@@ -144,6 +144,7 @@
   "confirm.deleteBoard": "Bord \"{title}\" met alle kaarten verwijderen?",
   "error.moveFailed": "Verplaatsen mislukt: {msg}",
   "error.saveFailed": "Opslaan mislukt: {msg}",
+  "error.noAnswer": "De adapter antwoordt niet. Draait de instantie nog?",
   "boards.avatars": "Gebruikersavatars (afbeelding i.p.v. initialen)",
   "avatar.choose": "Afbeelding kiezen",
   "user.color": "Kleur",

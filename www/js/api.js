@@ -1,5 +1,12 @@
 // REST-Wrapper + WebSocket mit Reconnect und Polling-Fallback
 
+import { t } from './i18n.js';
+
+// Zeitgrenze fuer einen Aufruf. Ohne sie wartet fetch beliebig lange, wenn der
+// Adapter mitten im Speichern verschwindet - der Dialog haengt dann, und die
+// Fehlermeldung, die es laengst gibt, kommt nie (Befund 25 aus dem Abnahmetest).
+const TIMEOUT_MS = 15000;
+
 // Schreib-Token: vom Server in index.html injiziert (<meta name="kanban-token">).
 // Die Abfrage ist gegen ein fehlendes document abgesichert, damit sich das Modul
 // auch ausserhalb des Browsers laden laesst — board.js importiert es, und board.js
@@ -15,7 +22,25 @@ export async function api(path, opts = {}) {
         init.body = JSON.stringify(opts.body);
     }
     if (init.method !== 'GET' && WRITE_TOKEN) init.headers['X-Kanban-Token'] = WRITE_TOKEN;
-    const res = await fetch(path, init);
+
+    // AbortController fehlt nur in sehr alten Umgebungen; dort laeuft es wie
+    // bisher weiter, statt am fehlenden Konstruktor zu scheitern.
+    const ctl = typeof AbortController !== 'undefined' ? new AbortController() : null;
+    let frist = null;
+    if (ctl) {
+        init.signal = ctl.signal;
+        frist = setTimeout(() => ctl.abort(), Number(opts.timeoutMs) || TIMEOUT_MS);
+    }
+    let res;
+    try {
+        res = await fetch(path, init);
+    } catch {
+        // Abbruch und Netzfehler sind fuer den Aufrufer dasselbe: Der Adapter
+        // war nicht erreichbar. Die Meldung sagt das, statt 'Failed to fetch'.
+        throw new Error(t('error.noAnswer'));
+    } finally {
+        if (frist) clearTimeout(frist);
+    }
     if (!res.ok) {
         let msg = res.statusText;
         try { msg = (await res.json()).error || msg; } catch { /* leer */ }

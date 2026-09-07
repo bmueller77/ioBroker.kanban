@@ -144,6 +144,7 @@
   "confirm.deleteBoard": "Usunąć tablicę „{title}” wraz ze wszystkimi kartami?",
   "error.moveFailed": "Nie udało się przenieść: {msg}",
   "error.saveFailed": "Nie udało się zapisać: {msg}",
+  "error.noAnswer": "Adapter nie odpowiada. Czy instancja nadal działa?",
   "boards.avatars": "Awatary użytkowników (obraz zamiast inicjałów)",
   "avatar.choose": "Wybierz obraz",
   "user.color": "Kolor",

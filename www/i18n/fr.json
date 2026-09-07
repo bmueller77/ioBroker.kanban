@@ -144,6 +144,7 @@
   "confirm.deleteBoard": "Supprimer le tableau « {title} » avec toutes ses cartes ?",
   "error.moveFailed": "Échec du déplacement : {msg}",
   "error.saveFailed": "Échec de l'enregistrement : {msg}",
+  "error.noAnswer": "L'adaptateur ne répond pas. L'instance fonctionne-t-elle encore ?",
   "boards.avatars": "Avatars des utilisateurs (image au lieu des initiales)",
   "avatar.choose": "Choisir une image",
   "user.color": "Couleur",

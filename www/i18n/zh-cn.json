@@ -144,6 +144,7 @@
   "confirm.deleteBoard": "删除看板“{title}”及其所有卡片？",
   "error.moveFailed": "移动失败：{msg}",
   "error.saveFailed": "保存失败：{msg}",
+  "error.noAnswer": "适配器没有响应。实例还在运行吗？",
   "boards.avatars": "用户头像（以图片代替首字母）",
   "avatar.choose": "选择图片",
   "user.color": "颜色",

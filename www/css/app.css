@@ -9,7 +9,11 @@
     --muted: #71717a;
     --border: #d4d4d8;
     --danger: #d32f2f;
-    --warn: #ef6c00;
+    /* Rot als Schriftfarbe auf der Flaeche. Als Hintergrund taugt --danger in
+       beiden Themes, als Schrift erreicht es im dunklen nur 3,14:1. */
+    --danger-fg: #d32f2f;
+    /* Fruehere #ef6c00 erreichte mit weisser Schrift nur 3,08:1. */
+    --warn: #bf5700;
     /* Dritte Stufe der Faelligkeit: im Vorlauf, standardmaessig morgen. Sattes
        Sonnengelb, damit es sich klar vom Orange absetzt - es liegt 24 Grad
        daneben im Farbkreis. Gelb vertraegt keine weisse Schrift, deshalb eine
@@ -34,6 +38,9 @@
 }
 
 html[data-theme="dark"] {
+    /* Auf dunklem Grund braucht rote Schrift einen helleren Ton: 6,85:1 statt
+       3,14:1. Als Hintergrundfarbe bleibt --danger unveraendert. */
+    --danger-fg: #ff8a80;
     --bg: #16161a;
     --surface: #232329;
     --surface2: #2d2d35;
@@ -117,7 +124,7 @@ button.primary {
 
 button.primary:hover { filter: brightness(1.1); background: var(--accent); }
 
-button.danger { color: var(--danger); border-color: var(--danger); background: transparent; }
+button.danger { color: var(--danger-fg); border-color: var(--danger-fg); background: transparent; }
 
 button.iconbtn { padding: 6px 10px; font-size: 16px; line-height: 1; }
 button.iconbtn svg { width: 18px; height: 18px; display: block; }
@@ -280,7 +287,7 @@ button.count:focus-visible { outline: 2px solid var(--accent, #7E57C2); outline-
 .count.count-zero { background: var(--surface); color: var(--muted); }
 
 /* Die WIP-Warnfarbe gilt der Gesamtzahl; die Faelligkeitszahlen tragen ihre eigene */
-.column.over-wip .column-head, .column.over-wip .count:not(.count-due) { color: var(--danger); }
+.column.over-wip .column-head, .column.over-wip .count:not(.count-due) { color: var(--danger-fg); }
 
 .cards {
     padding: 4px 8px 8px;
@@ -771,13 +778,13 @@ dialog footer > button { overflow: hidden; text-overflow: ellipsis; white-space:
 }
 
 .pick-chip.selected { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent) inset; }
-.req-star { color: var(--danger); margin-left: 2px; font-weight: 700; }
+.req-star { color: var(--danger-fg); margin-left: 2px; font-weight: 700; }
 .cap,
 .req-cap { display: inline-flex; align-items: baseline; align-self: flex-start; }
 /* Nur die einfache Beschriftung braucht Abstand; bei req-cap klebt der
    Pflicht-Stern absichtlich am Wort. */
 .cap { gap: 5px; }
-.req-legend { color: var(--danger); font-size: 10px; margin: 6px 0 0; }
+.req-legend { color: var(--danger-fg); font-size: 10px; margin: 6px 0 0; }
 .req-proxy { display: block; width: 100%; height: 1px; margin: -1px 0 0; padding: 0; border: 0; opacity: 0; pointer-events: none; }
 
 .color-pick { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
@@ -1274,5 +1281,5 @@ dialog button:disabled { opacity: 0.45; cursor: default; filter: grayscale(0.6);
 .rec-cron-info { margin: 4px 0 2px; font-size: 12px; line-height: 1.5; }
 .rec-cron-info .cron-good { color: var(--accent); font-weight: 600; }
 .rec-cron-info .cron-next { color: var(--muted); }
-.rec-cron-info .cron-bad { color: var(--danger, #d32f2f); }
+.rec-cron-info .cron-bad { color: var(--danger-fg, #d32f2f); }
 input[name="recCron"] { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }

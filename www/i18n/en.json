@@ -144,6 +144,7 @@
   "confirm.deleteBoard": "Delete board \"{title}\" with all its cards?",
   "error.moveFailed": "Move failed: {msg}",
   "error.saveFailed": "Save failed: {msg}",
+  "error.noAnswer": "The adapter is not answering. Is the instance still running?",
   "boards.avatars": "User avatars (image instead of initials)",
   "avatar.choose": "Choose image",
   "user.color": "Color",

@@ -144,6 +144,7 @@
   "confirm.deleteBoard": "Board \"{title}\" mit allen Karten löschen?",
   "error.moveFailed": "Verschieben fehlgeschlagen: {msg}",
   "error.saveFailed": "Speichern fehlgeschlagen: {msg}",
+  "error.noAnswer": "Der Adapter antwortet nicht. Läuft die Instanz noch?",
   "boards.avatars": "Benutzer-Avatare (Bild statt Initiale)",
   "avatar.choose": "Bild wählen",
   "user.color": "Farbe",

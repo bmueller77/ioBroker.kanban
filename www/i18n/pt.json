@@ -144,6 +144,7 @@
   "confirm.deleteBoard": "Eliminar o quadro «{title}» com todos os seus cartões?",
   "error.moveFailed": "Falha ao mover: {msg}",
   "error.saveFailed": "Falha ao guardar: {msg}",
+  "error.noAnswer": "O adaptador não responde. A instância ainda está em execução?",
   "boards.avatars": "Avatares de utilizador (imagem em vez de iniciais)",
   "avatar.choose": "Escolher imagem",
   "user.color": "Cor",

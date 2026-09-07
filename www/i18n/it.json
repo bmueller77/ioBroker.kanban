@@ -144,6 +144,7 @@
   "confirm.deleteBoard": "Eliminare la bacheca \"{title}\" con tutte le sue schede?",
   "error.moveFailed": "Spostamento non riuscito: {msg}",
   "error.saveFailed": "Salvataggio non riuscito: {msg}",
+  "error.noAnswer": "L'adattatore non risponde. L'istanza è ancora in esecuzione?",
   "boards.avatars": "Avatar utenti (immagine invece delle iniziali)",
   "avatar.choose": "Scegli immagine",
   "user.color": "Colore",
