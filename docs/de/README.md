@@ -98,7 +98,7 @@ Diese Einstellungen liegen im **ioBroker-Admin** unter *Instanzen → `kanban.0`
 | **Standard-Theme** | `auto` (System), `light` oder `dark`. |
 | **Akzentfarbe** | Farbe der Bedienelemente (Standard `#7E57C2`). |
 | **Sprache** | Sprache der Oberfläche (`de`, `en`, `fr`, `nl`, `it`). Leer/automatisch = ioBroker-Systemsprache. Per URL mit `?lang=xx` übersteuerbar. |
-| **Datumsformat** | Anzeigeformat des Fälligkeitsdatums. **Leer = ioBroker-Systemformat.** Platzhalter siehe Tabelle unten (Standard `DD.MM.`). |
+| **Datumsformat** | Anzeigeformat des Fälligkeitsdatums. **Leer = ioBroker-Systemformat.** Platzhalter siehe Tabelle unten (Standard `DD.MM.`). Seit 0.3.2 wird beim Start geprüft, ob überhaupt ein Tag, Monat oder Jahr darin vorkommt. Ein Vertipper stand vorher wortwörtlich auf jeder Karte; jetzt wird er verworfen, das Log nennt den Grund, und die Anzeige fällt auf das Systemformat zurück. |
 | **Uhrzeit-Format** | `24-Stunden (14:00)` oder `12-Stunden (2:00 PM)`. Betrifft die optionale Uhrzeit auf Karten. |
 | **Eigenes CSS** | Wird als `/api/custom.css` eingebunden, für individuelle Anpassungen. |
 
@@ -362,6 +362,8 @@ Der Lauf startet **einmal täglich** sowie **beim Adapterstart**. Grundlage ist 
 
 Labels sind farbige Schlagworte und werden **pro Board** im Tab *Board* verwaltet (anlegen, umbenennen, umfärben, löschen). Auf der Karte erscheinen sie als farbiges Badge mit automatisch kontrastierender Schrift; im [Ansichten-Dialog](#ansichten-teilen--url-parameter) lassen sie sich als Blacklist zum Ausblenden nutzen.
 
+Neue Labels bekommen ihre Farbe seit 0.3.2 reihum aus einer Palette von acht. Vorher waren drei nacheinander angelegte Labels alle grün und trugen damit keine Information außer ihrem Text.
+
 Seit 0.3.2 lässt sich die **Reihenfolge** der Labels wie die der Spalten am Anfasser ziehen, und diese Reihenfolge gilt überall: auf den Karten, in der Auswahl im Karteneditor und in der Zusammenfassung der Abschnittszeile. Vorher gab die Karte ihre Labels in der Reihenfolge aus, in der jemand sie angeklickt hatte, zwei Karten mit denselben Labels sahen also verschieden aus. Wer es alphabetisch will, zieht die Liste einmal in diese Reihenfolge.
 
 #### Link in Benachrichtigungen (ab 0.2.0)
@@ -400,7 +402,11 @@ Rechts in jeder Abschnittszeile steht, was darin steckt: ein Auszug der Beschrei
 
 In der Fußzeile stehen **Löschen**, **Verwalten** (übertragen/klonen), **Abbrechen** und **Speichern**. Oben rechts schließt ein **×** den Dialog, wie in allen Dialogen des Boards.
 
-**Mit der Tastatur** lässt sich der Editor vollständig bedienen. Tab springt von Feld zu Feld und dabei auch auf die Abschnittsköpfe; Enter oder Leertaste klappt einen Abschnitt auf. Die Chip-Gruppen (Zuständige, Labels, Kartenfarbe, Linktypen) sind je ein einziger Tab-Halt: darin bewegen die Pfeiltasten, Pos1 und Ende springen an die Ränder, Leertaste oder Enter wählt aus.
+**Ungespeicherte Änderungen** gehen seit 0.3.2 nicht mehr verloren. Escape und das Schließkreuz fragen nach, wenn du etwas geändert hast, und lassen dir die Wahl zwischen Speichern und Verwerfen. "Abbrechen" verwirft weiterhin ohne Rückfrage, denn wer diesen Knopf drückt, meint ihn auch.
+
+**Mit der Tastatur** lässt sich der Editor vollständig bedienen. Tab springt von Feld zu Feld und dabei auch auf die Abschnittsköpfe; Enter oder Leertaste klappt einen Abschnitt auf. Die Chip-Gruppen (Zuständige, Labels, Kartenfarbe, Linktypen) sind je ein einziger Tab-Halt: darin bewegen die Pfeiltasten, Pos1 und Ende springen an die Ränder, Leertaste oder Enter wählt aus. In der Checkliste legt Enter den nächsten Punkt an, gespeichert wird von dort aus mit Strg und Enter.
+
+**Gehört eine Karte jemandem, den es nicht mehr gibt**, steht die alte Kennung als eigener Chip im Feld *Zuständig*, gestrichelt und mit dem Zusatz "(gelöscht)". Vorher sah das Feld schlicht leer aus, und wer daraufhin jemanden anklickte, ließ die alte Kennung unbemerkt stehen. Abwählen kannst du sie hier, umhängen unter [⚙ → Benutzer](#benutzer-umbenennen).
 
 Eine Karte hat folgende inhaltliche Felder (per API unter denselben Namen setzbar):
 
@@ -500,6 +506,8 @@ Unabhängig davon färbt sich das Fälligkeits-Badge, sodass Dringendes auffäll
 Dahinter stehen zwei verschieden gerechnete Fragen. Das **Vorwarnfenster** (gelb) ist Planung und zählt in **Kalendertagen**. Es folgt der Instanz-Einstellung [**Erinnern X Tage vor Fälligkeit**](#tab-benachrichtigungen), damit die Farbe dasselbe sagt wie die Erinnerungsmail: Steht dort `3`, ist alles bis übermorgen gelb. Kein rollendes 24-Stunden-Fenster: "morgen" bleibt den ganzen Tag morgen.
 
 Die Grenze zu **rot** ist dagegen eine Tatsache. Trägt die Karte eine **Uhrzeit**, zählt sie: Um 17:01 ist 17:00 vorbei, und genau dann feuert auch das Ereignis `cardDue` mit `detail.exact`. Ohne Uhrzeit wechselt die Farbe um Mitternacht. Seit 0.3.2 rechnen die Zustände [`overdueCount` und `overdueList`](#iobroker-states--objekte) nach derselben Regel: Farbe und Datenpunkt springen zur selben Minute. Vorher verglichen die Zähler nur das Datum, eine Karte war also rot, während der Zähler noch bis Mitternacht auf dem alten Stand blieb.
+
+Was eine Farbe bedeutet, steht seit 0.3.2 im Tooltip des Abzeichens: überfällig, heute fällig, demnächst fällig, später fällig, erledigt. Eine Legende in der Oberfläche gibt es nicht, und eine Farbe allein sagt nicht, ob sie schlimmer ist als die daneben.
 
 Die Farben lassen sich über [eigenes CSS](#faq--fallstricke) ändern: `--danger` für rot, `--warn` für orange und `--due-upcoming` samt `--due-upcoming-text` für gelb. Dieselbe Einteilung steckt hinter den [Zahlen im Spaltenkopf](#zahlen-im-spaltenkopf).
 

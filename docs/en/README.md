@@ -98,7 +98,7 @@ These settings live in the **ioBroker admin** under *Instances → `kanban.0` �
 | **Default theme** | `auto` (system), `light` or `dark`. |
 | **Accent color** | Color of the controls (default `#7E57C2`). |
 | **Language** | UI language (`de`, `en`, `fr`, `nl`, `it`). Empty/automatic = ioBroker system language. Can be overridden per URL with `?lang=xx`. |
-| **Date format** | Display format of the due date. **Empty = ioBroker system format.** Tokens see the table below (default `DD.MM.`). |
+| **Date format** | Display format of the due date. **Empty = ioBroker system format.** Tokens see the table below (default `DD.MM.`). Since 0.3.2 the adapter checks on start whether the format carries a day, month or year at all. A typo used to end up printed on every card verbatim; now it is discarded, the log says why, and the display falls back to the system format. |
 | **Time format** | `24 hours (14:00)` or `12 hours (2:00 PM)`. Applies to the optional time of day on cards. |
 | **Custom CSS** | Served as `/api/custom.css`, for individual tweaks. |
 
@@ -362,6 +362,8 @@ The run happens **once a day** and **on adapter start**. It uses the completion 
 
 Labels are coloured tags and are managed **per board** in the *Board* tab (create, rename, recolour, delete). On a card they appear as a coloured badge with automatically contrasting text; in the [Views dialog](#sharing-views--url-parameters) they can be used as a blacklist to hide cards.
 
+New labels take their colour from a palette of eight in rotation since 0.3.2. Before that three labels created one after another were all green and carried no information beyond their text.
+
 Since 0.3.2 the labels carry a drag handle like the columns above, so their **order** is yours to set, and that order applies everywhere: on the cards, in the picker inside the card editor, and in the summary of the section header. Before that a card listed its labels in the order someone had clicked them, so two cards carrying the same labels looked different. If you want them alphabetical, drag the list into that order once.
 
 #### Link in notifications (from 0.2.0)
@@ -400,7 +402,11 @@ The right-hand end of each section header says what is inside: an excerpt of the
 
 The footer holds **Delete**, **Manage** (transfer/clone), **Cancel** and **Save**. A **×** in the top right closes the dialog, as in every dialog of the board.
 
-**The keyboard reaches everything.** Tab moves from field to field and also onto the section headers; Enter or space opens a section. The chip groups (assignees, labels, card colour, link types) are a single tab stop each: inside them the arrow keys move, Home and End jump to the ends, space or Enter selects.
+**Unsaved changes** no longer disappear since 0.3.2. Escape and the close cross ask first if you changed anything and let you choose between saving and discarding. "Cancel" still discards without asking, because someone pressing that button means it.
+
+**The keyboard reaches everything.** Tab moves from field to field and also onto the section headers; Enter or space opens a section. The chip groups (assignees, labels, card colour, link types) are a single tab stop each: inside them the arrow keys move, Home and End jump to the ends, space or Enter selects. Inside the checklist Enter creates the next item; from there you save with Ctrl and Enter.
+
+**If a card belongs to someone who no longer exists**, the old ID appears as its own chip in the *assignees* field, dashed and marked "(deleted)". Before that the field simply looked empty, and clicking a person then left the old ID in place unnoticed. You can deselect it here; moving it over happens under [⚙ → Users](#renaming-a-user).
 
 A card has the following content fields (settable via the API under the same names):
 
@@ -498,6 +504,8 @@ Independently of all this, the due badge is coloured, so anything urgent stands 
 Two differently computed questions sit behind this. The **lead-time window** (yellow) is planning and counts in **calendar days**. It follows the instance setting [**Remind X days before due**](#tab-notifications), so the colour says the same thing as the reminder mail: set it to `3` and everything up to the day after tomorrow turns yellow. Not a rolling 24 hour window, so tomorrow stays tomorrow all day.
 
 The boundary to **red** is a fact instead. When the card carries a **time of day**, that time counts: at 17:01 the 17:00 slot has passed, which is exactly when the `cardDue` event fires with `detail.exact`. Without a time, the colour changes at midnight. Since 0.3.2 the states [`overdueCount` and `overdueList`](#iobroker-states--objects) follow the same rule, so colour and counter change in the same minute. Before that the counters compared dates only, and a card could be red while the counter kept its old value until midnight.
+
+Since 0.3.2 the tooltip on the badge says what a colour means: overdue, due today, due soon, due later, done. There is no legend in the interface, and a colour on its own does not say whether it is worse than the one beside it.
 
 The colours can be changed through [custom CSS](#faq--pitfalls): `--danger` for red, `--warn` for orange, and `--due-upcoming` with `--due-upcoming-text` for yellow. The same grouping sits behind the [counts in the column header](#counts-in-the-column-header).
 
