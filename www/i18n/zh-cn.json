@@ -181,6 +181,7 @@
   "count.soon": "明天",
   "count.today": "今天",
   "count.overdue": "已逾期",
+  "count.lastOne": "至少保留一个数字",
   "card.doneLabel": "已完成",
   "card.copy": "复制卡片",
   "card.edit": "编辑卡片",

@@ -181,6 +181,7 @@
   "count.soon": "Mañana",
   "count.today": "Hoy",
   "count.overdue": "Vencidas",
+  "count.lastOne": "Al menos un número permanece",
   "card.doneLabel": "Hecha",
   "card.copy": "Copiar tarjeta",
   "card.edit": "Editar tarjeta",

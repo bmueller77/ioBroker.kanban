@@ -379,7 +379,9 @@ function onDocClickCount(e) { if (countMenuEl && !countMenuEl.contains(e.target)
 function openCountMenu(btn, state, board, col, actions, tastatur) {
     closeCountMenu();
     const menu = el('div', 'sort-menu count-menu');
+    menu.setAttribute('role', 'menu');
     const kopf = el('div', 'sort-menu-title', t('count.title'));
+    kopf.setAttribute('aria-hidden', 'true');
     // Das Umschalten rendert das Board neu; das Menue haengt an body und
     // ueberlebt das, muss seine Haken aber selbst nachziehen.
     const zeichne = (fokus) => {
@@ -388,9 +390,21 @@ function openCountMenu(btn, state, board, col, actions, tastatur) {
         const aktiv = getCountModes(state, board, col);
         for (const mode of COUNT_MODES) {
             const an = aktiv.includes(mode);
-            const item = el('button', 'sort-item count-item' + (an ? ' active' : ''));
+            // Der letzte gesetzte Haken bleibt stehen: Ohne jede Zahl gaebe es
+            // kein Ziel mehr, ueber das man das Menue wieder aufruft. Damit das
+            // nicht wie ein kaputter Knopf wirkt, ist er sichtbar gesperrt.
+            const gesperrt = an && aktiv.length === 1;
+            const item = el(
+                'button',
+                'sort-item count-item' + (an ? ' active' : '') + (gesperrt ? ' count-item-locked' : ''),
+            );
             item.type = 'button';
-            item.setAttribute('aria-pressed', an ? 'true' : 'false');
+            item.setAttribute('role', 'menuitemcheckbox');
+            item.setAttribute('aria-checked', an ? 'true' : 'false');
+            if (gesperrt) {
+                item.setAttribute('aria-disabled', 'true');
+                item.title = t('count.lastOne');
+            }
             const box = el('span', 'count-check');
             if (an) box.appendChild(mdiIcon(MDI.check));
             item.appendChild(box);
@@ -398,9 +412,8 @@ function openCountMenu(btn, state, board, col, actions, tastatur) {
             if (mode !== 'total') item.appendChild(el('span', 'count-dot due-' + mode));
             item.addEventListener('click', (e) => {
                 e.stopPropagation();
+                if (gesperrt) return;
                 const neu = an ? aktiv.filter(m => m !== mode) : COUNT_MODES.filter(m => aktiv.includes(m) || m === mode);
-                // Ohne jede Zahl bliebe kein Ziel, ueber das man das Menue wieder aufruft.
-                if (!neu.length) return;
                 actions.setCountModes(colKey(board, col), neu);
                 // Neu gezeichnet heisst neue Knoepfe: den Fokus zurueckholen,
                 // sonst faellt er bei jedem Haken auf body.
@@ -1074,6 +1087,15 @@ export function renderBoard(container, state, actions) {
                 b.type = 'button';
                 b.title = `${name} (${t('count.title')})`;
                 b.setAttribute('aria-label', b.title);
+                b.setAttribute('aria-haspopup', 'menu');
+                // Ein kleines Dreieck an der ersten Zahl. Ohne das haelt man sie
+                // fuer eine reine Anzeige und klickt sie nie an - auf dem Handy
+                // gibt es auch kein Zeigen mit der Maus, das es verraten wuerde.
+                if (!counts.children.length) {
+                    const pfeil = mdiIcon(MDI.chevronDown);
+                    pfeil.setAttribute('class', 'count-caret');
+                    b.appendChild(pfeil);
+                }
                 b.addEventListener('click', (e) => { e.stopPropagation(); openCountMenu(b, state, board, col, actions, e.detail === 0); });
             } else {
                 b.title = name;

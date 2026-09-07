@@ -181,6 +181,7 @@
   "count.soon": "Demain",
   "count.today": "Aujourd'hui",
   "count.overdue": "En retard",
+  "count.lastOne": "Au moins un nombre reste affiché",
   "card.doneLabel": "Terminé",
   "card.copy": "Copier la carte",
   "card.edit": "Modifier la carte",

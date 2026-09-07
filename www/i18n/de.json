@@ -181,6 +181,7 @@
   "count.soon": "Morgen",
   "count.today": "Heute",
   "count.overdue": "Überfällig",
+  "count.lastOne": "Mindestens eine Zahl bleibt stehen",
   "card.doneLabel": "Erledigt",
   "card.copy": "Karte kopieren",
   "card.edit": "Karte bearbeiten",

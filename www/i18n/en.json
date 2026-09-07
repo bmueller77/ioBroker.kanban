@@ -181,6 +181,7 @@
   "count.soon": "Tomorrow",
   "count.today": "Today",
   "count.overdue": "Overdue",
+  "count.lastOne": "At least one number stays",
   "card.doneLabel": "Done",
   "card.copy": "Copy card",
   "card.edit": "Edit card",

@@ -181,6 +181,7 @@
   "count.soon": "Domani",
   "count.today": "Oggi",
   "count.overdue": "Scadute",
+  "count.lastOne": "Almeno un numero resta visibile",
   "card.doneLabel": "Completata",
   "card.copy": "Copia scheda",
   "card.edit": "Modifica scheda",

@@ -275,8 +275,15 @@ button.linkbtn.orphan-count { display: flex; align-items: center; gap: 2px; font
     font-family: inherit;
     line-height: inherit;
 }
-button.count { cursor: pointer; }
+button.count { cursor: pointer; display: inline-flex; align-items: center; gap: 2px; }
+button.count:hover { background: var(--surface2); }
 button.count:focus-visible { outline: 2px solid var(--accent, #7E57C2); outline-offset: 2px; }
+/* Verraet, dass die Zahl ein Bedienelement ist. Nur an der ersten. */
+.count-caret { width: 11px; height: 11px; margin-right: -3px; opacity: .55; }
+/* Der letzte gesetzte Haken laesst sich nicht entfernen. Sichtbar gesperrt,
+   damit es nicht wie ein Knopf ohne Wirkung aussieht. */
+.count-item-locked { opacity: .5; cursor: default; }
+.count-item-locked:hover { background: none; }
 
 /* Dieselben Farben wie die Faelligkeits-Abzeichen auf den Karten */
 .count.due-overdue { background: var(--danger); color: #fff; }
@@ -304,7 +311,10 @@ button.count:focus-visible { outline: 2px solid var(--accent, #7E57C2); outline-
    Scrollen unten sichtbar. */
 .add-card-btn {
     position: sticky;
-    bottom: 0;
+    /* Beim Scrollen schwebt der Knopf ueber den Karten. Der Ring in der
+       Spaltenfarbe legt einen undurchsichtigen Sockel darunter, sonst steht er
+       auf Kartentiteln und Labels (Befund 26). */
+    bottom: 7px;
     z-index: 2;
     display: flex;
     align-items: center;
@@ -316,7 +326,10 @@ button.count:focus-visible { outline: 2px solid var(--accent, #7E57C2); outline-
     border-radius: 8px;
     background: var(--accent);
     color: var(--accent-text, #fff);
-    box-shadow: var(--card-shadow);
+    /* Der Ring in der Spaltenfarbe ist der undurchsichtige Sockel, der eigene
+       Schatten haengt hinten dran. Eine zweite box-shadow-Zeile wuerde die
+       erste ersetzen, deshalb stehen beide hier zusammen. */
+    box-shadow: 0 0 0 7px var(--surface2), var(--card-shadow);
 }
 .add-card-btn:hover { filter: brightness(1.1); background: var(--accent); }
 .add-card-btn svg { width: 18px; height: 18px; display: block; }
@@ -427,14 +440,17 @@ button.count:focus-visible { outline: 2px solid var(--accent, #7E57C2); outline-
     opacity: 0.8;
 }
 /* Treffer- und Hoverflaeche deutlich groesser als der Button selbst: seitlich je
-   25 px, nach oben 8 px. Das laeuft ueber ein absolut positioniertes ::after, damit
-   weder das Grid der Fusszeile noch die Lage des Chevrons sich veraendern. */
+   25 px, nach oben 13 px. Das laeuft ueber ein absolut positioniertes ::after,
+   damit weder das Grid der Fusszeile noch die Lage des Chevrons sich veraendern.
+   Nach oben statt nach unten, weil die Flaeche sonst ueber den Kartenrand in die
+   naechste Karte reichte. 11 + 13 = 24 px, die Mindestgroesse aus WCAG 2.5.8
+   (Befund 12). */
 .card-check-toggle::after {
     content: '';
     position: absolute;
     left: -25px;
     right: -25px;
-    top: -8px;
+    top: -13px;
     bottom: 0;
     border-radius: 5px;
 }

@@ -181,6 +181,7 @@
   "count.soon": "Завтра",
   "count.today": "Сегодня",
   "count.overdue": "Просроченные",
+  "count.lastOne": "Хотя бы одно число остаётся",
   "card.doneLabel": "Готово",
   "card.copy": "Копировать карточку",
   "card.edit": "Изменить карточку",
