@@ -984,10 +984,12 @@ dialog footer > button { overflow: hidden; text-overflow: ellipsis; white-space:
 .col-more {
     font-size: 12px;
     color: var(--muted);
-    /* Der Text sitzt damit auf derselben Kante wie die Karten darueber:
-       acht Pixel vom Spaltenrand. Vorher waren es zwei. */
-    padding: 4px 4px 3px;
-    margin: 0 4px;
+    /* Links auf derselben Kante wie die Karten darueber, also acht Pixel vom
+       Spaltenrand. Oben zieht der negative Rand die acht Pixel Polsterung der
+       Kartenliste wieder heran: Sonst stand der Hinweis weit abgesetzt unter
+       der letzten Karte, als gehoerte er nicht mehr dazu. */
+    padding: 4px 4px 8px;
+    margin: -6px 4px 0;
     background: none;
     border: none;
     border-radius: 6px;
