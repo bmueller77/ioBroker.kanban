@@ -66,7 +66,7 @@ A **Kanban board as a dedicated ioBroker adapter**. It ships its own web server,
 2. **Create an instance.** Open the **⋮** menu on the adapter tile and pick **"+"**. ioBroker creates the instance (`kanban.0`) and shows a console window you can close after `Process exited with code 0`. Repeat for every further instance (`kanban.1`, `kanban.2`, ...).
 3. **Set the port.** Under *Instances*, open the gear of the instance, tab **General**: adjust **port** (default `8095`), **IP binding** (default `0.0.0.0`) and **base URL**.
    **With several instances:** each needs its own port. If the configured one is taken, the adapter still starts and falls back to the next free port. The instance list, however, keeps showing the *configured* port, and the link there leads to the wrong instance. The port actually in use is in the log: `Port 8095 is in use - falling back to free port 8096. The instance list still shows the configured port; enter the free port there to keep both in sync.` Then enter that port in the settings.
-4. **Check the users.** Tab **Users**: a fresh instance ships with two example users, `user1` and `user2`, which appear as chips in the board. Rename them **before** creating the first board. [Tab "Users"](#tab-users) explains why.
+4. **Add a user.** Tab **Users**: a fresh instance ships with **none**. Enter at least one person, because every card needs an assignee. Take a moment over the ID: it cannot be changed after the first start, while the display name can be changed any time. [Tab "Users"](#tab-users) explains why.
 5. **Open the web UI:** **`http://<host>:<port>/`**
 6. On first launch there is no board yet. Use the **gear icon (⚙)** at the top right to create one. Every new board comes with three default columns:
    - **To do** (`todo`)
@@ -131,7 +131,7 @@ This is where you define **which people exist**, the list applies to the entire 
 | **E-mail** (`email`) | Optional. Target address for e-mail notifications. |
 | **notify...** | Nine per-user checkboxes controlling notifications, see [Tab "Notifications"](#tab-notifications). |
 
-Add a row with the **"+"** in the table header; the bin icon at the end of a row removes it again (without asking). Rows without an ID are dropped when saving. A fresh instance ships with two example users, `user1` and `user2`.
+Add a row with the **"+"** in the table header; the bin icon at the end of a row removes it again (without asking). Rows without an ID are dropped when saving. A fresh instance ships with **no** users; until you add the first one, the "+ Card" button in the board is blocked and says so.
 
 > **The ID is the key, and it is locked once created.** Boards and cards find their people through the *ID* column; the avatar pictures and the addresses of shared views hang on it as well. Changing it later would leave all of that pointing nowhere, and the adapter could not even clean up afterwards: a rename cannot be told apart from "deleted and newly created". The field is therefore locked as soon as the user has been saved once. The adapter writes a marker into the instance configuration on the next start and restarts once while doing so. That happens once per new user, never again after that.
 >

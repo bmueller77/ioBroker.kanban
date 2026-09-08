@@ -112,22 +112,7 @@
     "bind": "0.0.0.0",
     "dateFormat": "",
     "timeFormat": "24h",
-    "users": [
-      {
-        "name": "user1",
-        "displayName": "User 1",
-        "email": "",
-        "color": "#7E57C2",
-        "icon": "mdi:account"
-      },
-      {
-        "name": "user2",
-        "displayName": "User 2",
-        "email": "",
-        "color": "#26A69A",
-        "icon": "mdi:account"
-      }
-    ],
+    "users": [],
     "inboundTokens": [],
     "outboundWebhooks": [],
     "emailInstance": "email.0",

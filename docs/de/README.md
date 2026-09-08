@@ -66,7 +66,7 @@ Ein **Kanban-Board als eigener ioBroker-Adapter**. Er bringt seinen eigenen Webs
 2. **Instanz anlegen.** Auf der Adapter-Kachel das Menü **⋮** öffnen und **"+"** wählen. ioBroker legt die Instanz an (`kanban.0`) und zeigt dabei ein Konsolenfenster, das nach `Process exited with code 0` geschlossen werden kann. Für jede weitere Instanz (`kanban.1`, `kanban.2`, ...) denselben Weg noch einmal gehen.
 3. **Port festlegen.** Unter *Instanzen* das Zahnrad der Instanz öffnen, Tab **Allgemein**: **Port** (Standard `8095`), **IP-Bindung** (Standard `0.0.0.0`) und **Basis-URL** anpassen.
    **Bei mehreren Instanzen:** Jede braucht einen eigenen Port. Ist der eingetragene belegt, startet der Adapter trotzdem und weicht auf den nächsten freien Port aus - die Instanzliste zeigt dann aber weiter den *eingetragenen* Port, und der Link dort führt auf die falsche Instanz. Der tatsächlich benutzte Port steht im Log: `Port 8095 is in use - falling back to free port 8096. The instance list still shows the configured port; enter the free port there to keep both in sync.` Trage ihn danach fest ein.
-4. **Benutzer prüfen.** Tab **Benutzer**: Eine frische Instanz bringt zwei Beispielbenutzer `user1` und `user2` mit, die im Board als Chips erscheinen. Benenne sie **vor** dem ersten Board um - warum, steht im [Tab "Benutzer"](#tab-benutzer).
+4. **Benutzer anlegen.** Tab **Benutzer**: Eine frische Instanz bringt **keine** mit. Trage mindestens eine Person ein, denn jede Karte braucht eine zuständige. Überleg dir die Kennung in Ruhe: Sie lässt sich nach dem ersten Start nicht mehr ändern, der Anzeigename dagegen jederzeit. Warum das so ist, steht im [Tab "Benutzer"](#tab-benutzer).
 5. **Web-UI öffnen:** **`http://<host>:<port>/`**
 6. Beim ersten Start ist noch kein Board vorhanden. Über das **Zahnrad-Symbol (⚙)** oben rechts ein neues Board anlegen. Jedes neue Board erhält automatisch drei Standardspalten:
    - **Zu erledigen** (`todo`)
@@ -131,7 +131,7 @@ Hier wird festgelegt, **welche Personen es gibt**, die Liste gilt für die gesam
 | **E-Mail** (`email`) | Optional. Zieladresse für E-Mail-Benachrichtigungen. |
 | **notify...** | Neun Checkboxen je Benutzer für die Benachrichtigungssteuerung, siehe [Tab "Benachrichtigungen"](#tab-benachrichtigungen). |
 
-Eine neue Zeile legst du über das **"+"** in der Kopfzeile der Tabelle an, das Papierkorb-Symbol am Zeilenende entfernt sie wieder (ohne Rückfrage). Zeilen ohne ID werden beim Speichern verworfen. Eine frische Instanz bringt zwei Beispielbenutzer `user1` und `user2` mit.
+Eine neue Zeile legst du über das **"+"** in der Kopfzeile der Tabelle an, das Papierkorb-Symbol am Zeilenende entfernt sie wieder (ohne Rückfrage). Zeilen ohne ID werden beim Speichern verworfen. Eine frische Instanz bringt **keine** Benutzer mit; bis du den ersten einträgst, ist der Knopf "+ Karte" im Board gesperrt und sagt das auch.
 
 > **Die ID ist der Schlüssel, und nach dem Anlegen gesperrt.** Über die Spalte *ID* finden Boards und Karten ihre Personen; auch die Avatarbilder und die Adressen geteilter Ansichten hängen daran. Eine nachträgliche Änderung ließe all das ins Leere zeigen, und der Adapter könnte nicht einmal aufräumen: Eine Umbenennung ist technisch nicht von "gelöscht und neu angelegt" zu unterscheiden. Deshalb ist das Feld gesperrt, sobald der Benutzer einmal gespeichert wurde. Der Adapter trägt dafür beim nächsten Start ein Merkmal in die Instanzkonfiguration ein und startet dabei einmal neu. Das passiert einmal je neuem Benutzer, danach nie wieder.
 >
