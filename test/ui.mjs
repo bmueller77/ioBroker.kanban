@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { absoluteOrder, boardMembers, countDues, dueState, getCountModes } from '../www/js/board.js';
+import { absoluteOrder, boardMembers, countDues, dueState, getCountModes, totalLabel } from '../www/js/board.js';
 
 /**
  * Reine Hilfsfunktionen der Oberfläche — ohne Browser prüfbar.
@@ -185,5 +185,38 @@ describe('Kopfzahlen der Spalten', () => {
     it('fällt bei unbrauchbarem Inhalt auf die Gesamtzahl zurück', () => {
         assert.deepEqual(getCountModes({ countModes: { 'familie:todo': ['quatsch'] } }, board, col), ['total']);
         assert.deepEqual(getCountModes({ countModes: { 'familie:todo': 'total' } }, board, col), ['total']);
+    });
+});
+
+describe('Gesamtzahl im Spaltenkopf', () => {
+    // Die Regel: Die Zahl vor dem Schraegstrich muss zu der Farbe passen, in
+    // der sie steht. Zweimal falsch gewesen, deshalb hier festgehalten.
+    it('zeigt ohne Limit nur die Zahl', () => {
+        assert.equal(totalLabel(7, 7, false, 0), '7');
+        assert.equal(totalLabel(7, 2, true, 0), '2');
+    });
+
+    it('zeigt bei eingehaltenem Limit Spalte und Limit', () => {
+        assert.equal(totalLabel(3, 3, false, 5), '3/5');
+        assert.equal(totalLabel(5, 5, false, 5), '5/5');
+    });
+
+    it('laesst den Schraegstrich weg, solange gefiltert und eingehalten wird', () => {
+        // Sonst stuende dort ein Verhaeltnis aus zwei verschiedenen Mengen.
+        assert.equal(totalLabel(3, 1, true, 5), '1');
+    });
+
+    it('nennt bei Ueberschreitung die Spalte, nicht die gefilterte Zahl', () => {
+        // A20: Die Warnfarbe kommt von allInCol. Eine rote "2/5" erklaert sich
+        // niemandem, "7/5" schon.
+        assert.equal(totalLabel(7, 2, true, 5), '7/5');
+        assert.equal(totalLabel(7, 7, false, 5), '7/5');
+        assert.equal(totalLabel(6, 0, true, 5), '6/5');
+    });
+
+    it('kommt mit unbrauchbaren Limits zurecht', () => {
+        for (const kaputt of [null, undefined, '', 'viele', -3]) {
+            assert.equal(totalLabel(4, 4, false, kaputt), '4');
+        }
     });
 });

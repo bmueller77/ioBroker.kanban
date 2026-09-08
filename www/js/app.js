@@ -1,7 +1,9 @@
 // Bootstrap: Konfiguration laden, URL-Parameter, Theme, Live-Sync, Aktionen
 
 import { api, liveSync } from './api.js';
-import { renderBoard, userAvatar, boardUsers, soloUser, contrastText, mdiIcon, refreshDueBadges } from './board.js';
+import {
+    renderBoard, userAvatar, boardUsers, soloUser, contrastText, mdiIcon, refreshDueBadges, showHint,
+} from './board.js';
 import { initDialogs } from './dialogs.js';
 import { initI18n, applyStatic, t } from './i18n.js';
 
@@ -408,7 +410,8 @@ async function init() {
         const grund = addCardBlocker();
         if (grund) {
             // Statt stiller Wirkungslosigkeit: sagen, was zuerst noetig ist.
-            alert(grund);
+            // In der Seite, nicht als Browserbox - siehe showHint.
+            showHint(grund);
             return;
         }
         dialogs.openCard(null);

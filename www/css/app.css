@@ -1320,6 +1320,41 @@ dialog label.inline-num input { width: 80px; }
 .transfer-mode-btn { flex: 1 1 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .transfer-mode-btn.active { background: var(--accent); border-color: var(--accent); color: var(--accent-text, #fff); }
 dialog button:disabled { opacity: 0.45; cursor: default; filter: grayscale(0.6); }
+/* Hinweis in der Seite statt Browserbox. Sitzt unter der Kopfleiste, nimmt
+   keinen Fokus und verschwindet von selbst. */
+.app-hint {
+    position: fixed;
+    top: 60px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 60;
+    max-width: min(560px, calc(100vw - 32px));
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 12px 10px 14px;
+    border: 1px solid var(--accent);
+    border-radius: 10px;
+    background: var(--surface);
+    color: var(--text);
+    box-shadow: 0 6px 24px rgba(0, 0, 0, .35);
+    font-size: 14px;
+    line-height: 1.4;
+}
+.app-hint-close {
+    flex: none;
+    background: none;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 16px;
+    line-height: 1;
+    /* 24 px nach WCAG 2.5.8, wie die uebrigen kleinen Knoepfe */
+    min-width: 24px;
+    min-height: 24px;
+}
+.app-hint-close:hover { color: var(--text); }
+
 /* Gesperrt, aber anklickbar: Der Klick erklaert, was fehlt (B1, B18). Ohne
    diese Regel sah der Knopf genauso einladend aus wie im Normalzustand. */
 #addCardBtn[aria-disabled="true"] { opacity: 0.45; filter: grayscale(0.6); cursor: default; }

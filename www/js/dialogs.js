@@ -547,7 +547,11 @@ export function initDialogs(state, actions) {
     function showLabelCreator(box) {
         if (box.querySelector('.label-new')) return;
         const form = el('span', 'label-new');
-        const color = makeColorTrigger('#4CAF50');
+        // Reihum aus der Palette, genau wie im Board-Manager. Vorher stand hier
+        // fest Gruen, und zwei ueber "+ Neu" angelegte Labels sahen gleich aus -
+        // der Zustand, den Befund 11 abstellen sollte (B6).
+        const vorhanden = ((state.board && state.board.labels) || []).length;
+        const color = makeColorTrigger(LABEL_FARBEN[vorhanden % LABEL_FARBEN.length]);
         const name = document.createElement('input');
         name.type = 'text';
         name.placeholder = t('label.namePlaceholder');

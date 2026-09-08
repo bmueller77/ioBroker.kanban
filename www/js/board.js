@@ -315,6 +315,39 @@ export function getCountModes(state, board, col) {
  * @param liste Eintraege "JJJJ-MM-TT|hh:mm" (Uhrzeit darf leer sein)
  * @param cfg Konfiguration der Oberflaeche (fuer den Vorlauf)
  */
+/**
+ * Beschriftung der Gesamtzahl im Spaltenkopf.
+ *
+ * Drei Faelle, und die Regel dahinter ist immer dieselbe: Die Zahl vor dem
+ * Schraegstrich muss zu der Farbe passen, in der sie steht.
+ *
+ *  - Kein WIP-Limit: schlicht die Zahl, die man gerade sieht.
+ *  - Limit gesetzt und eingehalten: "sichtbar/Limit". Ohne Filter sind das
+ *    ohnehin dieselben Karten; mit Filter faellt der Schraegstrich weg, sonst
+ *    stuende dort ein Verhaeltnis aus zwei verschiedenen Mengen.
+ *  - Limit ueberschritten: "Spalte/Limit", auch bei aktivem Filter. Die
+ *    Warnfarbe kommt von der Zahl in der Spalte. Stand dort die gefilterte,
+ *    las man eine rote "2/5" und verstand die Warnung nicht (A20). Wie viele
+ *    der Filter zeigt, sagt der Tooltip.
+ *
+ * @param allInCol Karten in der Spalte, ohne Papierkorb
+ * @param matchedCount davon sichtbar unter den aktiven Filtern
+ * @param anyFilter ob ueberhaupt ein Filter aktiv ist
+ * @param wipLimit das WIP-Limit der Spalte, 0 heisst keins
+ * @returns Text fuer das Abzeichen
+ */
+export function totalLabel(allInCol, matchedCount, anyFilter, wipLimit) {
+    const sichtbar = anyFilter ? matchedCount : allInCol;
+    const limit = Number(wipLimit) || 0;
+    if (limit <= 0) {
+        return String(sichtbar);
+    }
+    if (allInCol > limit) {
+        return `${allInCol}/${limit}`;
+    }
+    return anyFilter ? String(sichtbar) : `${allInCol}/${limit}`;
+}
+
 export function countDues(liste, cfg) {
     const z = { soon: 0, today: 0, overdue: 0 };
     for (const e of liste) {
@@ -925,6 +958,42 @@ export function boardMembers(board, users) {
  * @param state Zustand der Oberflaeche
  * @returns Benutzername oder null
  */
+/**
+ * Kurzer Hinweis in der Seite, wo eine Meldung noetig ist.
+ *
+ * Nicht alert(): Die modale Box des Browsers steht ausserhalb des Dokuments,
+ * sieht in keiner Oberflaeche nach Hause aus und ist fuer jede automatische
+ * Pruefung unsichtbar - ein Tester hat die Meldung deshalb fuer gar nicht
+ * vorhanden gehalten. role=status laesst Screenreader sie beilaeufig vorlesen,
+ * ohne den Fokus wegzunehmen.
+ *
+ * @param text Der Hinweistext. Leer entfernt einen stehenden Hinweis.
+ */
+export function showHint(text) {
+    const alt = document.querySelector('.app-hint');
+    if (alt) {
+        clearTimeout(Number(alt.dataset.timer));
+        alt.remove();
+    }
+    if (!text) {
+        return;
+    }
+    const box = el('div', 'app-hint');
+    box.setAttribute('role', 'status');
+    box.appendChild(el('span', null, text));
+    const zu = el('button', 'app-hint-close');
+    zu.type = 'button';
+    zu.textContent = '\u00d7';
+    zu.title = t('hint.close');
+    zu.setAttribute('aria-label', t('hint.close'));
+    zu.addEventListener('click', () => showHint(''));
+    box.appendChild(zu);
+    document.body.appendChild(box);
+    // Lang genug zum Lesen, kurz genug, um nicht im Weg zu stehen. Wer
+    // schneller ist, klickt das Kreuz.
+    box.dataset.timer = String(setTimeout(() => showHint(''), 8000));
+}
+
 export function soloUser(state) {
     const alle = (state && state.users) || [];
     return alle.length === 1 && alle[0] && alle[0].name ? alle[0].name : null;
@@ -1116,9 +1185,8 @@ export function renderBoard(container, state, actions) {
                 : t('count.wipOver', { n: allInCol, limit: col.wipLimit })
             : '';
         for (const mode of (dueFaehig ? getCountModes(state, board, col) : ['total'])) {
-            const sichtbar = anyFilter ? matchedCount : allInCol;
             const zahl = mode === 'total'
-                ? (col.wipLimit > 0 && (!anyFilter || ueberWip) ? `${sichtbar}/${col.wipLimit}` : String(sichtbar))
+                ? totalLabel(allInCol, matchedCount, anyFilter, col.wipLimit)
                 : String(dueZahl[mode]);
             const leer = mode !== 'total' && !dueZahl[mode];
             const b = el(dueFaehig ? 'button' : 'span', 'count'
