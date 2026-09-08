@@ -10,7 +10,7 @@ const { Scheduler } = require('./lib/scheduler');
 const { cardWithDueAt, boardWithDueAt } = require('./lib/dueat');
 const { Server } = require('./lib/server');
 
-const { freezePlan } = require('./lib/freeze');
+const { freezePlan, prunePlan } = require('./lib/freeze');
 const { hasDateToken } = require('./lib/store');
 
 // Wie oft der Adapter versucht, das Merkmal `fixed` in die Benutzerliste
@@ -66,6 +66,9 @@ class Kanban extends utils.Adapter {
         await this._initApiSecret();
 
         try {
+            if (this.shuttingDown()) {
+                return;
+            }
             this._port = await this.webServer.start();
             await this.setStateAsync('info.connection', true, true);
         } catch (e) {
@@ -73,6 +76,9 @@ class Kanban extends utils.Adapter {
             return;
         }
 
+        if (this.shuttingDown()) {
+            return;
+        }
         this.scheduler.start();
         // Der action-State ist eine vollwertige Kommando-Schnittstelle (inkl. Löschen).
         // Wer ihn nicht braucht, kann ihn in den Instanz-Einstellungen abschalten.
@@ -128,6 +134,20 @@ class Kanban extends utils.Adapter {
             },
             native: {},
         });
+        await this.setObjectNotExistsAsync('info.frozenUserIds', {
+            type: 'state',
+            common: {
+                name: 'User IDs that have been frozen',
+                type: 'string',
+                role: 'json',
+                read: true,
+                write: false,
+                def: '[]',
+            },
+            native: {},
+        });
+        await this._pruneFrozenUserIds();
+
         const versuche = await this._freezeRetries();
         const plan = freezePlan(this.config.users, versuche, FREEZE_MAX_RETRIES);
         const offen = plan.offen;
@@ -147,18 +167,6 @@ class Kanban extends utils.Adapter {
             return false;
         }
 
-        await this.setObjectNotExistsAsync('info.frozenUserIds', {
-            type: 'state',
-            common: {
-                name: 'User IDs that have been frozen',
-                type: 'string',
-                role: 'json',
-                read: true,
-                write: false,
-                def: '[]',
-            },
-            native: {},
-        });
         await this.setStateAsync('info.freezeRetries', versuche + 1, true);
 
         const bekannt = await this._frozenUserIds();
@@ -180,6 +188,22 @@ class Kanban extends utils.Adapter {
                 'The adapter restarts once to pick up the change.',
         );
         return true;
+    }
+
+    /**
+     * Kennungen austragen, die es als Benutzer nicht mehr gibt.
+     *
+     * Die Liste wuchs bisher nur. Wer einen Benutzer loeschte und spaeter einen
+     * neuen mit derselben Kennung anlegte, haette dessen ID-Feld von Anfang an
+     * gesperrt vorgefunden, obwohl an der Kennung nichts mehr haengt (B16).
+     */
+    async _pruneFrozenUserIds() {
+        const { bleibt, faellt } = prunePlan(await this._frozenUserIds(), this.config.users);
+        if (!faellt.length) {
+            return;
+        }
+        await this.setStateAsync('info.frozenUserIds', JSON.stringify(bleibt), true);
+        this.log.debug(`Frozen user IDs pruned: ${faellt.join(', ')} no longer exist.`);
     }
 
     /** Liste der bereits festgeschriebenen IDs aus dem State lesen. */
@@ -213,20 +237,10 @@ class Kanban extends utils.Adapter {
      * den Zustand, umgehaengt wird ausdruecklich mit reassignUser.
      */
     async _reportOrphanedAssignees() {
-        await this.setObjectNotExistsAsync('info.orphanedAssignees', {
-            type: 'state',
-            common: {
-                name: 'Assignees without a matching user',
-                type: 'string',
-                role: 'json',
-                read: true,
-                write: false,
-                def: '[]',
-            },
-            native: {},
-        });
+        // Den State schreibt der Store in updateMirrors, damit er auch einer
+        // Reparatur im laufenden Betrieb folgt (B14). Hier bleibt die Warnung:
+        // Sie gehoert an den Start und nicht hinter jede Kartenaenderung.
         const verwaist = this.store.findOrphanedAssignees();
-        await this.setStateAsync('info.orphanedAssignees', JSON.stringify(verwaist), true);
         if (!verwaist.length) {
             return;
         }
@@ -308,18 +322,10 @@ class Kanban extends utils.Adapter {
     async _initApiSecret() {
         const newSecret = () => require('node:crypto').randomBytes(24).toString('hex');
         try {
-            await this.setObjectNotExistsAsync('info.apiSecret', {
-                type: 'state',
-                common: {
-                    name: 'API write secret (deprecated, moved to file storage)',
-                    type: 'string',
-                    role: 'text',
-                    read: true,
-                    write: false,
-                },
-                native: {},
-            });
-
+            // Der State wird hier nicht mehr angelegt. Auf einer frisch
+            // angelegten Instanz gibt es nichts zu uebernehmen, und ein leerer
+            // Zustand, der nie gefuellt wird, ist nur Ballast - das Handbuch
+            // sagt seit 0.3.0, dass es ihn dort gar nicht gibt (B17).
             let secret = '';
             try {
                 const data = await this.readFileAsync(this.namespace, 'apisecret.json');
@@ -333,23 +339,32 @@ class Kanban extends utils.Adapter {
             }
 
             if (!secret) {
-                // Migration: bisher im State abgelegtes Secret übernehmen, sonst neu erzeugen
-                const st = await this.getStateAsync('info.apiSecret');
-                secret = st && st.val ? String(st.val) : newSecret();
+                // Migration nur dort, wo der alte State wirklich existiert
+                const alt = await this.getObjectAsync('info.apiSecret');
+                const st = alt ? await this.getStateAsync('info.apiSecret') : null;
+                const uebernommen = !!(st && st.val);
+                secret = uebernommen ? String(st.val) : newSecret();
                 await this.writeFileAsync(
                     this.namespace,
                     'apisecret.json',
                     Buffer.from(JSON.stringify({ secret }), 'utf8'),
                 );
-                this.log.info('API secret moved to the file storage; the state info.apiSecret is no longer filled.');
+                if (uebernommen) {
+                    this.log.info(
+                        'API secret moved to the file storage; the state info.apiSecret is no longer filled.',
+                    );
+                }
             }
 
             this._apiSecret = secret;
 
-            // State leeren (einmalig nach der Migration, danach idempotent)
-            const cur = await this.getStateAsync('info.apiSecret');
-            if (cur && cur.val) {
-                await this.setStateAsync('info.apiSecret', '', true);
+            // Nachziehen, falls ein frueherer Lauf den alten State nicht leeren
+            // konnte. Auf neuen Instanzen gibt es ihn nicht, dann faellt das weg.
+            if (await this.getObjectAsync('info.apiSecret')) {
+                const cur = await this.getStateAsync('info.apiSecret');
+                if (cur && cur.val) {
+                    await this.setStateAsync('info.apiSecret', '', true);
+                }
             }
         } catch (e) {
             this._apiSecret = newSecret();
@@ -528,7 +543,24 @@ class Kanban extends utils.Adapter {
         }
     }
 
+    /**
+     * Laeuft das Herunterfahren schon?
+     *
+     * Beim Speichern der Einstellungen beendet der Host die Instanz mitten im
+     * Start. Der Start laeuft daneben weiter und legt Timer an, die niemand
+     * mehr bekommt - im Protokoll steht dann "setInterval called, but adapter
+     * is shutting down" (B9). "terminated" setzt der Adapter-Kern selbst, und
+     * an genau dem Feld haengt auch die Warnung. Die eigene Marke deckt den
+     * Fall ab, dass das Feld einmal anders heisst.
+     *
+     * @returns {boolean} true, wenn nichts Neues mehr begonnen werden soll
+     */
+    shuttingDown() {
+        return this.terminated === true || this._unloading === true;
+    }
+
     async onUnload(callback) {
+        this._unloading = true;
         try {
             if (this.scheduler) {
                 this.scheduler.stop();

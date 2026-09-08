@@ -714,7 +714,17 @@ export function initDialogs(state, actions) {
      * Markdown rendern und sicher einfuegen. Links oeffnen immer in einem neuen
      * Tab (target=_blank + rel), damit das Board nicht verlassen wird.
      */
-    function renderMarkdownInto(target, text) {
+    /**
+     * Markdown gesaeubert einsetzen.
+     *
+     * @param target Zielelement
+     * @param text Markdown-Quelltext
+     * @param ausTabfolge Links aus der Tab-Reihenfolge nehmen. Fuer die Vorschau
+     *        im Editor: Sie ist reine Anzeige, wer dort mehrere Links stehen
+     *        hat, musste sich sonst durch alle tabben, bevor er zum naechsten
+     *        Feld kam (B13). Im Lesedialog bleiben sie erreichbar.
+     */
+    function renderMarkdownInto(target, text, ausTabfolge) {
         const txt = String(text || '').trim();
         if (!txt) { target.textContent = ''; return; }
         // eslint-disable-next-line no-undef
@@ -724,6 +734,7 @@ export function initDialogs(state, actions) {
         if (window.DOMPurify) target.innerHTML = DOMPurify.sanitize(html);
         else { target.textContent = txt; return; }   // Fallback ohne Sanitizer: nur Text
         for (const a of target.querySelectorAll('a[href]')) {
+            if (ausTabfolge) a.tabIndex = -1;
             if (/^(mailto:|tel:)/i.test(a.getAttribute('href') || '')) continue;
             a.target = '_blank';
             a.rel = 'noopener noreferrer';
@@ -1039,7 +1050,7 @@ export function initDialogs(state, actions) {
         const txt = form.elements.description.value.trim();
         if (!txt) { prev.hidden = true; return; }
         prev.hidden = false;
-        renderMarkdownInto(prev, txt);
+        renderMarkdownInto(prev, txt, true);
     }
 
     on('description', 'input', updatePreview);
@@ -1217,7 +1228,10 @@ export function initDialogs(state, actions) {
                         }).join(', ');
                         const go = await confirmDialog({
                             title: t('boards.memberRemoveTitle'),
-                            message: t('boards.memberRemoveMsg', { count: orphans.length, names }),
+                            message: t(
+                                orphans.length === 1 ? 'boards.memberRemoveMsg1' : 'boards.memberRemoveMsg',
+                                { count: orphans.length, names },
+                            ),
                             ok: t('confirm.ok'),
                         });
                         if (go !== true) return false;
@@ -1419,7 +1433,15 @@ export function initDialogs(state, actions) {
             // eslint-disable-next-line no-undef
             Sortable.create(colBox, { handle: '.drag', animation: 150, onEnd: () => { dirty = true; } });
             const addCol = el('button', 'linkbtn', t('boards.addColumn'));
-            addCol.addEventListener('click', () => { colBox.appendChild(mkColRow({ title: '', maxVisible: 0, wipLimit: 0, isDone: false, allowAdd: false })); dirty = true; });
+            // Fokus in die neue Zeile: Wer vier Spalten hintereinander anlegt,
+            // musste sonst jedes Mal erst hineinklicken (B11).
+            addCol.addEventListener('click', () => {
+                const zeile = mkColRow({ title: '', maxVisible: 0, wipLimit: 0, isDone: false, allowAdd: false });
+                colBox.appendChild(zeile);
+                const feld = zeile.querySelector('input[type="text"]');
+                if (feld) feld.focus();
+                dirty = true;
+            });
             panel.appendChild(addCol);
 
             // ---- Labels ----
@@ -1454,7 +1476,10 @@ export function initDialogs(state, actions) {
             // (Befund 11).
             addLabel.addEventListener('click', () => {
                 const naechste = LABEL_FARBEN[labelBox.children.length % LABEL_FARBEN.length];
-                labelBox.appendChild(mkLabelRow({ color: naechste }));
+                const zeile = mkLabelRow({ color: naechste });
+                labelBox.appendChild(zeile);
+                const feld = zeile.querySelector('input[type="text"]');
+                if (feld) feld.focus();
                 dirty = true;
             });
             panel.appendChild(addLabel);

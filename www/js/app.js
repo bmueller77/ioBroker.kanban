@@ -56,6 +56,25 @@ matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
 
 // ------------------------------------------------------------ Laden & Rendern
 
+/**
+ * Warum sich gerade keine Karte anlegen laesst, oder '' wenn es geht.
+ *
+ * Ohne Benutzer laesst sich keine Karte speichern, weil die Zustaendigkeit ein
+ * Pflichtfeld ist. Bis 0.3.2 ging der Editor trotzdem auf und das Speichern
+ * scheiterte an einer Bedingung, die man dort gar nicht erfuellen kann (B18).
+ *
+ * @returns {string} Begruendung fuer den Benutzer, leer wenn nichts im Weg ist
+ */
+function addCardBlocker() {
+    if (!state.board) {
+        return t('topbar.addCardNoBoard');
+    }
+    if (!(state.users || []).length) {
+        return t('topbar.addCardNoUsers');
+    }
+    return '';
+}
+
 const boardEl = document.getElementById('board');
 let actions; // wird unten befüllt (Dialoge brauchen actions, actions brauchen render)
 
@@ -75,12 +94,19 @@ function renderHeader() {
     }
     if (state.board) sel.value = state.board.id;
 
-    // Ohne Board gibt es nichts anzulegen. Der auffaelligste Knopf der Seite
-    // war vorher voll sichtbar und tat nichts (Befund 9).
+    // Ohne Board gibt es nichts anzulegen, ohne Benutzer niemanden, dem eine
+    // Karte gehoeren koennte. Der auffaelligste Knopf der Seite war vorher voll
+    // sichtbar und tat nichts (Befund 9).
+    //
+    // Kein disabled: Chrome liefert an gesperrten Knoepfen keine
+    // Mausereignisse, der Tooltip erschien deshalb nie und die Begruendung kam
+    // nirgends an (B1). Mit aria-disabled bleibt der Knopf erreichbar, der
+    // Klick wird abgefangen und sagt, was fehlt.
     const addBtn = document.getElementById('addCardBtn');
     if (addBtn) {
-        addBtn.disabled = !state.board;
-        addBtn.title = state.board ? '' : t('topbar.addCardNoBoard');
+        const grund = addCardBlocker();
+        addBtn.setAttribute('aria-disabled', grund ? 'true' : 'false');
+        addBtn.title = grund || '';
     }
 
     const chips = document.getElementById('userChips');
@@ -378,7 +404,15 @@ async function init() {
     actions.confirm = dialogs.confirm;
 
     document.getElementById('boardSelect').addEventListener('change', ev => loadBoard(ev.target.value, true));
-    document.getElementById('addCardBtn').addEventListener('click', () => state.board && dialogs.openCard(null));
+    document.getElementById('addCardBtn').addEventListener('click', () => {
+        const grund = addCardBlocker();
+        if (grund) {
+            // Statt stiller Wirkungslosigkeit: sagen, was zuerst noetig ist.
+            alert(grund);
+            return;
+        }
+        dialogs.openCard(null);
+    });
     document.getElementById('settingsBtn').addEventListener('click', () => {
         Promise.resolve(dialogs.openBoardManager()).catch(e => alert(t('error.loadFailed') + ': ' + e.message));
     });

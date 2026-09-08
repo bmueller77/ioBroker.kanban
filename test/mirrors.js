@@ -448,3 +448,57 @@ describe('Datumsformat: traegt es ueberhaupt ein Datum?', () => {
         assert.equal(hasDateToken(undefined), false);
     });
 });
+
+describe('Verwaiste Zustaendige im State', () => {
+    // B14: Der State wurde nur beim Adapterstart geschrieben. Eine Reparatur
+    // ueber die Oberflaeche und eine Wiederherstellung aus dem Papierkorb
+    // aenderten den Zustand sofort, der State blieb aber stehen - wer die
+    // Reparatur per Skript ueberwachte, bekam bis zum naechsten Start ein
+    // falsches Bild.
+    const lies = states => JSON.parse(states['info.orphanedAssignees'] || '[]');
+
+    it('meldet die verwaiste Kennung, sobald der Benutzer weg ist', async () => {
+        const { store, states, entferne } = newStore();
+        await store.createBoard({ id: 'b', title: 'B' });
+        store.addCard('b', { title: 'K', columnId: 'todo', assignees: ['bjoern'] }, 'test');
+        entferne('bjoern');
+        await store.updateMirrors();
+        assert.deepEqual(lies(states).map(o => o.name), ['bjoern']);
+        assert.equal(lies(states)[0].cards, 1);
+    });
+
+    it('leert sich nach dem Umhaengen, ohne Neustart', async () => {
+        const { store, states, entferne } = newStore();
+        await store.createBoard({ id: 'b', title: 'B' });
+        store.addCard('b', { title: 'K', columnId: 'todo', assignees: ['bjoern'] }, 'test');
+        entferne('bjoern');
+        await store.updateMirrors();
+        assert.equal(lies(states).length, 1);
+
+        await store.reassignUser('bjoern', 'anna', 'test');
+        assert.deepEqual(lies(states), []);
+    });
+
+    it('faellt beim Wiederherstellen aus dem Papierkorb wieder an', async () => {
+        const { store, states, entferne } = newStore();
+        await store.createBoard({ id: 'b', title: 'B' });
+        const karte = store.addCard('b', { title: 'K', columnId: 'todo', assignees: ['bjoern'] }, 'test');
+        store.deleteCard('b', karte.id, 'test');
+        entferne('bjoern');
+        await store.updateMirrors();
+        // Im Papierkorb zaehlt sie nicht mit
+        assert.deepEqual(lies(states), []);
+
+        store.restoreCard('b', karte.id, undefined, 'test');
+        await store.updateMirrors();
+        assert.deepEqual(lies(states).map(o => o.name), ['bjoern']);
+    });
+
+    it('bleibt leer, solange alles zusammenpasst', async () => {
+        const { store, states } = newStore();
+        await store.createBoard({ id: 'b', title: 'B' });
+        store.addCard('b', { title: 'K', columnId: 'todo', assignees: ['anna'] }, 'test');
+        await store.updateMirrors();
+        assert.deepEqual(lies(states), []);
+    });
+});

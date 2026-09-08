@@ -513,6 +513,26 @@ export function dueState(due, dueTime, cfg) {
     return due <= todayStr(tage) ? 'soon' : '';
 }
 
+/**
+ * Tooltip am Faelligkeits-Abzeichen: der Zustand und die Einteilung dahinter.
+ *
+ * "demnaechst faellig" allein sagt nichts, solange man den Vorlauf aus den
+ * Instanzeinstellungen nicht kennt: Bei 1 heisst es morgen, bei 3 bis
+ * uebermorgen. Eine Legende gibt es in der Oberflaeche nicht, und ohne sie
+ * bleibt die dreistufige Abstufung unverstaendlich (B8, Issue #25).
+ *
+ * @param st Zustand aus dueState, leer fuer "spaeter"
+ * @param cfg Konfiguration der Oberflaeche
+ * @returns Text fuer das title-Attribut, zweizeilig
+ */
+function dueTitle(st, cfg) {
+    const vorlauf = Number(cfg && cfg.reminderDaysBefore);
+    const tage = Number.isFinite(vorlauf) && vorlauf >= 0 ? vorlauf : 1;
+    const skala = tage === 0 ? 'due.scaleNone' : tage === 1 ? 'due.scaleOne' : 'due.scaleMany';
+    return `${t('due.' + (st || 'later'))}
+${t(skala, { n: tage })}`;
+}
+
 function dueBadge(due, dueTime, done, cfg) {
     const b = el('span', 'badge date-badge');
     b.appendChild(mdiIcon(MDI.calendar));
@@ -529,8 +549,9 @@ function dueBadge(due, dueTime, done, cfg) {
         const st = dueState(due, dueTime, cfg);
         if (st) b.classList.add('due-' + st);
         // Die Farbe allein sagt nicht, was sie bedeutet, und in der Oberflaeche
-        // gibt es keine Legende. Der Tooltip nennt den Zustand.
-        b.title = t('due.' + (st || 'later'));
+        // gibt es keine Legende. Der Tooltip nennt den Zustand und die
+        // Einteilung, nach der er zustande kommt.
+        b.title = dueTitle(st, cfg);
     }
     return b;
 }
@@ -1216,7 +1237,12 @@ export function renderBoard(container, state, actions) {
                 e.stopPropagation();
                 actions.toggleExpandCol(colKey(board, col));
             });
-            colEl.appendChild(more);
+            // In die Kartenliste, nicht an die Spalte: Nur dort erbt der Knopf
+            // deren Polsterung, steht also auf derselben linken Kante wie die
+            // Karten und im selben Abstand zur letzten (B4, B5). Angehaengt
+            // wird er vor dem Plus-Knopf, der gleich danach in dieselbe Liste
+            // kommt - sonst stuende der Hinweis unter dem Knopf.
+            list.appendChild(more);
         }
 
         const canAdd = !col.isTrash && ((typeof col.allowAdd === 'boolean') ? col.allowAdd : (board.columns[0] && board.columns[0].id === col.id));

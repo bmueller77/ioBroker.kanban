@@ -1,5 +1,5 @@
 const assert = require('node:assert/strict');
-const { freezePlan } = require('../lib/freeze');
+const { freezePlan, prunePlan } = require('../lib/freeze');
 
 /**
  * Befund 22 aus dem Abnahmetest: Die Bremse gegen Neustartschleifen gab schon
@@ -59,5 +59,40 @@ describe('Einfrieren der Benutzer-IDs: was zu tun ist', () => {
         assert.equal(freezePlan([], 0, MAX).tun, 'nichts');
         assert.equal(freezePlan(undefined, 0, MAX).tun, 'nichts');
         assert.equal(freezePlan([{ name: '' }, null], 0, MAX).tun, 'nichts');
+    });
+});
+
+describe('Festgeschriebene Kennungen aufraeumen', () => {
+    // B16: Die Liste wuchs nur. Nach dem Loeschen eines Benutzers blieb seine
+    // Kennung darin stehen, und ein spaeter angelegter Benutzer mit derselben
+    // Kennung waere von Anfang an gesperrt gewesen.
+    it('traegt aus, was es als Benutzer nicht mehr gibt', () => {
+        const { bleibt, faellt } = prunePlan(['anna', 'ben', 'tom'], [{ name: 'anna' }, { name: 'tom' }]);
+        assert.deepEqual(bleibt, ['anna', 'tom']);
+        assert.deepEqual(faellt, ['ben']);
+    });
+
+    it('laesst alles stehen, solange jeder noch da ist', () => {
+        const { bleibt, faellt } = prunePlan(['anna', 'ben'], [{ name: 'ben' }, { name: 'anna' }]);
+        assert.deepEqual(bleibt, ['anna', 'ben']);
+        assert.deepEqual(faellt, []);
+    });
+
+    it('behaelt die Reihenfolge der bisherigen Liste', () => {
+        const { bleibt } = prunePlan(['tom', 'anna', 'ben'], [{ name: 'anna' }, { name: 'ben' }, { name: 'tom' }]);
+        assert.deepEqual(bleibt, ['tom', 'anna', 'ben']);
+    });
+
+    it('kommt mit leeren und unbrauchbaren Eingaben zurecht', () => {
+        assert.deepEqual(prunePlan([], [{ name: 'anna' }]), { bleibt: [], faellt: [] });
+        assert.deepEqual(prunePlan(null, null), { bleibt: [], faellt: [] });
+        assert.deepEqual(prunePlan(['anna', '', null, 7], []), { bleibt: [], faellt: ['anna'] });
+    });
+
+    it('raeumt alles ab, wenn der letzte Benutzer geht', () => {
+        // Genau der Zustand, in dem der Tester kanban.4 hinterlassen hat.
+        const { bleibt, faellt } = prunePlan(['user1', 'user2'], []);
+        assert.deepEqual(bleibt, []);
+        assert.deepEqual(faellt, ['user1', 'user2']);
     });
 });

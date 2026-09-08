@@ -65,7 +65,7 @@ A **Kanban board as a dedicated ioBroker adapter**. It ships its own web server,
 1. **Install the adapter.** In the ioBroker admin under *Adapters*, filter for `kanban` and install it (for a GitHub install see [Installation in the main README](../../README.md#installation)).
 2. **Create an instance.** Open the **⋮** menu on the adapter tile and pick **"+"**. ioBroker creates the instance (`kanban.0`) and shows a console window you can close after `Process exited with code 0`. Repeat for every further instance (`kanban.1`, `kanban.2`, ...).
 3. **Set the port.** Under *Instances*, open the gear of the instance, tab **General**: adjust **port** (default `8095`), **IP binding** (default `0.0.0.0`) and **base URL**.
-   **With several instances:** each needs its own port. If the configured one is taken, the adapter still starts and falls back to the next free port. The instance list, however, keeps showing the *configured* port, and the link there leads to the wrong instance. The port actually in use is in the log (`Port 8095 is in use - falling back to free port 8096`). Then enter that port in the settings.
+   **With several instances:** each needs its own port. If the configured one is taken, the adapter still starts and falls back to the next free port. The instance list, however, keeps showing the *configured* port, and the link there leads to the wrong instance. The port actually in use is in the log: `Port 8095 is in use - falling back to free port 8096. The instance list still shows the configured port; enter the free port there to keep both in sync.` Then enter that port in the settings.
 4. **Check the users.** Tab **Users**: a fresh instance ships with two example users, `user1` and `user2`, which appear as chips in the board. Rename them **before** creating the first board. [Tab "Users"](#tab-users) explains why.
 5. **Open the web UI:** **`http://<host>:<port>/`**
 6. On first launch there is no board yet. Use the **gear icon (⚙)** at the top right to create one. Every new board comes with three default columns:
@@ -92,7 +92,7 @@ These settings live in the **ioBroker admin** under *Instances → `kanban.0` �
 
 | Setting | Meaning |
 |---|---|
-| **Port** | Web server port (default `8095`). If it is taken, the adapter automatically picks a free one. |
+| **Port** | Web server port (default `8095`). If it is taken, the adapter falls back to a free one, but the instance list keeps showing the configured port. How to spot and straighten that out is in [Installation, step 3](#installation--first-steps). |
 | **IP address** | Bind address (default `0.0.0.0` = all interfaces). |
 | **Base URL** | Publicly reachable URL used in e-mail links (e.g. behind a reverse proxy). Empty = auto-detect local IP. |
 | **Default theme** | `auto` (system), `light` or `dark`. |
@@ -135,7 +135,7 @@ Add a row with the **"+"** in the table header; the bin icon at the end of a row
 
 > **The ID is the key, and it is locked once created.** Boards and cards find their people through the *ID* column; the avatar pictures and the addresses of shared views hang on it as well. Changing it later would leave all of that pointing nowhere, and the adapter could not even clean up afterwards: a rename cannot be told apart from "deleted and newly created". The field is therefore locked as soon as the user has been saved once. The adapter writes a marker into the instance configuration on the next start and restarts once while doing so. That happens once per new user, never again after that.
 >
-> **If the field stays editable:** the adapter writes the marker back on start. Saving the instance settings at exactly that moment overwrites it again with what your form still held. The adapter then retries up to three times, after that it logs "Could not freeze the user ID(s)" and leaves the fields editable. You can tell by the *ID* column still being typeable. The remedy: restart the instance once and check that the fields are locked **before** creating any cards.
+> **If the field stays editable:** the adapter writes the marker back on start. Saving the instance settings at exactly that moment overwrites it again with what your form still held. The adapter then retries up to three times, after that it logs "Could not freeze the user ID(s)" and leaves the fields editable. You can tell by the *ID* column still being typeable - but only **after a full reload of the admin page**. Inside the open page the field stays typeable even when the adapter locked it long ago, and switching to another menu entry and back is not enough. Without knowing that, a successful run looks like a failure. The log is more reliable than the field: it says either "User ID(s) ... are now fixed" or the warning. The remedy for a real failure: restart the instance once and check that the fields are locked **before** creating any cards.
 >
 > The **display name** stays freely editable. "Tom Reich" becomes "Tommy Reich" without a single card noticing.
 >
@@ -300,7 +300,7 @@ Above the column list sits a header row with the field names (**Title · Max · 
 
 - **Column ID:** besides its visible title every column carries an **immutable ID**. The three default columns are called `todo`, `doing` and `done`, newly created columns get a generated ID like `col_msd0mu8tkck68`. **Renaming keeps the ID**, so shared `columns=` links and `moveCard` calls keep working unchanged. You can look the IDs up via `GET /api/boards/<id>` (see [REST API](#rest-api)). IDs must be **unique**: if a `PATCH` sends the same ID twice, or the ID of the trash column, the affected column receives a freshly generated one.
 - **Column width:** columns always share the **full width of the window**, so two columns each take up half. Only once less than 280 px would be left per column does the board become horizontally scrollable.
-- **Display limit (Max):** a number > 0 shows only the first N cards in that column; below them `+X more` appears. `0` = show all. Useful so a long backlog does not blow up the board. The counter in the column header still counts **all** cards of the column. Since 0.3.2 `+X more` is a **button**: one click shows the remaining cards, a second hides them again. The limit on the board stays untouched, only your browser remembers the deviation, like the sort mode and the eye icon.
+- **Display limit (Max):** a number > 0 shows only the first N cards in that column; `+X more` appears directly under the last one, with the add button below that. `0` = show all. Useful so a long backlog does not blow up the board. The counter in the column header still counts **all** cards of the column. Since 0.3.2 `+X more` is a **button**: one click shows the remaining cards, the line then reads `Hide X again`, and a second click collapses them. The limit on the board stays untouched, only your browser remembers the deviation, like the sort mode and the eye icon.
 - **WIP limit** (work in progress): a number > 0 caps the recommended card count. If exceeded, the column warns visually (counter & header are highlighted). `0` = no limit. The limit is a **warning**, not a hard block. It always refers to the **total** number of cards in the column, even while a person/label filter is showing fewer. Once it is exceeded, the limit stays next to the number since 0.3.2 even with a filter on, so "2/3". The tooltip then names both figures: how many cards the column really holds and how many the filter shows. Before that only the match count was there, and two cards against a limit of three looked like a bug rather than a warning.
 - **"New"** (`allowAdd`): controls in which columns the "+ Add card" link appears.
 - **"Done" column** (`isDone`): cards moved here count as completed (`doneAt` is set, recurrences are triggered). Their title is shown with a **strikethrough**, and below it the completion time appears in brackets, for example `(Done: 26/07/2026 20:09)`, in the instance's date and time format.
@@ -374,7 +374,7 @@ Per board you can choose where the "open card" link in notification e-mails poin
 
 ### Cards: all fields
 
-**Card anatomy (since 0.3.0):** the **assignees** sit as a stack of avatars in the top right corner and the title text flows around them. Hovering or tapping the stack fans the faces out to the left without changing the line breaks. Long titles are cut off after **two lines** with an ellipsis, the full title stays available as a tooltip. The **card footer** holds the checklist progress on the left, the expand chevron in the middle and the icons for **description, link and recurrence** on the right, in that order. Clicking the description icon opens the description in a **read-only window** with rendered Markdown; links inside always open in a new tab. The chevron's hit area is deliberately larger than the symbol itself so it is easy to hit by touch: 140 x 24 px against a symbol of 14 x 14 px. It sits as an invisible area on top, so the button itself measures only 90 x 11 px. Whether a checklist is expanded or collapsed is **remembered per device and board**, just like the column sort modes, and survives a reload.
+**Card anatomy (since 0.3.0):** the **assignees** sit as a stack of avatars in the top right corner and the title text flows around them. Hovering or tapping the stack fans the faces out to the left without changing the line breaks. Long titles are cut off after **two lines** with an ellipsis, the full title stays available as a tooltip. If the card carries a **checklist**, it gets a footer: progress on the left, the expand chevron in the middle and the icons for **description, link and recurrence** on the right, in that order. Without a checklist there is no footer, and the same icons sit at the right end of the label or badge row. Clicking the description icon opens the description in a **read-only window** with rendered Markdown; links inside always open in a new tab. The chevron's hit area is deliberately larger than the symbol itself so it is easy to hit by touch: measured 119 x 26 px against a symbol of 14 x 14 px. It sits as an invisible area on top, so the button itself measures only 90 x 11 px. Whether a checklist is expanded or collapsed is **remembered per device and board**, just like the column sort modes, and survives a reload.
 
 **The icons on a card**, in the order they appear:
 
@@ -402,7 +402,7 @@ The right-hand end of each section header says what is inside: an excerpt of the
 
 The footer holds **Delete**, **Manage** (transfer/clone), **Cancel** and **Save**. A **×** in the top right closes the dialog, as in every dialog of the board.
 
-**Unsaved changes** no longer disappear since 0.3.2. Escape and the close cross ask first if you changed anything and let you choose between saving and discarding. "Cancel" still discards without asking, because someone pressing that button means it.
+**Unsaved changes** no longer disappear since 0.3.2. Escape and the close cross ask first if you changed anything. The prompt has three buttons: **Save**, **Discard** and **Cancel**. "Cancel" is the important one of the three - it leaves the editor open with everything you typed still there, so you can simply carry on. "Cancel" still discards without asking, because someone pressing that button means it.
 
 **The keyboard reaches everything.** Tab moves from field to field and also onto the section headers; Enter or space opens a section. The chip groups (assignees, labels, card colour, link types) are a single tab stop each: inside them the arrow keys move, Home and End jump to the ends, space or Enter selects. Inside the checklist Enter creates the next item; from there you save with Ctrl and Enter.
 
@@ -527,7 +527,9 @@ If a recurring card is created **without** a manual date, the adapter automatica
 | `every_n_days_done` | Every X days **from completion** (since 0.3.2) | `interval`: N |
 | `cron` | Cron expression used as a pattern | `cron`: `"0 8 * * 1-5"` |
 
-The two **X days** kinds look alike and count differently. "Every X days" keeps a fixed grid from the start date: if a card is due every 30 days and you finish it ten days late, the next date still sits on that grid, so in 20 days. "Every X days (after the previous one is done)" counts from the moment you tick it off, which would be a full 30 days. It is meant for maintenance where the interval starts at the actual job, a filter change for instance.
+The two **X days** kinds look alike and count differently. "Every X days" keeps a fixed grid from the start date: if a card is due every 30 days and you finish it ten days late, the next date lands on the next grid point, so in 20 days. "Every X days (after the previous one is done)" counts from the moment you tick it off, which would be a full 30 days. It is meant for maintenance where the interval starts at the actual job, a filter change for instance.
+
+For every calendar-bound kind the next date is always **in the future**. Leave a daily card alone for two weeks and then tick it off, and the follow-up card is due tomorrow, not on some day last week. Up to 0.3.2 the adapter moved one grid step only, and the follow-up card was already overdue the moment it appeared. Finish **early** and the calendar stays the reference instead, otherwise the date would creep forward with every early tick.
 
 **No calendar series** can be built for this kind: when the next date falls is only decided by finishing the card. A [calendar invite](#cards-all-fields) therefore carries the single date only, the same as with "working day of the month".
 
@@ -571,6 +573,8 @@ Which people exist at all comes from the instance settings ([Tab "Users"](#tab-u
 
 **With only one person**, assignment disappears from the interface entirely: no chips in the header, no avatars on the cards, no *assignees* field in the card editor and no user picker in the views dialog. There would be nothing to choose and nothing to filter. New cards get that person automatically, through the API as well: a `POST` without `assignees` is no longer rejected with `400` but quietly completed. An ID that is given is still checked.
 
+**With no person at all**, no card can be created: the assignee is a required field, and nobody is not the same as anybody. The "+ Card" button is therefore blocked and says on click that a user in the instance settings is missing first. You can reach that state without any warning by deleting every row there.
+
 As soon as a second user appears in the instance settings, all of it is back. Cards created in the meantime carry that one person and show them from then on. If a card carries an ID that no longer exists, it stays as it is rather than being silently moved; that is what the [repair for orphaned assignees](#renaming-a-user) is for.
 
 **Header chips as a filter:** The user chips in the header double as a **multi-select filter**, tapping toggles a person on or off. With a partial selection the board only shows cards of the selected people; with **all or none** active, all cards are shown. The selection is **stored per board in the browser** and restored on the next visit.
@@ -581,7 +585,7 @@ As soon as a second user appears in the instance settings, all of it is back. Ca
 
 ![Board settings, user avatars and colours](img/settings-users.png)
 
-**Members per board:** in the Board tab of the settings (**⚙ → Board**), right below the board title, you define which users are assignable there (card dialog, header chips and the Views dialog only show members). Every board needs **at least one member**; new boards start with all users. Using the board picker at the top you can also edit the members of other boards without switching to them.
+**Members per board:** in the Board tab of the settings (**⚙ → Board**), right below the board title, you define which users are assignable there (card dialog, header chips and the Views dialog only show members). Every board needs **at least one member**; new boards start with all users. If you remove someone whose cards would then have no assignee left, the dialog asks first and names the number: those cards keep their assignment but no longer show up in the board's person filter. Using the board picker at the top you can also edit the members of other boards without switching to them.
 
 ![Board settings, members per board](img/settings-boards.png)
 
@@ -1032,7 +1036,8 @@ Besides the UI, the adapter creates states you can use in scripts, VIS/Lovelace 
 | `kanban.0.lastEvent` | json | Last triggered event (`{event, ts, board, card, detail, link, dueAt}`), ideal as a script trigger. |
 | `kanban.0.action` | json (writable) | Command input, see [sendTo & action state](#sendto--action-state). |
 | `kanban.0.info.orphanedAssignees` | json | Assignees that no longer exist as users, each with the number of cards and boards. Empty while everything matches. See [Renaming a user](#renaming-a-user). |
-| `kanban.0.info.apiSecret` | string | From 0.3.0 the internal write token lives in the adapter's file storage, no longer in this state. On instances **upgraded from an older version** the state remains and stays **empty**; on **newly created** 0.3.0 instances it is **not created at all**. For scripts, use the tokens from "Webhooks (in)". |
+| `kanban.0.info.apiSecret` | string | From 0.3.0 the internal write token lives in the adapter's file storage, no longer in this state. On instances **upgraded from an older version** the state remains and stays **empty**; on **newly created** instances it is **not created at all**. For scripts, use the tokens from "Webhooks (in)". |
+| `kanban.0.info.freezeRetries` | number | How often the adapter tried to write back the marker for the locked user IDs. `0` means it held on the first attempt. See [Users](#tab-users). |
 | `kanban.0.boards.<id>.data` | json | Full board (cards, columns, labels). |
 | `kanban.0.boards.<id>.rev` | number | Revision (increments on every change, for polling). |
 | `kanban.0.boards.<id>.cardCount` | number | Number of cards in the board. |

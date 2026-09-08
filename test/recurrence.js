@@ -129,6 +129,41 @@ describe('Wiederholung: alle X Tage, Raster gegen Erledigung', () => {
     });
 });
 
+describe('Wiederholung: spaet erledigt, Folgekarte trotzdem in der Zukunft', () => {
+    // Befund B7 aus dem zweiten Abnahmetest: Faellig war Tag -10, erledigt wird
+    // heute, Intervall 7. Der naechste Rasterpunkt nach der alten Faelligkeit
+    // waere Tag -3 gewesen, die Folgekarte also von Geburt an ueberfaellig.
+    it('nimmt den naechsten Rasterpunkt nach heute, nicht nach der alten Faelligkeit', async () => {
+        const { folge } = await erledige({ type: 'every_n_days', interval: 7, startDate: tag(-24) }, tag(-10));
+        assert.equal(folge.due, tag(4));
+        assert.ok(folge.due > todayStr(), 'Folgekarte darf nicht in der Vergangenheit liegen');
+    });
+
+    it('betrifft auch die kalendergebundenen Arten', async () => {
+        // Taeglich, zehn Tage liegengeblieben: vorher entstand Tag -9.
+        const taeglich = await erledige({ type: 'daily' }, tag(-10));
+        assert.equal(taeglich.folge.due, tag(1));
+
+        // Woechentlich am selben Wochentag, drei Wochen liegengeblieben.
+        // dayOfWeek zaehlt nach ISO, Montag ist die 1 und Sonntag die 7.
+        const heuteIso = new Date().getDay() || 7;
+        const woechentlich = await erledige({ type: 'weekly', dayOfWeek: [heuteIso] }, tag(-21));
+        assert.equal(woechentlich.folge.due, tag(7));
+    });
+
+    it('laesst vorzeitiges Erledigen am Kalender haengen', async () => {
+        // Wer eine Karte drei Tage vor der Faelligkeit abhakt, soll den Termin
+        // danach nicht um drei Tage nach vorn geschoben bekommen.
+        const { folge } = await erledige({ type: 'daily' }, tag(3));
+        assert.equal(folge.due, tag(4));
+    });
+
+    it('rechnet ohne Faelligkeit ab heute', async () => {
+        const { folge } = await erledige({ type: 'every_n_days', interval: 5, startDate: todayStr() }, '');
+        assert.equal(folge.due, tag(5));
+    });
+});
+
 describe('Wiederholung: zweimal hintereinander erledigen', () => {
     it('zaehlt jedes Mal ab dem neuen Erledigungstag', async () => {
         // Ein einzelner Durchlauf laesst einen geteilten Verweis noch durch.
