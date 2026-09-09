@@ -3,6 +3,7 @@
 import { api, liveSync } from './api.js';
 import {
     renderBoard, userAvatar, boardUsers, soloUser, contrastText, mdiIcon, refreshDueBadges, showHint,
+    focusRingColor,
 } from './board.js';
 import { initDialogs } from './dialogs.js';
 import { initI18n, applyStatic, t } from './i18n.js';
@@ -48,6 +49,14 @@ function applyTheme(cfg) {
     // Schriftfarbe auf Akzent-Buttons je nach Helligkeit (auch bei Custom-CSS-Akzent)
     const effAccent = (getComputedStyle(document.documentElement).getPropertyValue('--accent') || accent || '#7E57C2').trim();
     document.documentElement.style.setProperty('--accent-text', contrastText(effAccent));
+    // Der Fokusring liegt auf ganz verschiedenen Flaechen. Die Akzentfarbe
+    // unveraendert zu nehmen, liess ihn im dunklen Theme verschwinden (G1).
+    const stil = getComputedStyle(document.documentElement);
+    const flaeche = name => (stil.getPropertyValue(name) || '').trim();
+    const flaechen = [flaeche('--bg'), flaeche('--surface'), flaeche('--surface2'),
+        resolved === 'dark' ? '#53535c' : '#676770'].filter(Boolean);
+    document.documentElement.style.setProperty(
+        '--focus', focusRingColor(effAccent, flaechen, resolved === 'dark'));
     const tbtn = document.getElementById('themeBtn');
     if (tbtn) { tbtn.textContent = ''; tbtn.appendChild(mdiIcon(resolved === 'dark' ? MDI_MOON : MDI_SUN)); }
 }

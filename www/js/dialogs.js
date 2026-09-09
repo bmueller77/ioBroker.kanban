@@ -177,6 +177,9 @@ export function initDialogs(state, actions) {
     // Listener nur setzen, wenn das Feld existiert (robust gegen veraltetes HTML)
     const on = (name, ev, fn) => { const e = form.elements[name]; if (e) e.addEventListener(ev, fn); };
     let editingCardId = null;
+    // Stand der bearbeiteten Karte beim Oeffnen, fuer den Abgleich beim
+    // Speichern (F3)
+    let cardBasis = '';
     // Vergabe reihum fuer neue Labels. Gut unterscheidbar und dunkel genug,
     // dass die automatische Kontrastschrift darauf weiss bleibt.
     const LABEL_FARBEN = ['#4CAF50', '#1E88E5', '#E53935', '#8E24AA', '#F9A825', '#00897B', '#6D4C41', '#3949AB'];
@@ -885,6 +888,9 @@ export function initDialogs(state, actions) {
         const box = document.getElementById('checklistEdit');
         box.textContent = '';
         for (const item of (card && card.checklist) || []) addCheckRow(item);
+        // Stand der Karte beim Oeffnen. Damit laesst sich beim Speichern
+        // erkennen, ob sie inzwischen woanders geaendert wurde (F3).
+        cardBasis = card ? kartenKern(card) : '';
         updateCheckGrips();
         loadRecurrence(card && card.recurrence);
         updatePreview();
@@ -894,6 +900,7 @@ export function initDialogs(state, actions) {
         applyFolds();
         cardStand = JSON.stringify(readCard());
         dlg.showModal();
+        verlaufAn();
     }
 
     // ---- Wiederholung ------------------------------------------------------
@@ -1109,6 +1116,55 @@ export function initDialogs(state, actions) {
      *
      * @returns true, wenn geschlossen werden darf
      */
+    /**
+     * Die Felder einer Karte, die der Editor bearbeitet, als Vergleichstext.
+     *
+     * Bewusst ohne Zeitstempel und Reihenfolge: Ein Verschieben in eine andere
+     * Spalte oder ein neuer Erledigt-Zeitpunkt ist keine Aenderung am Inhalt,
+     * ueber die jemand stolpern muesste.
+     *
+     * @param card Karte aus dem Board
+     * @returns Vergleichstext, leer wenn es die Karte nicht gibt
+     */
+    function kartenKern(card) {
+        if (!card) {
+            return '';
+        }
+        return JSON.stringify([
+            card.title, card.description, card.due, card.dueTime, card.priority,
+            card.link, card.location, card.color, card.calendarInvite, card.calendarDuration,
+            [...(card.assignees || [])].sort(),
+            [...(card.labels || [])].sort(),
+            (card.checklist || []).map(i => [i.text, !!i.done]),
+            card.recurrence || null,
+        ]);
+    }
+
+    /**
+     * Hat jemand die Karte inzwischen woanders geaendert?
+     *
+     * Das Board bekommt eine fremde Aenderung sofort mit, der offene Editor
+     * nicht. Wer dann speicherte, ueberschrieb sie stillschweigend (F3). Statt
+     * zu sperren wird gefragt: Der eigene Stand ist oft der gewollte, aber man
+     * soll es wissen.
+     *
+     * @returns true, wenn gespeichert werden darf
+     */
+    async function guardFremdaenderung() {
+        if (!editingCardId || !cardBasis) {
+            return true;
+        }
+        const jetzt = kartenKern((state.board && state.board.cards.find(c => c.id === editingCardId)) || null);
+        if (!jetzt || jetzt === cardBasis) {
+            return true;
+        }
+        return await confirmDialog({
+            title: t('card.conflictTitle'),
+            message: t('card.conflictMsg'),
+            ok: t('card.conflictOverwrite'),
+        }) === true;
+    }
+
     async function guardCard() {
         let geaendert = false;
         try { geaendert = JSON.stringify(readCard()) !== cardStand; } catch { geaendert = false; }
@@ -1130,6 +1186,41 @@ export function initDialogs(state, actions) {
         ev.preventDefault();
         if (await guardCard()) dlg.close();
     });
+
+    // Die Zurueck-Taste des Browsers schloss den Editor kommentarlos, waehrend
+    // Escape und das Schliesskreuz nachfragen - das Getippte war weg (F4). Der
+    // offene Dialog legt deshalb einen Eintrag im Verlauf an; die Zurueck-Taste
+    // holt ihn wieder weg, und hier faellt dieselbe Rueckfrage an.
+    let verlaufMarke = false;
+    function verlaufAn() {
+        if (verlaufMarke) {
+            return;
+        }
+        verlaufMarke = true;
+        try { history.pushState({ kanbanDialog: 1 }, ''); } catch { verlaufMarke = false; }
+    }
+    function verlaufAus() {
+        if (!verlaufMarke) {
+            return;
+        }
+        verlaufMarke = false;
+        // Nur zurueckgehen, wenn unser eigener Eintrag noch obenauf liegt.
+        try { if (history.state && history.state.kanbanDialog) history.back(); } catch { /* ignore */ }
+    }
+    window.addEventListener('popstate', async () => {
+        if (!dlg.open || !verlaufMarke) {
+            return;
+        }
+        verlaufMarke = false;
+        if (await guardCard()) {
+            dlg.close();
+        } else {
+            // Bleibt der Dialog offen, gehoert der Eintrag zurueck in den
+            // Verlauf, sonst wirkt die Zurueck-Taste beim naechsten Mal nicht.
+            verlaufAn();
+        }
+    });
+    dlg.addEventListener('close', verlaufAus);
     document.getElementById('deleteCardBtn').addEventListener('click', async () => {
         if (!editingCardId) return;
         if (!await confirmDialog({ title: t('card.delete'), message: t('confirm.deleteCard'), danger: true, ok: t('card.delete') })) return;
@@ -1194,6 +1285,9 @@ export function initDialogs(state, actions) {
         const data = readCard();
         if (!data.title) return;
         if (!data.assignees.length) { updateAssigneeValidity(); const p = document.getElementById('assigneeValidity'); if (p) p.reportValidity(); return; }
+        if (!await guardFremdaenderung()) {
+            return;
+        }
         try {
             if (editingCardId) {
                 await actions.updateCard(editingCardId, data);

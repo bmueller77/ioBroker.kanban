@@ -284,7 +284,7 @@ button.linkbtn.orphan-count { display: flex; align-items: center; gap: 2px; font
 }
 button.count { cursor: pointer; display: inline-flex; align-items: center; gap: 2px; }
 button.count:hover { background: var(--surface2); }
-button.count:focus-visible { outline: 2px solid var(--accent, #7E57C2); outline-offset: 2px; }
+button.count:focus-visible { outline: 2px solid var(--focus, var(--accent, #7E57C2)); outline-offset: 2px; }
 /* Verraet, dass die Zahl ein Bedienelement ist. Nur an der ersten. */
 .count-caret { width: 11px; height: 11px; margin-right: -3px; opacity: .55; }
 /* Auf einem farbigen Abzeichen ging das Dreieck bei .55 unter. Wer die
@@ -679,7 +679,7 @@ dialog h3.has-x { display: flex; align-items: center; gap: 8px; }
 }
 .dlg-x svg { width: 20px; height: 20px; }
 .dlg-x:hover { background: var(--surface2); color: var(--text); }
-.dlg-x:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.dlg-x:focus-visible { outline: 2px solid var(--focus, var(--accent)); outline-offset: 1px; }
 
 dialog::backdrop { background: rgba(0, 0, 0, .45); }
 
@@ -739,14 +739,14 @@ dialog input, dialog textarea, dialog select {
     padding: 7px 9px;
 }
 
-dialog input:focus, dialog textarea:focus, dialog select:focus { outline: 2px solid var(--accent); border-color: transparent; }
+dialog input:focus, dialog textarea:focus, dialog select:focus { outline: 2px solid var(--focus, var(--accent)); border-color: transparent; }
 /* Chips und Farbfelder sind per Pfeiltaste erreichbar - ohne sichtbaren Fokus
    waere nicht zu erkennen, wo man gerade steht.
    Gestrichelt, weil die Auswahl selbst ebenfalls ein farbiger Ring ist: Traegt
    der Benutzer die Akzentfarbe, sahen ausgewaehlt und fokussiert vorher gleich
    aus (Befund 6). Ein gestrichelter Ring ist nie eine Auswahl. */
 .pick-chip:focus-visible,
-.color-swatch:focus-visible { outline: 2px dashed var(--accent); outline-offset: 3px; }
+.color-swatch:focus-visible { outline: 2px dashed var(--focus, var(--accent)); outline-offset: 3px; }
 
 dialog .row { display: flex; gap: 10px; flex-wrap: wrap; }
 
@@ -784,7 +784,7 @@ dialog .row { display: flex; gap: 10px; flex-wrap: wrap; }
     opacity: .6;
 }
 .fold[open] > summary::before { transform: translateY(-50%) rotate(90deg); }
-.fold > summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+.fold > summary:focus-visible { outline: 2px solid var(--focus, var(--accent)); outline-offset: 2px; border-radius: 4px; }
 .fold > summary:hover .fold-info { color: var(--text); }
 /* Zusammenfassung rechts: verraet bei zugeklapptem Abschnitt, was drinsteckt */
 .fold-info {
@@ -815,7 +815,7 @@ dialog .row { display: flex; gap: 10px; flex-wrap: wrap; }
 .link-type svg { width: 15px; height: 15px; }
 .link-type:hover { color: var(--text); }
 .link-type.selected { border-color: var(--accent); color: var(--accent); }
-.link-type:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.link-type:focus-visible { outline: 2px solid var(--focus, var(--accent)); outline-offset: 2px; }
 
 .fold-dot { display: inline-block; width: 12px; height: 12px; border-radius: 50%; vertical-align: -1px; margin-left: 10px; }
 .fold-body { display: flex; flex-direction: column; gap: 10px; padding: 0 0 12px; }
@@ -1063,7 +1063,7 @@ dialog footer > button { overflow: hidden; text-overflow: ellipsis; white-space:
     font-family: inherit;
 }
 .col-more:hover { color: var(--accent); background: var(--surface); }
-.col-more:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.col-more:focus-visible { outline: 2px solid var(--focus, var(--accent)); outline-offset: -2px; }
 
 /* Label-Verwaltung (Board-Einstellungen) */
 .label-edit {
@@ -1126,7 +1126,14 @@ button.mini {
     /* Dialoge vollfl\u00e4chig, Felder gestapelt, Footer sticky */
     /* Dialoge als bodennahes Vollflaechen-Sheet: volle Breite, Hoehe = Inhalt (max. Schirm),
        nur der Inhalt scrollt, Footer klebt unten, Buttons gleich gross nebeneinander */
-    dialog[open] {
+    /* Mit den IDs zusammen: Die Regeln fuer Karteneditor, Board-Manager und
+       Ansichten stehen weiter oben auf ihren IDs und schlagen sonst diese hier.
+       Der Dialog blieb dadurch 32 px schmaler und 48 px kuerzer als der Schirm
+       und sass oben links fest (G2). */
+    dialog[open],
+    #cardDialog[open],
+    #boardDialog[open],
+    #shareDialog[open] {
         width: 100%; max-width: 100%;
         height: 100dvh; max-height: 100dvh;           /* immer gleiche, volle Hoehe */
         margin: 0; inset: 0;
@@ -1150,7 +1157,12 @@ button.mini {
     .fold-inner:not([open]) > .fold-body { display: none; }
     .fold-inner > .fold-body { padding: 0 0 12px; }
     .share-url { flex-direction: column; }
-    .tab-panels { height: auto; max-height: none; overflow: visible; }
+    /* Nicht zusammendruecken lassen: Als Flex-Kind schrumpfte der Kasten,
+       waehrend sein Inhalt sichtbar herauslief. Der Rollbereich darueber
+       rechnete die ueberlaufenden Pixel nicht mit, und die klebende Fussleiste
+       verliess ihren Bereich zu frueh - bei kurzem Fenster scrollte
+       "Speichern" ganz aus dem Bild (G3). */
+    .tab-panels { height: auto; max-height: none; overflow: visible; flex: none; }
     .tabbar { position: sticky; top: 0; background: var(--surface); z-index: 3; }
 
     /* Footer klebt unten, volle Breite, gleich grosse Buttons nebeneinander */
@@ -1170,7 +1182,7 @@ button.mini {
 .col-chevron { display: none; font-size: 12px; color: var(--muted); }
 
 /* Hervorgehobene Karte (Benachrichtigungs-Link-Ziel \u201eBoard\u201c) */
-.card-focus { outline: 2px solid var(--accent); }
+.card-focus { outline: 2px solid var(--focus, var(--accent)); }
 .card-focus { animation: card-pulse 1s ease-in-out 2; }
 @keyframes card-pulse { 0%, 100% { box-shadow: var(--shadow); } 50% { box-shadow: 0 0 0 4px var(--accent); } }
 
@@ -1319,7 +1331,7 @@ button.mini {
     font-size: 13px;
 }
 .sort-item:hover { background: var(--bg); }
-.sort-item:focus-visible { outline: 2px solid var(--accent, #7E57C2); outline-offset: -2px; background: var(--bg); }
+.sort-item:focus-visible { outline: 2px solid var(--focus, var(--accent, #7E57C2)); outline-offset: -2px; background: var(--bg); }
 .sort-item.active { color: var(--accent); }
 .sort-item svg { display: block; }
 /* Mehrfachauswahl: Haken links, Farbtupfer der Stufe rechts */

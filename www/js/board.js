@@ -948,15 +948,114 @@ function renderCard(state, board, card, actions, opts = {}) {
 }
 
 // Lesbare Schriftfarbe je nach Hintergrundhelligkeit (YIQ): hell -> schwarz, dunkel -> weiss
+/**
+ * Farbe als RGB-Tripel, oder null bei allem, was keine ist.
+ *
+ * @param wert Hex-Schreibweise, kurz oder lang
+ * @returns `[r, g, b]` oder null
+ */
+function toRgb(wert) {
+    const c = String(wert || '').trim();
+    let m = /^#([0-9a-f]{3})$/i.exec(c);
+    if (m) {
+        return [0, 1, 2].map(i => parseInt(m[1][i] + m[1][i], 16));
+    }
+    m = /^#([0-9a-f]{6})$/i.exec(c);
+    if (m) {
+        const n = parseInt(m[1], 16);
+        return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+    }
+    m = /^rgba?\(([^)]+)\)$/i.exec(c);
+    if (m) {
+        const teile = m[1].split(',').map(v => Number(v.trim()));
+        return teile.length >= 3 && teile.slice(0, 3).every(Number.isFinite) ? teile.slice(0, 3) : null;
+    }
+    return null;
+}
+
+/** WCAG-Relativluminanz eines RGB-Tripels. */
+function luminanz([r, g, b]) {
+    const lin = v => {
+        v /= 255;
+        return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+    };
+    return 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b);
+}
+
+/**
+ * Kontrastverhaeltnis zweier Farben nach WCAG, zwischen 1 und 21.
+ *
+ * @param a erste Farbe
+ * @param b zweite Farbe
+ * @returns Verhaeltnis, 1 bei gleicher Helligkeit
+ */
+export function contrastRatio(a, b) {
+    const ra = toRgb(a);
+    const rb = toRgb(b);
+    if (!ra || !rb) {
+        return 1;
+    }
+    const la = luminanz(ra);
+    const lb = luminanz(rb);
+    return (Math.max(la, lb) + 0.05) / (Math.min(la, lb) + 0.05);
+}
+
+/**
+ * Farbe fuer den Fokusring: die Akzentfarbe, so weit verschoben, dass man sie
+ * sieht.
+ *
+ * Der Ring liegt auf ganz verschiedenen Flaechen, vom Seitenhintergrund bis zur
+ * Papierkorb-Karte. Gefordert sind 3:1 gegen jede davon (WCAG 1.4.11). Im
+ * dunklen Theme wird deshalb aufgehellt, im hellen abgedunkelt, in kleinen
+ * Schritten und nur so weit wie noetig - so bleibt die Farbfamilie der Instanz
+ * erkennbar. Reicht auch der Endpunkt nicht, gewinnt Weiss beziehungsweise
+ * Schwarz; das ist immer noch besser als ein unsichtbarer Ring (G1).
+ *
+ * @param accent Akzentfarbe der Instanz
+ * @param flaechen Farben, auf denen der Ring vorkommt
+ * @param dunkel true im dunklen Theme
+ * @returns Farbe in Hex-Schreibweise
+ */
+export function focusRingColor(accent, flaechen, dunkel) {
+    const start = toRgb(accent);
+    const auf = (Array.isArray(flaechen) ? flaechen : []).map(toRgb).filter(Boolean);
+    if (!start || !auf.length) {
+        return dunkel ? '#ffffff' : '#000000';
+    }
+    const hex = ([r, g, b]) => `#${[r, g, b].map(v => Math.round(v).toString(16).padStart(2, '0')).join('')}`;
+    const reicht = farbe => auf.every(f => contrastRatio(hex(farbe), hex(f)) >= 3);
+    const ziel = dunkel ? 255 : 0;
+    let farbe = start;
+    for (let schritt = 0; schritt <= 20; schritt++) {
+        if (reicht(farbe)) {
+            return hex(farbe);
+        }
+        // Je Schritt fuenf Prozent des Weges zum Endpunkt
+        farbe = start.map(v => v + (ziel - v) * (schritt + 1) * 0.05);
+    }
+    return dunkel ? '#ffffff' : '#000000';
+}
+
+/**
+ * Schwarz oder Weiss auf einer Farbflaeche, je nachdem, was besser lesbar ist.
+ *
+ * Frueher entschied eine feste Schwelle von 0,31. Der Punkt, an dem Schwarz und
+ * Weiss denselben Kontrast liefern, liegt aber bei 0,179, und dazwischen fiel
+ * die Wahl systematisch falsch aus: Auf Tuerkis kam Weiss mit 3,0:1 heraus, wo
+ * Schwarz 7,0:1 erreicht haette (G5). Statt einer Zahl steht hier jetzt die
+ * Rechnung selbst, damit die Schwelle nicht wieder abdriften kann.
+ *
+ * @param bg Hintergrundfarbe in Hex-Schreibweise
+ * @returns '#000' oder '#fff'
+ */
 export function contrastText(bg) {
-    const c = String(bg || '').trim();
-    let r, g, b, m;
-    if ((m = /^#([0-9a-f]{3})$/i.exec(c))) { r = parseInt(m[1][0] + m[1][0], 16); g = parseInt(m[1][1] + m[1][1], 16); b = parseInt(m[1][2] + m[1][2], 16); }
-    else if ((m = /^#([0-9a-f]{6})$/i.exec(c))) { const n = parseInt(m[1], 16); r = (n >> 16) & 255; g = (n >> 8) & 255; b = n & 255; }
-    else return '#fff';
-    const lin = v => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); };
-    const L = 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b);   // WCAG relative Luminanz
-    return L > 0.31 ? '#000' : '#fff';
+    const rgb = toRgb(bg);
+    if (!rgb) {
+        return '#fff';
+    }
+    const L = luminanz(rgb);
+    // Kontrast gegen Weiss und gegen Schwarz nach WCAG, der groessere gewinnt
+    return (1.05 / (L + 0.05)) >= ((L + 0.05) / 0.05) ? '#fff' : '#000';
 }
 
 // Zuweisbare Benutzer des aktiven Boards: Mitglieder, sonst (leer) alle.

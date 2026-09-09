@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import {
     absoluteOrder, boardMembers, countDues, dueState, getCountModes, totalLabel, plainText, shortUrl,
+    contrastRatio, focusRingColor, contrastText,
 } from '../www/js/board.js';
 
 /**
@@ -272,5 +273,77 @@ describe('Zusammenfassung der zugeklappten Abschnitte', () => {
         const lang = shortUrl(`https://example.com/${'a'.repeat(80)}`);
         assert.equal(lang.length, 43);
         assert.ok(lang.endsWith('...'));
+    });
+});
+
+describe('Farbe des Fokusrings', () => {
+    // G1: Der Ring nahm die Akzentfarbe unveraendert. Im dunklen Theme stand
+    // damit ein dunkler Ton gegen dunkle Flaechen, gemessen bis herunter auf
+    // 1,52:1. Gefordert sind 3:1.
+    const dunkel = ['#16161a', '#232329', '#2d2d35', '#53535c'];
+    const hell = ['#f4f4f7', '#ffffff', '#e9e9ee', '#676770'];
+
+    it('rechnet Kontraste nach WCAG', () => {
+        assert.equal(Math.round(contrastRatio('#000000', '#ffffff')), 21);
+        assert.equal(Math.round(contrastRatio('#ffffff', '#ffffff')), 1);
+    });
+
+    it('hellt eine dunkle Akzentfarbe auf, bis sie ueberall reicht', () => {
+        const ring = focusRingColor('#1B7F4B', dunkel, true);
+        for (const f of dunkel) {
+            assert.ok(contrastRatio(ring, f) >= 3, `${ring} auf ${f}: ${contrastRatio(ring, f).toFixed(2)}`);
+        }
+    });
+
+    it('dunkelt eine helle Akzentfarbe ab, bis sie ueberall reicht', () => {
+        const ring = focusRingColor('#F9A825', hell, false);
+        for (const f of hell) {
+            assert.ok(contrastRatio(ring, f) >= 3, `${ring} auf ${f}: ${contrastRatio(ring, f).toFixed(2)}`);
+        }
+    });
+
+    it('laesst eine Farbe in Ruhe, die schon reicht', () => {
+        // Bleibt sie unveraendert, ist die Farbfamilie der Instanz erhalten.
+        const ring = focusRingColor('#7E57C2', ['#ffffff'], false);
+        assert.equal(ring.toLowerCase(), '#7e57c2');
+    });
+
+    it('faellt bei unbrauchbaren Eingaben auf Schwarz oder Weiss zurueck', () => {
+        assert.equal(focusRingColor('', dunkel, true), '#ffffff');
+        assert.equal(focusRingColor('#1B7F4B', [], false), '#000000');
+        assert.equal(focusRingColor('kaputt', hell, false), '#000000');
+    });
+});
+
+describe('Schrift auf einer Farbflaeche', () => {
+    // G5: Eine feste Helligkeitsschwelle von 0,31 traf die Wahl zwischen
+    // Schwarz und Weiss systematisch falsch. Der Umschlagpunkt liegt bei 0,179.
+    const paare = [
+        ['#26A69A', '#000'],   // Tuerkis: Schwarz 7,0:1 gegen Weiss 3,0:1
+        ['#E91E63', '#000'],   // Pink: knapp, Schwarz 4,83:1 gegen Weiss 4,35:1
+        ['#7E57C2', '#fff'],
+        ['#FF9800', '#000'],
+        ['#4CAF50', '#000'],
+        ['#000000', '#fff'],
+        ['#ffffff', '#000'],
+    ];
+
+    it('waehlt jeweils die besser lesbare der beiden', () => {
+        for (const [grund, erwartet] of paare) {
+            const gewaehlt = contrastText(grund);
+            const andere = gewaehlt === '#fff' ? '#000' : '#fff';
+            assert.ok(
+                contrastRatio(gewaehlt, grund) >= contrastRatio(andere, grund),
+                `${grund}: ${gewaehlt} ${contrastRatio(gewaehlt, grund).toFixed(2)} gegen ` +
+                `${andere} ${contrastRatio(andere, grund).toFixed(2)}`,
+            );
+            assert.equal(gewaehlt, erwartet, `${grund}`);
+        }
+    });
+
+    it('nimmt bei unbrauchbaren Werten Weiss', () => {
+        for (const v of ['', null, 'kaputt']) {
+            assert.equal(contrastText(v), '#fff');
+        }
     });
 });
