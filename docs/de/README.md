@@ -349,7 +349,7 @@ Jedes Board hat eine **Systemspalte "Papierkorb"**. Gelöschte Karten verschwind
 - **Rückfragen richtig lesen:** Der Bestätigungsdialog beim Löschen einer Karte sagt seit 0.3.2 selbst, was passiert: "Karte in den Papierkorb verschieben? Von dort ist sie 30 Tage lang wiederherstellbar." Wirklich unwiderruflich sind nur das zweite Symbol auf einer Karte **im** Papierkorb und der Besen-Button am Spaltenkopf; deren Dialoge sagen das ausdrücklich.
 - **Restlaufzeit:** Jede Karte zeigt an, wie lange sie noch aufbewahrt wird, zum Beispiel "noch 30 Tage".
 - **Eigene Optik:** Die Spalte ist bewusst neutral grau gehalten, unabhängig von Theme und Akzentfarbe, damit sie sich von den Arbeitsspalten abhebt.
-- **Sonderstellung:** Der Papierkorb steht immer ganz rechts, lässt sich nicht umbenennen, verschieben oder löschen und taucht in der Spalten-Konfiguration nicht auf. Er kennt kein WIP-Limit, keinen "Neu"-Button und keinen Sortier-Umschalter, sondern ist fest nach Löschzeitpunkt sortiert (die Karte, deren Frist zuerst abläuft, steht oben). Zum WIP-Limit und zum Zähler anderer Spalten trägt er nicht bei.
+- **Sonderstellung:** Der Papierkorb steht immer ganz rechts, lässt sich nicht umbenennen, verschieben oder löschen und taucht in der Spalten-Konfiguration nicht auf. Er kennt kein WIP-Limit und keinen "Neu"-Button und trägt zum Zähler anderer Spalten nicht bei. Den **Sortier-Umschalter** hat er seit 0.3.2 wie jede andere Spalte; er sitzt rechts im Spaltenkopf, der Besen links daneben. Voreingestellt bleibt die Reihenfolge nach Löschzeitpunkt, älteste zuerst - oben steht also, was der endgültigen Löschung am nächsten ist.
 - **Bestehende Boards:** Beim ersten Start von 0.3.0 bekommt jedes vorhandene Board automatisch einen Papierkorb. An bestehenden Karten ändert sich dabei nichts.
 
 <a id="erledigte-karten-in-den-papierkorb"></a>
@@ -409,7 +409,9 @@ Rechts in jeder Abschnittszeile steht, was darin steckt: ein Auszug der Beschrei
 
 In der Fußzeile stehen **Löschen**, **Verwalten** (übertragen/klonen), **Abbrechen** und **Speichern**. Oben rechts schließt ein **×** den Dialog, wie in allen Dialogen des Boards.
 
-**Ungespeicherte Änderungen** gehen seit 0.3.2 nicht mehr verloren. Escape und das Schließkreuz fragen nach, wenn du etwas geändert hast. Die Rückfrage hat drei Knöpfe: **Speichern**, **Verwerfen** und **Abbrechen**. "Abbrechen" ist der wichtigste der drei - er lässt den Editor offen und alles Getippte stehen, du kannst also einfach weiterarbeiten. "Abbrechen" verwirft weiterhin ohne Rückfrage, denn wer diesen Knopf drückt, meint ihn auch.
+**Ungespeicherte Änderungen** gehen seit 0.3.2 nicht mehr verloren. Escape, das Schließkreuz und die **Zurück-Taste des Browsers** fragen nach, wenn du etwas geändert hast. Auf dem Tablet ist die letzte die wichtigste, denn dort ist die Zurück-Geste der übliche Weg aus einem Dialog heraus; vorher war das Getippte damit kommentarlos weg. Die Rückfrage hat drei Knöpfe: **Speichern**, **Verwerfen** und **Abbrechen**. "Abbrechen" ist der wichtigste der drei - er lässt den Editor offen und alles Getippte stehen, du kannst also einfach weiterarbeiten.
+
+Der Knopf **Abbrechen** in der Fußzeile des Editors ist etwas anderes: Er schließt ohne Rückfrage, denn wer ihn drückt, meint ihn auch.
 
 **Mit der Tastatur** lässt sich der Editor vollständig bedienen. Tab springt von Feld zu Feld und dabei auch auf die Abschnittsköpfe; Enter oder Leertaste klappt einen Abschnitt auf. Die Chip-Gruppen (Zuständige, Labels, Kartenfarbe, Linktypen) sind je ein einziger Tab-Halt: darin bewegen die Pfeiltasten, Pos1 und Ende springen an die Ränder, Leertaste oder Enter wählt aus. In der Checkliste legt Enter den nächsten Punkt an, gespeichert wird von dort aus mit Strg und Enter.
 
@@ -494,6 +496,8 @@ Bei den drei automatischen Modi erscheint links daneben ein **Richtungsumschalte
 Ein paar Feinheiten, damit das Umkehren berechenbar bleibt: Umgedreht wird immer nur das Hauptkriterium. Karten ohne Datum oder Zeitstempel bleiben unten, bei Gleichstand entscheidet der Titel, und innerhalb gleicher Priorität sortiert weiterhin die Fälligkeit aufsteigend.
 
 Das Menü lässt sich seit 0.3.2 auch mit der Tastatur bedienen: Tab erreicht den Knopf, Enter öffnet, die Pfeiltasten wandern im Menü, Escape schließt und gibt den Fokus zurück. Vorher ging es zwar auf, aber der nächste Tab sprang daran vorbei mitten in die Karten.
+
+Auch der **Papierkorb** hat dieses Menü seit 0.3.2. Dort bedeuten "Drag & Drop" und "Anfasser" allerdings nicht deine eigene Reihenfolge - von Hand ziehen lässt sich im Papierkorb ohnehin nichts -, sondern die Reihenfolge nach Löschzeitpunkt, älteste zuerst. Das ist die Voreinstellung und zeigt oben, was der endgültigen Löschung am nächsten ist. Der Richtungsumschalter dreht auch sie um. Die übrigen drei Modi wirken wie in jeder anderen Spalte.
 
 **Sortiermodus und Richtung werden pro Gerät gespeichert** (wie das Augen-Symbol), sie gelten also nur für dich. In den automatischen Modi ist das eigene Umsortieren innerhalb der Spalte deaktiviert, weil es wirkungslos wäre; das Verschieben in eine andere Spalte funktioniert weiterhin. Schaltest du zurück auf "Drag & Drop" oder "Anfasser", erscheint deine gespeicherte eigene Reihenfolge unverändert.
 
@@ -1042,7 +1046,7 @@ Der Adapter führt das Kommando aus und leert den State wieder.
 - **WebSocket `/ws`:** Bei jeder Änderung sendet der Server eine `dirty`-Nachricht an alle offenen Ansichten; diese laden das betroffene Board neu. So sehen alle Geräte Änderungen praktisch sofort.
 - **Polling-Fallback:** Ist der WebSocket nicht verfügbar, fragt die UI periodisch mit `?rev=` nach Änderungen.
 - **Deep-Link:** `.../?board=<id>&card=<id>` öffnet direkt die betreffende Karte, so verlinken auch die Benachrichtigungs-E-Mails ("Karte im Board öffnen").
-- **Gleichzeitiges Bearbeiten:** Der Karten-Editor arbeitet **ohne Sperre**. Speichern zwei Personen dieselbe Karte kurz nacheinander, gewinnt der **letzte** Speichervorgang; die Änderung des ersten geht dabei ohne Hinweis verloren. Bei gemeinsam gepflegten Karten also besser kurz absprechen, wer sie gerade offen hat.
+- **Gleichzeitiges Bearbeiten:** Der Karten-Editor arbeitet weiterhin **ohne Sperre**, seit 0.3.2 aber nicht mehr stillschweigend. Hat jemand die Karte geändert, während du sie offen hattest, meldet sich beim Speichern die Rückfrage "Karte wurde inzwischen geändert" mit den Knöpfen *Trotzdem speichern* und *Abbrechen*. Speicherst du trotzdem, gewinnt nach wie vor dein Stand - du weißt es jetzt nur vorher. Verglichen wird der **Inhalt** der Karte; dass sie inzwischen in einer anderen Spalte liegt oder abgehakt wurde, löst die Rückfrage nicht aus.
 - **Nach einem Adapter-Neustart:** Eine offene Seite verbindet sich **selbsttätig neu** - das gilt auch nach jedem Speichern der Instanzeinstellungen, denn dabei startet der Adapter. Zusätzlich gleicht sich die Ansicht ab, sobald du auf den Tab zurückwechselst, und im Minutentakt. Sollte eine Ansicht doch einmal veraltet wirken, hilft ein Neuladen.
 
 ### ioBroker-States & Objekte

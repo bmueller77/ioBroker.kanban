@@ -346,10 +346,10 @@ Every board has a **"Trash" system column**. Deleted cards no longer vanish stra
 - **What ends up there:** anything you remove with the **Delete** button in the card editor, cards you **drag** into the trash, and the cards from the [automatic cleanup](#cleanup).
 - **Bringing a card back:** drag it out of the trash or tap the **restore** icon on the card. It returns to the first open column.
 - **Deleting for good right away:** the second icon on the card removes it irreversibly. The broom button in the column header empties the **entire** trash. Both ask first. Via API and webhook, `purgeCard` likewise applies **only to cards in the trash**: on an active card it answers `400` with "Karte '...' liegt nicht im Papierkorb". Getting past the retention period therefore always leads through the trash first.
-- **Reading the confirmations correctly:** the confirmation when deleting a card simply says "Really delete this card?", but since 0.3.0 that **always means the trash** and the card is still there. Truly irreversible are only the second icon on a card **inside** the trash and the broom button in the column header; their dialogs say so explicitly.
+- **Reading the confirmations correctly:** since 0.3.2 the confirmation when deleting a card says what actually happens: "Move this card to the trash? You can restore it from there for 30 days." Truly irreversible are only the second icon on a card **inside** the trash and the broom button in the column header; their dialogs say so explicitly.
 - **Remaining time:** every card shows how long it will still be kept, for example "30 days left".
 - **Its own look:** the column is deliberately kept neutral grey, independent of theme and accent colour, so it stands apart from the working columns.
-- **Special status:** the trash always sits on the far right, cannot be renamed, moved or deleted and does not show up in the column configuration. It has no WIP limit, no "+ Add card" link and no sort toggle; it is sorted by deletion time, so the card whose deadline expires first sits on top. It does not count towards the WIP limit or the counters of other columns.
+- **Special status:** the trash always sits on the far right, cannot be renamed, moved or deleted and does not show up in the column configuration. It has no WIP limit and no "+ Add card" link, and it does not count towards the counters of other columns. It does have the **sort toggle** since 0.3.2, like every other column; it sits on the right of the column header, with the broom to its left. The default remains deletion time, oldest first - so whatever is closest to being removed for good sits on top.
 - **Existing boards:** on the first start of 0.3.0 every existing board gets a trash column automatically. Existing cards are not touched.
 
 <a id="cleanup"></a>
@@ -409,7 +409,9 @@ The right-hand end of each section header says what is inside: an excerpt of the
 
 The footer holds **Delete**, **Manage** (transfer/clone), **Cancel** and **Save**. A **×** in the top right closes the dialog, as in every dialog of the board.
 
-**Unsaved changes** no longer disappear since 0.3.2. Escape and the close cross ask first if you changed anything. The prompt has three buttons: **Save**, **Discard** and **Cancel**. "Cancel" is the important one of the three - it leaves the editor open with everything you typed still there, so you can simply carry on. "Cancel" still discards without asking, because someone pressing that button means it.
+**Unsaved changes** no longer disappear since 0.3.2. Escape, the close cross and the **browser's back button** ask first if you changed anything. On a tablet that last one matters most, because the back gesture is the usual way out of a dialog there; before, everything typed was simply gone. The prompt has three buttons: **Save**, **Discard** and **Cancel**. "Cancel" is the important one of the three - it leaves the editor open with everything you typed still there, so you can simply carry on.
+
+The **Cancel** button in the editor's footer is a different thing: it closes without asking, because someone pressing it means it.
 
 **The keyboard reaches everything.** Tab moves from field to field and also onto the section headers; Enter or space opens a section. The chip groups (assignees, labels, card colour, link types) are a single tab stop each: inside them the arrow keys move, Home and End jump to the ends, space or Enter selects. Inside the checklist Enter creates the next item; from there you save with Ctrl and Enter.
 
@@ -492,6 +494,8 @@ Since 0.3.0 **each column individually** can be sorted automatically instead. Cl
 For the three automatic modes a **direction toggle** appears next to the sort icon. One click reverses the order, and the arrow shows the current direction at a glance. So in "age in column" you can look at either what was finished last or the cards that have been sitting longest.
 
 A few details keep reversing predictable: only the main criterion is flipped. Cards without a date or timestamp stay at the bottom, ties are still decided by the title, and within the same priority the due date still sorts ascending.
+
+The **trash** has this menu too since 0.3.2. There, "drag & drop" and "drag handles" do not mean your own order - nothing can be dragged inside the trash anyway - but the order by deletion time, oldest first. That is the default and puts whatever is closest to being removed for good on top. The direction toggle reverses it as well. The other three modes behave exactly as in any other column.
 
 **Mode and direction are stored per device** (like the eye icon), so they only affect your own view. In the automatic modes, reordering within the column is disabled because it would have no effect; moving cards to another column still works. Switching back to "drag & drop" or "drag handles" brings back your saved manual order unchanged.
 
@@ -1036,7 +1040,7 @@ The adapter executes the command and clears the state again.
 - **WebSocket `/ws`:** on every change the server sends a `dirty` message to all open views, which reload the affected board. All devices see changes almost instantly.
 - **Polling fallback:** if the WebSocket is unavailable, the UI periodically checks for changes using `?rev=`.
 - **Deep link:** `.../?board=<id>&card=<id>` opens the given card directly, this is how notification e-mails link ("Open card in board").
-- **Simultaneous editing:** the card editor works **without locking**. If two people save the same card shortly after one another, the **last** save wins; the first person's change is lost without any notice. For cards several people maintain, it pays to agree briefly on who currently has it open.
+- **Simultaneous editing:** the card editor still works **without locking**, but since 0.3.2 no longer silently. If someone changed the card while you had it open, saving raises the prompt "Card was changed meanwhile" with the buttons *Save anyway* and *Cancel*. Save anyway and your version still wins - you just know about it beforehand. What gets compared is the card's **content**; the card having moved to another column or been ticked off in the meantime does not raise the prompt.
 - **After an adapter restart:** an open page **reconnects on its own**, which also covers every save of the instance settings, since that restarts the adapter. On top of that the view syncs whenever you switch back to the tab, and once a minute. Should a view still look stale, a reload fixes it.
 
 ### ioBroker states & objects
