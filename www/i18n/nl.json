@@ -5,6 +5,7 @@
   "topbar.addCardNoBoard": "Maak eerst een bord aan, daarna kaarten",
   "topbar.addCardNoUsers": "Maak eerst een gebruiker aan in de instantie-instellingen, daarna kaarten. Elke kaart heeft een verantwoordelijke nodig.",
   "hint.close": "Melding sluiten",
+  "hint.cardHidden": "De kaart is opgeslagen. Hij wordt nu niet getoond omdat een filter of de weergavelimiet van de kolom hem verbergt.",
   "topbar.theme": "Thema wisselen",
   "topbar.share": "Weergaven",
   "topbar.settings": "Instellingen",

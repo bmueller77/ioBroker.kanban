@@ -294,8 +294,9 @@ actions = {
     async addCard(data) {
         data.by = '';
         data.createdBy = '';
-        await api(`api/boards/${state.board.id}/cards`, { method: 'POST', body: data });
+        const karte = await api(`api/boards/${state.board.id}/cards`, { method: 'POST', body: data });
         await refreshCurrent();
+        return karte;
     },
 
     async updateCard(cardId, data) {
@@ -343,7 +344,29 @@ actions = {
         await api(`api/boards/${encodeURIComponent(id)}`, { method: 'PATCH', body: patch });
         await loadBoards();
         if (state.board && state.board.id === id) await refreshCurrent();
-        else render();
+        // In jedem Fall zeichnen: refreshCurrent haelt sich zurueck, wenn der
+        // Server "unveraendert" meldet, und das tut er bei einer Aenderung, die
+        // keine Karte anfasst. Die Board-Auswahl in der Kopfleiste zeigte danach
+        // weiter den alten Namen, bis jemand die Seite neu lud (A23).
+        render();
+    },
+
+    /**
+     * Den gemerkten aufgeklappten Zustand einzelner Spalten vergessen.
+     *
+     * @param boardId Board, zu dem die Spalten gehoeren
+     * @param colIds Spalten, deren Anzeige-Limit sich geaendert hat
+     */
+    forgetExpanded(boardId, colIds) {
+        let ab = false;
+        for (const id of colIds || []) {
+            if (state.expandedCols.delete(`${boardId}:${id}`)) {
+                ab = true;
+            }
+        }
+        if (ab) {
+            try { localStorage.setItem('kanban.expandedCols', [...state.expandedCols].join(',')); } catch (e) { /* ignore */ }
+        }
     },
 
     // Board anlegen, ohne das aktive Board zu wechseln (Einstellungen-Dialog bleibt offen)

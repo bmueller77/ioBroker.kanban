@@ -5,6 +5,7 @@
   "topbar.addCardNoBoard": "请先创建看板，再创建卡片",
   "topbar.addCardNoUsers": "请先在实例设置中添加用户，然后再创建卡片。每张卡片都需要一位负责人。",
   "hint.close": "关闭提示",
+  "hint.cardHidden": "卡片已保存。因为筛选或列的显示上限，它现在未显示。",
   "topbar.theme": "切换主题",
   "topbar.share": "视图",
   "topbar.settings": "设置",

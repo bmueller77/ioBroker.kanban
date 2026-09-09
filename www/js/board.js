@@ -348,6 +348,59 @@ export function totalLabel(allInCol, matchedCount, anyFilter, wipLimit) {
     return anyFilter ? String(sichtbar) : `${allInCol}/${limit}`;
 }
 
+/**
+ * Markdown-Auszeichnung entfernen, damit eine Zusammenfassung lesbar wird.
+ *
+ * In der zugeklappten Abschnittszeile stand bisher der rohe Quelltext, also
+ * Rauten und Sternchen statt der ersten Zeile des Textes (B3). Gerendert wird
+ * hier nichts, es faellt nur weg, was Auszeichnung ist.
+ *
+ * @param roh Markdown-Quelltext
+ * @returns einzeiliger Klartext
+ */
+export function plainText(roh) {
+    return String(roh || '')
+        .replace(/```[\s\S]*?```/g, ' ')            // Codebloecke ganz raus
+        .replace(/`([^`]*)`/g, '$1')                 // Code im Fliesstext
+        .replace(/!\[[^\]]*\]\([^)]*\)/g, ' ')        // Bilder
+        .replace(/\[([^\]]*)\]\([^)]*\)/g, '$1')      // Links: nur der Text
+        .replace(/^[ \t]{0,3}#{1,6}[ \t]+/gm, '')    // Ueberschriften
+        .replace(/^[ \t]{0,3}>[ \t]?/gm, '')         // Zitate
+        .replace(/^[ \t]{0,3}[-*+][ \t]+/gm, '')     // Aufzaehlungen
+        .replace(/^[ \t]{0,3}\d+\.[ \t]+/gm, '')     // nummerierte Listen
+        .replace(/(\*\*|__)(.*?)\1/g, '$2')          // fett
+        .replace(/(\*|_)(.*?)\1/g, '$2')             // kursiv
+        .replace(/~~(.*?)~~/g, '$1')                 // durchgestrichen
+        .replace(/\s+/g, ' ')
+        .trim();
+}
+
+/**
+ * Kurzform einer Adresse fuer die Zusammenfassung.
+ *
+ * Nur der Host reichte nicht: Zwei Karten mit verschiedenen Dateien auf
+ * demselben Server sahen zugeklappt gleich aus (B3). Deshalb kommt der letzte
+ * Pfadteil dazu, der den Unterschied traegt.
+ *
+ * @param roh die eingetragene Adresse
+ * @returns Kurzform, hoechstens 40 Zeichen
+ */
+export function shortUrl(roh) {
+    const txt = String(roh || '').trim();
+    if (!txt) {
+        return '';
+    }
+    let kurz = txt;
+    try {
+        const u = new URL(txt);
+        const letzte = u.pathname.split('/').filter(Boolean).pop();
+        kurz = letzte ? `${u.host}/${letzte}` : u.host;
+    } catch {
+        kurz = txt;
+    }
+    return kurz.length > 40 ? `${kurz.slice(0, 40)}...` : kurz;
+}
+
 export function countDues(liste, cfg) {
     const z = { soon: 0, today: 0, overdue: 0 };
     for (const e of liste) {

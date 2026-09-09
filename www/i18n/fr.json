@@ -5,6 +5,7 @@
   "topbar.addCardNoBoard": "Créez d'abord un tableau, puis des cartes",
   "topbar.addCardNoUsers": "Créez d'abord un utilisateur dans les paramètres de l'instance, puis des cartes. Chaque carte a besoin d'une personne responsable.",
   "hint.close": "Fermer l’avis",
+  "hint.cardHidden": "La carte est enregistrée. Elle ne s'affiche pas pour l'instant parce qu'un filtre ou la limite d'affichage de la colonne la masque.",
   "topbar.theme": "Changer de thème",
   "topbar.share": "Vues",
   "topbar.settings": "Paramètres",

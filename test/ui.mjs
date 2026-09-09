@@ -1,5 +1,7 @@
 import assert from 'node:assert/strict';
-import { absoluteOrder, boardMembers, countDues, dueState, getCountModes, totalLabel } from '../www/js/board.js';
+import {
+    absoluteOrder, boardMembers, countDues, dueState, getCountModes, totalLabel, plainText, shortUrl,
+} from '../www/js/board.js';
 
 /**
  * Reine Hilfsfunktionen der Oberfläche — ohne Browser prüfbar.
@@ -218,5 +220,51 @@ describe('Gesamtzahl im Spaltenkopf', () => {
         for (const kaputt of [null, undefined, '', 'viele', -3]) {
             assert.equal(totalLabel(4, 4, false, kaputt), '4');
         }
+    });
+});
+
+describe('Zusammenfassung der zugeklappten Abschnitte', () => {
+    // B3: Dort stand der rohe Markdown-Quelltext, also Rauten und Sternchen
+    // statt der ersten Zeile des Textes.
+    it('nimmt die Auszeichnung aus dem Text', () => {
+        assert.equal(plainText('## Ueberschrift'), 'Ueberschrift');
+        assert.equal(plainText('Ein **fetter** Text'), 'Ein fetter Text');
+        assert.equal(plainText('Ein _kursiver_ Text'), 'Ein kursiver Text');
+        assert.equal(plainText('~~weg~~ damit'), 'weg damit');
+        assert.equal(plainText('- erster\n- zweiter'), 'erster zweiter');
+        assert.equal(plainText('1. eins\n2. zwei'), 'eins zwei');
+        assert.equal(plainText('> Zitat'), 'Zitat');
+    });
+
+    it('behaelt bei Links den Text und wirft die Adresse weg', () => {
+        assert.equal(plainText('siehe [Handbuch](https://example.com/x)'), 'siehe Handbuch');
+        assert.equal(plainText('![Bild](a.png) daneben'), 'daneben');
+    });
+
+    it('wirft Codebloecke ganz raus und entkleidet Code im Fliesstext', () => {
+        assert.equal(plainText('vor ```js\ncode()\n``` nach'), 'vor nach');
+        assert.equal(plainText('nimm `npm test`'), 'nimm npm test');
+    });
+
+    it('macht eine einzige Zeile daraus', () => {
+        assert.equal(plainText('   a \n\n   b   '), 'a b');
+        assert.equal(plainText(''), '');
+        assert.equal(plainText(null), '');
+    });
+
+    it('kuerzt Adressen auf Host und letzten Pfadteil', () => {
+        // Nur der Host reichte nicht: zwei Dateien auf demselben Server sahen
+        // zugeklappt gleich aus.
+        assert.equal(shortUrl('https://example.com/doc/anleitung.pdf'), 'example.com/anleitung.pdf');
+        assert.equal(shortUrl('https://example.com/'), 'example.com');
+        assert.equal(shortUrl('https://example.com'), 'example.com');
+        assert.equal(shortUrl(''), '');
+    });
+
+    it('laesst stehen, was keine Adresse ist, und kuerzt sehr lange', () => {
+        assert.equal(shortUrl('/pfad/datei.pdf'), '/pfad/datei.pdf');
+        const lang = shortUrl(`https://example.com/${'a'.repeat(80)}`);
+        assert.equal(lang.length, 43);
+        assert.ok(lang.endsWith('...'));
     });
 });

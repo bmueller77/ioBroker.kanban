@@ -3,7 +3,10 @@
 import { openColorPicker, closeColorPicker, colorPickerOpen } from './colorpicker.js';
 import { api } from './api.js';
 import { t } from './i18n.js';
-import { boardUsers, boardMembers, soloUser, contrastText, mdiIcon, MDI, fmtDate, linkIcon, safeHref } from './board.js';
+import {
+    boardUsers, boardMembers, soloUser, contrastText, mdiIcon, MDI, fmtDate, linkIcon, safeHref,
+    plainText, shortUrl, showHint,
+} from './board.js';
 
 const CARD_COLORS = ['', '#e57373', '#ffb74d', '#fff176', '#aed581', '#4fc3f7', '#9575cd', '#f06292', '#a1887f'];
 const WEEKDAYS = [['Mo', 1], ['Di', 2], ['Mi', 3], ['Do', 4], ['Fr', 5], ['Sa', 6], ['So', 7]];
@@ -331,17 +334,33 @@ export function initDialogs(state, actions) {
         };
         const f = form.elements;
 
-        const beschr = String(f.description.value || '').trim().replace(/\s+/g, ' ');
+        // Klartext statt Quelltext: Wer zuklappt, will die erste Zeile seines
+        // Textes sehen und nicht Rauten und Sternchen (B3).
+        const beschr = plainText(f.description.value);
         setz('desc', beschr.length > 40 ? `${beschr.slice(0, 40)}...` : beschr);
 
         // Reihenfolge des Boards, damit die Zusammenfassung dasselbe sagt wie
         // die Karte und wie die Auswahl darunter (#32)
-        const titel = ((state.board && state.board.labels) || [])
-            .filter(l => selLabels.has(l.id))
-            .map(l => l.title);
-        const labelText =
-            titel.length > 3 ? `${titel.slice(0, 3).join(', ')} +${titel.length - 3}` : titel.join(', ');
-        setz('labels', labelText);
+        const gewaehlt = ((state.board && state.board.labels) || []).filter(l => selLabels.has(l.id));
+        const labelText = gewaehlt.length > 3
+            ? `${gewaehlt.slice(0, 3).map(l => l.title).join(', ')} +${gewaehlt.length - 3}`
+            : gewaehlt.map(l => l.title).join(', ');
+        // Mit Farbtupfer, so wie das Handbuch es beschreibt. Ab drei Labels wird
+        // auf "+2" gekuerzt, dann waere die Farbe die einzige verbliebene
+        // Information gewesen - und die fehlte (B4).
+        const labelInfo = feld('labels');
+        if (labelInfo) {
+            labelInfo.textContent = '';
+            for (const l of gewaehlt.slice(0, 3)) {
+                const tupf = el('span', 'fold-dot');
+                tupf.style.background = l.color || 'var(--muted)';
+                tupf.title = l.title;
+                labelInfo.appendChild(tupf);
+            }
+            if (labelText) {
+                labelInfo.appendChild(document.createTextNode(` ${labelText}`));
+            }
+        }
 
         // Farbe als Tupfer statt als Hex-Wert: die Zahl sagt niemandem etwas
         const punkt = () => {
@@ -369,15 +388,7 @@ export function initDialogs(state, actions) {
             }
         }
 
-        // Nur der Host: eine volle Adresse mit Parametern sprengt die Kopfzeile
-        const roh = String(f.link.value || '').trim();
-        let kurz = roh;
-        try {
-            kurz = roh ? new URL(roh).host : '';
-        } catch {
-            kurz = roh.length > 30 ? `${roh.slice(0, 30)}...` : roh;
-        }
-        setz('link', kurz);
+        setz('link', shortUrl(f.link.value));
         setz('loc', String(f.location.value || '').trim());
 
         const rt = f.recType;
@@ -897,10 +908,15 @@ export function initDialogs(state, actions) {
 
     function loadRecurrence(rec) {
         rec = rec || {};
+        // Vorbelegung aus der Faelligkeit der Karte, nicht aus dem heutigen
+        // Datum: Wer eine Karte auf den 12.09. legt und "Jaehrlich" waehlt,
+        // meint den 12. September und nicht den Tag, an dem er das einstellt
+        // (A11). Ohne Faelligkeit bleibt es beim heutigen Datum.
+        const faellig = parseFaellig(form.elements.due.value);
         form.elements.recType.value = rec.type || 'none';
         form.elements.recInterval.value = rec.interval || 2;
-        form.elements.recDom.value = rec.dayOfMonth || (new Date().getDate());
-        form.elements.recMonth.value = String(rec.month || (new Date().getMonth() + 1));
+        form.elements.recDom.value = rec.dayOfMonth || faellig.getDate();
+        form.elements.recMonth.value = String(rec.month || (faellig.getMonth() + 1));
         form.elements.recOrdinal.value = String(rec.ordinal || 1);
         form.elements.recWorkdayPos.value = rec.workdayPos || 'first';
         form.elements.recWorkdayN.value = rec.n || 1;
@@ -912,6 +928,17 @@ export function initDialogs(state, actions) {
     }
 
     function isoToday() { const d = new Date().getDay(); return d === 0 ? 7 : d; }
+
+    /**
+     * Faelligkeitsdatum der Karte als Date, sonst heute.
+     *
+     * @param wert Inhalt des Feldes, JJJJ-MM-TT oder leer
+     * @returns Date fuer die Vorbelegung der Wiederholung
+     */
+    function parseFaellig(wert) {
+        const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(wert || '').trim());
+        return m ? new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3])) : new Date();
+    }
 
     function updateRecUI() {
         const type = form.elements.recType.value;
@@ -1129,6 +1156,28 @@ export function initDialogs(state, actions) {
         };
     }
 
+    /**
+     * Sagen, wenn die gespeicherte Karte gerade nicht zu sehen ist.
+     *
+     * Ein Tester hat sechs Karten angelegt und das Speichern fuer kaputt
+     * gehalten: Der Server antwortete jedes Mal mit 201, aber der aktive
+     * Personenfilter blendete sie sofort wieder aus, und die Oberflaeche sagte
+     * dazu nichts (A9). Geprueft wird am gezeichneten Board statt an einer
+     * zweiten Umsetzung der Filterregeln - was dort nicht steht, sieht der
+     * Benutzer nicht, gleich aus welchem Grund.
+     *
+     * @param id Kennung der gespeicherten Karte
+     */
+    function sichtbarPruefen(id) {
+        if (!id) {
+            return;
+        }
+        const sel = (window.CSS && CSS.escape) ? CSS.escape(id) : id;
+        if (!document.querySelector(`.card[data-card-id="${sel}"]`)) {
+            showHint(t('hint.cardHidden'));
+        }
+    }
+
     form.addEventListener('submit', async ev => {
         ev.preventDefault();
         const data = readCard();
@@ -1141,8 +1190,10 @@ export function initDialogs(state, actions) {
                 if (card && card.columnId !== data.columnId) {
                     await actions.moveCard(editingCardId, data.columnId);
                 }
+                sichtbarPruefen(editingCardId);
             } else {
-                await actions.addCard(data);
+                const neu = await actions.addCard(data);
+                sichtbarPruefen(neu && neu.id);
             }
             dlg.close();
         } catch (e) {
@@ -1259,6 +1310,21 @@ export function initDialogs(state, actions) {
                     color: row.querySelector('.cp-trigger').dataset.color || '#4CAF50',
                 };
             }).filter(Boolean);
+            // Wer das Anzeige-Limit aendert, meint es auch. Der pro Geraet
+            // gemerkte aufgeklappte Zustand stammt von vorher und ueberstimmte
+            // die neue Einstellung stillschweigend: Man setzte "Max 3", sah
+            // weiterhin sieben Karten und hielt die Einstellung fuer wirkungslos
+            // (A19).
+            const limitNeu = columns
+                .filter(c => c.id)
+                .filter(c => {
+                    const alt = (editBoard.columns || []).find(o => o.id === c.id);
+                    return alt && (Number(alt.maxVisible) || 0) !== c.maxVisible;
+                })
+                .map(c => c.id);
+            if (limitNeu.length) {
+                actions.forgetExpanded(editBoard.id, limitNeu);
+            }
             await actions.patchBoardById(editBoard.id, {
                 title: titleInput.value.trim() || editBoard.title,
                 columns, labels,
@@ -1444,6 +1510,10 @@ export function initDialogs(state, actions) {
                 colBox.appendChild(zeile);
                 const feld = zeile.querySelector('input[type="text"]');
                 if (feld) feld.focus();
+                // Ab der sechsten Spalte stand der Link auf der Kante des
+                // Rollbereichs, halb abgeschnitten und ohne Wirkung; die
+                // anschliessende Eingabe war verloren (A7).
+                addCol.scrollIntoView({ block: 'nearest' });
                 dirty = true;
             });
             panel.appendChild(addCol);
@@ -1484,6 +1554,7 @@ export function initDialogs(state, actions) {
                 labelBox.appendChild(zeile);
                 const feld = zeile.querySelector('input[type="text"]');
                 if (feld) feld.focus();
+                addLabel.scrollIntoView({ block: 'nearest' });
                 dirty = true;
             });
             panel.appendChild(addLabel);

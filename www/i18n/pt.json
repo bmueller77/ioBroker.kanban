@@ -5,6 +5,7 @@
   "topbar.addCardNoBoard": "Cria primeiro um quadro, depois cartões",
   "topbar.addCardNoUsers": "Crie primeiro um utilizador nas definições da instância e depois os cartões. Cada cartão precisa de um responsável.",
   "hint.close": "Fechar aviso",
+  "hint.cardHidden": "O cartão foi guardado. Não está visível agora porque um filtro ou o limite de exibição da coluna o esconde.",
   "topbar.theme": "Mudar de tema",
   "topbar.share": "Vistas",
   "topbar.settings": "Definições",

@@ -666,6 +666,10 @@ dialog label { display: flex; flex-direction: column; gap: 10px; font-size: 13px
 /* flex:1 nur in einer Zeile, wo es die Breite verteilt. In einer Spalte wuerde
    es die Hoehe aufblaehen und alles Folgende nach unten schieben. */
 dialog .row > label { flex: 1; }
+/* Ein Feld fuer "01:00" braucht keine 850 px. Ohne diese Regel nimmt es den
+   ganzen Platz neben dem Haken daneben ein und laesst die Zeile unfertig
+   aussehen (B2). */
+#calDurWrap { flex: 0 0 auto; }
 /* [hidden] muss das display:flex der Labels schlagen, sonst bleiben nicht
    relevante Wiederholungs-Felder sichtbar */
 dialog [hidden] { display: none !important; }

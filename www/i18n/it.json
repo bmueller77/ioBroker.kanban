@@ -5,6 +5,7 @@
   "topbar.addCardNoBoard": "Prima crea una board, poi le schede",
   "topbar.addCardNoUsers": "Crea prima un utente nelle impostazioni dell'istanza, poi le schede. Ogni scheda ha bisogno di un responsabile.",
   "hint.close": "Chiudi avviso",
+  "hint.cardHidden": "La scheda è salvata. Al momento non viene mostrata perché un filtro o il limite di visualizzazione della colonna la nasconde.",
   "topbar.theme": "Cambia tema",
   "topbar.share": "Viste",
   "topbar.settings": "Impostazioni",

@@ -292,7 +292,7 @@ describe('API-Pruefung: Zustaendige und Labels', () => {
 
         assert.throws(
             () => store.addCard('b', { title: 'Karte', columnId: 'todo', assignees: ['default'] }, 'test'),
-            /unbekannte zustaendige Person: default.*anna/s,
+            /unbekannte zuständige Person: default.*anna/s,
         );
     });
 
@@ -422,7 +422,7 @@ describe('Ein einziger Benutzer', () => {
         await store.createBoard({ id: 'b', title: 'B' });
         assert.throws(
             () => store.addCard('b', { title: 'Karte', columnId: 'todo', assignees: ['default'] }, 'test'),
-            /unbekannte zustaendige Person: default/,
+            /unbekannte zuständige Person: default/,
         );
     });
 });
