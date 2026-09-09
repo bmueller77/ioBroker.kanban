@@ -317,9 +317,12 @@ button.count:focus-visible { outline: 2px solid var(--accent, #7E57C2); outline-
 .add-card-btn {
     position: sticky;
     /* Beim Scrollen schwebt der Knopf ueber den Karten. Der Ring in der
-       Spaltenfarbe legt einen undurchsichtigen Sockel darunter, sonst steht er
-       auf Kartentiteln und Labels (Befund 26). */
-    bottom: 7px;
+       Spaltenfarbe legt einen schmalen, undurchsichtigen Sockel darunter,
+       sonst steht der Knopf unmittelbar auf Kartentiteln und Labels
+       (Befund 26). Ringbreite und dieser Abstand gehoeren zusammen: Der Ring
+       fuellt genau die Luecke zwischen Knopf und unterem Rand der Liste. Waere
+       er schmaler, schiene dort ein Streifen der durchlaufenden Karte hervor. */
+    bottom: 1px;
     z-index: 2;
     display: flex;
     align-items: center;
@@ -334,7 +337,7 @@ button.count:focus-visible { outline: 2px solid var(--accent, #7E57C2); outline-
     /* Der Ring in der Spaltenfarbe ist der undurchsichtige Sockel, der eigene
        Schatten haengt hinten dran. Eine zweite box-shadow-Zeile wuerde die
        erste ersetzen, deshalb stehen beide hier zusammen. */
-    box-shadow: 0 0 0 7px var(--surface2), var(--card-shadow);
+    box-shadow: 0 0 0 1px var(--surface2), var(--card-shadow);
 }
 .add-card-btn:hover { filter: brightness(1.1); background: var(--accent); }
 .add-card-btn svg { width: 18px; height: 18px; display: block; }
