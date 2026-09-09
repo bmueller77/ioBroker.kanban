@@ -1683,7 +1683,7 @@ export function initDialogs(state, actions) {
                             const dataUrl = await fileToSquareDataUrl(file.files[0], 128);
                             await api(`api/users/${encodeURIComponent(u.name)}/avatar`, { method: 'POST', body: { image: dataUrl } });
                             u.avatar = true; await actions.avatarsChanged(); paint(); rm.hidden = false;
-                        } catch (e) { alert(t('avatar.failed', { msg: e.message })); }
+                        } catch (e) { showHint(t('avatar.failed', { msg: e.message }), 'error'); }
                         file.value = '';
                     });
                     const rm = el('button', 'rm', '×'); rm.type = 'button'; rm.title = t('avatar.remove');
@@ -1700,7 +1700,7 @@ export function initDialogs(state, actions) {
                             try {
                                 await api(`api/users/${encodeURIComponent(u.name)}`, { method: 'PATCH', body: { color: col } });
                                 await actions.avatarsChanged();
-                            } catch (e) { alert(t('avatar.failed', { msg: e.message })); }
+                            } catch (e) { showHint(t('avatar.failed', { msg: e.message }), 'error'); }
                         }, 500);
                     });
                     colorTrig.title = t('user.color');
@@ -1837,7 +1837,7 @@ export function initDialogs(state, actions) {
                     });
                 } catch (e) {
                     ok.disabled = false;
-                    alert(t('orphan.failed', { msg: e.message }));
+                    showHint(t('orphan.failed', { msg: e.message }), 'error');
                     return;
                 }
                 zeile.remove();
@@ -2232,7 +2232,7 @@ export function initDialogs(state, actions) {
                 await actions.transferCard(cardId, toBoard, colSel.value, mode === 'move' ? 'move' : 'copy', [...overrideSel]);
                 tdlg.close();
                 dlg.close();
-            } catch (e) { alert(t('error.saveFailed', { msg: e.message })); }
+            } catch (e) { showHint(t('error.saveFailed', { msg: e.message }), 'error'); }
         });
 
         body.append(modeWrap, boardLbl, colLbl, note, assignLbl, assignWrap);
