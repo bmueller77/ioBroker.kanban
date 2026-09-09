@@ -30,13 +30,7 @@ class Kanban extends utils.Adapter {
     async onReady() {
         await this.setStateAsync('info.connection', false, true);
 
-        // Vor allem anderen: Benutzer-IDs festschreiben. Schreibt der Adapter
-        // dabei seine eigene Konfiguration, startet ihn der js-controller kurz
-        // darauf neu - der Rest des Starts laeuft trotzdem weiter, damit die
-        // Instanz nicht tot liegenbleibt, falls der Neustart ausbleibt.
         this._checkDateFormat();
-        await this._freezeUserIds();
-
         this.bus = new EventBus();
         this.store = new Store(this, this.bus);
         this.notifier = new Notifier(
@@ -61,6 +55,13 @@ class Kanban extends utils.Adapter {
         // angelegt und braucht dafür den lokalisierten Namen.
         await this._resolveLanguage();
         await this.store.load();
+        // Erst nach dem Laden: Ob eine Kennung festgeschrieben werden muss,
+        // haengt daran, ob Karten auf sie zeigen, und die kennt der Store
+        // vorher nicht. Schreibt der Adapter dabei seine eigene Konfiguration,
+        // startet ihn der js-controller kurz darauf neu. Der Rest des Starts
+        // laeuft trotzdem weiter, damit die Instanz nicht tot liegenbleibt,
+        // falls der Neustart ausbleibt.
+        await this._freezeUserIds();
         await this._resolveTimezone();
         await this._initHolidays();
         await this._initApiSecret();
@@ -149,7 +150,7 @@ class Kanban extends utils.Adapter {
         await this._pruneFrozenUserIds();
 
         const versuche = await this._freezeRetries();
-        const plan = freezePlan(this.config.users, versuche, FREEZE_MAX_RETRIES);
+        const plan = freezePlan(this.config.users, versuche, FREEZE_MAX_RETRIES, await this.store.referencedUsers());
         const offen = plan.offen;
         if (plan.zuruecksetzen) {
             await this.setStateAsync('info.freezeRetries', 0, true);

@@ -1,6 +1,6 @@
 const assert = require('node:assert/strict');
 const { Store, isoDay, todayStr } = require('../lib/store');
-const { buildRrule } = require('../lib/notify');
+const { buildRrule, buildIcsCancel } = require('../lib/notify');
 
 /**
  * Wiederholungen beim Erledigen.
@@ -237,5 +237,38 @@ describe('Kalendertag aus einem Zeitstempel', () => {
         for (const v of ['', null, undefined, 'kaputt', '2026-13-45T99:99:99Z']) {
             assert.equal(isoDay(v), '');
         }
+    });
+});
+
+describe('Kalender-Absage beim Loeschen', () => {
+    // E6: Beim Loeschen ging keine Absage raus, der Termin blieb im Kalender
+    // aller Zustaendigen stehen.
+    const karte = { id: 'c_1', icsUid: 'c_1', icsSeq: 2, title: 'Zahnarzt; 14 Uhr' };
+
+    it('traegt METHOD:CANCEL und STATUS:CANCELLED', () => {
+        const ics = buildIcsCancel(karte);
+        assert.match(ics, /^METHOD:CANCEL$/m);
+        assert.match(ics, /^STATUS:CANCELLED$/m);
+    });
+
+    it('behaelt die UID und zaehlt die Sequenz hoch', () => {
+        // Nur an beidem erkennt ein Kalender den vorhandenen Eintrag wieder.
+        const ics = buildIcsCancel(karte);
+        assert.match(ics, /^UID:c_1@kanban\.iobroker$/m);
+        assert.match(ics, /^SEQUENCE:3$/m);
+    });
+
+    it('faellt ohne eigene UID auf die Kartenkennung zurueck', () => {
+        assert.match(buildIcsCancel({ id: 'c_9', title: 'X' }), /^UID:c_9@kanban\.iobroker$/m);
+        assert.match(buildIcsCancel({ id: 'c_9', title: 'X' }), /^SEQUENCE:1$/m);
+    });
+
+    it('schuetzt Sonderzeichen im Titel', () => {
+        // Semikolon und Komma trennen in .ics die Felder.
+        assert.match(buildIcsCancel(karte), /^SUMMARY:Zahnarzt\\\; 14 Uhr$/m);
+    });
+
+    it('nutzt Zeilenenden nach der Norm', () => {
+        assert.ok(buildIcsCancel(karte).includes('\r\n'), 'CRLF fehlt');
     });
 });

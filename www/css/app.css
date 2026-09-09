@@ -329,9 +329,14 @@ button.count:focus-visible { outline: 2px solid var(--accent, #7E57C2); outline-
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 25%;
+    /* Schmal statt ein Viertel der Spalte: Der Knopf klebt unten und deckt
+       damit alles ab, was unter ihm durchlaeuft. Bei 25 Prozent waren das 111
+       von 423 px und zwei Zeilen einer aufgeklappten Checkliste, deren Klicks
+       er abfing (F1). Ein "+" braucht diese Breite nicht. */
+    width: auto;
+    min-width: 72px;
     margin: 0 auto;
-    padding: 5px 0;
+    padding: 5px 16px;
     border: 1px solid var(--accent);
     border-radius: 8px;
     background: var(--accent);

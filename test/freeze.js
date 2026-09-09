@@ -96,3 +96,39 @@ describe('Festgeschriebene Kennungen aufraeumen', () => {
         assert.deepEqual(faellt, ['user1', 'user2']);
     });
 });
+
+describe('Einfrieren nur, woran etwas haengt', () => {
+    // A15: Der Rueckschreibvorgang kostet einen Neustart, und in dessen Fenster
+    // ging das Speichern im Admin verloren. Er faellt jetzt weg, solange keine
+    // Karte und kein Avatar auf die Kennung zeigt.
+    const users = [{ name: 'anna' }, { name: 'ben' }];
+
+    it('laesst unbenutzte Kennungen in Ruhe', () => {
+        const plan = freezePlan(users, 0, 3, new Set());
+        assert.equal(plan.tun, 'nichts');
+        assert.deepEqual(plan.offen, []);
+    });
+
+    it('schreibt nur die Kennung fest, an der etwas haengt', () => {
+        const plan = freezePlan(users, 0, 3, new Set(['ben']));
+        assert.equal(plan.tun, 'schreiben');
+        assert.deepEqual(plan.offen, ['ben']);
+    });
+
+    it('laesst bereits festgeschriebene aus', () => {
+        const plan = freezePlan([{ name: 'anna', fixed: true }, { name: 'ben' }], 0, 3, new Set(['anna', 'ben']));
+        assert.deepEqual(plan.offen, ['ben']);
+    });
+
+    it('haelt sich ohne Angabe wie frueher', () => {
+        // Ohne die Menge gilt jede Kennung als schuetzenswert. Das ist der
+        // Rueckfall, falls der Store einmal nichts liefert.
+        const plan = freezePlan(users, 0, 3);
+        assert.deepEqual(plan.offen, ['anna', 'ben']);
+    });
+
+    it('gibt nach drei Versuchen auch bei benutzten Kennungen auf', () => {
+        const plan = freezePlan(users, 3, 3, new Set(['anna']));
+        assert.equal(plan.tun, 'aufgeben');
+    });
+});
