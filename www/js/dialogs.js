@@ -707,11 +707,21 @@ export function initDialogs(state, actions) {
             .filter(i => i.text);
     }
 
-    function fillColumnSelect(selected) {
+    /**
+     * Die Spaltenauswahl des Karteneditors fuellen.
+     *
+     * @param selected vorzuwaehlende Spalte
+     * @param nurOffene Erledigt-Spalten weglassen. Gilt beim Anlegen und
+     *        Kopieren: Karten wandern in eine Erledigt-Spalte, sie entstehen
+     *        dort nicht. Beim Bearbeiten einer bestehenden Karte bleiben sie
+     *        waehlbar, das ist der uebliche Weg, eine Karte abzuschliessen.
+     */
+    function fillColumnSelect(selected, nurOffene) {
         const sel = form.elements.columnId;
         sel.textContent = '';
         for (const c of (state.board && state.board.columns) || []) {
             if (c.isTrash) continue;   // Papierkorb ist kein wählbares Ziel
+            if (nurOffene && c.isDone) continue;
             const o = document.createElement('option');
             o.value = c.id;
             o.textContent = c.title;
@@ -806,10 +816,11 @@ export function initDialogs(state, actions) {
         form.elements.calendarInvite.checked = !!src.calendarInvite;
         form.elements.calendarDuration.value = src.calendarDuration || '01:00';
         updateCalDurUI();
-        // Zielspalte: erste „Neu"-Spalte, sonst erste normale Spalte
-        const cols = (state.board.columns || []).filter(c => !c.isTrash);
+        // Zielspalte: erste „Neu"-Spalte, sonst erste normale Spalte.
+        // Erledigt-Spalten scheiden aus, die Kopie ist eine neue Karte.
+        const cols = (state.board.columns || []).filter(c => !c.isTrash && !c.isDone);
         const target = cols.find(c => c.allowAdd) || cols[0];
-        fillColumnSelect(target && target.id);
+        fillColumnSelect(target && target.id, true);
         selAssignees = new Set(src.assignees || []);
         selLabels = new Set(src.labels || []);
         selColor = src.color || '';
@@ -864,7 +875,7 @@ export function initDialogs(state, actions) {
         form.elements.calendarInvite.checked = !!(card && card.calendarInvite);
         form.elements.calendarDuration.value = (card && card.calendarDuration) || '01:00';
         updateCalDurUI();
-        fillColumnSelect(card ? card.columnId : defaultColumnId);
+        fillColumnSelect(card ? card.columnId : defaultColumnId, !card);
         selAssignees = new Set(card ? card.assignees : []);
         selLabels = new Set(card ? card.labels : []);
         selColor = (card && card.color) || '';
@@ -2180,7 +2191,11 @@ export function initDialogs(state, actions) {
             if (!targetBoard) return;
             const clone = mode === 'clone';
             colSel.textContent = '';
-            const cols = (targetBoard.columns || []).filter(c => !c.isTrash);
+            // Kopieren und Klonen legen eine neue Karte an, dafuer scheidet eine
+            // Erledigt-Spalte aus. Verschieben nimmt die vorhandene Karte mit,
+            // dort bleibt sie waehlbar.
+            const neueKarte = mode === 'clone' || mode === 'copy';
+            const cols = (targetBoard.columns || []).filter(c => !c.isTrash && !(neueKarte && c.isDone));
             for (const c of cols) { const o = document.createElement('option'); o.value = c.id; o.textContent = c.title; colSel.appendChild(o); }
             const def = (clone && cols.find(c => c.id === card.columnId)) || cols.find(c => c.allowAdd) || cols[0];
             if (def) colSel.value = def.id;

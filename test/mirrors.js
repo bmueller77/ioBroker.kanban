@@ -502,3 +502,63 @@ describe('Verwaiste Zustaendige im State', () => {
         assert.deepEqual(lies(states), []);
     });
 });
+
+describe('Erledigt-Spalte: anlegen, loeschen, wiederherstellen', () => {
+    // D2/E12: Eine dort angelegte Karte trug kein doneAt und fiel damit aus der
+    // Sortierung nach Alter in Spalte, aus dem Anzeige-Limit und aus dem
+    // Aufraeumen heraus. Sie blieb fuer immer liegen.
+    it('weist das Anlegen in einer Erledigt-Spalte ab', async () => {
+        const { store } = newStore();
+        await store.createBoard({ id: 'b', title: 'B' });
+        assert.throws(
+            () => store.addCard('b', { title: 'K', columnId: 'done', assignees: ['anna'] }, 'test'),
+            /Erledigt-Spalte/,
+        );
+    });
+
+    it('laesst offene Spalten unberuehrt', async () => {
+        const { store } = newStore();
+        await store.createBoard({ id: 'b', title: 'B' });
+        const k = store.addCard('b', { title: 'K', columnId: 'todo', assignees: ['anna'] }, 'test');
+        assert.equal(k.columnId, 'todo');
+        assert.equal(k.doneAt, null);
+    });
+
+    // E13: Beim Verschieben in den Papierkorb wurde doneAt geloescht. Nach dem
+    // Wiederherstellen war der urspruengliche Zeitpunkt weg.
+    it('behaelt den Erledigungszeitpunkt ueber Papierkorb und Rueckweg', async () => {
+        const { store } = newStore();
+        await store.createBoard({ id: 'b', title: 'B' });
+        const k = store.addCard('b', { title: 'K', columnId: 'todo', assignees: ['anna'] }, 'test');
+        store.moveCard('b', k.id, 'done', undefined, 'test');
+        const erledigtAm = store.getBoard('b').cards.find(c => c.id === k.id).doneAt;
+        assert.ok(erledigtAm, 'doneAt fehlt nach dem Erledigen');
+
+        store.deleteCard('b', k.id, 'test');
+        assert.equal(store.getBoard('b').cards.find(c => c.id === k.id).doneAt, erledigtAm);
+
+        store.restoreCard('b', k.id, 'done', 'test');
+        assert.equal(store.getBoard('b').cards.find(c => c.id === k.id).doneAt, erledigtAm);
+    });
+
+    it('setzt doneAt zurueck, wenn die Karte in eine offene Spalte zurueckkommt', async () => {
+        const { store } = newStore();
+        await store.createBoard({ id: 'b', title: 'B' });
+        const k = store.addCard('b', { title: 'K', columnId: 'todo', assignees: ['anna'] }, 'test');
+        store.moveCard('b', k.id, 'done', undefined, 'test');
+        store.deleteCard('b', k.id, 'test');
+        store.restoreCard('b', k.id, 'todo', 'test');
+        assert.equal(store.getBoard('b').cards.find(c => c.id === k.id).doneAt, null);
+    });
+
+    // E14: Ueber die Schnittstelle entstandene Labels waren alle gruen.
+    it('vergibt neuen Labels aus der Schnittstelle Farben reihum', async () => {
+        const { store } = newStore();
+        await store.createBoard({ id: 'b', title: 'B' });
+        store.addCard('b', { title: 'A', columnId: 'todo', assignees: ['anna'], labels: ['eins'] }, 'api');
+        store.addCard('b', { title: 'B', columnId: 'todo', assignees: ['anna'], labels: ['zwei'] }, 'api');
+        store.addCard('b', { title: 'C', columnId: 'todo', assignees: ['anna'], labels: ['drei'] }, 'api');
+        const farben = store.getBoard('b').labels.map(l => l.color);
+        assert.equal(new Set(farben).size, farben.length, `gleiche Farben: ${farben.join(', ')}`);
+    });
+});

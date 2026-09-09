@@ -1388,7 +1388,10 @@ export function renderBoard(container, state, actions) {
             list.appendChild(more);
         }
 
-        const canAdd = !col.isTrash && ((typeof col.allowAdd === 'boolean') ? col.allowAdd : (board.columns[0] && board.columns[0].id === col.id));
+        // Kein "+" an einer Erledigt-Spalte: Dort wird nichts angelegt, und ein
+        // Knopf, der nur in eine Fehlermeldung fuehrt, ist keiner.
+        const canAdd = !col.isTrash && !col.isDone
+            && ((typeof col.allowAdd === 'boolean') ? col.allowAdd : (board.columns[0] && board.columns[0].id === col.id));
         if (canAdd) {
             // Der Button haengt in der Kartenliste, damit er exakt so breit ist
             // wie die Karten (auch wenn die Spalte einen Scrollbalken hat).
@@ -1397,7 +1400,22 @@ export function renderBoard(container, state, actions) {
             addBtn.appendChild(mdiIcon(MDI.plus));
             addBtn.title = t('board.addCard');
             addBtn.setAttribute('aria-label', t('board.addCard'));
-            addBtn.addEventListener('click', () => actions.openCard(null, col.id));
+            // Derselbe Riegel wie am Knopf in der Kopfleiste. Er fehlte hier, und
+            // damit war die Sackgasse ohne Benutzer ueber den zweiten Weg
+            // unveraendert erreichbar (E11).
+            const grund = actions.addCardBlocker ? actions.addCardBlocker() : '';
+            if (grund) {
+                addBtn.setAttribute('aria-disabled', 'true');
+                addBtn.title = grund;
+            }
+            addBtn.addEventListener('click', () => {
+                const jetzt = actions.addCardBlocker ? actions.addCardBlocker() : '';
+                if (jetzt) {
+                    showHint(jetzt, 'error');
+                    return;
+                }
+                actions.openCard(null, col.id);
+            });
             list.appendChild(addBtn);
         }
 

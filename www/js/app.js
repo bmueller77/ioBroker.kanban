@@ -364,6 +364,10 @@ actions = {
      * @param boardId Board, zu dem die Spalten gehoeren
      * @param colIds Spalten, deren Anzeige-Limit sich geaendert hat
      */
+    // Damit der "+"-Knopf am Spaltenfuss denselben Riegel benutzt wie der in
+    // der Kopfleiste, statt einen zweiten zu bekommen (E11).
+    addCardBlocker,
+
     forgetExpanded(boardId, colIds) {
         let ab = false;
         for (const id of colIds || []) {

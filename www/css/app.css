@@ -1385,7 +1385,8 @@ dialog button:disabled { opacity: 0.45; cursor: default; filter: grayscale(0.6);
 
 /* Gesperrt, aber anklickbar: Der Klick erklaert, was fehlt (B1, B18). Ohne
    diese Regel sah der Knopf genauso einladend aus wie im Normalzustand. */
-#addCardBtn[aria-disabled="true"] { opacity: 0.45; filter: grayscale(0.6); cursor: default; }
+#addCardBtn[aria-disabled="true"],
+.add-card-btn[aria-disabled="true"] { opacity: 0.45; filter: grayscale(0.6); cursor: default; }
 .transfer-note { font-size: 12px; color: var(--muted); background: var(--surface2); border-radius: 6px; padding: 8px 10px; }
 
 /* ---- 0.3.0: Kopfzeile der Board-Einstellungen (Feature 64) ---- */
