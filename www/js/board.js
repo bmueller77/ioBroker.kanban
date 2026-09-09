@@ -1313,8 +1313,18 @@ export function renderBoard(container, state, actions) {
         // aktiven Filter abbilden, nicht die Kürzung der Anzeige.
         const zaehlBasis = cards;
         if (col.isTrash) {
-            // Papierkorb: fest nach trashedAt (älteste zuerst = am nächsten zur endgültigen Löschung)
-            cards = cards.slice().sort((a, b) => String(a.trashedAt || '').localeCompare(String(b.trashedAt || '')));
+            // Im Papierkorb heisst "manuell" nach Loeschzeitpunkt, aelteste
+            // zuerst: Oben steht, was der endgueltigen Loeschung am naechsten
+            // ist. Von Hand ziehen laesst sich hier ohnehin nichts. Die
+            // uebrigen Modi wirken wie in jeder anderen Spalte.
+            const sm = getSortMode(state, board, col);
+            cards = sm.mode === 'manual' || sm.mode === 'grid'
+                ? cards.slice().sort((a, b) => {
+                    const va = String(a.trashedAt || '');
+                    const vb = String(b.trashedAt || '');
+                    return sm.rev ? vb.localeCompare(va) : va.localeCompare(vb);
+                })
+                : applySort(cards, sm.mode, sm.rev);
         } else {
             // In Erledigt-Spalten optional nur die zuletzt erledigten N Karten zeigen
             if (col.isDone && state.doneLimit != null && cards.length > state.doneLimit) {
@@ -1410,9 +1420,25 @@ export function renderBoard(container, state, actions) {
             eye.addEventListener('click', () => actions.toggleShowDone());
             head.appendChild(eye);
         }
-        // Sortier-Umschalter (nicht im Papierkorb; in Erledigt-Spalten rechts vom Auge).
+        // Papierkorb: Leeren-Button. Er steht links vom Sortier-Umschalter, damit
+        // die Sortierung in jeder Spalte an derselben Stelle sitzt.
+        if (col.isTrash) {
+            const empt = el('button', 'col-toggle');
+            empt.appendChild(mdiIcon(MDI.broom));
+            empt.title = t('trash.empty');
+            empt.setAttribute('aria-label', empt.title);
+            empt.addEventListener('click', async (e) => {
+                e.stopPropagation();
+                if (!board.cards.some(c => c.columnId === col.id)) return;
+                if (await actions.confirm({ title: t('trash.empty'), message: t('confirm.emptyTrash'), danger: true, ok: t('trash.empty') })) {
+                    actions.emptyTrash();
+                }
+            });
+            head.appendChild(empt);
+        }
+        // Sortier-Umschalter, in jeder Spalte einschliesslich Papierkorb.
         // Bei den automatischen Modi steht links davon ein Richtungsumschalter.
-        if (!col.isTrash) {
+        {
             const { mode: curMode, rev: curRev } = getSortMode(state, board, col);
             if (AUTO_SORT_MODES.includes(curMode)) {
                 const dirBtn = el('button', 'col-sort col-sort-dir');
@@ -1432,21 +1458,6 @@ export function renderBoard(container, state, actions) {
             sortBtn.addEventListener('click', (e) => { e.stopPropagation(); openSortMenu(sortBtn, state, board, col, actions, e.detail === 0); });
             head.appendChild(sortBtn);
         }
-        // Papierkorb: Leeren-Button
-        if (col.isTrash) {
-            const empt = el('button', 'col-toggle');
-            empt.appendChild(mdiIcon(MDI.broom));
-            empt.title = t('trash.empty');
-            empt.setAttribute('aria-label', empt.title);
-            empt.addEventListener('click', async (e) => {
-                e.stopPropagation();
-                if (!board.cards.some(c => c.columnId === col.id)) return;
-                if (await actions.confirm({ title: t('trash.empty'), message: t('confirm.emptyTrash'), danger: true, ok: t('trash.empty') })) {
-                    actions.emptyTrash();
-                }
-            });
-            head.appendChild(empt);
-        }
         // Mobil: Spaltenkopf antippen klappt die Spalte ein/aus
         head.addEventListener('click', (e) => {
             if (!window.matchMedia('(max-width: 600px)').matches) return;   // nur bei gestapelten Spalten
@@ -1461,6 +1472,7 @@ export function renderBoard(container, state, actions) {
         colEl.appendChild(head);
 
         const list = el('div', 'cards');
+        // Im Papierkorb wird nicht umsortiert, der Anfasser waere ohne Wirkung.
         const sortMode = col.isTrash ? 'manual' : getSortMode(state, board, col).mode;
         const withGrip = sortMode === 'grid';
         const hideCards = isDoneCol && !state.showDone;
