@@ -553,12 +553,19 @@ function onDocClickSort(e) { if (sortMenuEl && !sortMenuEl.contains(e.target)) c
 function openSortMenu(btn, state, board, col, actions, tastatur) {
     closeSortMenu();
     const menu = el('div', 'sort-menu');
-    menu.appendChild(el('div', 'sort-menu-title', t('sort.mode')));
+    // Dieselben Rollen wie am Kopfzahlen-Menue. Dort kamen sie mit Befund 7,
+    // hier fehlten sie noch (C4).
+    menu.setAttribute('role', 'menu');
+    const sortKopf = el('div', 'sort-menu-title', t('sort.mode'));
+    sortKopf.setAttribute('aria-hidden', 'true');
+    menu.appendChild(sortKopf);
     const cur = getSortMode(state, board, col).mode;
     const labels = { manual: t('sort.manual'), grid: t('sort.grid'), due: t('sort.due'), priority: t('sort.priority'), age: t('sort.age') };
     for (const mode of SORT_MODES) {
         const item = el('button', 'sort-item' + (mode === cur ? ' active' : ''));
         item.type = 'button';
+        item.setAttribute('role', 'menuitemradio');
+        item.setAttribute('aria-checked', mode === cur ? 'true' : 'false');
         item.appendChild(mdiIcon(sortModeIcon(mode)));
         item.appendChild(el('span', null, labels[mode]));
         // Moduswechsel startet immer in der Standardrichtung
@@ -636,7 +643,9 @@ function dueBadge(due, dueTime, done, cfg) {
     b.appendChild(document.createTextNode(' ' + fmtDate(due, cfg && cfg.dateFormat) + (dueTime ? ' ' + fmtTime(dueTime, cfg && cfg.timeFormat) : '')));
     if (done) {
         b.classList.add('due-done');                  // erledigt → grün, keine Überfällig-Warnung
-        b.title = t('due.done');
+        // Zweizeilig wie alle anderen. Die erledigte Karte war die einzige mit
+        // einem einzeiligen Tooltip (C5).
+        b.title = dueTitle('done');
     } else {
         // Die Daten am Element behalten: So kann der Minutentakt die Farbe
         // nachziehen, ohne das Board neu aufzubauen - das würde Scrollposition
@@ -1377,6 +1386,13 @@ export function renderBoard(container, state, actions) {
             more.addEventListener('click', e => {
                 e.stopPropagation();
                 actions.toggleExpandCol(colKey(board, col));
+                // Das Umschalten zeichnet das Board neu und ersetzt damit den
+                // Knopf, unter dem gerade noch der Fokus lag - er landete auf
+                // body, und die Tastatur fing wieder von vorn an (C9).
+                const neu = container.querySelector(`.column[data-col-id="${(window.CSS && CSS.escape) ? CSS.escape(col.id) : col.id}"] .col-more`);
+                if (neu) {
+                    neu.focus();
+                }
             });
             // In die Kartenliste, nicht an die Spalte: Nur dort erbt der Knopf
             // deren Polsterung, steht also auf derselben linken Kante wie die

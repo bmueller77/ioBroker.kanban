@@ -287,10 +287,16 @@ button.count:hover { background: var(--surface2); }
 button.count:focus-visible { outline: 2px solid var(--accent, #7E57C2); outline-offset: 2px; }
 /* Verraet, dass die Zahl ein Bedienelement ist. Nur an der ersten. */
 .count-caret { width: 11px; height: 11px; margin-right: -3px; opacity: .55; }
+/* Auf einem farbigen Abzeichen ging das Dreieck bei .55 unter. Wer die
+   Gesamtzahl abschaltet, sah dann nur noch eine farbige Zahl und fand den Weg
+   ins Menue nicht mehr zurueck (C8). */
+.count-due .count-caret { opacity: .9; }
 /* Der letzte gesetzte Haken laesst sich nicht entfernen. Sichtbar gesperrt,
    damit es nicht wie ein Knopf ohne Wirkung aussieht. */
-.count-item-locked { opacity: .5; cursor: default; }
-.count-item-locked:hover { background: none; }
+/* Mit .sort-item zusammen, sonst gewinnt dessen spaetere Regel und der
+   gesperrte Eintrag behaelt den Zeigefinger (C7). */
+.sort-item.count-item-locked { opacity: .5; cursor: default; }
+.sort-item.count-item-locked:hover { background: none; }
 
 /* Dieselben Farben wie die Faelligkeits-Abzeichen auf den Karten */
 .count.due-overdue { background: var(--danger); color: #fff; }
@@ -515,6 +521,15 @@ button.count:focus-visible { outline: 2px solid var(--accent, #7E57C2); outline-
     color: var(--muted);
     white-space: nowrap;
 }
+/* Ein Abzeichen ohne Warnfarbe hob sich im hellen Theme mit 1,21:1 kaum vom
+   weissen Kartengrund ab (C6). Eine Haarlinie reicht, um es als eigenes Feld
+   erkennbar zu machen, ohne ihm die Zurueckhaltung zu nehmen. Die farbigen
+   Zustaende brauchen sie nicht, sie tragen ihre eigene Flaeche. */
+.card .badge { border: 1px solid var(--border); }
+.card .badge.due-overdue,
+.card .badge.due-today,
+.card .badge.due-soon,
+.card .badge.due-done { border-color: transparent; }
 
 .card .badges > .badge, .card .badges > .label-pill { box-shadow: var(--chip-shadow); }
 .badge svg { display: inline-block; width: 14px; height: 14px; vertical-align: -2px; }
@@ -1000,7 +1015,19 @@ dialog footer > button { overflow: hidden; text-overflow: ellipsis; white-space:
     padding: 6px;
 }
 
-.col-edit .drag { cursor: grab; color: var(--muted); flex: 0 0 18px; text-align: center; padding: 0; }
+/* Der Anfasser ist die Hilfe fuer den Finger und war mit 18 x 18 px selbst zu
+   klein dafuer (C3). */
+.col-edit .drag,
+.label-edit .drag {
+    cursor: grab;
+    color: var(--muted);
+    flex: 0 0 24px;
+    min-height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+}
 .col-edit input[type="text"] { flex: 1; min-width: 80px; }
 .col-edit input[type="number"] { flex: 0 0 60px; width: 60px; text-align: center; appearance: textfield; -moz-appearance: textfield; }
 .col-edit input[type="number"]::-webkit-outer-spin-button,
@@ -1020,6 +1047,8 @@ dialog footer > button { overflow: hidden; text-overflow: ellipsis; white-space:
 .col-more {
     font-size: 12px;
     color: var(--muted);
+    /* 24 px hoch, der Knopf mass 20 (C10) */
+    min-height: 24px;
     /* Sitzt in der Kartenliste und teilt damit deren linke Kante mit den
        Karten. Der negative obere Rand nimmt einen Teil des Listenabstands
        zurueck, damit der Hinweis am Fuss der Karten haengt und nicht
@@ -1046,7 +1075,7 @@ dialog footer > button { overflow: hidden; text-overflow: ellipsis; white-space:
     border-radius: 8px;
     padding: 6px;
 }
-.label-edit .drag { cursor: grab; color: var(--muted); flex: 0 0 18px; text-align: center; padding: 0; }
+
 .label-edit input[type="text"] { flex: 1; min-width: 80px; }
 
 /* nativer Colorpicker – kompakt und konsistent */
@@ -1148,6 +1177,14 @@ button.mini {
 .col-toggle {
     background: none;
     border: none;
+    /* 24 px in beide Richtungen nach WCAG 2.5.8. Auge und Besen massen 22 x 18,
+       und hinter dem Besen steht eine Aktion, die sich nicht ruecknehmen laesst
+       (C1, C2). */
+    min-width: 24px;
+    min-height: 24px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     padding: 0 2px;
     font-size: 16px;
     line-height: 1;
@@ -1307,6 +1344,9 @@ button.mini {
 }
 .card-grip:hover { opacity: 1; color: var(--accent); }
 .card-grip:active { cursor: grabbing; }
+/* Nur der Anfasser zeigt die Greifhand. Im Anfasser-Modus trug sie die ganze
+   Karte und versprach damit ein Ziehen, das dort gar nicht beginnt (C15). */
+.card.has-grip { cursor: default; }
 
 /* ---- 0.3.0: erledigte Karten (Feature 3+4) ---- */
 /* Erledigte Karten treten zurueck: gedaempfter Titel (hell -> heller, dunkel -> dunkler) */

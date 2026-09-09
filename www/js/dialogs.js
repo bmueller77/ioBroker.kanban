@@ -1291,7 +1291,13 @@ export function initDialogs(state, actions) {
                         && (c.assignees || []).length
                         && (c.assignees || []).every(a => dropped.includes(a)));
                     if (orphans.length) {
-                        const names = dropped.map(n => {
+                        // Nur die Personen nennen, die auf den gezaehlten Karten
+                        // wirklich stehen. Vorher standen dort alle kuenftigen
+                        // Nichtmitglieder, und wer die Meldung las, suchte auf der
+                        // Karte nach jemandem, der dort nie stand (D6).
+                        const betroffen = [...new Set(orphans.flatMap(c => c.assignees || []))]
+                            .filter(a => dropped.includes(a));
+                        const names = betroffen.map(n => {
                             const u = (state.users || []).find(x => x.name === n);
                             return (u && u.displayName) || n;
                         }).join(', ');
