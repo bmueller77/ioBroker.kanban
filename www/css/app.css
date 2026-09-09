@@ -140,7 +140,9 @@ button.linkbtn {
 
 /* Benutzer-Chips */
 
-#userChips { display: flex; gap: 4px; align-items: center; }
+/* Umbrechen statt die Seite in die Breite ziehen: Bei fuenfzehn Benutzern war
+   die Zeile 1750 px lang und schob den ganzen Seiteninhalt hinaus (F8). */
+#userChips { display: flex; gap: 4px; align-items: center; flex-wrap: wrap; min-width: 0; }
 #topbar button { box-shadow: var(--ui-shadow); }
 
 .user-chip {
@@ -673,6 +675,23 @@ dialog .row > label { flex: 1; }
    ganzen Platz neben dem Haken daneben ein und laesst die Zeile unfertig
    aussehen (B2). */
 #calDurWrap { flex: 0 0 auto; }
+
+/* Markdown-Tabellen in Beschreibung und Lesefenster. Ohne diese Regeln standen
+   die Zellen ohne Rahmen und ohne Innenabstand aneinander (F2). */
+.md-preview table,
+#descDialogBody table {
+    border-collapse: collapse;
+    margin: 6px 0;
+    font-size: 13px;
+}
+.md-preview th, .md-preview td,
+#descDialogBody th, #descDialogBody td {
+    border: 1px solid var(--border);
+    padding: 4px 8px;
+    text-align: left;
+}
+.md-preview th,
+#descDialogBody th { background: var(--surface2); font-weight: 600; }
 /* [hidden] muss das display:flex der Labels schlagen, sonst bleiben nicht
    relevante Wiederholungs-Felder sichtbar */
 dialog [hidden] { display: none !important; }
@@ -1361,6 +1380,8 @@ dialog button:disabled { opacity: 0.45; cursor: default; filter: grayscale(0.6);
     min-height: 24px;
 }
 .app-hint-close:hover { color: var(--text); }
+/* Fehler bleiben stehen und tragen die Warnfarbe. */
+.app-hint-error { border-color: var(--danger); }
 
 /* Gesperrt, aber anklickbar: Der Klick erklaert, was fehlt (B1, B18). Ohne
    diese Regel sah der Knopf genauso einladend aus wie im Normalzustand. */

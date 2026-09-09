@@ -4,6 +4,7 @@
   "topbar.addCard": "+ Card",
   "topbar.addCardNoBoard": "Create a board first, then cards",
   "topbar.addCardNoUsers": "Add a user in the instance settings first, then cards. Every card needs someone responsible.",
+  "topbar.addCardNoColumns": "This board has no column. Add one via the gear first, then you can create cards.",
   "hint.close": "Close notice",
   "hint.cardHidden": "The card is saved. It is not shown right now because a filter or the column display limit hides it.",
   "topbar.theme": "Switch theme",

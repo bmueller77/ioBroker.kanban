@@ -4,6 +4,7 @@
   "topbar.addCard": "+ Karte",
   "topbar.addCardNoBoard": "Erst ein Board anlegen, dann Karten",
   "topbar.addCardNoUsers": "Erst in den Instanzeinstellungen einen Benutzer anlegen, dann Karten. Jede Karte braucht eine zuständige Person.",
+  "topbar.addCardNoColumns": "Dieses Board hat keine Spalte. Lege zuerst über das Zahnrad eine an, dann lassen sich Karten anlegen.",
   "hint.close": "Hinweis schließen",
   "hint.cardHidden": "Die Karte ist gespeichert. Sie wird gerade nicht angezeigt, weil ein Filter oder das Anzeige-Limit der Spalte sie ausblendet.",
   "topbar.theme": "Theme wechseln",

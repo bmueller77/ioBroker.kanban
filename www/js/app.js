@@ -74,6 +74,13 @@ function addCardBlocker() {
     if (!(state.users || []).length) {
         return t('topbar.addCardNoUsers');
     }
+    // Ohne Spalte gibt es keinen Ort fuer die Karte. Der Editor ging bisher auf,
+    // das Feld "Spalte" war leer, und das Speichern lief in eine Fehlermeldung
+    // (F5). Ein Board ohne Spalten ist mit drei Klicks erreichbar.
+    const spalten = (state.board.columns || []).filter(c => !c.isTrash);
+    if (!spalten.length) {
+        return t('topbar.addCardNoColumns');
+    }
     return '';
 }
 
@@ -314,7 +321,7 @@ actions = {
                 method: 'POST', body: { columnId, order, by: '' },
             });
         } catch (e) {
-            alert(t('error.moveFailed', { msg: e.message }));
+            showHint(t('error.moveFailed', { msg: e.message }), 'error');
         }
         await refreshCurrent();
     },
@@ -440,7 +447,8 @@ async function init() {
         dialogs.openCard(null);
     });
     document.getElementById('settingsBtn').addEventListener('click', () => {
-        Promise.resolve(dialogs.openBoardManager()).catch(e => alert(t('error.loadFailed') + ': ' + e.message));
+        Promise.resolve(dialogs.openBoardManager())
+            .catch(e => showHint(`${t('error.loadFailed')}: ${e.message}`, 'error'));
     });
     document.getElementById('shareBtn').addEventListener('click', () => dialogs.openShareDialog());
     // Der fruehere "nur meine Karten"-Knopf ist seit 0.3.0 ohne Funktion; gefiltert

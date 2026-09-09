@@ -1197,7 +1197,10 @@ export function initDialogs(state, actions) {
             }
             dlg.close();
         } catch (e) {
-            alert(t('error.saveFailed', { msg: e.message }));
+            // Kein alert(): Die modale Box des Browsers haelt die ganze Seite an,
+            // bis jemand sie wegklickt, und ist fuer keine Pruefung lesbar. Genau
+            // daran blieb die Fernsteuerung bei F5 und bei Befund 25 haengen.
+            showHint(t('error.saveFailed', { msg: e.message }), 'error');
         }
     });
 

@@ -462,6 +462,19 @@ function closeCountMenu() {
     if (countMenuEl) { countMenuEl.remove(); countMenuEl = null; document.removeEventListener('click', onDocClickCount, true); }
 }
 function onDocClickCount(e) { if (countMenuEl && !countMenuEl.contains(e.target)) closeCountMenu(); }
+/**
+ * Offene Kopf- und Sortiermenues schliessen.
+ *
+ * Sie haengen an body, nicht an der Spalte. Wurde die Spalte inzwischen
+ * geloescht oder umbenannt, blieb ihr Menue stehen und liess sich weiter
+ * bedienen (F6). Beim Neuzeichnen des Boards ist es in jedem Fall veraltet.
+ */
+export function closeColumnMenus() {
+    for (const m of document.querySelectorAll('.sort-menu')) {
+        m.remove();
+    }
+}
+
 function openCountMenu(btn, state, board, col, actions, tastatur) {
     closeCountMenu();
     const menu = el('div', 'sort-menu count-menu');
@@ -1021,8 +1034,11 @@ export function boardMembers(board, users) {
  * ohne den Fokus wegzunehmen.
  *
  * @param text Der Hinweistext. Leer entfernt einen stehenden Hinweis.
+ * @param art 'info' (Vorgabe) verschwindet von selbst, 'error' bleibt stehen,
+ *        bis jemand das Kreuz drueckt. Eine Fehlermeldung, die sich nach acht
+ *        Sekunden davonmacht, ist so gut wie keine.
  */
-export function showHint(text) {
+export function showHint(text, art) {
     const alt = document.querySelector('.app-hint');
     if (alt) {
         clearTimeout(Number(alt.dataset.timer));
@@ -1031,8 +1047,9 @@ export function showHint(text) {
     if (!text) {
         return;
     }
-    const box = el('div', 'app-hint');
-    box.setAttribute('role', 'status');
+    const fehler = art === 'error';
+    const box = el('div', `app-hint${fehler ? ' app-hint-error' : ''}`);
+    box.setAttribute('role', fehler ? 'alert' : 'status');
     box.appendChild(el('span', null, text));
     const zu = el('button', 'app-hint-close');
     zu.type = 'button';
@@ -1042,9 +1059,11 @@ export function showHint(text) {
     zu.addEventListener('click', () => showHint(''));
     box.appendChild(zu);
     document.body.appendChild(box);
-    // Lang genug zum Lesen, kurz genug, um nicht im Weg zu stehen. Wer
-    // schneller ist, klickt das Kreuz.
-    box.dataset.timer = String(setTimeout(() => showHint(''), 8000));
+    if (!fehler) {
+        // Lang genug zum Lesen, kurz genug, um nicht im Weg zu stehen. Wer
+        // schneller ist, klickt das Kreuz.
+        box.dataset.timer = String(setTimeout(() => showHint(''), 8000));
+    }
 }
 
 export function soloUser(state) {
@@ -1125,6 +1144,9 @@ const _widthWatcher = typeof ResizeObserver === 'function' ? new ResizeObserver(
 }) : null;
 
 export function renderBoard(container, state, actions) {
+    // Was zu einer Spalte von vorhin gehoert, gehoert nach dem Neuzeichnen
+    // nirgendwohin mehr (F6).
+    closeColumnMenus();
     initCtxGuard();
     // Scrollpositionen merken: das Board wird bei jeder Änderung komplett neu
     // aufgebaut (z. B. nach dem Abhaken eines Checklisten-Punkts), sonst springt

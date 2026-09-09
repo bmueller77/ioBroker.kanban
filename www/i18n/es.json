@@ -4,6 +4,7 @@
   "topbar.addCard": "+ Tarjeta",
   "topbar.addCardNoBoard": "Primero crea un tablero, luego tarjetas",
   "topbar.addCardNoUsers": "Primero crea un usuario en la configuración de la instancia y luego las tarjetas. Cada tarjeta necesita una persona responsable.",
+  "topbar.addCardNoColumns": "Este tablero no tiene ninguna columna. Crea una desde el engranaje y luego podrás añadir tarjetas.",
   "hint.close": "Cerrar aviso",
   "hint.cardHidden": "La tarjeta se ha guardado. Ahora no se muestra porque un filtro o el límite de visualización de la columna la oculta.",
   "topbar.theme": "Cambiar tema",

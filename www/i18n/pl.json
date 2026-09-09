@@ -4,6 +4,7 @@
   "topbar.addCard": "+ Karta",
   "topbar.addCardNoBoard": "Najpierw utwórz tablicę, potem karty",
   "topbar.addCardNoUsers": "Najpierw dodaj użytkownika w ustawieniach instancji, potem karty. Każda karta potrzebuje osoby odpowiedzialnej.",
+  "topbar.addCardNoColumns": "Ta tablica nie ma żadnej kolumny. Najpierw dodaj ją przez koło zębate, potem można tworzyć karty.",
   "hint.close": "Zamknij powiadomienie",
   "hint.cardHidden": "Karta została zapisana. Nie jest teraz widoczna, ponieważ ukrywa ją filtr lub limit wyświetlania kolumny.",
   "topbar.theme": "Zmień motyw",
