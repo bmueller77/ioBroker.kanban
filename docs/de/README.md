@@ -4,7 +4,7 @@ Ein **Kanban-Board als eigener ioBroker-Adapter**. Er bringt seinen eigenen Webs
 
 > **Für wen?** Für Haushalte, die Aufgaben gemeinsam verwalten wollen - Familie, WG, Wartungsplan fürs Haus - und sie dort haben möchten, wo ohnehin ioBroker läuft. Jedes Ereignis landet in einem State, den Skripte und Node-RED auswerten können, und das Board lässt sich als Webpage-Card in Lovelace einbetten.
 
-> **Version 0.3.2**, Zahlen im Spaltenkopf umschaltbar (Gesamt, Morgen, Heute, Überfällig), aufklappbare Abschnitte im Karteneditor mit Zusammenfassung, Symbolleiste über dem Link-Feld, Benutzer-IDs nach dem Anlegen gesperrt, Reparatur verwaister Zuständiger in der Oberfläche, eine Reihenfolge für Labels an allen Stellen und eine ziehbare Labelliste, Ein-Benutzer-Betrieb ohne Zuständigkeitsfelder, überarbeitete Tastaturbedienung.
+> **Version 0.3.2**, Zahlen im Spaltenkopf umschaltbar (Gesamt, Morgen, Heute, Überfällig), aufklappbare Abschnitte im Karteneditor mit Zusammenfassung, Symbolleiste über dem Link-Feld, Benutzer-IDs gesperrt, sobald etwas an ihnen hängt, Reparatur verwaister Zuständiger in der Oberfläche, eine Reihenfolge für Labels an allen Stellen und eine ziehbare Labelliste, Ein-Benutzer-Betrieb ohne Zuständigkeitsfelder, überarbeitete Tastaturbedienung, "Alle X Tage (nach Erledigung des Vorgängers)" als neue Wiederholungsart, Gelb heißt jetzt genau der nächste Kalendertag, keine neuen Karten in Erledigt-Spalten, Kalender-Absage beim Löschen.
 
 > **Version 0.3.1**, Fehlerbehebungen und Pflege der Abhängigkeiten.
 
@@ -135,6 +135,8 @@ Eine neue Zeile legst du über das **"+"** in der Kopfzeile der Tabelle an, das 
 
 > **Die ID ist der Schlüssel, und nach dem Anlegen gesperrt.** Über die Spalte *ID* finden Boards und Karten ihre Personen; auch die Avatarbilder und die Adressen geteilter Ansichten hängen daran. Eine nachträgliche Änderung ließe all das ins Leere zeigen, und der Adapter könnte nicht einmal aufräumen: Eine Umbenennung ist technisch nicht von "gelöscht und neu angelegt" zu unterscheiden. Deshalb ist das Feld gesperrt, sobald der Benutzer einmal gespeichert wurde. Der Adapter trägt dafür beim nächsten Start ein Merkmal in die Instanzkonfiguration ein und startet dabei einmal neu. Das passiert einmal je neuem Benutzer, danach nie wieder.
 >
+> **Wann das Feld überhaupt zuschnappt:** Erst dann, wenn an der Kennung etwas hängt, also sobald ihr eine Karte zugewiesen ist oder sie ein Avatarbild trägt. Bis dahin lässt sie sich frei ändern; eine Kennung, auf die nichts zeigt, kann man gefahrlos umbenennen. Eine frisch eingerichtete Instanz mit Benutzern, aber ohne Karten schreibt ihre Konfiguration deshalb gar nicht zurück und startet nicht von selbst neu. Bis 0.3.2 geschah das beim ersten Start für alle Benutzer, und wer in diesem Moment im Admin speicherte, verlor seine Eingabe.
+>
 > **Wenn das Feld editierbar bleibt:** Der Adapter schreibt das Merkmal beim Start zurück. Speicherst du die Instanzeinstellungen genau in diesem Moment, überschreibt dein Formular es wieder. Der Adapter versucht es dann bis zu dreimal erneut, meldet danach im Log "Could not freeze the user ID(s)" und lässt die Felder editierbar. Erkennbar ist der Zustand daran, dass die Spalte *ID* weiterhin tippbar ist - allerdings **erst nach einem vollständigen Neuladen der Admin-Seite**. Innerhalb der offenen Seite bleibt das Feld auch dann tippbar, wenn der Adapter es längst festgeschrieben hat; ein Wechsel zu einem anderen Menüpunkt und zurück genügt nicht. Wer das nicht weiß, hält einen gelungenen Vorgang für gescheitert. Verlässlicher als das Feld ist das Log: Dort steht entweder "User ID(s) ... are now fixed" oder die Warnung. Abhilfe im echten Fehlerfall: Instanz einmal neu starten und prüfen, ob die Felder gesperrt sind, **bevor** Karten angelegt werden.
 >
 > Der **Anzeigename** bleibt frei änderbar. Aus "Tom Reich" wird also gefahrlos "Tommy Reich", ohne dass eine Karte etwas davon merkt.
@@ -196,6 +198,8 @@ Der Kern-Unterschied zwischen **Zugew.** und **Neu**: "Zugew." ist die **persön
 | Karte **mit** Zuständigen anlegen | **Neu** + **Zugew.** |
 | Karte bearbeiten und dabei jemanden hinzufügen | **Geänd.** + **Zugew.** |
 | Karte in die Erledigt-Spalte ziehen | **Versch.** + **Erled.** |
+| Spalte im Karteneditor auf eine Erledigt-Spalte umstellen | **Geänd.** + **Versch.** + **Erled.** |
+| Spalte im Karteneditor auf eine offene Spalte umstellen | **Geänd.** + **Versch.** |
 
 Für die meisten Setups genügt daher **"Zugew." allein**. "Neu" lohnt sich, wenn du auch über Karten informiert werden willst, die *andere* anlegen und bei denen du mitzuständig bist.
 
@@ -205,7 +209,9 @@ Für die meisten Setups genügt daher **"Zugew." allein**. "Neu" lohnt sich, wen
 
 **Voraussetzung:** Nur Benutzer **mit hinterlegter E-Mail-Adresse** erhalten Mails; alle anderen werden übersprungen.
 
-> **Papierkorb-Ereignisse** (seit 0.3.0): Für "in den Papierkorb", "wiederhergestellt" und "endgültig gelöscht" gibt es eigene Häkchen, die standardmäßig **aus** sind. Ein **automatischer Aufräumlauf** verschickt keine Einzelmails, sondern **eine Sammelmail je Benutzer** mit allen betroffenen Karten. Löschst du eine einzelne Karte von Hand, kommt wie gewohnt eine Einzelmail.
+> **Der Weg zählt mit.** Verschiebst du eine Karte per Ziehen, kommen die Ereignisse des Verschiebens. Stellst du dieselbe Spalte im **Karteneditor** um, ist das für den Adapter zusätzlich eine Änderung an der Karte, es kommt also **Geänd.** dazu. Wer alle Haken gesetzt hat, bekommt für einen Handgriff drei Nachrichten.
+
+> **Papierkorb-Ereignisse** (seit 0.3.0): Für "in den Papierkorb", "wiederhergestellt" und "endgültig gelöscht" gibt es eigene Häkchen, die standardmäßig **aus** sind. Ein **automatischer Aufräumlauf** verschickt keine Einzelmails, sondern **eine Sammelmail je Benutzer** mit allen betroffenen Karten. Löschst du eine einzelne Karte von Hand, kommt wie gewohnt eine Einzelmail. Der **Besen** dagegen leert den ganzen Papierkorb auf einmal und verschickt deshalb ebenfalls eine Sammelmail, nicht eine Nachricht je Karte.
 
 #### Kalender-Einladung (.ics)
 
@@ -215,6 +221,7 @@ Ist an einer Karte **"Kalender-Einladung"** aktiviert und ein Datum gesetzt, hä
 - **Mit Uhrzeit** → Termin mit Start und der an der Karte eingestellten **Dauer** (`calendarDuration`, Standard eine Stunde).
 - **Mit Wiederholung** → **Serientermin** statt Einzeltermin: Der Termin trägt eine `RRULE`, der Kalender legt also die ganze Serie an. Abgebildet werden täglich, alle X Tage, wöchentlich (mit Wochentagen), monatlich (Tag im Monat), monatlich (n-ter/letzter Wochentag) und jährlich. **Ausnahme:** "Arbeitstag im Monat" hängt an Feiertagen, die der Kalenderstandard nicht kennt - solche Karten bleiben Einzeltermine.
 - **Die Einladung kommt nur einmal.** Sie liegt der Mail bei, wenn die Karte **angelegt** oder jemandem **neu zugewiesen** wird. Die Folgekarten einer Wiederholung verschicken **keine** weitere Einladung (die Serie liegt im Kalender bereits), und Erinnerungs- oder Verschiebe-Mails hängen ebenfalls nichts an. Eine **aktualisierte** Einladung geht nur raus, wenn sich **Fälligkeit, Uhrzeit, Dauer oder Wiederholungsregel** ändern - dann mit derselben `UID` und höherer `SEQUENCE`, sodass der Kalender den vorhandenen Termin ersetzt statt einen zweiten anzulegen. Andere Änderungen (z. B. am Titel) lösen bewusst keine neue Einladung aus.
+- **Beim Löschen kommt eine Absage.** Wandert eine Karte mit Einladung in den Papierkorb oder wird sie endgültig entfernt, geht eine `.ics` mit `METHOD:CANCEL`, derselben `UID` und der nächsten `SEQUENCE` raus. Der Kalender räumt den Termin damit ab, statt ihn stehen zu lassen. Bis 0.3.2 blieb er bei allen Zuständigen im Kalender.
 - Übernommen werden Titel (`SUMMARY`), Beschreibung, **Ort** (`LOCATION`) und Link (`URL`).
 - **Zeitzone:** Uhrzeit-Termine werden eindeutig in UTC ausgegeben; die zugrunde liegende Zeitzone wird aus dem System ermittelt (bzw. `system.config`), Sommer-/Winterzeit inklusive. Ganztägige Termine sind bewusst zeitzonenlos.
 
@@ -356,7 +363,7 @@ Damit sich die Erledigt-Spalte nicht endlos füllt, kann jedes Board alte erledi
 | **Nach Alter** | Karten, deren Erledigung länger als *X* Tage zurückliegt, wandern in den Papierkorb. Voreinstellung: 90 Tage. |
 | **Nach Anzahl** | In jeder Erledigt-Spalte bleiben nur die *X* zuletzt erledigten Karten stehen, der Rest wandert in den Papierkorb. Voreinstellung: 100 Karten. |
 
-Der Lauf startet **einmal täglich** sowie **beim Adapterstart**. Grundlage ist der Erledigt-Zeitpunkt (`doneAt`); Karten ohne diesen Zeitstempel bleiben unangetastet. Weil die Karten nur in den Papierkorb wandern, hast du weitere 30 Tage Zeit, etwas zurückzuholen.
+Der Lauf startet **einmal täglich** sowie **beim Adapterstart**. Grundlage ist der Erledigt-Zeitpunkt (`doneAt`); Karten ohne diesen Zeitstempel bleiben unangetastet. Er überlebt seit 0.3.2 den Papierkorb: Wer eine erledigte Karte löscht und zurückholt, findet ihren ursprünglichen Erledigt-Zeitpunkt wieder vor. Weil die Karten nur in den Papierkorb wandern, hast du weitere 30 Tage Zeit, etwas zurückzuholen.
 
 #### Labels
 
@@ -420,7 +427,7 @@ Eine Karte hat folgende inhaltliche Felder (per API unter denselben Namen setzba
 | **dueTime** | `HH:MM` | Optionale Uhrzeit. Wird über eine Checkbox aktiviert und erscheint auf der Karte hinter dem Datum. Nur wirksam zusammen mit `due`. |
 | **priority** | `0`/`1`/`2` | Normal / Hoch / Dringend. Auf der Karte zeigt sich das als Badge unter dem Titel (vor Fälligkeit und Ort): bei **Normal** erscheint nichts, bei **Hoch** ein oranges `!`, bei **Dringend** ein rotes `!!`. Andere Werte werden abgelehnt, per API mit einem Fehler - siehe [Antworten & Fehler](#antworten--fehler). |
 | **assignees** | Liste von Benutzer-IDs | Zuständige. Steuern, wer Benachrichtigungen erhält. **Pflichtfeld, auch über die API:** Mindestens eine Person muss angegeben sein, und jede angegebene ID muss in den Instanzeinstellungen existieren - sonst antwortet die Schnittstelle mit `400` und nennt die vorhandenen Kennungen. **Ausnahme seit 0.3.2:** Gibt es genau einen Benutzer, wird die Angabe automatisch ergänzt statt abgewiesen. Bis dahin nahm die API alles an, auch Platzhalter wie `default`; so entstanden Karten, die sich über den Editor gar nicht anlegen ließen und die hinter einem `users`-Filter unsichtbar blieben. Eine ID, die **bereits auf der Karte steht**, bleibt beim Bearbeiten erlaubt, auch wenn es den Benutzer nicht mehr gibt - sonst wäre ausgerechnet die verwaiste Karte gesperrt. Zeigt die **Mitgliederliste eines Boards ins Leere**, sind seit 0.3.0 **alle** Benutzer zuweisbar. |
-| **labels** | Liste von Label-IDs | Farbige Schlagworte. Labels werden pro Board verwaltet (anlegen, umbenennen, umfärben, löschen). Kommt über die API ein Label an, das das Board nicht kennt, wird es **angelegt** statt abgelehnt (grün, Titel = Kennung; beides danach änderbar). Andernfalls trüge die Karte ein Label, das das Board nicht führt - hinter einem `onlyLabel`-Filter bliebe sie damit unsichtbar. |
+| **labels** | Liste von Label-IDs | Farbige Schlagworte. Labels werden pro Board verwaltet (anlegen, umbenennen, umfärben, löschen). Kommt über die API ein Label an, das das Board nicht kennt, wird es **angelegt** statt abgelehnt (Titel = Kennung, Farbe reihum aus derselben Palette wie in der Oberfläche; beides danach änderbar). Andernfalls trüge die Karte ein Label, das das Board nicht führt - hinter einem `onlyLabel`-Filter bliebe sie damit unsichtbar. |
 | **color** | Hex-Farbe | Farbiger Balken links an der Karte. Wählbar über einen eingebetteten Colorpicker (Farbfeld + Farbton-Regler + Hex-Eingabe) oder Presets. |
 | **link** | URL | Verknüpfung. Auf der Karte erscheint ein **typabhängiges Icon** - siehe [Link-Typen](#link-typen). |
 | **location** | Text | Ort. Erscheint als Orts-Badge (Pin-Symbol) auf der Karte und wird als `LOCATION` in die Kalender-Einladung übernommen. |
@@ -577,7 +584,11 @@ Welche Personen es überhaupt gibt, kommt aus den Instanzeinstellungen ([Tab "Be
 
 **Gibt es nur eine Person**, verschwindet die ganze Zuständigkeit aus der Oberfläche: keine Chips in der Kopfzeile, keine Avatare auf den Karten, kein Feld *Zuständig* im Karteneditor und keine Benutzerauswahl im Ansichten-Dialog. Es gäbe dort nichts zu wählen und nichts zu filtern. Neue Karten bekommen diese Person automatisch, auch über die Schnittstelle: Ein `POST` ohne `assignees` wird dann nicht mehr mit `400` abgewiesen, sondern still ergänzt. Eine angegebene Kennung wird weiterhin geprüft.
 
-**Gibt es gar keine Person**, lässt sich keine Karte anlegen: Die Zuständigkeit ist ein Pflichtfeld, und niemand ist nicht dasselbe wie irgendjemand. Der Knopf "+ Karte" ist deshalb gesperrt und sagt beim Anklicken, dass zuerst ein Benutzer in den Instanzeinstellungen fehlt. Dieser Zustand ist ohne Warnung erreichbar, indem man dort alle Zeilen löscht.
+**Gibt es gar keine Person**, lässt sich keine Karte anlegen: Die Zuständigkeit ist ein Pflichtfeld, und niemand ist nicht dasselbe wie irgendjemand. Der Knopf "+ Karte" ist deshalb gesperrt und sagt beim Anklicken, dass zuerst ein Benutzer in den Instanzeinstellungen fehlt, ebenso das "+" am Fuß der Spalten. Dieser Zustand ist ohne Warnung erreichbar, indem man dort alle Zeilen löscht.
+
+Dasselbe gilt für ein **Board ohne Spalten**: Ohne Spalte gibt es keinen Ort für die Karte, der Knopf sagt es und der Editor geht gar nicht erst auf.
+
+> **In einer Erledigt-Spalte entstehen keine Karten** (seit 0.3.2). Sie wandern dorthin, sie werden dort nicht angelegt: Der Karteneditor bietet Erledigt-Spalten beim Anlegen und Kopieren nicht an, am Fuß einer solchen Spalte steht kein "+", und über die Schnittstelle wird der Versuch abgewiesen. Der Grund ist der Erledigt-Zeitpunkt. Eine dort angelegte Karte hatte keinen, fiel damit aus der Sortierung [Alter in Spalte](#sortierung--reihenfolge), aus dem [Anzeige-Limit](#spalten) für Erledigte und aus dem [automatischen Aufräumen](#erledigte-karten-in-den-papierkorb) heraus und blieb für immer liegen. Beim **Verschieben** und beim Bearbeiten einer bestehenden Karte bleibt die Erledigt-Spalte wählbar, das ist der übliche Weg zum Abschließen.
 
 Sobald ein zweiter Benutzer in den Instanzeinstellungen steht, ist alles wieder da. Karten, die in der Zwischenzeit entstanden sind, tragen die eine Person und zeigen sie ab dann auch an. Trägt eine Karte eine Kennung, die es nicht mehr gibt, bleibt die stehen und wird nicht stillschweigend umgehängt; dafür gibt es die [Reparatur verwaister Zuständiger](#benutzer-umbenennen).
 
@@ -614,7 +625,7 @@ Alle Parameter lassen sich auch direkt an die URL hängen:
 | Parameter | Wirkung |
 |---|---|
 | `board=<id>` | Öffnet dieses Board. Ab 0.3.0 trägt die Adresszeile das aktuelle Board automatisch nach: Beim Wechsel über die Board-Auswahl wird `?board=<id>` gesetzt (ohne neuen History-Eintrag, alle übrigen Parameter bleiben stehen), sodass die Adresse direkt kopier- und teilbar ist. |
-| `users=<name,name>` | **Personen-Filter**: zeigt nur Karten, die mindestens einem dieser Benutzer zugewiesen sind (setzt die Kopf-Chips entsprechend). `user=<name>` ist die Kurzform für einen einzelnen Benutzer. **Achtung:** Der Parameter überschreibt die je Board im Browser gespeicherte Chip-Auswahl **dauerhaft** - sie bleibt auch beim nächsten Aufruf *ohne* Parameter aktiv. Zurücksetzen lässt sie sich über die Chips in der Kopfleiste. |
+| `users=<name,name>` | **Personen-Filter**: zeigt nur Karten, die mindestens einem dieser Benutzer zugewiesen sind (setzt die Kopf-Chips entsprechend). `user=<name>` ist die Kurzform für einen einzelnen Benutzer. Der Parameter gilt **nur für diesen Aufruf**: Deine eigene Chip-Auswahl bleibt gespeichert und steht beim nächsten Aufruf ohne Parameter wieder da. Ein geteilter Link überschreibt also nicht, was jemand am eigenen Gerät eingestellt hat. |
 | `label=<id,id>` | **Label-Blacklist** (mehrere möglich): blendet Karten mit einem dieser Labels aus, neue Labels bleiben automatisch sichtbar. |
 | `onlyLabel=<id,id>` | **Label-Whitelist** (ab 0.3.0): zeigt **nur** Karten, die mindestens eines dieser Labels tragen - Karten ohne Label fallen weg. Lässt sich mit `label=` kombinieren (erst Whitelist, dann Blacklist). |
 | `columns=<id,id>` | Zeigt nur diese Spalten. Nicht genannte Spalten werden ausgeblendet. |
@@ -1054,7 +1065,7 @@ Neben der Oberfläche legt der Adapter States an, die sich in Skripten, VIS/Love
 | `kanban.0.users.<name>.overdueCount` | number | Davon überfällig. |
 | `kanban.0.users.<name>.overdueList` | json | Liste der überfälligen Karten (Titel + Board/Spalte). |
 
-Die `boards.*`- und `users.*`-Spiegel-States eignen sich gut für Dashboards ("Björn: 3 offen, 1 überfällig") oder Automatisierungen, ohne die REST-API abfragen zu müssen.
+Die `boards.*`- und `users.*`-Spiegel-States eignen sich gut für Dashboards ("Björn: 3 offen, 1 überfällig") oder Automatisierungen, ohne die REST-API abfragen zu müssen. Wird ein Benutzer in den Instanzeinstellungen gelöscht, verschwindet sein Zweig unter `users.*` mit; bis 0.3.2 blieb er samt seinen letzten Zahlen stehen und ein Dashboard zählte dauerhaft eine Person zu viel.
 
 ---
 

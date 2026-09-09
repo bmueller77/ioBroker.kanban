@@ -4,7 +4,7 @@ A **Kanban board as a dedicated ioBroker adapter**. It ships its own web server,
 
 > **Who is it for?** Households that manage tasks together, whether that is a family, a flat-share or the maintenance plan for a house, and want those tasks where ioBroker already runs. Every event lands in a state that scripts and Node-RED can read, and the board embeds into Lovelace as a webpage card.
 
-> **Version 0.3.2**, switchable counts in the column header (total, tomorrow, today, overdue), collapsible sections in the card editor with a summary, an icon bar above the link field, user IDs locked once created, repair for orphaned assignees in the UI, one label order everywhere plus a draggable label list, single-user mode without assignment fields, reworked keyboard operation.
+> **Version 0.3.2**, switchable counts in the column header (total, tomorrow, today, overdue), collapsible sections in the card editor with a summary, an icon bar above the link field, user IDs locked as soon as something hangs on them, repair for orphaned assignees in the UI, one label order everywhere plus a draggable label list, single-user mode without assignment fields, reworked keyboard operation, "every X days (after the previous one is done)" as a new recurrence kind, yellow now means exactly the next calendar day, no new cards in done columns, calendar cancellation on delete.
 
 > **Version 0.3.1**, bug fixes and dependency maintenance.
 
@@ -135,6 +135,8 @@ Add a row with the **"+"** in the table header; the bin icon at the end of a row
 
 > **The ID is the key, and it is locked once created.** Boards and cards find their people through the *ID* column; the avatar pictures and the addresses of shared views hang on it as well. Changing it later would leave all of that pointing nowhere, and the adapter could not even clean up afterwards: a rename cannot be told apart from "deleted and newly created". The field is therefore locked as soon as the user has been saved once. The adapter writes a marker into the instance configuration on the next start and restarts once while doing so. That happens once per new user, never again after that.
 >
+> **When the field locks at all:** only once something hangs on the ID, meaning a card is assigned to it or it carries an avatar image. Until then it can be changed freely; an ID nothing points at is safe to rename. A freshly set up instance with users but no cards therefore never writes its configuration back and never restarts itself. Up to 0.3.2 this happened on the first start for every user, and saving in the admin at that moment lost your input.
+>
 > **If the field stays editable:** the adapter writes the marker back on start. Saving the instance settings at exactly that moment overwrites it again with what your form still held. The adapter then retries up to three times, after that it logs "Could not freeze the user ID(s)" and leaves the fields editable. You can tell by the *ID* column still being typeable - but only **after a full reload of the admin page**. Inside the open page the field stays typeable even when the adapter locked it long ago, and switching to another menu entry and back is not enough. Without knowing that, a successful run looks like a failure. The log is more reliable than the field: it says either "User ID(s) ... are now fixed" or the warning. The remedy for a real failure: restart the instance once and check that the fields are locked **before** creating any cards.
 >
 > The **display name** stays freely editable. "Tom Reich" becomes "Tommy Reich" without a single card noticing.
@@ -196,6 +198,8 @@ The core difference between **assigned** and **created**: "assigned" is the **pe
 | Create a card **with** assignees | **created** + **assigned** |
 | Edit a card and add someone | **changed** + **assigned** |
 | Drag a card into the done column | **moved** + **done** |
+| Switch the column in the card editor to a done column | **changed** + **moved** + **done** |
+| Switch the column in the card editor to an open column | **changed** + **moved** |
 
 For most setups **"assigned" alone** is therefore enough. "created" pays off if you also want to hear about cards that *others* create and where you are a co-assignee.
 
@@ -205,7 +209,9 @@ For most setups **"assigned" alone** is therefore enough. "created" pays off if 
 
 **Prerequisite:** only users **with an e-mail address on file** receive mails; everyone else is skipped.
 
-> **Trash events** (since 0.3.0): "moved to trash", "restored" and "permanently deleted" have their own checkboxes, all **off** by default. An **automatic cleanup run** does not send one mail per card but **one summary mail per user** listing every affected card. Deleting a single card by hand still sends a normal individual mail.
+> **The route counts too.** Move a card by dragging and you get the events of a move. Switch the same column in the **card editor** and the adapter also sees a change to the card, so **changed** comes on top. With every checkbox set, one gesture produces three messages.
+
+> **Trash events** (since 0.3.0): "moved to trash", "restored" and "permanently deleted" have their own checkboxes, all **off** by default. An **automatic cleanup run** does not send one mail per card but **one summary mail per user** listing every affected card. Deleting a single card by hand still sends a normal individual mail. The **broom** empties the whole trash at once and therefore also sends a summary mail rather than one message per card.
 
 #### Calendar invite (.ics)
 
@@ -215,6 +221,7 @@ If **"Calendar invite"** is enabled on a card and a date is set, the adapter att
 - **With time** → timed event with the **duration** set on the card (`calendarDuration`, default one hour).
 - **With a recurrence** → a **series** instead of a single event: the invite carries an `RRULE`, so the calendar creates the whole series. Daily, every X days, weekly (with weekdays), monthly (day of month), monthly (nth/last weekday) and yearly are mapped. **Exception:** "workday of the month" depends on public holidays, which the calendar standard does not know, so those cards stay single events.
 - **The invite is sent only once.** It is attached when the card is **created** or **newly assigned** to someone. Follow-up cards of a recurrence send **no** further invite (the series is already in the calendar), and reminder or move mails attach nothing either. An **updated** invite only goes out when **due date, time, duration or recurrence rule** change. That invite carries the same `UID` and a higher `SEQUENCE`, so the calendar replaces the existing entry instead of adding a second one. Other changes (the title, for instance) deliberately do not trigger a new invite.
+- **Deleting sends a cancellation.** When a card with an invite moves to the trash or is removed for good, an `.ics` with `METHOD:CANCEL`, the same `UID` and the next `SEQUENCE` goes out. The calendar clears the entry instead of leaving it behind. Up to 0.3.2 the appointment stayed in every assignee's calendar.
 - Title (`SUMMARY`), description, **location** (`LOCATION`) and link (`URL`) are carried over.
 - **Time zone:** timed events are emitted unambiguously in UTC; the underlying time zone is determined from the system (or `system.config`), including daylight saving. All-day events are deliberately time-zone-free.
 
@@ -356,7 +363,7 @@ To stop the done column from growing forever, each board can move old completed 
 | **By age** | Cards completed more than *X* days ago move to the trash. Default: 90 days. |
 | **By count** | Only the *X* most recently completed cards stay in each done column, the rest move to the trash. Default: 100 cards. |
 
-The run happens **once a day** and **on adapter start**. It uses the completion timestamp (`doneAt`); cards without one are left alone. Because the cards only move to the trash, you still have another 30 days to pull something back.
+The run happens **once a day** and **on adapter start**. It uses the completion timestamp (`doneAt`); cards without one are left alone. Since 0.3.2 it survives the trash: delete a done card and restore it, and its original completion time is still there. Because the cards only move to the trash, you still have another 30 days to pull something back.
 
 #### Labels
 
@@ -420,7 +427,7 @@ A card has the following content fields (settable via the API under the same nam
 | **dueTime** | `HH:MM` | Optional time of day. Enabled via a checkbox, shown on the card after the date. Only effective together with `due`. |
 | **priority** | `0`/`1`/`2` | Normal / High / Urgent. On the card this shows as a badge below the title (before due date and location): **Normal** shows nothing, **High** an orange `!`, **Urgent** a red `!!`. Other values are rejected, via the API with an error (see [Responses & errors](#responses--errors)). |
 | **assignees** | list of user IDs | Assignees. Determine who receives notifications. **Required, through the API as well:** at least one person must be given, and every ID must exist in the instance settings. Otherwise the interface answers with `400` and names the IDs it knows. **Exception since 0.3.2:** with exactly one user configured the field is filled in automatically instead of being rejected. Until now the API accepted anything, placeholders like `default` included; that produced cards the editor could never have created and which stay invisible behind a `users` filter. An ID that is **already on the card** remains allowed when editing, even if the user no longer exists. Otherwise the orphaned card would be the one you cannot touch. If a board's **member list no longer matches any existing user**, **all** users are assignable since 0.3.0. |
-| **labels** | list of label IDs | Colored tags. Labels are managed per board (create, rename, recolor, delete). If a label arrives through the API that the board does not know, it is **created** rather than rejected (green, title = ID; both editable afterwards). Otherwise the card would carry a label the board does not list, which makes it invisible behind an `onlyLabel` filter. |
+| **labels** | list of label IDs | Colored tags. Labels are managed per board (create, rename, recolor, delete). If a label arrives through the API that the board does not know, it is **created** rather than rejected (title = ID, colour taken in turn from the same palette as in the interface; both editable afterwards). Otherwise the card would carry a label the board does not list, which makes it invisible behind an `onlyLabel` filter. |
 | **color** | hex color | Colored bar on the left edge of the card. Chosen via an embedded color picker (color field + hue slider + hex input) or presets. |
 | **link** | URL | A link. The card shows a **type-dependent icon** (see [Link types](#link-types)). |
 | **location** | text | Location. Shown as a location badge (pin icon) on the card and copied into the calendar invite as `LOCATION`. |
@@ -575,7 +582,11 @@ Which people exist at all comes from the instance settings ([Tab "Users"](#tab-u
 
 **With only one person**, assignment disappears from the interface entirely: no chips in the header, no avatars on the cards, no *assignees* field in the card editor and no user picker in the views dialog. There would be nothing to choose and nothing to filter. New cards get that person automatically, through the API as well: a `POST` without `assignees` is no longer rejected with `400` but quietly completed. An ID that is given is still checked.
 
-**With no person at all**, no card can be created: the assignee is a required field, and nobody is not the same as anybody. The "+ Card" button is therefore blocked and says on click that a user in the instance settings is missing first. You can reach that state without any warning by deleting every row there.
+**With no person at all**, no card can be created: the assignee is a required field, and nobody is not the same as anybody. The "+ Card" button is therefore blocked and says on click that a user in the instance settings is missing first, and so is the "+" at the foot of the columns. You can reach that state without any warning by deleting every row there.
+
+The same goes for a **board without columns**: without a column there is nowhere for the card to go, the button says so and the editor does not even open.
+
+> **No cards are created in a done column** (since 0.3.2). Cards move there, they are not created there: the card editor leaves done columns out when creating and copying, there is no "+" at the foot of such a column, and the API refuses the attempt. The reason is the completion timestamp. A card created there had none, which dropped it out of the [age in column](#sorting--order) sort, out of the [display limit](#columns) for done cards and out of the [automatic cleanup](#cleanup), so it stayed forever. When **moving** a card and when editing an existing one the done column stays selectable, which is the usual way to finish a card.
 
 As soon as a second user appears in the instance settings, all of it is back. Cards created in the meantime carry that one person and show them from then on. If a card carries an ID that no longer exists, it stays as it is rather than being silently moved; that is what the [repair for orphaned assignees](#renaming-a-user) is for.
 
@@ -612,7 +623,7 @@ All parameters can also be appended to the URL directly:
 | Parameter | Effect |
 |---|---|
 | `board=<id>` | Opens this board. Since 0.3.0 the address bar keeps track of the current board: switching via the board picker sets `?board=<id>` (no extra history entry, all other parameters are preserved), so the address can be copied and shared as is. |
-| `users=<name,name>` | **Person filter**: shows only cards assigned to at least one of these users (sets the header chips accordingly). `user=<name>` is the short form for a single user. **Careful:** the parameter overwrites the chip selection stored per board in the browser **for good**: it stays active on the next visit *without* the parameter. Reset it via the chips in the header bar. |
+| `users=<name,name>` | **Person filter**: shows only cards assigned to at least one of these users (sets the header chips accordingly). `user=<name>` is the short form for a single user. The parameter applies **to this visit only**: your own chip selection stays stored and is back on the next visit without the parameter. A shared link therefore does not overwrite what someone set up on their own device. |
 | `label=<id,id>` | **Label blacklist** (multiple possible): hides cards that have one of these labels, new labels stay visible automatically. |
 | `onlyLabel=<id,id>` | **Label whitelist** (since 0.3.0): shows **only** cards carrying at least one of these labels, so cards without a label drop out. Can be combined with `label=` (whitelist first, then blacklist). |
 | `columns=<id,id>` | Shows only these columns. Others are hidden. |
@@ -1048,7 +1059,7 @@ Besides the UI, the adapter creates states you can use in scripts, VIS/Lovelace 
 | `kanban.0.users.<name>.overdueCount` | number | Of those, overdue. |
 | `kanban.0.users.<name>.overdueList` | json | List of overdue cards (title + board/column). |
 
-The `boards.*` and `users.*` mirror states are handy for dashboards ("Björn: 3 open, 1 overdue") or automations without querying the REST API.
+The `boards.*` and `users.*` mirror states are handy for dashboards ("Björn: 3 open, 1 overdue") or automations without querying the REST API. Delete a user in the instance settings and their branch under `users.*` goes with them; up to 0.3.2 it stayed behind with its last figures, and a dashboard kept counting one person too many.
 
 ---
 
