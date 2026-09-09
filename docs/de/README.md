@@ -167,7 +167,7 @@ Benachrichtigungen werden bei Karten-Ereignissen ausgelöst und per **E-Mail** (
 | **email-Adapter-Instanz** | Welche `email.x`-Instanz für den Versand genutzt wird. |
 | **Absender** | Optionale Absenderadresse (leer = Standard des email-Adapters). |
 | **Erinnerungs-Uhrzeit** | `HH:MM`, wann fällige Karten geprüft werden (Standard `08:00`). |
-| **Erinnern X Tage vor Fälligkeit** | Vorlauf für `cardDue`-Erinnerungen (`0`-`30`, Standard `1`). |
+| **Erinnern X Tage vor Fälligkeit** | Vorlauf für `cardDue`-Erinnerungen (`0`-`30`, Standard `1`). Betrifft **nur** die Erinnerungsmail, nicht die Farben am Board. |
 | **"Karte fällig" zur Uhrzeit der Karte auslösen** | Ab 0.3.0, Standard **aus**. Zusätzlich zur täglichen Erinnerung feuert `cardDue` bei Karten mit gesetzter **Uhrzeit** genau zu dieser Uhrzeit (`detail.exact = true`). Damit lassen sich Automatisierungen minutengenau auslösen, ohne die API abzufragen. **Achtung:** Das Ereignis läuft durch die normale Benachrichtigung, es geht also auch eine zweite "Fällig"-E-Mail an alle raus, die diese aktiviert haben - wer nur Skripte/Webhooks bedienen will, schaltet die E-Mail "Fällig" beim Benutzer ab. |
 | **Standard-Vorgabe** | Globale Fallback-Schalter je Ereignis, greifen, wenn ein Benutzer nichts Eigenes eingestellt hat (siehe unten). |
 
@@ -322,7 +322,7 @@ Ein Klick auf eine der Zahlen öffnet ein kleines Menü mit vier Haken. Was du a
 | **Heute** | heute fällige Karten, orange |
 | **Überfällig** | Karten, deren Datum oder Uhrzeit vorbei ist, rot |
 
-Die drei Fälligkeitszahlen tragen **dieselben Farben wie die Abzeichen auf den Karten** und folgen derselben Rechnung, samt Uhrzeit und Vorlaufzeit aus den Instanzeinstellungen. Steht die Vorlaufzeit auf `3`, umfasst "Morgen" also alles bis übermorgen. Bei `0` bleibt das Abzeichen stehen und verliert nur die Warnfarbe; so springt die Kopfzeile nicht bei jeder Änderung, und du behältst das Menü in Reichweite.
+Die drei Fälligkeitszahlen tragen **dieselben Farben wie die Abzeichen auf den Karten** und folgen derselben Rechnung, samt Uhrzeit. "Morgen" heisst dabei genau der nächste Kalendertag, unabhängig davon, was in den Instanzeinstellungen als Vorlauf für die Erinnerungsmail steht. Steht eine Zahl auf `0`, bleibt das Abzeichen stehen und verliert nur die Warnfarbe; so springt die Kopfzeile nicht bei jeder Änderung, und du behältst das Menü in Reichweite.
 
 Mindestens eine Zahl bleibt stehen: Der letzte gesetzte Haken lässt sich nicht entfernen, sonst gäbe es kein Ziel mehr, über das sich das Menü wieder aufrufen lässt. Er ist deshalb abgeblendet dargestellt.
 
@@ -499,15 +499,17 @@ Unabhängig davon färbt sich das Fälligkeits-Badge, sodass Dringendes auffäll
 |---|---|
 | **rot** | vorbei: Datum in der Vergangenheit, oder die Uhrzeit der Karte ist verstrichen |
 | **orange** | heute fällig, Uhrzeit noch nicht erreicht |
-| **gelb** | innerhalb der Vorlaufzeit, mit der Vorgabe also morgen |
+| **gelb** | morgen fällig, also am nächsten Kalendertag |
 | neutral | später fällig |
 | **grün** | erledigt |
 
-Dahinter stehen zwei verschieden gerechnete Fragen. Das **Vorwarnfenster** (gelb) ist Planung und zählt in **Kalendertagen**. Es folgt der Instanz-Einstellung [**Erinnern X Tage vor Fälligkeit**](#tab-benachrichtigungen), damit die Farbe dasselbe sagt wie die Erinnerungsmail: Steht dort `3`, ist alles bis übermorgen gelb. Kein rollendes 24-Stunden-Fenster: "morgen" bleibt den ganzen Tag morgen.
+Dahinter stehen zwei verschieden gerechnete Fragen. Das **Vorwarnfenster** (gelb) ist Planung und zählt in **Kalendertagen**: Gelb ist genau der nächste Kalendertag. Kein rollendes 24-Stunden-Fenster, "morgen" bleibt den ganzen Tag morgen.
+
+> **Bis 0.3.2** folgte die gelbe Farbe der Einstellung [**Erinnern X Tage vor Fälligkeit**](#tab-benachrichtigungen). Bei `3` war alles bis übermorgen gelb, die Zahl im Spaltenkopf hiess aber weiterhin "Morgen". Wer die Einstellung nicht kannte, konnte die Farben nicht deuten. Seither steuert der Vorlauf nur noch, wie früh die **Erinnerungsmail** rausgeht; die Farbe am Board hängt nicht mehr daran.
 
 Die Grenze zu **rot** ist dagegen eine Tatsache. Trägt die Karte eine **Uhrzeit**, zählt sie: Um 17:01 ist 17:00 vorbei, und genau dann feuert auch das Ereignis `cardDue` mit `detail.exact`. Ohne Uhrzeit wechselt die Farbe um Mitternacht. Seit 0.3.2 rechnen die Zustände [`overdueCount` und `overdueList`](#iobroker-states--objekte) nach derselben Regel: Farbe und Datenpunkt springen zur selben Minute. Vorher verglichen die Zähler nur das Datum, eine Karte war also rot, während der Zähler noch bis Mitternacht auf dem alten Stand blieb.
 
-Was eine Farbe bedeutet, steht seit 0.3.2 im Tooltip des Abzeichens: überfällig, heute fällig, demnächst fällig, später fällig, erledigt. Eine Legende in der Oberfläche gibt es nicht, und eine Farbe allein sagt nicht, ob sie schlimmer ist als die daneben.
+Was eine Farbe bedeutet, steht seit 0.3.2 im Tooltip des Abzeichens: überfällig, heute fällig, morgen fällig, später fällig, erledigt. In einer zweiten Zeile steht die Einteilung dazu, damit man sie nicht raten muss. Eine Legende in der Oberfläche gibt es nicht, und eine Farbe allein sagt nicht, ob sie schlimmer ist als die daneben.
 
 Die Farben lassen sich über [eigenes CSS](#faq--fallstricke) ändern: `--danger` für rot, `--warn` für orange und `--due-upcoming` samt `--due-upcoming-text` für gelb. Dieselbe Einteilung steckt hinter den [Zahlen im Spaltenkopf](#zahlen-im-spaltenkopf).
 

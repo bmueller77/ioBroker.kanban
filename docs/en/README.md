@@ -167,7 +167,7 @@ Notifications are triggered on card events and delivered via **e-mail** (through
 | **Email adapter instance** | Which `email.x` instance is used for sending. |
 | **Sender** | Optional sender address (empty = email adapter default). |
 | **Reminder time** | `HH:MM`, when due cards are checked (default `08:00`). |
-| **Remind X days before due** | Lead time for `cardDue` reminders (`0` to `30`, default `1`). |
+| **Remind X days before due** | Lead time for `cardDue` reminders (`0` to `30`, default `1`). Affects **only** the reminder e-mail, not the colours on the board. |
 | **Fire "card due" at the card's time of day** | Since 0.3.0, **off** by default. In addition to the daily reminder, cards with a **time of day** fire `cardDue` exactly at that time (`detail.exact = true`), so automations can trigger to the minute without polling the API. **Note:** the event goes through the normal notification path, so a second "due" e-mail is also sent to everyone who has that notification enabled. If you only want to drive scripts/webhooks, turn the "due" e-mail off per user. |
 | **Default** | Global fallback switches per event, they apply when a user has nothing set of their own (see below). |
 
@@ -322,7 +322,7 @@ Clicking one of the numbers opens a small menu with four checkmarks. Whatever yo
 | **Today** | cards due today, orange |
 | **Overdue** | cards whose date or time has passed, red |
 
-The three due-date numbers carry **the same colours as the badges on the cards** and follow the same arithmetic, time of day and lead time from the instance settings included. Set the lead time to `3` and "tomorrow" covers everything up to the day after tomorrow. At `0` the badge stays in place and merely loses its warning colour, so the header does not jump on every change and the menu stays within reach.
+The three due-date numbers carry **the same colours as the badges on the cards** and follow the same arithmetic, time of day included. "Tomorrow" means exactly the next calendar day, whatever lead time the instance settings hold for the reminder mail. When a number is `0` the badge stays in place and merely loses its warning colour, so the header does not jump on every change and the menu stays within reach.
 
 At least one number stays: the last remaining checkmark cannot be removed, because otherwise there would be nothing left to reopen the menu with. It is shown dimmed for that reason.
 
@@ -497,15 +497,17 @@ Independently of all this, the due badge is coloured, so anything urgent stands 
 |---|---|
 | **red** | past: the date has gone by, or the card's time of day has passed |
 | **orange** | due today, time of day not reached yet |
-| **yellow** | within the reminder lead time, so tomorrow by default |
+| **yellow** | due tomorrow, meaning the next calendar day |
 | neutral | due later |
 | **green** | done |
 
-Two differently computed questions sit behind this. The **lead-time window** (yellow) is planning and counts in **calendar days**. It follows the instance setting [**Remind X days before due**](#tab-notifications), so the colour says the same thing as the reminder mail: set it to `3` and everything up to the day after tomorrow turns yellow. Not a rolling 24 hour window, so tomorrow stays tomorrow all day.
+Two differently computed questions sit behind this. The **early-warning window** (yellow) is planning and counts in **calendar days**: yellow is exactly the next calendar day. Not a rolling 24 hour window, so tomorrow stays tomorrow all day.
+
+> **Up to 0.3.2** the yellow colour followed the setting [**Remind X days before due**](#tab-notifications). At `3` everything up to the day after tomorrow turned yellow while the number in the column header still read "Tomorrow". Without knowing that setting the colours could not be read. Since then the lead time only governs how early the **reminder mail** goes out; the colour on the board no longer depends on it.
 
 The boundary to **red** is a fact instead. When the card carries a **time of day**, that time counts: at 17:01 the 17:00 slot has passed, which is exactly when the `cardDue` event fires with `detail.exact`. Without a time, the colour changes at midnight. Since 0.3.2 the states [`overdueCount` and `overdueList`](#iobroker-states--objects) follow the same rule, so colour and counter change in the same minute. Before that the counters compared dates only, and a card could be red while the counter kept its old value until midnight.
 
-Since 0.3.2 the tooltip on the badge says what a colour means: overdue, due today, due soon, due later, done. There is no legend in the interface, and a colour on its own does not say whether it is worse than the one beside it.
+Since 0.3.2 the tooltip on the badge says what a colour means: overdue, due today, due tomorrow, due later, done. A second line spells out the scale, so nobody has to guess it. There is no legend in the interface, and a colour on its own does not say whether it is worse than the one beside it.
 
 The colours can be changed through [custom CSS](#faq--pitfalls): `--danger` for red, `--warn` for orange, and `--due-upcoming` with `--due-upcoming-text` for yellow. The same grouping sits behind the [counts in the column header](#counts-in-the-column-header).
 

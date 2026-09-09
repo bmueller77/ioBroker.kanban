@@ -606,30 +606,28 @@ export function dueState(due, dueTime, cfg) {
         }
         return 'today';
     }
-    // Karten ohne Datum sind oben schon raus; ab hier liegt due in der Zukunft
-    const vorlauf = Number(cfg && cfg.reminderDaysBefore);
-    const tage = Number.isFinite(vorlauf) && vorlauf >= 0 ? vorlauf : 1;
-    return due <= todayStr(tage) ? 'soon' : '';
+    // Karten ohne Datum sind oben schon raus; ab hier liegt due in der Zukunft.
+    // Gelb heisst der naechste Kalendertag, unabhaengig von der Vorlaufzeit.
+    // Vorher richtete sich die Farbe nach ihr, und bei Vorlaufzeit 3 war alles
+    // bis uebermorgen gelb, waehrend die Zahl darueber "Morgen" hiess (C12).
+    // Die Vorlaufzeit steuert seither nur noch die Erinnerungsmail.
+    return due === todayStr(1) ? 'soon' : '';
 }
 
 /**
  * Tooltip am Faelligkeits-Abzeichen: der Zustand und die Einteilung dahinter.
  *
- * "demnaechst faellig" allein sagt nichts, solange man den Vorlauf aus den
- * Instanzeinstellungen nicht kennt: Bei 1 heisst es morgen, bei 3 bis
- * uebermorgen. Eine Legende gibt es in der Oberflaeche nicht, und ohne sie
- * bleibt die dreistufige Abstufung unverstaendlich (B8, Issue #25).
+ * Die Farbe allein sagt nicht, was sie bedeutet, und eine Legende gibt es in
+ * der Oberflaeche nicht (B8, Issue #25). Seit die Einteilung nicht mehr an der
+ * Vorlaufzeit haengt, ist sie fuer jede Instanz dieselbe und braucht keine Zahl
+ * mehr im Text.
  *
  * @param st Zustand aus dueState, leer fuer "spaeter"
- * @param cfg Konfiguration der Oberflaeche
  * @returns Text fuer das title-Attribut, zweizeilig
  */
-function dueTitle(st, cfg) {
-    const vorlauf = Number(cfg && cfg.reminderDaysBefore);
-    const tage = Number.isFinite(vorlauf) && vorlauf >= 0 ? vorlauf : 1;
-    const skala = tage === 0 ? 'due.scaleNone' : tage === 1 ? 'due.scaleOne' : 'due.scaleMany';
+function dueTitle(st) {
     return `${t('due.' + (st || 'later'))}
-${t(skala, { n: tage })}`;
+${t('due.scale')}`;
 }
 
 function dueBadge(due, dueTime, done, cfg) {
@@ -650,7 +648,7 @@ function dueBadge(due, dueTime, done, cfg) {
         // Die Farbe allein sagt nicht, was sie bedeutet, und in der Oberflaeche
         // gibt es keine Legende. Der Tooltip nennt den Zustand und die
         // Einteilung, nach der er zustande kommt.
-        b.title = dueTitle(st, cfg);
+        b.title = dueTitle(st);
     }
     return b;
 }

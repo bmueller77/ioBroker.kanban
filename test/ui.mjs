@@ -108,14 +108,19 @@ describe('Fälligkeit: dreistufige Einfärbung', () => {
         assert.equal(dueState(tag(2), '', cfg), '');
     });
 
-    it('folgt der eingestellten Vorlaufzeit', () => {
-        assert.equal(dueState(tag(3), '', { reminderDaysBefore: 3 }), 'soon');
-        assert.equal(dueState(tag(4), '', { reminderDaysBefore: 3 }), '');
-        // Vorlauf 0: nur heute und Vergangenes sind gefärbt
-        assert.equal(dueState(tag(1), '', { reminderDaysBefore: 0 }), '');
+    it('lässt sich von der Vorlaufzeit nicht mehr verschieben', () => {
+        // C12: Gelb heisst der nächste Kalendertag, sonst nichts. Vorher zog
+        // die Vorlaufzeit die Farbe mit, und bei 3 war alles bis übermorgen
+        // gelb, während die Zahl darüber "Morgen" hiess. Die Vorlaufzeit
+        // steuert seither nur noch die Erinnerungsmail.
+        for (const vorlauf of [0, 1, 3, 7]) {
+            assert.equal(dueState(tag(1), '', { reminderDaysBefore: vorlauf }), 'soon');
+            assert.equal(dueState(tag(2), '', { reminderDaysBefore: vorlauf }), '');
+            assert.equal(dueState(tag(3), '', { reminderDaysBefore: vorlauf }), '');
+        }
     });
 
-    it('nimmt ohne Angabe einen Tag Vorlauf an', () => {
+    it('kommt ohne Konfiguration zurecht', () => {
         assert.equal(dueState(tag(1), '', {}), 'soon');
         assert.equal(dueState(tag(1), '', undefined), 'soon');
     });
@@ -150,10 +155,11 @@ describe('Kopfzahlen der Spalten', () => {
         assert.deepEqual(countDues([`${tag(5)}|`, `${tag(30)}|`], cfg), { soon: 0, today: 0, overdue: 0 });
     });
 
-    it('folgt der Vorlaufzeit der Instanz', () => {
-        const liste = [`${tag(2)}|`, `${tag(3)}|`];
-        assert.equal(countDues(liste, { reminderDaysBefore: 3 }).soon, 2);
-        assert.equal(countDues(liste, cfg).soon, 0);
+    it('zählt unter "Morgen" nur den nächsten Kalendertag', () => {
+        // Gegenprobe zu C12, diesmal an der Kopfzahl.
+        const liste = [`${tag(1)}|`, `${tag(2)}|`, `${tag(3)}|`];
+        assert.equal(countDues(liste, { reminderDaysBefore: 3 }).soon, 1);
+        assert.equal(countDues(liste, cfg).soon, 1);
     });
 
     it('wertet die Uhrzeit mit aus', () => {
