@@ -54,7 +54,7 @@ A **Kanban board as a dedicated ioBroker adapter**. It ships its own web server,
    **With several instances:** each needs its own port. If the configured one is taken, the adapter still starts and falls back to the next free port. The instance list, however, keeps showing the *configured* port, and the link there leads to the wrong instance. The port actually in use is in the log: `Port 8095 is in use - falling back to free port 8096. The instance list still shows the configured port; enter the free port there to keep both in sync.` Then enter that port in the settings.
 4. **Add a user.** Tab **Users**: a fresh instance ships with **none**. Enter at least one person, because every card needs an assignee. Take a moment over the ID: it cannot be changed after the first start, while the display name can be changed any time. [Tab "Users"](#tab-users) explains why.
 5. **Open the web UI:** **`http://<host>:<port>/`**
-6. On first launch there is no board yet. Use the **gear icon (⚙)** at the top right to create one. Every new board comes with three default columns:
+6. On first launch there is no board yet. Use the **gear icon** <img src="../icons/cog.svg" width="18" alt="gear"> at the top right to create one. Every new board comes with three default columns:
    - **To do** (`todo`)
    - **In progress** (`doing`)
    - **Done** (`done`, flagged as the "Done" column)
@@ -130,7 +130,7 @@ Add a row with the **"+"** in the table header; the bin icon at the end of a row
 > *Recommendation:* give the ID a moment's thought at the outset. Lower case, no umlauts, and readable enough to survive in a shared address (`?users=bjoern`).
 >
 > <a id="renaming-a-user"></a>
-> **If cards do point nowhere**, the adapter reports it on start in the log and in the state `info.orphanedAssignees`, and the gear icon in the board header gets a small dot. That happens when someone was deleted and created again, or when a card came in through the API with a foreign ID.
+> **If cards do point nowhere**, the adapter reports it on start in the log and in the state `info.orphanedAssignees`, and the gear icon <img src="../icons/cog.svg" width="18" alt="gear"> in the board header gets a small dot. That happens when someone was deleted and created again, or when a card came in through the API with a foreign ID.
 >
 > The repair lives under **Settings → Users → Orphaned assignees**. That section only exists while there is something to repair - with everything in order the tab shows nothing but the user avatars. Each orphaned ID gets a row with its extent and the boards involved; the card count expands into the list of cards, so nothing gets moved unseen. Next to it a dropdown with the existing people and a button that asks first. The trash stays out of it: what is on its way to deletion does not need to belong to anyone.
 >
@@ -197,7 +197,7 @@ For most setups **"assigned"** alone is therefore enough. **"created"** pays off
 
 > **The route counts too.** Moving a card by dragging produces the events of a move. Switching the same column in the **card editor** counts as a change to the card as well, so **changed** comes on top. With every checkbox set, one gesture produces three messages.
 
-> **Trash events:** "moved to trash", "restored" and "permanently deleted" have their own checkboxes, all **off** by default. An **automatic cleanup run** does not send one mail per card but **one summary mail per user** listing every affected card. Deleting a single card by hand still sends a normal individual mail. The button with the **broom icon** empties the whole trash at once and therefore also sends a summary mail rather than one message per card.
+> **Trash events:** "moved to trash", "restored" and "permanently deleted" have their own checkboxes, all **off** by default. An **automatic cleanup run** does not send one mail per card but **one summary mail per user** listing every affected card. Deleting a single card by hand still sends a normal individual mail. The button with the **broom icon** <img src="../icons/broom.svg" width="18" alt="broom"> empties the whole trash at once and therefore also sends a summary mail rather than one message per card.
 
 #### Calendar invite (.ics)
 
@@ -262,7 +262,7 @@ The web UI at **`http://<host>:8095/`** is the actual workspace. Everything in t
 
 ### Header bar
 
-The **header bar** contains, left to right: the **board selector**, the **user chips** (doubling as a person filter, see [Users in the board](#users-in-the-board)), the **"+ Card"** button, the **theme toggle** (sun/moon), the **"Views"** dialog (monitor icon, see [Sharing views](#sharing-views--url-parameters)) and the **settings** (gear).
+The **header bar** contains, left to right: the **board selector**, the **user chips** (doubling as a person filter, see [Users in the board](#users-in-the-board)), the **"+ Card"** button, the **theme toggle** (sun/moon <img src="../icons/moon.svg" width="18" alt="moon">), the **"Views"** dialog (monitor icon <img src="../icons/monitor.svg" width="18" alt="monitor">, see [Sharing views](#sharing-views--url-parameters)) and the **settings** (gear <img src="../icons/cog.svg" width="18" alt="gear">).
 
 *Note: in embed mode (`embed=1`) the header bar is hidden entirely.*
 
@@ -270,7 +270,7 @@ The **header bar** contains, left to right: the **board selector**, the **user c
 
 ### Boards, columns & labels
 
-The button with the **gear icon** opens the board manager. It has two tabs: **Board** and **Users** (colours and avatars, see [Users in the board](#users-in-the-board)). Changes are only applied on **Save**.
+The button with the **gear icon** <img src="../icons/cog.svg" width="18" alt="gear"> opens the board manager. It has two tabs: **Board** and **Users** (colours and avatars, see [Users in the board](#users-in-the-board)). Changes are only applied on **Save**.
 
 At the very top of the Board tab sits a row with three elements. The fourth entry of the table, "Delete board", sits at the bottom of the tab:
 
@@ -295,13 +295,13 @@ Above the column list sits a header row with the field names (**Title · Max · 
 
 - **Column ID:** besides its visible title every column carries an **immutable ID**. The three default columns are called `todo`, `doing` and `done`, newly created columns get a generated, unique ID. **Renaming keeps the ID**, so shared `columns=` links and `moveCard` calls keep working unchanged. The IDs can be looked up via `GET /api/boards/<id>` (see [REST API](#rest-api)).
 - **Column width:** columns always share the **full width of the window**, so two columns each take up half. Only once less than 280 px would be left per column does the board become horizontally scrollable.
-- **Display limit (Max):** a number > 0 shows only the first N cards in that column; `+X more` appears directly under the last one, with the add button below that. `0` = show all. The counter in the column header still counts **all** cards of the column. `+X more` is a **button**: one click shows the remaining cards, the line then reads `- hide X again`, and a second click collapses them. The limit on the board stays untouched; only the local browser remembers the deviation, like the sort mode and the eye icon.
+- **Display limit (Max):** a number > 0 shows only the first N cards in that column; `+X more` appears directly under the last one, with the add button below that. `0` = show all. The counter in the column header still counts **all** cards of the column. `+X more` is a **button**: one click shows the remaining cards, the line then reads `- hide X again`, and a second click collapses them. The limit on the board stays untouched; only the local browser remembers the deviation, like the sort mode and the eye icon <img src="../icons/eye.svg" width="18" alt="eye">.
 - **WIP limit** (work in progress): a number > 0 caps the recommended card count. If exceeded, the column warns visually (counter & header are highlighted). `0` = no limit. The limit is a **warning**, not a hard block. It always refers to the **total** number of cards in the column, even while a person/label filter is showing fewer. Once it is exceeded, the **column** count sits before the slash even with a filter on, so "7/5" - exactly the number the warning colour comes from. The tooltip names both: how many cards the column really holds and how many the filter shows. While the limit is kept, an active filter simply shows the matches without a slash; a ratio of filtered cards to the limit would mix two different sets.
 - **"New"** (`allowAdd`): controls which columns accept new cards. Such a column carries the add button at its foot - a "+" on a coloured pad.
 - **"Done" column** (`isDone`): cards moved here count as completed (`doneAt` is set, recurrences are triggered). Their title is shown with a **strikethrough**, and below it the completion time appears in brackets, for example `(Done: 26/07/2026 20:09)`, in the instance's date and time format. That line needs a `doneAt` to be set; cards that never passed through a done column do not show it.
-- **Show/hide done (eye icon):** every done column has a toggle in the shape of an eye at the top right that shows or hides the completed cards (this setting is stored per device).
+- **Show/hide done (eye icon <img src="../icons/eye.svg" width="18" alt="eye">):** every done column has a toggle in the shape of an eye at the top right that shows or hides the completed cards (this setting is stored per device).
 - **Limit of visible done cards:** the URL parameter `doneLimit=N` (see [Sharing views / URL parameters](#sharing-views--url-parameters)) shows only the N most recently completed cards; handy for compact, shared views.
-- **Copy a completed card:** next to the title of a done card sits a small copy icon. It opens the editor with the same content as a **new** card. On save it lands in the first column flagged "New", checklist items start unticked, and the due date is prefilled with **today** if the original had one at all (a time of day is kept).
+- **Copy a completed card:** next to the title of a done card sits a small copy icon <img src="../icons/copy.svg" width="18" alt="two offset sheets">. It opens the editor with the same content as a **new** card. On save it lands in the first column flagged "New", checklist items start unticked, and the due date is prefilled with **today** if the original had one at all (a time of day is kept).
 
 <a id="counts-in-the-column-header"></a>
 #### Counts in the column header (since 0.3.2)
@@ -321,7 +321,7 @@ The three due-date numbers carry **the same colours as the badges on the cards**
 
 At least one number stays: the last remaining checkmark cannot be removed, because otherwise there would be nothing left to reopen the menu with.
 
-The selection applies **per column** and is stored **per device**, like the sort mode and the eye icon. A person or label filter affects all four numbers alike. The done column and the trash have no menu: every card there counts as completed, so there would be nothing to colour.
+The selection applies **per column** and is stored **per device**, like the sort mode and the eye icon <img src="../icons/eye.svg" width="18" alt="eye">. A person or label filter affects all four numbers alike. The done column and the trash have no menu: every card there counts as completed, so there would be nothing to colour.
 
 The keyboard reaches all of it. Tab lands on the numbers, Enter opens the menu, the arrow keys move inside it, Enter ticks or unticks, Escape closes and hands the focus back. The same is true of the sort menu.
 
@@ -335,7 +335,7 @@ Every board has a **"Trash" system column**. Deleted cards do not vanish straigh
 - **Visibility:** the trash is **hidden by default**. Show it via **"Show trash"** at the bottom of the board settings. That setting applies to **the local device only**, so other people keep seeing their usual board.
 - **What ends up there:** anything removed with the **Delete** button in the card editor, cards **dragged** into the trash, and the cards from the [automatic cleanup](#cleanup).
 - **Bringing a card back:** drag it out of the trash or tap the **restore** icon on the card. It returns to the first open column.
-- **Deleting for good right away:** the second icon on the card removes it irreversibly. The button with the broom icon in the column header empties the **entire** trash. Both ask first. Via API and webhook, `purgeCard` likewise applies **only to cards in the trash**: on an active card it returns `400` with "Karte '...' liegt nicht im Papierkorb". Getting past the retention period therefore always leads through the trash first.
+- **Deleting for good right away:** the second icon on the card removes it irreversibly. The button with the broom icon <img src="../icons/broom.svg" width="18" alt="broom"> in the column header empties the **entire** trash. Both ask first. Via API and webhook, `purgeCard` likewise applies **only to cards in the trash**: on an active card it returns `400` with "Karte '...' liegt nicht im Papierkorb". Getting past the retention period therefore always leads through the trash first.
 - **Reading the confirmations correctly:** the confirmation when deleting a card says what actually happens: "Move this card to the trash? You can restore it from there for 30 days." Truly irreversible are only the second icon on a card **inside** the trash and the broom button in the column header; their dialogs say so explicitly.
 - **Remaining time:** every card shows how long it will still be kept, for example "30 days left".
 - **Its own look:** the column is deliberately kept neutral grey, independent of theme and accent colour, so it stands apart from the working columns.
@@ -357,13 +357,13 @@ The run happens **once a day** and **on adapter start**. It uses the completion 
 
 ![Trash holding two deleted cards](img/trash.png)
 
-*Every card shows how long it will be kept, with restore and delete-for-good below. The broom in the column header empties the whole trash.*
+*Every card shows how long it will be kept, with restore and delete-for-good below. The broom <img src="../icons/broom.svg" width="18" alt="broom"> in the column header empties the whole trash.*
 
 #### Labels
 
 Labels are coloured tags and are managed **per board** in the *Board* tab (create, rename, recolour, delete). On a card they appear as a coloured badge with automatically contrasting text; in the [Views dialog](#sharing-views--url-parameters) they can be used as a blacklist to hide cards.
 
-The labels carry a drag handle like the columns above, so their **order** can be set freely, and that order applies everywhere: on the cards, in the picker inside the card editor, and in the summary of the section header. Two cards carrying the same labels therefore look alike.
+The labels carry a drag handle <img src="../icons/grip.svg" width="18" alt="drag handle"> like the columns above, so their **order** can be set freely, and that order applies everywhere: on the cards, in the picker inside the card editor, and in the summary of the section header. Two cards carrying the same labels therefore look alike.
 
 ![The same labels on two cards](img/card-labels.png)
 
@@ -377,7 +377,7 @@ Each board decides where the "open card" link in notification e-mails points: **
 
 ### Cards: all fields
 
-**Card anatomy:** the **assignee**, or with several of them the stack of avatars, sits in the top right corner and the title text flows around it. With several assignees the faces fan out to the left on hover or tap, without changing the line breaks. Long titles are cut off after **two lines** with an ellipsis, the full title stays available as a tooltip. If the card carries a **checklist**, it gets a footer: progress on the left, the expand chevron in the middle and the icons for **description, link and recurrence** on the right, in that order. Without a checklist there is no footer, and the same icons sit at the right end of the label or badge row. Clicking the description icon opens the description in a **read-only window** with rendered Markdown; links inside always open in a new tab. Whether a checklist is expanded or collapsed is **remembered per device and board**, just like the column sort modes, and survives a reload.
+**Card anatomy:** the **assignee**, or with several of them the stack of avatars, sits in the top right corner and the title text flows around it. With several assignees the faces fan out to the left on hover or tap, without changing the line breaks. Long titles are cut off after **two lines** with an ellipsis, the full title stays available as a tooltip. If the card carries a **checklist**, it gets a footer: progress on the left, the expand chevron <img src="../icons/chevron-down.svg" width="18" alt="chevron"> in the middle and the icons for **description, link and recurrence** on the right, in that order. Without a checklist there is no footer, and the same icons sit at the right end of the label or badge row. Clicking the description icon opens the description in a **read-only window** with rendered Markdown; links inside always open in a new tab. Whether a checklist is expanded or collapsed is **remembered per device and board**, just like the column sort modes, and survives a reload.
 
 ![Anatomy of a card](img/card.png)
 
@@ -385,19 +385,19 @@ Each board decides where the "open card" link in notification e-mails points: **
 
 | Icon | Where | Meaning |
 |---|---|---|
-| Sheet with a pencil | right of the title | Open the card editor. The only way in. |
-| Two offset sheets | right of the title, done cards only | Take the content over into a **new** card, see [Copy a completed card](#boards-columns--labels) |
-| Arrow in a circle | in the trash, in a row of its own at the bottom of the card | Restore the card. The remaining retention period sits above it. |
-| Waste bin | next to it | Delete for good, with a confirmation |
+| <img src="../icons/pencil.svg" width="18" alt="sheet with a pencil"> Sheet with a pencil | right of the title | Open the card editor. The only way in. |
+| <img src="../icons/copy.svg" width="18" alt="two offset sheets"> Two offset sheets | right of the title, done cards only | Take the content over into a **new** card, see [Copy a completed card](#boards-columns--labels) |
+| <img src="../icons/restore.svg" width="18" alt="arrow in a circle"> Arrow in a circle | in the trash, in a row of its own at the bottom of the card | Restore the card. The remaining retention period sits above it. |
+| <img src="../icons/delete-forever.svg" width="18" alt="waste bin"> Waste bin | next to it | Delete for good, with a confirmation |
 | `!` orange, `!!` red | below the title | Priority high or urgent. Nothing appears for normal. |
-| Calendar sheet with a date | below the title | Due date, coloured by [Due date colours](#due-date-colours) |
-| Map marker | below the title | Location, shortened. The full text is in the tooltip. |
-| Note sheet | right of the label or badge row, or in the card footer when there is a checklist | The card has a description. Clicking opens it as a reading window with rendered Markdown. |
-| Varying link icon | next to it | The card has a link. Which icon appears depends on the address, see [Link types](#link-types). |
-| Circular arrows | next to it | Recurring task |
-| Check mark with `3/12` | bottom left of the card | State of the checklist. The triangle beside it expands it. |
+| <img src="../icons/calendar.svg" width="18" alt="calendar sheet"> Calendar sheet with a date | below the title | Due date, coloured by [Due date colours](#due-date-colours) |
+| <img src="../icons/map-marker.svg" width="18" alt="map marker"> Map marker | below the title | Location, shortened. The full text is in the tooltip. |
+| <img src="../icons/note.svg" width="18" alt="note sheet"> Note sheet | right of the label or badge row, or in the card footer when there is a checklist | The card has a description. Clicking opens it as a reading window with rendered Markdown. |
+| <img src="../icons/web.svg" width="18" alt="link icon"> Varying link icon | next to it | The card has a link. Which icon appears depends on the address, see [Link types](#link-types). |
+| <img src="../icons/sync.svg" width="18" alt="circular arrows"> Circular arrows | next to it | Recurring task |
+| <img src="../icons/check.svg" width="18" alt="check mark"> Check mark with `3/12` | bottom left of the card | State of the checklist. The triangle beside it expands it. |
 
-The editor opens via the pencil icon right next to the end of the title; clicking anywhere on the card does not open it. That keeps the editor from being opened by accident while scrolling or tapping. Cards can still be grabbed and dragged anywhere.
+The editor opens via the pencil icon <img src="../icons/pencil.svg" width="18" alt="sheet with a pencil"> right next to the end of the title; clicking anywhere on the card does not open it. That keeps the editor from being opened by accident while scrolling or tapping. Cards can still be grabbed and dragged anywhere.
 
 The two required fields come first: **title**, and directly below it **assignees**. Then the row with due date, time, priority and column, and below that the calendar invite. Everything else sits in **collapsible sections**: description, labels and card colour, link, location, recurrence, checklist.
 
@@ -427,7 +427,7 @@ A card has the following content fields (settable via the API under the same nam
 | **color** | hex color | Colored bar on the left edge of the card. Chosen via an embedded color picker (color field + hue slider + hex input) or presets. |
 | **link** | URL | A link. The card shows a **type-dependent icon** (see [Link types](#link-types)). |
 | **location** | text | Location. Shown as a location badge (pin icon) on the card and copied into the calendar invite as `LOCATION`. |
-| **checklist** | list | Sub-items with checkboxes; once there are at least two, drag the small **handle** on the left in the editor to reorder them. Shown as progress `✓ 2/5` in the bottom left on the card. The **chevron (▾/▴)** at the middle of the card footer expands/collapses the items directly on the card, where they can also be **ticked off** (saved immediately). |
+| **checklist** | list | Sub-items with checkboxes; once there are at least two, drag the small **handle** <img src="../icons/grip.svg" width="18" alt="drag handle"> on the left in the editor to reorder them. Shown as progress `✓ 2/5` in the bottom left on the card. The **chevron** <img src="../icons/chevron-down.svg" width="18" alt="chevron"> at the middle of the card footer expands/collapses the items directly on the card, where they can also be **ticked off** (saved immediately). |
 | **calendarInvite** | yes/no | If enabled **and** a due date is set, a **`.ics` calendar invite** is attached to every notification e-mail for this card. |
 | **calendarDuration** | `HH:MM` | Duration of the calendar invite, default **`01:00`** (one hour). The field appears in the editor right next to the **calendar invite** checkbox once that is enabled. Only effective for events **with a time of day**; without one it stays an all-day event. |
 | **recurrence** | object | Recurrence rule (see [Recurrence](#recurrence)). |
@@ -479,8 +479,8 @@ Instead, **each column individually** can be sorted automatically. Clicking the 
 
 | Mode | Behaviour |
 |---|---|
-| **Drag & drop** | Your own order. Cards are grabbed and dragged directly (default). |
-| **Drag handles** | Your own order as well, but every card gets a handle on the left. Dragging only works via that handle, which makes reordering easier on a touchscreen. |
+| **Drag & drop** | The hand-made order. Cards are grabbed and dragged directly (default). |
+| **Drag handles** <img src="../icons/grip.svg" width="18" alt="drag handle"> | The hand-made order as well, but every card gets a handle on the left. Dragging only works via that handle, which makes reordering easier on a touchscreen. |
 | **Due date** | Earliest date first, taking a set time of day into account. Cards without a date sit at the bottom. |
 | **Priority** | Highest priority first; within the same priority the due date decides. |
 | **Age in column** | The card that entered this column most recently sits on top. In a done column that is the task ticked off last. |
@@ -493,7 +493,7 @@ The menu can be operated from the keyboard as well: Tab reaches the button, Ente
 
 The **trash** has this menu too. There, "drag & drop" and "drag handles" do not mean a hand-made order - nothing can be dragged inside the trash anyway - but the order by deletion time, oldest first. That is the default and puts whatever is closest to being removed for good on top. The direction toggle reverses it as well. The other three modes behave exactly as in any other column.
 
-**Mode and direction are stored per device** (like the eye icon), so they only affect the view they were set in. In the automatic modes, reordering within the column is disabled because it would have no effect; moving cards to another column still works. Switching back to "drag & drop" or "drag handles" brings the saved manual order back unchanged.
+**Mode and direction are stored per device** (like the eye icon <img src="../icons/eye.svg" width="18" alt="eye">), so they only affect the view they were set in. In the automatic modes, reordering within the column is disabled because it would have no effect; moving cards to another column still works. Switching back to "drag & drop" or "drag handles" brings the saved manual order back unchanged.
 
 Independently of all this, the due badge is coloured, so anything urgent stands out regardless of its position.
 
@@ -522,7 +522,7 @@ The colours can be changed through [custom CSS](#faq--pitfalls): `--danger` for 
 
 ### Recurrence
 
-Recurring tasks work **on completion** (the Kanban way): as soon as a recurring card is moved to the "Done" column, a **fresh card** with the next matching due date is created automatically in the first non-done column (checklist items reset). Every content field of the template is carried over: title, description, assignees, labels, card colour, priority, link, **time of day**, **location** and the **calendar invite** flag. Cards with recurrence carry a recurrence badge (circular-arrows icon). The **completed** card does not keep the rule: it moves over to the follow-up card entirely, so the badge disappears there.
+Recurring tasks work **on completion** (the Kanban way): as soon as a recurring card is moved to the "Done" column, a **fresh card** with the next matching due date is created automatically in the first non-done column (checklist items reset). Every content field of the template is carried over: title, description, assignees, labels, card colour, priority, link, **time of day**, **location** and the **calendar invite** flag. Cards with recurrence carry a recurrence badge (circular-arrows icon <img src="../icons/sync.svg" width="18" alt="circular arrows">). The **completed** card does not keep the rule: it moves over to the follow-up card entirely, so the badge disappears there.
 
 If a recurring card is created **without** a manual date, the adapter automatically sets the next matching date.
 
@@ -584,7 +584,7 @@ Which people exist at all comes from the instance settings ([Tab "Users"](#tab-u
 
 **With only one person**, assignment disappears from the interface entirely: no chips in the header, no avatars on the cards, no *assignees* field in the card editor and no user picker in the views dialog. There would be nothing to choose and nothing to filter. New cards get that person automatically, through the API as well: a `POST` without `assignees` is no longer rejected with `400` but quietly completed. An ID that is given is still checked.
 
-**With no person at all**, no card can be created: the assignee is a required field, and nobody is not the same as anybody. The "+ Card" button is therefore blocked and says on click that a user in the instance settings is missing first, and so is the "+" at the foot of the columns. You can reach that state without any warning by deleting every row there.
+**With no person at all**, no card can be created: the assignee is a required field, and nobody is not the same as anybody. The "+ Card" button is therefore blocked and says on click that a user in the instance settings is missing first, and so is the "+" at the foot of the columns. That state can be reached without any warning by deleting every row there.
 
 The same goes for a **board without columns**: without a column there is nowhere for the card to go, the button says so and the editor does not even open.
 
@@ -594,13 +594,13 @@ As soon as a second user appears in the instance settings, all of it is back. Ca
 
 **Header chips as a filter:** The user chips in the header double as a **multi-select filter**, tapping toggles a person on or off. With a partial selection the board only shows cards of the selected people; with **all or none** active, all cards are shown. The selection is **stored per board in the browser** and restored on the next visit.
 
-**User colour:** The colour of the avatar ring and chip is maintained **in the board UI** (⚙ → Users) and applies immediately, without restarting the instance.
+**User colour:** The colour of the avatar ring and chip is maintained **in the board UI** (<img src="../icons/cog.svg" width="18" alt="gear"> → Users) and applies immediately, without restarting the instance.
 
-**Avatar image (optional):** By default the avatar shows the initials (on the user color). In the board UI under **⚙ → "User avatars"** a **PNG/JPG** can be uploaded per user, which is then shown as a round avatar (with preview; the image is automatically cropped to a square, scaled to 128 px and stored in the ioBroker file storage, no config bloat). "Remove avatar" reverts to the initials.
+**Avatar image (optional):** By default the avatar shows the initials (on the user color). In the board UI under **<img src="../icons/cog.svg" width="18" alt="gear"> → "User avatars"** a **PNG/JPG** can be uploaded per user, which is then shown as a round avatar (with preview; the image is automatically cropped to a square, scaled to 128 px and stored in the ioBroker file storage, no config bloat). "Remove avatar" reverts to the initials.
 
 ![Board settings, user avatars and colours](img/settings-users.png)
 
-**Members per board:** in the Board tab of the settings (**⚙ → Board**), right below the board title, sits the choice of which users are assignable there (card dialog, header chips and the Views dialog only show members). Every board needs **at least one member**; new boards start with all users. Removing someone whose cards would then have no assignee left makes the dialog ask first and name the number: those cards keep their assignment but no longer show up in the board's person filter. The board picker at the top also gives access to the members of other boards, without switching to them.
+**Members per board:** in the Board tab of the settings (**<img src="../icons/cog.svg" width="18" alt="gear"> → Board**), right below the board title, sits the choice of which users are assignable there (card dialog, header chips and the Views dialog only show members). Every board needs **at least one member**; new boards start with all users. Removing someone whose cards would then have no assignee left makes the dialog ask first and name the number: those cards keep their assignment but no longer show up in the board's person filter. The board picker at the top also gives access to the members of other boards, without switching to them.
 
 ![Board settings, members per board](img/settings-boards.png)
 
@@ -614,7 +614,7 @@ On narrow screens the board stacks the columns vertically; each column collapses
 
 ### Sharing views / URL parameters
 
-The **monitor icon** in the header opens the **"Views"** dialog. It assembles a filtered view and offers a **ready-to-copy URL** below. Ideal for embedding in Vis 2.0, Lovelace (webpage card) or for sharing.
+The **monitor icon** <img src="../icons/monitor.svg" width="18" alt="monitor"> in the header opens the **"Views"** dialog. It assembles a filtered view and offers a **ready-to-copy URL** below. Ideal for embedding in Vis 2.0, Lovelace (webpage card) or for sharing.
 
 The dialog covers the **most common** filters: board, users (multiple), labels (multiple) including the switch between **"Hide these labels"** (blacklist) and **"Show only these labels"** (whitelist), visible columns, the done-card limit (`doneLimit`) and the controls to hide (`hideSettings`, `embed`). **Not** in the dialog, but available **as URL parameters only**, are `theme`, `accent`, `lang`, `card` and `focus`. They go onto the generated address by hand where needed.
 
@@ -630,7 +630,7 @@ All parameters can also be appended to the URL directly:
 | `onlyLabel=<id,id>` | **Label whitelist**: shows **only** cards carrying at least one of these labels, so cards without a label drop out. Can be combined with `label=` (whitelist first, then blacklist). |
 | `columns=<id,id>` | Shows only these columns. Others are hidden. |
 | `doneLimit=N` | In done columns, show only the N most recently completed cards (`0` = none, omit = all). |
-| `hideSettings=1` | Hides the settings gear. |
+| `hideSettings=1` | Hides the settings gear <img src="../icons/cog.svg" width="18" alt="gear">. |
 | `embed=1` | **Embed mode**: hides the whole header bar (for iframe/Lovelace). |
 | `theme=auto\|light\|dark` | Forces a theme. |
 | `accent=%23RRGGBB` | Accent color (hex, encode `#` as `%23`). |

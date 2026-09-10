@@ -54,7 +54,7 @@ Ein **Kanban-Board als eigener ioBroker-Adapter**. Er bringt seinen eigenen Webs
    **Bei mehreren Instanzen:** Jede braucht einen eigenen Port. Ist der eingetragene belegt, startet der Adapter trotzdem und weicht auf den nächsten freien Port aus - die Instanzliste zeigt dann aber weiter den *eingetragenen* Port, und der Link dort führt auf die falsche Instanz. Der tatsächlich benutzte Port steht im Log: `Port 8095 is in use - falling back to free port 8096. The instance list still shows the configured port; enter the free port there to keep both in sync.` Trage ihn danach fest ein.
 4. **Benutzer anlegen.** Tab **Benutzer**: Eine frische Instanz bringt **keine** mit. Mindestens eine Person muss eingetragen werden, denn jede Karte braucht eine zuständige. Die Kennung will in Ruhe überlegt sein: Sie lässt sich nach dem ersten Start nicht mehr ändern, der Anzeigename dagegen jederzeit. Warum das so ist, steht im [Tab "Benutzer"](#tab-benutzer).
 5. **Web-UI öffnen:** **`http://<host>:<port>/`**
-6. Beim ersten Start ist noch kein Board vorhanden. Über das **Zahnrad-Symbol (⚙)** oben rechts ein neues Board anlegen. Jedes neue Board erhält automatisch drei Standardspalten:
+6. Beim ersten Start ist noch kein Board vorhanden. Über das **Zahnrad-Symbol** <img src="../icons/cog.svg" width="18" alt="Zahnrad"> oben rechts ein neues Board anlegen. Jedes neue Board erhält automatisch drei Standardspalten:
    - **Zu erledigen** (`todo`)
    - **In Arbeit** (`doing`)
    - **Erledigt** (`done`, als "Erledigt"-Spalte markiert)
@@ -130,7 +130,7 @@ Eine neue Zeile wird mit **"+"** in der Kopfzeile der Tabelle angelegt, das Papi
 > *Empfehlung:* Die Kennung beim Anlegen kurz überlegen. Kleingeschrieben, ohne Umlaute, und so, dass sie auch in einer geteilten Adresse (`?users=bjoern`) noch lesbar ist.
 >
 > <a id="benutzer-umbenennen"></a>
-> **Wenn Karten doch ins Leere zeigen**, meldet der Adapter das beim Start im Log und im State `info.orphanedAssignees`, und das Zahnrad in der Board-Kopfzeile bekommt einen kleinen Punkt. Dahin kommt es, wenn jemand gelöscht und neu angelegt wurde oder wenn eine Karte über die API mit einer fremden Kennung entstand.
+> **Wenn Karten doch ins Leere zeigen**, meldet der Adapter das beim Start im Log und im State `info.orphanedAssignees`, und das Zahnrad <img src="../icons/cog.svg" width="18" alt="Zahnrad"> in der Board-Kopfzeile bekommt einen kleinen Punkt. Dahin kommt es, wenn jemand gelöscht und neu angelegt wurde oder wenn eine Karte über die API mit einer fremden Kennung entstand.
 >
 > Reparieren lässt sich das unter **Einstellungen → Benutzer → Verwaiste Zuständige**. Diesen Abschnitt gibt es nur, wenn es etwas zu reparieren gibt - stimmt alles, zeigt der Reiter nur die Benutzer-Avatare. Dort steht je verwaister Kennung eine Zeile mit Umfang und betroffenen Boards; die Kartenzahl klappt die Liste der Karten auf, damit man vor dem Umhängen hineinsehen kann. Daneben ein Auswahlfeld mit den vorhandenen Personen und ein Knopf mit Rückfrage. Der Papierkorb bleibt aussen vor: Was auf dem Weg zur Löschung ist, muss niemandem mehr gehören.
 >
@@ -199,7 +199,7 @@ Für die meisten Setups genügt daher **"Zugew."** allein. **"Neu"** lohnt sich,
 
 > **Der Weg zählt mit.** Eine Karte per Ziehen zu verschieben löst die Ereignisse des Verschiebens aus. Wird dieselbe Spalte im **Karteneditor** umgestellt, ist das für den Adapter zusätzlich eine Änderung an der Karte, es kommt also **Geänd.** dazu. Wer alle Haken gesetzt hat, bekommt für einen Handgriff drei Nachrichten.
 
-> **Papierkorb-Ereignisse:** Für "in den Papierkorb", "wiederhergestellt" und "endgültig gelöscht" gibt es eigene Häkchen, die standardmäßig **aus** sind. Ein **automatischer Aufräumlauf** verschickt keine Einzelmails, sondern **eine Sammelmail je Benutzer** mit allen betroffenen Karten. Wird eine einzelne Karte von Hand gelöscht, kommt wie gewohnt eine Einzelmail. Der Button mit dem **Besen-Symbol** dagegen leert den ganzen Papierkorb auf einmal und verschickt deshalb ebenfalls eine Sammelmail, nicht eine Nachricht je Karte.
+> **Papierkorb-Ereignisse:** Für "in den Papierkorb", "wiederhergestellt" und "endgültig gelöscht" gibt es eigene Häkchen, die standardmäßig **aus** sind. Ein **automatischer Aufräumlauf** verschickt keine Einzelmails, sondern **eine Sammelmail je Benutzer** mit allen betroffenen Karten. Wird eine einzelne Karte von Hand gelöscht, kommt wie gewohnt eine Einzelmail. Der Button mit dem **Besen-Symbol** <img src="../icons/broom.svg" width="18" alt="Besen"> dagegen leert den ganzen Papierkorb auf einmal und verschickt deshalb ebenfalls eine Sammelmail, nicht eine Nachricht je Karte.
 
 #### Kalender-Einladung (.ics)
 
@@ -264,14 +264,14 @@ Die Weboberfläche unter **`http://<host>:8095/`** ist der eigentliche Arbeitsbe
 
 ### Kopfleiste
 
-Die **Kopfleiste** enthält von links nach rechts: die **Board-Auswahl**, die **Benutzer-Chips** (zugleich Personen-Filter, siehe [Benutzer im Board](#benutzer-im-board)), den Button **"+ Karte"**, den **Theme-Umschalter** (Sonne/Mond), die **"Ansichten"** (Monitor-Symbol, siehe [Ansichten teilen](#ansichten-teilen--url-parameter)) und die **Einstellungen** (Zahnrad).
+Die **Kopfleiste** enthält von links nach rechts: die **Board-Auswahl**, die **Benutzer-Chips** (zugleich Personen-Filter, siehe [Benutzer im Board](#benutzer-im-board)), den Button **"+ Karte"**, den **Theme-Umschalter** (Sonne/Mond <img src="../icons/moon.svg" width="18" alt="Mond">), die **"Ansichten"** (Monitor-Symbol <img src="../icons/monitor.svg" width="18" alt="Monitor">, siehe [Ansichten teilen](#ansichten-teilen--url-parameter)) und die **Einstellungen** (Zahnrad <img src="../icons/cog.svg" width="18" alt="Zahnrad">).
 *Hinweis: Im Einbettmodus (`embed=1`) wird die Kopfleiste komplett ausgeblendet.*
 
 ![Kopfleiste des Boards](img/topbar.png)
 
 ### Boards, Spalten & Labels
 
-Der Button mit dem **Zahnrad-Symbol** öffnet den Board-Manager. Er hat zwei Tabs: **Board** und **Benutzer** (Farben und Avatare, siehe [Benutzer im Board](#benutzer-im-board)). Änderungen werden erst mit **Speichern** übernommen.
+Der Button mit dem **Zahnrad-Symbol** <img src="../icons/cog.svg" width="18" alt="Zahnrad"> öffnet den Board-Manager. Er hat zwei Tabs: **Board** und **Benutzer** (Farben und Avatare, siehe [Benutzer im Board](#benutzer-im-board)). Änderungen werden erst mit **Speichern** übernommen.
 
 Ganz oben im Board-Tab steht eine Zeile mit drei Elementen. Der vierte Eintrag der Tabelle, "Board löschen", sitzt am unteren Ende des Tabs:
 
@@ -296,13 +296,13 @@ Spalten lassen sich anlegen, per Drag & Drop sortieren, umbenennen und löschen.
 
 - **Spalten-ID:** Neben dem sichtbaren Titel trägt jede Spalte eine **unveränderliche ID**. Die drei Standardspalten heißen `todo`, `doing` und `done`, neu angelegte Spalten bekommen eine erzeugte eindeutige ID. Beim **Umbenennen bleibt die ID erhalten** - geteilte `columns=`-Links und `moveCard`-Aufrufe funktionieren also unverändert weiter. Nachschlagen lassen sich die IDs über `GET /api/boards/<id>` (siehe [REST-API](#rest-api)).
 - **Spaltenbreite:** Die Spalten teilen sich immer die **volle Fensterbreite** - zwei Spalten nehmen also je die Hälfte ein. Erst wenn rechnerisch weniger als 280 px je Spalte übrig bleiben, wird das Board waagerecht scrollbar.
-- **Anzeige-Limit (Max):** Zahl > 0 zeigt in dieser Spalte nur die ersten N Karten; direkt unter der letzten erscheint `+X weitere`, darunter der Knopf zum Anlegen. `0` = alle anzeigen. Der Zähler in der Spaltenkopfzeile zählt weiterhin **alle** Karten der Spalte. `+X weitere` ist ein **Button**: Ein Klick zeigt die übrigen Karten, die Zeile heißt dann `- X wieder ausblenden`, ein zweiter Klick klappt sie zu. Das Limit am Board bleibt dabei unangetastet, die Abweichung merkt sich nur der eigene Browser, wie der Sortiermodus und das Augen-Symbol.
+- **Anzeige-Limit (Max):** Zahl > 0 zeigt in dieser Spalte nur die ersten N Karten; direkt unter der letzten erscheint `+X weitere`, darunter der Knopf zum Anlegen. `0` = alle anzeigen. Der Zähler in der Spaltenkopfzeile zählt weiterhin **alle** Karten der Spalte. `+X weitere` ist ein **Button**: Ein Klick zeigt die übrigen Karten, die Zeile heißt dann `- X wieder ausblenden`, ein zweiter Klick klappt sie zu. Das Limit am Board bleibt dabei unangetastet, die Abweichung merkt sich nur der eigene Browser, wie der Sortiermodus und das Augen-Symbol <img src="../icons/eye.svg" width="18" alt="Auge">.
 - **WIP-Limit** (Work-in-Progress): Zahl > 0 begrenzt die empfohlene Kartenanzahl. Wird sie überschritten, warnt die Spalte optisch (Zähler & Kopf werden hervorgehoben). `0` = kein Limit. Das Limit ist eine **Warnung**, keine harte Sperre. Sie bezieht sich immer auf die **Gesamtzahl** der Spalte, auch wenn der Personen-/Label-Filter gerade weniger Karten anzeigt. Ist es überschritten, steht auch bei aktivem Filter die Zahl der **Spalte** vor dem Schrägstrich, etwa "7/5" — also genau die Zahl, aus der die Warnfarbe kommt. Der Tooltip nennt beide: Wie viele Karten wirklich in der Spalte liegen und wie viele der Filter davon zeigt. Solange das Limit eingehalten wird, zeigt die Zahl bei aktivem Filter schlicht die Treffer, ohne Schrägstrich; ein Verhältnis aus gefilterten Karten und Limit wäre eine Zahl aus zwei verschiedenen Mengen.
 - **"Neu"** (`allowAdd`): legt fest, welche Spalten neue Karten erlauben. Am Spaltenfuß erscheint dann der Knopf zum Anlegen neuer Karten - ein "+" auf farbigem Grund.
 - **"Erledigt"-Spalte** (`isDone`): Karten, die hierher verschoben werden, gelten als erledigt (`doneAt` wird gesetzt, Wiederholungen werden ausgelöst). Ihr Titel wird **durchgestrichen** dargestellt, darunter steht der Zeitpunkt des Erledigens in Klammern, zum Beispiel `(Erledigt: 26.07.2026 20:09)`, im Datums- und Zeitformat der Instanz. Die Zeile setzt einen gesetzten `doneAt` voraus; Karten, die nie durch eine Erledigt-Spalte gegangen sind, zeigen sie nicht.
-- **Erledigt ein-/ausblenden (Augen-Symbol):** Jede Erledigt-Spalte hat oben rechts einen Umschalter in Form eines Auges, der die erledigten Karten ein- oder ausblendet (Diese Einstellung wird pro Gerät gespeichert).
+- **Erledigt ein-/ausblenden (Augen-Symbol <img src="../icons/eye.svg" width="18" alt="Auge">):** Jede Erledigt-Spalte hat oben rechts einen Umschalter in Form eines Auges, der die erledigten Karten ein- oder ausblendet (Diese Einstellung wird pro Gerät gespeichert).
 - **Limit sichtbarer erledigter Karten:** Per URL-Parameter `doneLimit=N` (siehe [Ansichten teilen / URL-Parameter](#ansichten-teilen--url-parameter)) lassen sich nur die N zuletzt erledigten Karten anzeigen; praktisch für kompakte, geteilte Ansichten.
-- **Erledigte Karte kopieren:** Neben dem Titel einer erledigten Karte sitzt ein kleines Kopier-Symbol. Es öffnet den Editor mit denselben Inhalten als **neue** Karte. Sie landet beim Speichern in der ersten Spalte mit "Neu"-Häkchen, Checklisten-Punkte starten unerledigt, und als Fälligkeit wird das **heutige Datum** vorgeschlagen, sofern das Original überhaupt eines hatte (eine gesetzte Uhrzeit bleibt erhalten).
+- **Erledigte Karte kopieren:** Neben dem Titel einer erledigten Karte sitzt ein kleines Kopier-Symbol <img src="../icons/copy.svg" width="18" alt="Zwei versetzte Blaetter">. Es öffnet den Editor mit denselben Inhalten als **neue** Karte. Sie landet beim Speichern in der ersten Spalte mit "Neu"-Häkchen, Checklisten-Punkte starten unerledigt, und als Fälligkeit wird das **heutige Datum** vorgeschlagen, sofern das Original überhaupt eines hatte (eine gesetzte Uhrzeit bleibt erhalten).
 
 <a id="zahlen-im-spaltenkopf"></a>
 #### Zahlen im Spaltenkopf (ab 0.3.2)
@@ -322,7 +322,7 @@ Die drei Fälligkeitszahlen tragen **dieselben Farben wie die Abzeichen auf den 
 
 Mindestens eine Zahl bleibt stehen: Der letzte gesetzte Haken lässt sich nicht entfernen, sonst gäbe es kein Ziel mehr, über das sich das Menü wieder aufrufen lässt.
 
-Die Auswahl gilt **je Spalte** und wird **pro Gerät** gespeichert, wie der Sortiermodus und das Augen-Symbol. Ein Personen- oder Label-Filter wirkt auf alle vier Zahlen gleich. In der Erledigt-Spalte und im Papierkorb fehlt das Menü: Dort gilt jede Karte als erledigt, es gäbe nichts einzufärben.
+Die Auswahl gilt **je Spalte** und wird **pro Gerät** gespeichert, wie der Sortiermodus und das Augen-Symbol <img src="../icons/eye.svg" width="18" alt="Auge">. Ein Personen- oder Label-Filter wirkt auf alle vier Zahlen gleich. In der Erledigt-Spalte und im Papierkorb fehlt das Menü: Dort gilt jede Karte als erledigt, es gäbe nichts einzufärben.
 
 Bedienen lässt sich das auch mit der Tastatur. Tab erreicht die Zahlen, Enter öffnet das Menü, die Pfeiltasten wandern darin, Enter setzt oder löscht einen Haken, Escape schließt und gibt den Fokus zurück. Dasselbe gilt für das Sortiermenü.
 
@@ -336,7 +336,7 @@ Jedes Board hat eine **Systemspalte "Papierkorb"**. Gelöschte Karten verschwind
 - **Sichtbarkeit:** Der Papierkorb ist **standardmäßig ausgeblendet**. Einblenden lässt er sich unten in den Board-Einstellungen über **"Papierkorb einblenden"**. Diese Einstellung gilt **nur für das jeweilige Gerät**, andere Nutzer sehen ihr Board unverändert.
 - **Was dort landet:** alles, was über den **Löschen**-Button im Karten-Editor entfernt wird, Karten, die **per Drag & Drop** in den Papierkorb gezogen werden, sowie die Karten aus dem [automatischen Aufräumen](#erledigte-karten-in-den-papierkorb).
 - **Zurückholen:** Karte aus dem Papierkorb herausziehen oder das **Wiederherstellen**-Symbol auf der Karte antippen. Sie landet dann in der ersten offenen Spalte.
-- **Sofort endgültig löschen:** Das zweite Symbol auf der Karte entfernt sie unwiderruflich. Am Spaltenkopf leert der Button mit dem Besen-Symbol den **kompletten** Papierkorb. Beides fragt vorher nach. Auch über API und Webhook greift `purgeCard` **nur auf Karten im Papierkorb** - bei einer aktiven Karte kommt ein Return `400` mit "Karte '...' liegt nicht im Papierkorb". Der Weg an der Aufbewahrungsfrist vorbei führt also immer erst durch den Papierkorb.
+- **Sofort endgültig löschen:** Das zweite Symbol auf der Karte entfernt sie unwiderruflich. Am Spaltenkopf leert der Button mit dem Besen-Symbol <img src="../icons/broom.svg" width="18" alt="Besen"> den **kompletten** Papierkorb. Beides fragt vorher nach. Auch über API und Webhook greift `purgeCard` **nur auf Karten im Papierkorb** - bei einer aktiven Karte kommt ein Return `400` mit "Karte '...' liegt nicht im Papierkorb". Der Weg an der Aufbewahrungsfrist vorbei führt also immer erst durch den Papierkorb.
 - **Restlaufzeit:** Jede Karte zeigt an, wie lange sie noch aufbewahrt wird, zum Beispiel "noch 30 Tage".
 - **Eigene Optik:** Die Spalte ist bewusst neutral grau gehalten, unabhängig von Theme und Akzentfarbe, damit sie sich von den Arbeitsspalten abhebt.
 - **Sonderstellung:** Der Papierkorb steht immer ganz rechts, lässt sich nicht umbenennen, verschieben oder löschen und taucht in der Spalten-Konfiguration nicht auf. Er kennt kein WIP-Limit und keinen "Neu"-Button und trägt zum Zähler anderer Spalten nicht bei. Den **Sortier-Umschalter** hat er seit 0.3.2 wie jede andere Spalte. Voreingestellt ist die Reihenfolge nach Löschzeitpunkt, älteste zuerst - oben steht also, was der endgültigen Löschung am nächsten ist.
@@ -356,13 +356,13 @@ Der Lauf startet **einmal täglich** sowie **beim Adapterstart**. Grundlage ist 
 
 ![Papierkorb mit zwei gelöschten Karten](img/trash.png)
 
-*Auf jeder Karte steht die Restlaufzeit, darunter Wiederherstellen und endgültig Löschen. Am Spaltenkopf leert der Besen den ganzen Papierkorb.*
+*Auf jeder Karte steht die Restlaufzeit, darunter Wiederherstellen und endgültig Löschen. Am Spaltenkopf leert der Besen <img src="../icons/broom.svg" width="18" alt="Besen"> den ganzen Papierkorb.*
 
 #### Labels
 
 Labels sind farbige Schlagworte und werden **pro Board** im Tab *Board* verwaltet (anlegen, umbenennen, umfärben, löschen). Auf der Karte erscheinen sie als farbiges Badge mit automatisch kontrastierender Schrift; im [Ansichten-Dialog](#ansichten-teilen--url-parameter) lassen sie sich als Blacklist zum Ausblenden nutzen.
 
-Die **Reihenfolge** der Labels lässt sich wie die der Spalten am Anfasser ziehen, und sie gilt überall: auf den Karten, in der Auswahl im Karteneditor und in der Zusammenfassung der Abschnittszeile. Zwei Karten mit denselben Labels sehen damit gleich aus.
+Die **Reihenfolge** der Labels lässt sich wie die der Spalten am Anfasser <img src="../icons/grip.svg" width="18" alt="Anfasser"> ziehen, und sie gilt überall: auf den Karten, in der Auswahl im Karteneditor und in der Zusammenfassung der Abschnittszeile. Zwei Karten mit denselben Labels sehen damit gleich aus.
 
 ![Dieselben Labels auf zwei Karten](img/card-labels.png)
 
@@ -376,29 +376,27 @@ Je Board lässt sich festlegen, wohin der "Karte öffnen"-Link in den Benachrich
 
 ### Karten: alle Felder
 
-**Aufbau einer Karte:** Der oder die **Zuständigen** stehen als Avatar oder bei mehreren als Avatarstapel oben rechts, der Titeltext umfließt sie. Im Falle mehrerer Zuständiger fächern die Gesichter nach links auf, ohne den Zeilenumbruch zu verändern, sobald man mit der Maus darüberfährt oder darauf tippt. Lange Titel werden nach **zwei Zeilen** mit "..." abgeschnitten, der vollständige Titel steht im Tooltip. Trägt die Karte eine **Checkliste**, bekommt sie einen Kartenfuß: links der Fortschritt, mittig der Chevron zum Auf- und Zuklappen und rechts die Symbole für **Beschreibung, Link und Wiederholung** in dieser Reihenfolge. Ohne Checkliste gibt es keinen Fuß, dieselben Symbole stehen dann am rechten Ende der Label- oder Abzeichenzeile. Ein Klick auf das Beschreibungssymbol öffnet die Beschreibung in einem **Lesefenster** mit gerendertem Markdown; Links darin öffnen immer in einem neuen Tab. Ob eine Checkliste auf- oder zugeklappt ist, wird **pro Gerät und Board gemerkt** - genau wie die Sortierung der Spalten - und bleibt nach einem Neuladen erhalten.
+**Aufbau einer Karte:** Der oder die **Zuständigen** stehen als Avatar oder bei mehreren als Avatarstapel oben rechts, der Titeltext umfließt sie. Im Falle mehrerer Zuständiger fächern die Gesichter nach links auf, ohne den Zeilenumbruch zu verändern, sobald man mit der Maus darüberfährt oder darauf tippt. Lange Titel werden nach **zwei Zeilen** mit "..." abgeschnitten, der vollständige Titel steht im Tooltip. Trägt die Karte eine **Checkliste**, bekommt sie einen Kartenfuß: links der Fortschritt, mittig der Chevron <img src="../icons/chevron-down.svg" width="18" alt="Chevron"> zum Auf- und Zuklappen und rechts die Symbole für **Beschreibung, Link und Wiederholung** in dieser Reihenfolge. Ohne Checkliste gibt es keinen Fuß, dieselben Symbole stehen dann am rechten Ende der Label- oder Abzeichenzeile. Ein Klick auf das Beschreibungssymbol öffnet die Beschreibung in einem **Lesefenster** mit gerendertem Markdown; Links darin öffnen immer in einem neuen Tab. Ob eine Checkliste auf- oder zugeklappt ist, wird **pro Gerät und Board gemerkt** - genau wie die Sortierung der Spalten - und bleibt nach einem Neuladen erhalten.
 
 ![Aufbau einer Karte](img/card.png)
 
 **Die Symbole auf einer Karte** in der Reihenfolge, in der sie auftauchen:
 
-///// Bitte für die einzelnen Symbole Screenshots einbauen
-
 | Symbol | Wo | Bedeutung |
 |---|---|---|
-| Blatt mit Stift | rechts neben dem Titel | Karteneditor öffnen. Der einzige Weg dorthin. |
-| Zwei versetzte Blätter | rechts neben dem Titel, nur auf erledigten Karten | Inhalt als **neue** Karte übernehmen, siehe [Erledigte Karte kopieren](#boards-spalten--labels) |
-| Pfeil im Kreis | im Papierkorb, in einer eigenen Zeile unten auf der Karte | Karte wiederherstellen. Darüber steht die verbleibende Aufbewahrungsfrist. |
-| Papierkorb | daneben | endgültig löschen, mit Rückfrage |
+| <img src="../icons/pencil.svg" width="18" alt="Blatt mit Stift"> Blatt mit Stift | rechts neben dem Titel | Karteneditor öffnen. Der einzige Weg dorthin. |
+| <img src="../icons/copy.svg" width="18" alt="Zwei versetzte Blaetter"> Zwei versetzte Blätter | rechts neben dem Titel, nur auf erledigten Karten | Inhalt als **neue** Karte übernehmen, siehe [Erledigte Karte kopieren](#boards-spalten--labels) |
+| <img src="../icons/restore.svg" width="18" alt="Pfeil im Kreis"> Pfeil im Kreis | im Papierkorb, in einer eigenen Zeile unten auf der Karte | Karte wiederherstellen. Darüber steht die verbleibende Aufbewahrungsfrist. |
+| <img src="../icons/delete-forever.svg" width="18" alt="Papierkorb"> Papierkorb | daneben | endgültig löschen, mit Rückfrage |
 | `!` orange, `!!` rot | unter dem Titel | Priorität Hoch beziehungsweise Dringend. Bei Normal steht dort nichts. |
-| Kalenderblatt mit Datum | unter dem Titel | Fälligkeit, eingefärbt nach [Farben der Fälligkeit](#farben-der-fälligkeit) |
-| Ortsmarke | unter dem Titel | Ort, gekürzt. Der vollständige Text steht im Tooltip. |
-| Notizblatt | rechts in der Label- oder Abzeichenzeile, bei vorhandener Checkliste im Kartenfuß | Die Karte hat eine Beschreibung. Ein Klick öffnet sie als Lesefenster mit gerendertem Markdown. |
-| wechselndes Linksymbol | daneben | Die Karte hat einen Link. Welches Symbol erscheint, hängt an der Adresse, siehe [Link-Typen](#link-typen). |
-| Kreispfeil | daneben | Wiederkehrende Aufgabe |
-| Haken mit `3/12` | im Kartenfuß links | Stand der Checkliste. Das Dreieck daneben klappt sie auf. |
+| <img src="../icons/calendar.svg" width="18" alt="Kalenderblatt"> Kalenderblatt mit Datum | unter dem Titel | Fälligkeit, eingefärbt nach [Farben der Fälligkeit](#farben-der-fälligkeit) |
+| <img src="../icons/map-marker.svg" width="18" alt="Ortsmarke"> Ortsmarke | unter dem Titel | Ort, gekürzt. Der vollständige Text steht im Tooltip. |
+| <img src="../icons/note.svg" width="18" alt="Notizblatt"> Notizblatt | rechts in der Label- oder Abzeichenzeile, bei vorhandener Checkliste im Kartenfuß | Die Karte hat eine Beschreibung. Ein Klick öffnet sie als Lesefenster mit gerendertem Markdown. |
+| <img src="../icons/web.svg" width="18" alt="Linksymbol"> wechselndes Linksymbol | daneben | Die Karte hat einen Link. Welches Symbol erscheint, hängt an der Adresse, siehe [Link-Typen](#link-typen). |
+| <img src="../icons/sync.svg" width="18" alt="Kreispfeil"> Kreispfeil | daneben | Wiederkehrende Aufgabe |
+| <img src="../icons/check.svg" width="18" alt="Haken"> Haken mit `3/12` | im Kartenfuß links | Stand der Checkliste. Das Dreieck daneben klappt sie auf. |
 
-Der Editor öffnet sich über das Stift-Symbol direkt rechts neben dem Titel; ein Klick irgendwo auf die Karte öffnet ihn nicht. Das verhindert, dass der Editor beim Scrollen oder Antippen versehentlich geöffnet wird. Karten lassen sich überall anfassen und ziehen.
+Der Editor öffnet sich über das Stift-Symbol <img src="../icons/pencil.svg" width="18" alt="Blatt mit Stift"> direkt rechts neben dem Titel; ein Klick irgendwo auf die Karte öffnet ihn nicht. Das verhindert, dass der Editor beim Scrollen oder Antippen versehentlich geöffnet wird. Karten lassen sich überall anfassen und ziehen.
 
 Oben stehen die beiden Pflichtfelder: **Titel**, direkt darunter **Zuständig**. Es folgt die Zeile mit Fälligkeit, Uhrzeit, Priorität und Spalte, darunter die Kalender-Einladung. Alles Weitere steckt in **aufklappbaren Abschnitten**: Beschreibung, Labels und Kartenfarbe, Link, Ort, Wiederholung, Checkliste.
 
@@ -428,7 +426,7 @@ Eine Karte hat folgende inhaltliche Felder (per API unter denselben Namen setzba
 | **color** | Hex-Farbe | Farbiger Balken links an der Karte. Wählbar über einen eingebetteten Colorpicker (Farbfeld + Farbton-Regler + Hex-Eingabe) oder Presets. |
 | **link** | URL | Verknüpfung. Auf der Karte erscheint ein **typabhängiges Icon** - siehe [Link-Typen](#link-typen). |
 | **location** | Text | Ort. Erscheint als Orts-Badge (Pin-Symbol) auf der Karte und wird als `LOCATION` in die Kalender-Einladung übernommen. |
-| **checklist** | Liste | Unterpunkte mit Häkchen; ab zwei Punkten lassen sie sich im Editor am kleinen **Anfasser** links per Drag & Drop umsortieren. Auf der Karte als Fortschritt `✓ 2/5` unten links. Über den **Chevron (▾/▴)** in der Mitte des Kartenfußes lassen sich die Punkte direkt auf der Karte auf-/zuklappen und **abhaken** (wird sofort gespeichert). |
+| **checklist** | Liste | Unterpunkte mit Häkchen; ab zwei Punkten lassen sie sich im Editor am kleinen **Anfasser** <img src="../icons/grip.svg" width="18" alt="Anfasser"> links per Drag & Drop umsortieren. Auf der Karte als Fortschritt `✓ 2/5` unten links. Über den **Chevron** <img src="../icons/chevron-down.svg" width="18" alt="Chevron"> in der Mitte des Kartenfußes lassen sich die Punkte direkt auf der Karte auf-/zuklappen und **abhaken** (wird sofort gespeichert). |
 | **calendarInvite** | Ja/Nein | Wenn aktiviert **und** ein Fälligkeitsdatum gesetzt ist, wird jeder Benachrichtigungs-E-Mail zu dieser Karte eine **`.ics`-Kalender-Einladung** angehängt. |
 | **calendarDuration** | `HH:MM` | Termindauer in der Kalender-Einladung, Standard **`01:00`** (eine Stunde). Das Feld erscheint im Editor rechts neben der Kalender-Checkbox, sobald diese aktiv ist. Wirkt nur bei Terminen **mit Uhrzeit**; ohne Uhrzeit bleibt es ein Ganztagestermin. |
 | **recurrence** | Objekt | Wiederholungsregel - siehe [Wiederholungen](#wiederholungen). |
@@ -481,7 +479,7 @@ Stattdessen kann **jede Spalte einzeln** automatisch sortiert werden. Ein Klick 
 | Modus | Verhalten |
 |---|---|
 | **Drag & Drop** | Die eigene Reihenfolge. Karten werden direkt angefasst und gezogen (Standard). |
-| **Anfasser** | Ebenfalls die eigene Reihenfolge, aber jede Karte bekommt links einen Anfasser. Gezogen wird nur darüber, was das Umsortieren auf dem Touchscreen erleichtert. |
+| **Anfasser** <img src="../icons/grip.svg" width="18" alt="Anfasser"> | Ebenfalls die eigene Reihenfolge, aber jede Karte bekommt links einen Anfasser. Gezogen wird nur darüber, was das Umsortieren auf dem Touchscreen erleichtert. |
 | **Fälligkeit** | Frühestes Datum zuerst, eine gesetzte Uhrzeit wird mitberücksichtigt. Karten ohne Datum stehen unten. |
 | **Priorität** | Höchste Priorität zuerst, bei gleicher Priorität entscheidet die Fälligkeit. |
 | **Alter in Spalte** | Die zuletzt in diese Spalte gekommene Karte steht oben. In der Erledigt-Spalte ist das also die zuletzt abgehakte Aufgabe. |
@@ -494,7 +492,7 @@ Das Menü lässt sich auch mit der Tastatur bedienen: Tab erreicht den Knopf, En
 
 Auch der **Papierkorb** hat dieses Menü. Dort bedeuten "Drag & Drop" und "Anfasser" allerdings nicht die eigene Reihenfolge - von Hand ziehen lässt sich im Papierkorb ohnehin nichts -, sondern die Reihenfolge nach Löschzeitpunkt, älteste zuerst. Das ist die Voreinstellung und zeigt oben, was der endgültigen Löschung am nächsten ist. Der Richtungsumschalter dreht auch sie um. Die übrigen drei Modi wirken wie in jeder anderen Spalte.
 
-**Sortiermodus und Richtung werden pro Gerät gespeichert** (wie das Augen-Symbol), sie gelten also nur für den, der sie eingestellt hat. In den automatischen Modi ist das eigene Umsortieren innerhalb der Spalte deaktiviert, weil es wirkungslos wäre; das Verschieben in eine andere Spalte funktioniert weiterhin. Zurück auf "Drag & Drop" oder "Anfasser" geschaltet, erscheint die gespeicherte eigene Reihenfolge unverändert.
+**Sortiermodus und Richtung werden pro Gerät gespeichert** (wie das Augen-Symbol <img src="../icons/eye.svg" width="18" alt="Auge">), sie gelten also nur für den, der sie eingestellt hat. In den automatischen Modi ist das eigene Umsortieren innerhalb der Spalte deaktiviert, weil es wirkungslos wäre; das Verschieben in eine andere Spalte funktioniert weiterhin. Zurück auf "Drag & Drop" oder "Anfasser" geschaltet, erscheint die gespeicherte eigene Reihenfolge unverändert.
 
 Unabhängig davon färbt sich das Fälligkeits-Badge, sodass Dringendes auffällt, egal an welcher Position es steht.
 
@@ -523,7 +521,7 @@ Die Farben lassen sich über [eigenes CSS](#faq--fallstricke) ändern: `--danger
 
 ### Wiederholungen
 
-Wiederkehrende Aufgaben funktionieren **beim Erledigen** (Kanban-typisch): Sobald eine wiederkehrende Karte in die "Erledigt"-Spalte wandert, wird automatisch eine **frische Karte** mit dem nächsten passenden Fälligkeitsdatum in der ersten Nicht-Erledigt-Spalte angelegt (Checklisten-Haken zurückgesetzt). Übernommen werden dabei alle inhaltlichen Felder der Vorlage: Titel, Beschreibung, Zuständige, Labels, Kartenfarbe, Priorität, Link, **Uhrzeit**, **Ort** und das **Kalender-Einladung**-Häkchen. Karten mit Wiederholung tragen ein Wiederholungs-Badge (Kreispfeil-Symbol). Die **erledigte** Karte behält die Regel nicht: Sie wandert vollständig zur Folgekarte, das Badge verschwindet dort also.
+Wiederkehrende Aufgaben funktionieren **beim Erledigen** (Kanban-typisch): Sobald eine wiederkehrende Karte in die "Erledigt"-Spalte wandert, wird automatisch eine **frische Karte** mit dem nächsten passenden Fälligkeitsdatum in der ersten Nicht-Erledigt-Spalte angelegt (Checklisten-Haken zurückgesetzt). Übernommen werden dabei alle inhaltlichen Felder der Vorlage: Titel, Beschreibung, Zuständige, Labels, Kartenfarbe, Priorität, Link, **Uhrzeit**, **Ort** und das **Kalender-Einladung**-Häkchen. Karten mit Wiederholung tragen ein Wiederholungs-Badge (Kreispfeil-Symbol <img src="../icons/sync.svg" width="18" alt="Kreispfeil">). Die **erledigte** Karte behält die Regel nicht: Sie wandert vollständig zur Folgekarte, das Badge verschwindet dort also.
 
 Wird eine wiederkehrende Karte **ohne** manuelles Datum angelegt, setzt der Adapter automatisch das nächste passende Datum.
 
@@ -595,13 +593,13 @@ Dasselbe gilt für ein **Board ohne Spalten**: Ohne Spalte gibt es keinen Ort f�
 
 **Kopf-Chips als Filter:** Die Benutzer-Chips in der Kopfzeile sind zugleich ein **Mehrfach-Filter**, Antippen wählt Personen an oder ab. Bei einer Teilauswahl zeigt das Board nur Karten der gewählten Personen; sind **alle oder keine** Chips aktiv, werden alle Karten angezeigt. Die Auswahl wird **je Board im Browser gespeichert** und beim nächsten Aufruf wiederhergestellt.
 
-**Benutzerfarbe:** Die Farbe von Avatar-Ring und Chip wird **in der Board-Oberfläche** gepflegt (⚙ → Benutzer) und greift sofort, ohne Neustart der Instanz.
+**Benutzerfarbe:** Die Farbe von Avatar-Ring und Chip wird **in der Board-Oberfläche** gepflegt (<img src="../icons/cog.svg" width="18" alt="Zahnrad"> → Benutzer) und greift sofort, ohne Neustart der Instanz.
 
-**Avatar-Bild (optional):** Standardmäßig zeigt der Avatar die Initialen (auf der Benutzerfarbe). In der Board-Oberfläche unter **⚙ → "Benutzer-Avatare"** kann man je Benutzer ein **PNG/JPG hochladen**, das dann rund als Avatar erscheint (mit Vorschau; das Bild wird automatisch quadratisch zugeschnitten, auf 128 px verkleinert und im ioBroker-Dateispeicher abgelegt, kein Config-Ballast). "Avatar entfernen" schaltet zurück auf die Initialen.
+**Avatar-Bild (optional):** Standardmäßig zeigt der Avatar die Initialen (auf der Benutzerfarbe). In der Board-Oberfläche unter **<img src="../icons/cog.svg" width="18" alt="Zahnrad"> → "Benutzer-Avatare"** kann man je Benutzer ein **PNG/JPG hochladen**, das dann rund als Avatar erscheint (mit Vorschau; das Bild wird automatisch quadratisch zugeschnitten, auf 128 px verkleinert und im ioBroker-Dateispeicher abgelegt, kein Config-Ballast). "Avatar entfernen" schaltet zurück auf die Initialen.
 
 ![Board-Einstellungen - Benutzer-Avatare und -Farben](img/settings-users.png)
 
-**Mitglieder je Board:** Im Board-Tab der Einstellungen (**⚙ → Board**) wird direkt unter dem Board-Titel festgelegt, welche Benutzer dort zuweisbar sind (Karten-Dialog, Kopf-Chips und Ansichten-Dialog zeigen nur Mitglieder). Jedes Board braucht **mindestens ein Mitglied**; neue Boards starten mit allen Benutzern. Wird jemand herausgenommen, dessen Karten sonst niemanden mehr als zuständig hätten, fragt der Dialog nach und nennt die Zahl: Diese Karten behalten ihre Zuordnung, tauchen aber nicht mehr im Personenfilter des Boards auf. Über die Board-Auswahl ganz oben lassen sich auch die Mitglieder anderer Boards bearbeiten, ohne dorthin zu wechseln.
+**Mitglieder je Board:** Im Board-Tab der Einstellungen (**<img src="../icons/cog.svg" width="18" alt="Zahnrad"> → Board**) wird direkt unter dem Board-Titel festgelegt, welche Benutzer dort zuweisbar sind (Karten-Dialog, Kopf-Chips und Ansichten-Dialog zeigen nur Mitglieder). Jedes Board braucht **mindestens ein Mitglied**; neue Boards starten mit allen Benutzern. Wird jemand herausgenommen, dessen Karten sonst niemanden mehr als zuständig hätten, fragt der Dialog nach und nennt die Zahl: Diese Karten behalten ihre Zuordnung, tauchen aber nicht mehr im Personenfilter des Boards auf. Über die Board-Auswahl ganz oben lassen sich auch die Mitglieder anderer Boards bearbeiten, ohne dorthin zu wechseln.
 
 ![Board-Einstellungen - Mitglieder je Board](img/settings-boards.png)
 
@@ -615,7 +613,7 @@ Auf schmalen Bildschirmen stapelt das Board die Spalten untereinander; jede Spal
 
 ### Ansichten teilen / URL-Parameter
 
-Über das **Monitor-Symbol** in der Kopfzeile öffnet sich der Dialog **"Ansichten"**. Dort lässt sich eine gefilterte Ansicht zusammenklicken; darunter steht eine **fertige URL zum Kopieren**. Ideal zum Einbetten in Vis 2.0, Lovelace (Webpage-Card) oder zum Weitergeben.
+Über das **Monitor-Symbol** <img src="../icons/monitor.svg" width="18" alt="Monitor"> in der Kopfzeile öffnet sich der Dialog **"Ansichten"**. Dort lässt sich eine gefilterte Ansicht zusammenklicken; darunter steht eine **fertige URL zum Kopieren**. Ideal zum Einbetten in Vis 2.0, Lovelace (Webpage-Card) oder zum Weitergeben.
 
 Der Dialog deckt die **gebräuchlichsten** Filter ab: Board, Benutzer (mehrfach), Labels (mehrfach) samt Umschaltung zwischen **"Diese Labels ausblenden"** (Blacklist) und **"Nur diese Labels zeigen"** (Whitelist), sichtbare Spalten, Limit für erledigte Karten (`doneLimit`) sowie das Ausblenden von Bedienelementen (`hideSettings`, `embed`). **Nicht** im Dialog, sondern **nur als URL-Parameter** gibt es `theme`, `accent`, `lang`, `card` und `focus` - die kommen bei Bedarf von Hand an die erzeugte Adresse.
 
@@ -631,7 +629,7 @@ Alle Parameter lassen sich auch direkt an die URL hängen:
 | `onlyLabel=<id,id>` | **Label-Whitelist**: zeigt **nur** Karten, die mindestens eines dieser Labels tragen - Karten ohne Label fallen weg. Lässt sich mit `label=` kombinieren (erst Whitelist, dann Blacklist). |
 | `columns=<id,id>` | Zeigt nur diese Spalten. Nicht genannte Spalten werden ausgeblendet. |
 | `doneLimit=N` | In Erledigt-Spalten nur die N zuletzt erledigten Karten anzeigen (`0` = keine, weglassen = alle). |
-| `hideSettings=1` | Blendet das Einstellungen-Zahnrad aus. |
+| `hideSettings=1` | Blendet das Einstellungen-Zahnrad <img src="../icons/cog.svg" width="18" alt="Zahnrad"> aus. |
 | `embed=1` | **Einbettmodus**: blendet die komplette Kopfleiste aus (für iframe/Lovelace). |
 | `theme=auto\|light\|dark` | Erzwingt ein Theme. |
 | `accent=%23RRGGBB` | Akzentfarbe (Hex, `#` als `%23` kodieren). |
