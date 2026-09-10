@@ -21,6 +21,12 @@ Systemsprache).
 | "admin-email.png" | Instanzeinstellungen, Tab "Benachrichtigungen" | ioBroker-Admin |
 | "mobile.png" | Mobile Ansicht (gestapelte Spalten) | Smartphone (360x780, Faktor 2) |
 | "mobile-drag.png" | Mobile Ansicht, Schnellmenue beim Ziehen einer Karte | Smartphone (360x780, Faktor 2) |
+| "topbar.png" | Kopfleiste des Boards | Ausschnitt aus dem Board |
+| "col-counts.png" | Zahlen im Spaltenkopf mit geoeffnetem Auswahlmenue | Ausschnitt, Menue vorher anklicken |
+| "sort-menu.png" | Sortiermenue einer Spalte | Ausschnitt, Menue vorher anklicken |
+| "trash.png" | Papierkorb-Spalte mit zwei geloeschten Karten | Ausschnitt, Papierkorb vorher einblenden |
+| "card.png" | Aufbau einer Karte | Ausschnitt aus dem Board |
+| "card-labels.png" | Zwei Karten mit denselben Labels | Ausschnitt aus dem Board |
 
 Alle Bilder im **dunklen Modus**, an der URL mit "&theme=dark" erzwungen.
 
@@ -39,6 +45,7 @@ Ansichten-Dialogs am Inhalt.
 | "settings*.png" | 1403 x 1000 | 1122 x 952 |
 | "share.png" | 1403 x 1000 | 1122 x 661 |
 | "mobile*.png" | 360 x 780, Faktor 2 | 720 x 1560 |
+| die sechs Ausschnitte | 1868 breit | so gross wie der Ausschnitt |
 
 Die Fensterhoehe fuers Board richtet sich nach dem Inhalt: So hoch, dass die
 laengste Spalte gerade noch ganz hineinpasst und darunter nicht mehr als ein
@@ -67,6 +74,17 @@ nach der Aufnahme ist auf dem Bild alles rot, und die Farben fuer heute, morgen
 und spaeter kommen nirgends mehr vor. Vor einer neuen Runde die Termine der
 Testboards auf den Aufnahmetag ausrichten: mindestens eine Karte ueberfaellig,
 eine heute, eine morgen, eine spaeter und eine ohne Datum.
+
+**Die sechs Ausschnitte entstehen ueber "python mkjobs.py <de|en> extra".** Sie
+schneiden sich ihr Rechteck selbst zu, ueber "clipJs" statt "clipSel": Zwei von
+ihnen muessen ein geoeffnetes Menue mit einschliessen, und das haengt der
+Browser an "body" statt an die Spalte. "clipSel" trifft ausserdem nur das erste
+Vorkommen eines Selektors, die Karten werden deshalb ueber ihren Titel gesucht.
+
+**Der Papierkorb braucht Karten.** Fuer "trash.png" muessen zwei Karten darin
+liegen, sonst zeigt das Bild eine leere Spalte. Anlegen und wieder loeschen -
+nur dieser Weg setzt "trashedAt" und damit die Restlaufzeit, die auf der Karte
+steht. Nach dreissig Tagen sind sie weg und muessen neu angelegt werden.
 
 **Die Zahlen im Spaltenkopf stehen im localStorage.** Ohne Zutun zeigt jede
 Spalte nur ihre Gesamtzahl. Fuer "board.png" wird "kanban.countModes" vorher

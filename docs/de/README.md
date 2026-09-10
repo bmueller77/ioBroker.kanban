@@ -84,7 +84,7 @@ Diese Einstellungen liegen im **ioBroker-Admin** unter *Instanzen → `kanban.0`
 | **Standard-Theme** | `auto` (System), `light` oder `dark`. |
 | **Akzentfarbe** | Farbe der Bedienelemente (Standard `#7E57C2`). |
 | **Sprache** | Sprache der Oberfläche. Zur Auswahl stehen elf Sprachen, aufgezählt unter [Sprache / Mehrsprachigkeit](#sprache--mehrsprachigkeit). Leer/automatisch = ioBroker-Systemsprache. Per URL mit `?lang=xx` übersteuerbar. |
-| **Datumsformat** | Anzeigeformat des Fälligkeitsdatums. Das Feld ist **leer voreingestellt**, dann gilt das **ioBroker-Systemformat**. Platzhalter siehe Tabelle unten, `DD.MM.` ist eines der möglichen Muster. Beim Start wird geprüft, ob überhaupt ein Tag, Monat oder Jahr darin vorkommt. Ein Vertipper wird verworfen, das Log nennt den Grund, und die Anzeige fällt auf das Systemformat zurück. |
+| **Datumsformat** | Anzeigeformat des Fälligkeitsdatums. Das Feld ist **leer voreingestellt** und verwendet dann das **ioBroker-Systemformat**. Platzhalter siehe Tabelle unten, `DD.MM.` ist eines der möglichen Muster. Beim Start wird geprüft, ob überhaupt ein Tag, Monat oder Jahr darin vorkommt. Fehleingaben werden verworfen (Begründung im Log) und die Anzeige fällt auf das Systemformat zurück. |
 | **Uhrzeit-Format** | `24-Stunden (14:00)` oder `12-Stunden (2:00 PM)`. Betrifft die optionale Uhrzeit auf Karten. |
 | **Eigenes CSS** | Wird als `/api/custom.css` eingebunden, für individuelle Anpassungen. |
 
@@ -94,7 +94,7 @@ Es gilt die verbreitete moment-/Day.js-Schreibweise (Groß-/Kleinschreibung beac
 
 | Platzhalter | Bedeutung | Beispiel (20. Juli 2026) |
 |---|---|---|
-| `D` / `DD` | Tag ohne / mit führender Null | `20` / `20` |
+| `D` / `DD` | Tag ohne / mit führender Null | `5` / `05` |
 | `M` / `MM` | Monat als Zahl ohne / mit führender Null | `7` / `07` |
 | `MMM` / `MMMM` | Monatsname kurz / ausgeschrieben | `Jul` / `Juli` |
 | `YY` / `YYYY` | Jahr zwei- / vierstellig | `26` / `2026` |
@@ -106,38 +106,38 @@ Monats- und Wochentagsnamen erscheinen in der Sprache des Boards. Beispiele: `DD
 
 ### Tab "Benutzer"
 
-Hier wird festgelegt, **welche Personen es gibt**, die Liste gilt für die gesamte Instanz. Im Board erscheinen sie als Chips in der Kopfleiste und lassen sich Karten als Zuständige zuweisen.
+Hier werden die Benutzer angelegt. Die Liste gilt für die gesamte Instanz. Im Board erscheinen sie als Chips in der Kopfleiste und lassen sich Karten als Zuständige zuweisen.
 
 ![Instanzeinstellungen - Benutzer](img/admin-users.png)
 
 | Feld | Bedeutung |
 |---|---|
 | **ID** (`name`) | Interne ID, klein geschrieben, ohne Umlaute (z. B. `bjoern`). Wird in URL-Parametern und Zuweisungen verwendet. |
-| **Anzeigename** (`displayName`) | Anzeigename (z. B. `Björn`). |
+| **Anzeigename** (`displayName`) | Anzeigename des Benutzers (z. B. `Björn`). |
 | **E-Mail** (`email`) | Optional. Zieladresse für E-Mail-Benachrichtigungen. |
 | **notify...** | Neun Checkboxen je Benutzer für die Benachrichtigungssteuerung, siehe [Tab "Benachrichtigungen"](#tab-benachrichtigungen). |
 
-Eine neue Zeile entsteht über das **"+"** in der Kopfzeile der Tabelle, das Papierkorb-Symbol am Zeilenende entfernt sie wieder (ohne Rückfrage). Die beiden Pfeile daneben schieben eine Zeile nach oben oder unten; die Reihenfolge der Tabelle ist die Reihenfolge, in der die Personen im Board erscheinen. Zeilen ohne ID werden beim Speichern verworfen. Eine frische Instanz bringt **keine** Benutzer mit; bis der erste eingetragen ist, ist der Knopf "+ Karte" im Board gesperrt und sagt das auch.
+Eine neue Zeile wird mit **"+"** in der Kopfzeile der Tabelle angelegt, das Papierkorb-Symbol am Zeilenende entfernt sie wieder (ohne Rückfrage). Die beiden Pfeile daneben schieben eine Zeile nach oben oder unten. Die Reihenfolge der Tabelle ist die Reihenfolge, in der die Personen im Board erscheinen. Zeilen ohne ID werden beim Speichern verworfen. Zur Nutzung der KanBan-Boards ist je Instanz mindestens ein Benutzer anzulegen.
 
-> **Die ID ist der Schlüssel, und nach dem Anlegen gesperrt.** Über die Spalte *ID* finden Boards und Karten ihre Personen; auch die Avatarbilder und die Adressen geteilter Ansichten hängen daran. Eine nachträgliche Änderung ließe all das ins Leere zeigen, und der Adapter könnte nicht einmal aufräumen: Eine Umbenennung ist technisch nicht von "gelöscht und neu angelegt" zu unterscheiden. Deshalb ist das Feld gesperrt, sobald der Benutzer einmal gespeichert wurde. Der Adapter trägt dafür beim nächsten Start ein Merkmal in die Instanzkonfiguration ein und startet dabei einmal neu. Das passiert einmal je neuem Benutzer, danach nie wieder.
+> **Die ID lässt sich nach dem Anlegen nicht mehr ändern.** Boards und Karten finden ihre Personen darüber, und auch die Avatarbilder und die Adressen geteilter Ansichten hängen daran. Eine spätere Änderung liesse all das ins Leere zeigen, und aufräumen könnte der Adapter dann nicht einmal: Eine Umbenennung ist technisch nicht von "gelöscht und neu angelegt" zu unterscheiden. Deshalb schreibt der Adapter die Kennung fest, sobald der Benutzer einmal gespeichert wurde. Dazu trägt er beim nächsten Start ein Merkmal in die Instanzkonfiguration ein und startet dabei einmal neu - einmal je neuem Benutzer, danach nie wieder.
 >
-> **Wann das Feld überhaupt zuschnappt:** Erst dann, wenn an der Kennung etwas hängt, also sobald ihr eine Karte zugewiesen ist oder sie ein Avatarbild trägt. Bis dahin lässt sie sich frei ändern; eine Kennung, auf die nichts zeigt, kann man gefahrlos umbenennen. Eine frisch eingerichtete Instanz mit Benutzern, aber ohne Karten schreibt ihre Konfiguration deshalb gar nicht zurück und startet nicht von selbst neu.
+> **Wann das Feld zuschnappt:** Erst wenn an der Kennung etwas hängt, also sobald ihr eine Karte zugewiesen ist oder sie ein Avatarbild trägt. Bis dahin lässt sie sich frei ändern; eine Kennung, auf die nichts zeigt, kann man gefahrlos umbenennen. Eine frisch eingerichtete Instanz mit Benutzern, aber ohne Karten schreibt ihre Konfiguration deshalb gar nicht zurück und startet nicht von selbst neu.
 >
-> **Wenn das Feld editierbar bleibt:** Der Adapter schreibt das Merkmal beim Start zurück. Wer die Instanzeinstellungen genau in diesem Moment speichert, überschreibt es mit dem Formular wieder. Der Adapter versucht es dann bis zu dreimal erneut, meldet danach im Log "Could not freeze the user ID(s)" und lässt die Felder editierbar. Erkennbar ist der Zustand daran, dass die Spalte *ID* weiterhin tippbar ist - allerdings **erst nach einem vollständigen Neuladen der Admin-Seite**. Innerhalb der offenen Seite bleibt das Feld auch dann tippbar, wenn der Adapter es längst festgeschrieben hat; ein Wechsel zu einem anderen Menüpunkt und zurück genügt nicht. Wer das nicht weiß, hält einen gelungenen Vorgang für gescheitert. Verlässlicher als das Feld ist das Log: Dort steht entweder "User ID(s) ... are now fixed" oder die Warnung. Abhilfe im echten Fehlerfall: Instanz einmal neu starten und prüfen, ob die Felder gesperrt sind, **bevor** Karten angelegt werden.
+> **Wenn das Feld tippbar bleibt:** Wer die Instanzeinstellungen genau in dem Moment speichert, in dem der Adapter das Merkmal zurückschreibt, überschreibt es mit dem Formular wieder. Der Adapter versucht es bis zu dreimal, meldet danach im Log "Could not freeze the user ID(s)" und lässt die Felder tippbar. Erkennbar ist dieser Zustand allerdings **erst nach einem vollständigen Neuladen der Admin-Seite**: Innerhalb der offenen Seite bleibt das Feld tippbar, auch wenn der Adapter es längst festgeschrieben hat. Verlässlicher ist das Log, dort steht entweder "User ID(s) ... are now fixed" oder die Warnung. Im echten Fehlerfall die Instanz einmal neu starten und prüfen, ob die Felder gesperrt sind, **bevor** Karten angelegt werden.
 >
 > Der **Anzeigename** bleibt frei änderbar. Aus "Tom Reich" wird also gefahrlos "Tommy Reich", ohne dass eine Karte etwas davon merkt.
 >
-> *Empfehlung:* Beim Anlegen kurz überlegen. Kleingeschrieben, ohne Umlaute, und so, dass die Kennung auch in einer geteilten Adresse (`?users=bjoern`) noch lesbar ist.
+> *Empfehlung:* Die Kennung beim Anlegen kurz überlegen. Kleingeschrieben, ohne Umlaute, und so, dass sie auch in einer geteilten Adresse (`?users=bjoern`) noch lesbar ist.
 >
 > <a id="benutzer-umbenennen"></a>
 > **Wenn Karten doch ins Leere zeigen**, meldet der Adapter das beim Start im Log und im State `info.orphanedAssignees`, und das Zahnrad in der Board-Kopfzeile bekommt einen kleinen Punkt. Dahin kommt es, wenn jemand gelöscht und neu angelegt wurde oder wenn eine Karte über die API mit einer fremden Kennung entstand.
 >
-> Reparieren lässt sich das unter **⚙ → Benutzer → Verwaiste Zuständige**. Diesen Abschnitt gibt es nur, wenn es etwas zu reparieren gibt - stimmt alles, zeigt der Reiter nur die Benutzer-Avatare. Dort steht je verwaister Kennung eine Zeile mit Umfang und betroffenen Boards; die Kartenzahl klappt die Liste der Karten auf, damit man vor dem Umhängen hineinsehen kann. Daneben ein Auswahlfeld mit den vorhandenen Personen und ein Knopf mit Rückfrage. Der Papierkorb bleibt außen vor: Was auf dem Weg zur Löschung ist, muss niemandem mehr gehören.
+> Reparieren lässt sich das unter **Einstellungen → Benutzer → Verwaiste Zuständige**. Diesen Abschnitt gibt es nur, wenn es etwas zu reparieren gibt - stimmt alles, zeigt der Reiter nur die Benutzer-Avatare. Dort steht je verwaister Kennung eine Zeile mit Umfang und betroffenen Boards; die Kartenzahl klappt die Liste der Karten auf, damit man vor dem Umhängen hineinsehen kann. Daneben ein Auswahlfeld mit den vorhandenen Personen und ein Knopf mit Rückfrage. Der Papierkorb bleibt aussen vor: Was auf dem Weg zur Löschung ist, muss niemandem mehr gehören.
 >
 > Ohne Oberfläche geht dasselbe über die Schnittstelle:
 >
 > ```bash
-> curl -X POST "http://<host>:8095/webhook/<TOKEN>/action" >   -H 'Content-Type: application/json' >   -d '{"cmd":"reassignUser","from":"bjoern_alt","to":"bjoern"}'
+> curl -X POST "http://<host>:8095/webhook/<TOKEN>/action" -H 'Content-Type: application/json' -d '{"cmd":"reassignUser","from":"bjoern_alt","to":"bjoern"}'
 > ```
 >
 > Das zieht die Zuständigen aller Karten, die Mitgliederlisten der Boards **und** das Avatarbild mit. Das Bild allerdings nur, wenn die Zielperson noch keines hat. War die neue ID an einer Karte schon eingetragen, entsteht kein doppelter Eintrag. Die Zielkennung muss in den Instanzeinstellungen existieren, sonst bricht der Aufruf mit `400` ab.
@@ -155,11 +155,11 @@ Benachrichtigungen werden bei Karten-Ereignissen ausgelöst und per **E-Mail** (
 | **email-Adapter-Instanz** | Welche `email.x`-Instanz für den Versand genutzt wird. |
 | **Absender** | Optionale Absenderadresse (leer = Standard des email-Adapters). |
 | **Erinnerungs-Uhrzeit** | `HH:MM`, wann fällige Karten geprüft werden (Standard `08:00`). |
-| **Erinnern X Tage vor Fälligkeit** | Vorlauf für `cardDue`-Erinnerungen (`0`-`30`, Standard `1`). Betrifft **nur** die Erinnerungsmail, nicht die Farben am Board. |
-| **"Karte fällig" zur Uhrzeit der Karte auslösen** | Standard **aus**. Zusätzlich zur täglichen Erinnerung feuert `cardDue` bei Karten mit gesetzter **Uhrzeit** genau zu dieser Uhrzeit (`detail.exact = true`). Damit lassen sich Automatisierungen minutengenau auslösen, ohne die API abzufragen. **Achtung:** Das Ereignis läuft durch die normale Benachrichtigung, es geht also auch eine zweite "Fällig"-E-Mail an alle raus, die diese aktiviert haben - wer nur Skripte/Webhooks bedienen will, schaltet die E-Mail "Fällig" beim Benutzer ab. |
-| **Standard-Vorgabe** | Globale Fallback-Schalter je Ereignis, greifen, wenn ein Benutzer nichts Eigenes eingestellt hat (siehe unten). |
+| **Erinnern X Tage vor Fälligkeit** | Vorlauf für `cardDue`-Erinnerungen (`0`-`30`, Standard `1`). |
+| **"Karte fällig" zur Uhrzeit der Karte auslösen** | Standard **aus**. Zusätzlich zur täglichen Erinnerung feuert `cardDue` bei Karten mit gesetzter **Uhrzeit** genau zu dieser Uhrzeit (`detail.exact = true`). Damit lassen sich Automatisierungen minutengenau auslösen, ohne die API abzufragen. **Achtung:** Das Ereignis läuft durch die normale Benachrichtigung, es geht also auch eine zweite "Fällig"-E-Mail an alle raus, die diese aktiviert haben - wer nur Skripte/Webhooks bedienen will, sollte die E-Mail-Benachrichtigung "Fällig" beim Benutzer abschalten. |
+| **Standard-Vorgabe** | Globale Fallback-Schalter je Ereignis. Dies gilt, wenn für einen Benutzer im Benutzer-Tab keine eigenen Benachrichtigungs-Einstellungen gesetzt sind (siehe unten). |
 
-Ganz unten im Tab steht der Block **"Andere Dienste (Telegram, Pushover, ...)"**. Er enthält keine Einstellung, sondern nur den Hinweis, dass allein E-Mail eingebaut ist, und einen Link auf [Benachrichtigungen an beliebige Dienste](#andere-dienste).
+Ganz unten im Tab steht der Block **"Andere Dienste (Telegram, Pushover, ...)"**. Er enthält keine Einstellung, sondern nur den Hinweis, dass allein E-Mail als Benachrichtigungsweg eingebaut ist, und einen Link zu Beispielen für die Anbindung anderer Adapter, etwa Telegram: [Benachrichtigungen an beliebige Dienste](#andere-dienste).
 
 #### Wer wird wann benachrichtigt?
 
@@ -167,10 +167,10 @@ Im Tab **"Benutzer"** hat jeder Benutzer neun Checkboxen. Sie legen fest, bei we
 
 | Häkchen | Wann genau es feuert | Empfänger |
 |---|---|---|
-| **Zugew.** (`notifyAssigned`) | Sobald jemand als Zuständiger **hinzukommt**, beim Anlegen der Karte für jeden Ersteintrag und beim späteren Hinzufügen. Feuert **einmal je Person**. | **Nur die betroffene Person** |
+| **Zugew.** (`notifyAssigned`) | Sobald jemand als Zuständiger gesetzt wird, beim Anlegen der Karte für jeden Ersteintrag und beim späteren Hinzufügen. Feuert **einmal je Person**. | **Nur die betroffene Person** |
 | **Fällig** (`notifyDue`) | Täglich zur Erinnerungszeit (Standard `08:00`) für Karten, die heute fällig sind oder innerhalb der Vorlauftage liegen. Ein durch Adapterstart verpasster Lauf wird nachgeholt. | Alle Zuständigen der Karte |
 | **Geänd.** (`notifyUpdated`) | Bei jeder Bearbeitung einer Karte (Titel, Datum, Labels, Checkliste ...). | Alle Zuständigen der Karte |
-| **Versch.** (`notifyMoved`) | Beim Verschieben in eine **andere** Spalte. | Alle Zuständigen der Karte |
+| **Versch.** (`notifyMoved`) | Beim Verschieben in eine andere Spalte. | Alle Zuständigen der Karte |
 | **Erled.** (`notifyDone`) | **Zusätzlich** zu "Versch.", wenn die Zielspalte als *Erledigt* markiert ist. | Alle Zuständigen der Karte |
 | **Neu** (`notifyCreated`) | **Einmal** beim Anlegen einer Karte; ebenso beim Kopieren aus einem anderen Board und wenn eine Wiederholung die nächste Karte erzeugt. | **Alle Mitglieder des Boards**, unabhängig von der Zuständigkeit |
 | **Papier.** (`notifyDeleted`) | Wenn eine Karte in den **Papierkorb** wandert, egal ob von Hand gelöscht oder durch das automatische Aufräumen. Standard: aus. | Alle Zuständigen der Karte |
@@ -189,7 +189,7 @@ Der Kern-Unterschied zwischen **Zugew.** und **Neu**: "Zugew." ist die **persön
 | Spalte im Karteneditor auf eine Erledigt-Spalte umstellen | **Geänd.** + **Versch.** + **Erled.** |
 | Spalte im Karteneditor auf eine offene Spalte umstellen | **Geänd.** + **Versch.** |
 
-Für die meisten Setups genügt daher **"Zugew." allein**. "Neu" lohnt sich, wenn man auch über Karten informiert werden will, die *andere* anlegen und bei denen man mitzuständig ist.
+Für die meisten Setups genügt daher **"Zugew."** allein. **"Neu"** lohnt sich, wenn man auch über Karten informiert werden will, die *andere* anlegen und bei denen man mitzuständig ist.
 
 **Fallback:** Hat ein Benutzer bei einem Ereignis nichts eingestellt, greift die **globale Vorgabe** (Tab "Benachrichtigungen", Abschnitt "Standard-Vorgabe"). So bekommen bestehende Benutzer weiterhin Benachrichtigungen, ohne dass für jeden alles einzeln gesetzt werden muss.
 
@@ -199,7 +199,7 @@ Für die meisten Setups genügt daher **"Zugew." allein**. "Neu" lohnt sich, wen
 
 > **Der Weg zählt mit.** Eine Karte per Ziehen zu verschieben löst die Ereignisse des Verschiebens aus. Wird dieselbe Spalte im **Karteneditor** umgestellt, ist das für den Adapter zusätzlich eine Änderung an der Karte, es kommt also **Geänd.** dazu. Wer alle Haken gesetzt hat, bekommt für einen Handgriff drei Nachrichten.
 
-> **Papierkorb-Ereignisse:** Für "in den Papierkorb", "wiederhergestellt" und "endgültig gelöscht" gibt es eigene Häkchen, die standardmäßig **aus** sind. Ein **automatischer Aufräumlauf** verschickt keine Einzelmails, sondern **eine Sammelmail je Benutzer** mit allen betroffenen Karten. Wird eine einzelne Karte von Hand gelöscht, kommt wie gewohnt eine Einzelmail. Der **Besen** dagegen leert den ganzen Papierkorb auf einmal und verschickt deshalb ebenfalls eine Sammelmail, nicht eine Nachricht je Karte.
+> **Papierkorb-Ereignisse:** Für "in den Papierkorb", "wiederhergestellt" und "endgültig gelöscht" gibt es eigene Häkchen, die standardmäßig **aus** sind. Ein **automatischer Aufräumlauf** verschickt keine Einzelmails, sondern **eine Sammelmail je Benutzer** mit allen betroffenen Karten. Wird eine einzelne Karte von Hand gelöscht, kommt wie gewohnt eine Einzelmail. Der Button mit dem **Besen-Symbol** dagegen leert den ganzen Papierkorb auf einmal und verschickt deshalb ebenfalls eine Sammelmail, nicht eine Nachricht je Karte.
 
 #### Kalender-Einladung (.ics)
 
@@ -260,26 +260,27 @@ Aufbau des gesendeten JSON-Payloads und Details zur Zustellung: [Teil C](#webhoo
 
 ## Teil B: Das Board (Weboberfläche)
 
-Die Weboberfläche unter **`http://<host>:8095/`** ist der eigentliche Arbeitsbereich. Alles in diesem Teil wird **direkt im Browser** eingestellt und wirkt sofort, ohne Adapter-Neustart. Dank Live-Sync sind Änderungen auf allen offenen Geräten unmittelbar sichtbar.
+Die Weboberfläche unter **`http://<host>:8095/`** ist der eigentliche Arbeitsbereich. Alles in diesem Teil wird direkt im Browser eingestellt und wirkt sofort, ohne Adapter-Neustart. Dank Live-Sync sind Änderungen auf allen offenen Geräten unmittelbar sichtbar.
 
 ### Kopfleiste
 
 Die **Kopfleiste** enthält von links nach rechts: die **Board-Auswahl**, die **Benutzer-Chips** (zugleich Personen-Filter, siehe [Benutzer im Board](#benutzer-im-board)), den Button **"+ Karte"**, den **Theme-Umschalter** (Sonne/Mond), die **"Ansichten"** (Monitor-Symbol, siehe [Ansichten teilen](#ansichten-teilen--url-parameter)) und die **Einstellungen** (Zahnrad).
+*Hinweis: Im Einbettmodus (`embed=1`) wird die Kopfleiste komplett ausgeblendet.*
 
-Das Zahnrad öffnet den **Board-Manager**, der die folgenden Abschnitte abdeckt. Im Einbettmodus (`embed=1`) wird die Kopfleiste komplett ausgeblendet.
+![Kopfleiste des Boards](img/topbar.png)
 
 ### Boards, Spalten & Labels
 
-Das **Zahnrad (⚙)** öffnet den Board-Manager. Er hat zwei Tabs: **Board** und **Benutzer** (Farben und Avatare, siehe [Benutzer im Board](#benutzer-im-board)). Änderungen werden erst mit **Speichern** übernommen.
+Der Button mit dem **Zahnrad-Symbol** öffnet den Board-Manager. Er hat zwei Tabs: **Board** und **Benutzer** (Farben und Avatare, siehe [Benutzer im Board](#benutzer-im-board)). Änderungen werden erst mit **Speichern** übernommen.
 
 Ganz oben im Board-Tab steht eine Zeile mit drei Elementen. Der vierte Eintrag der Tabelle, "Board löschen", sitzt am unteren Ende des Tabs:
 
 | Element | Wirkung |
 |---|---|
-| **Board-Auswahl** | Legt fest, welches Board gerade **bearbeitet** wird. Das aktive Board im Hintergrund wechselt dadurch nicht. Bei ungespeicherten Änderungen fragt der Dialog vorher nach (Speichern, Verwerfen, Abbrechen). |
-| **Pfeil-Button** | Wechselt das **angezeigte** Board auf das gerade bearbeitete. Der Dialog bleibt dabei offen. Ist bereits das aktive Board gewählt, ist der Button ausgegraut. |
+| **Board-Auswahl** | Legt fest, welches Board gerade bearbeitet wird. Das aktive Board im Hintergrund wechselt dadurch nicht. Bei ungespeicherten Änderungen fragt der Dialog vorher nach (Speichern, Verwerfen, Abbrechen). |
+| **Pfeil-Button** | Wechselt das angezeigte Board auf das gerade bearbeitete. Der Dialog bleibt dabei offen. Ist bereits das aktive Board gewählt, ist der Button ausgegraut. |
 | **Namensfeld + "Anlegen"** | Legt ein neues Board an. Es wird sofort zum bearbeiteten Board und bekommt automatisch alle bekannten Benutzer als Mitglieder sowie einen Papierkorb. |
-| **"Board löschen"** (ganz unten) | Löscht das bearbeitete Board nach Rückfrage. Das letzte verbleibende Board lässt sich **in der Weboberfläche** nicht löschen. Über API und Webhook (`deleteBoard`) greift diese Sperre **nicht**: Dort lässt sich auch das letzte Board entfernen, die Instanz zeigt danach wieder "Kein Board vorhanden". |
+| **"Board löschen"** (ganz unten) | Löscht das bearbeitete Board nach Rückfrage. Das letzte verbleibende Board lässt sich in der Weboberfläche nicht löschen. Über API und Webhook (`deleteBoard`) greift diese Sperre **nicht**: Dort lässt sich auch das letzte Board entfernen, die Instanz zeigt danach wieder "Kein Board vorhanden". |
 
 Darunter folgen Board-Titel, die Mitgliederauswahl (siehe [Benutzer im Board](#benutzer-im-board)), Spalten, Labels, das Link-Ziel für Benachrichtigungen sowie der Abschnitt [Erledigte Karten in den Papierkorb](#papierkorb).
 
@@ -291,24 +292,24 @@ Spalten lassen sich anlegen, per Drag & Drop sortieren, umbenennen und löschen.
 
 ![Einstellungen: Board, Spalten, Labels](img/settings.png)
 
-Über der Spaltenliste steht eine Kopfzeile mit den Feldbezeichnungen (**Titel · Max · WIP · Neu · Erledigt**). Jede Überschrift hat einen Tooltip mit der ausführlichen Erklärung.
+Über der Spaltenliste steht eine Kopfzeile mit den Feldbezeichnungen (**Titel · Max · WIP · Neu · Erledigt**).
 
-- **Spalten-ID:** Neben dem sichtbaren Titel trägt jede Spalte eine **unveränderliche ID**. Die drei Standardspalten heißen `todo`, `doing` und `done`, neu angelegte Spalten bekommen eine erzeugte ID der Form `col_msd0mu8tkck68`. Beim **Umbenennen bleibt die ID erhalten** - geteilte `columns=`-Links und `moveCard`-Aufrufe funktionieren also unverändert weiter. Nachschlagen lassen sich die IDs über `GET /api/boards/<id>` (siehe [REST-API](#rest-api)). IDs müssen **eindeutig** sein: Schickt ein `PATCH` dieselbe ID zweimal oder die ID der Papierkorb-Spalte, bekommt die betroffene Spalte eine neue erzeugte ID.
+- **Spalten-ID:** Neben dem sichtbaren Titel trägt jede Spalte eine **unveränderliche ID**. Die drei Standardspalten heißen `todo`, `doing` und `done`, neu angelegte Spalten bekommen eine erzeugte eindeutige ID. Beim **Umbenennen bleibt die ID erhalten** - geteilte `columns=`-Links und `moveCard`-Aufrufe funktionieren also unverändert weiter. Nachschlagen lassen sich die IDs über `GET /api/boards/<id>` (siehe [REST-API](#rest-api)).
 - **Spaltenbreite:** Die Spalten teilen sich immer die **volle Fensterbreite** - zwei Spalten nehmen also je die Hälfte ein. Erst wenn rechnerisch weniger als 280 px je Spalte übrig bleiben, wird das Board waagerecht scrollbar.
-- **Anzeige-Limit (Max):** Zahl > 0 zeigt in dieser Spalte nur die ersten N Karten; direkt unter der letzten erscheint `+X weitere`, darunter erst der Knopf zum Anlegen. `0` = alle anzeigen. Praktisch, damit lange Rückstände das Board nicht sprengen. Der Zähler in der Spaltenkopfzeile zählt weiterhin **alle** Karten der Spalte. `+X weitere` ist ein **Knopf**: Ein Klick zeigt die übrigen Karten, die Zeile heißt dann `- X wieder ausblenden`, ein zweiter Klick klappt sie zu. Das Limit am Board bleibt dabei unangetastet, die Abweichung merkt sich nur der eigene Browser, wie der Sortiermodus und das Augen-Symbol.
-- **WIP-Limit** (Work-in-Progress): Zahl > 0 begrenzt die empfohlene Kartenanzahl. Wird sie überschritten, warnt die Spalte optisch (Zähler & Kopf werden hervorgehoben). `0` = kein Limit. Das Limit ist eine **Warnung**, keine harte Sperre. Sie bezieht sich immer auf die **Gesamtzahl** der Spalte, auch wenn der Personen-/Label-Filter gerade weniger Karten anzeigt. Ist es überschritten, steht auch bei aktivem Filter die Zahl der **Spalte** vor dem Schrägstrich, etwa "7/5" — also genau die Zahl, aus der die Warnfarbe kommt. Der Tooltip nennt beide: wie viele Karten wirklich in der Spalte liegen und wie viele der Filter davon zeigt. Solange das Limit eingehalten wird, zeigt die Zahl bei aktivem Filter schlicht die Treffer, ohne Schrägstrich; ein Verhältnis aus gefilterten Karten und Limit wäre eine Zahl aus zwei verschiedenen Mengen.
-- **"Neu"** (`allowAdd`): legt fest, in welchen Spalten am Spaltenfuß der Knopf zum Anlegen erscheint - ein "+" auf farbigem Grund. Beschriftet ist er nur im Tooltip, dort steht "+ Karte hinzufügen".
+- **Anzeige-Limit (Max):** Zahl > 0 zeigt in dieser Spalte nur die ersten N Karten; direkt unter der letzten erscheint `+X weitere`, darunter der Knopf zum Anlegen. `0` = alle anzeigen. Der Zähler in der Spaltenkopfzeile zählt weiterhin **alle** Karten der Spalte. `+X weitere` ist ein **Button**: Ein Klick zeigt die übrigen Karten, die Zeile heißt dann `- X wieder ausblenden`, ein zweiter Klick klappt sie zu. Das Limit am Board bleibt dabei unangetastet, die Abweichung merkt sich nur der eigene Browser, wie der Sortiermodus und das Augen-Symbol.
+- **WIP-Limit** (Work-in-Progress): Zahl > 0 begrenzt die empfohlene Kartenanzahl. Wird sie überschritten, warnt die Spalte optisch (Zähler & Kopf werden hervorgehoben). `0` = kein Limit. Das Limit ist eine **Warnung**, keine harte Sperre. Sie bezieht sich immer auf die **Gesamtzahl** der Spalte, auch wenn der Personen-/Label-Filter gerade weniger Karten anzeigt. Ist es überschritten, steht auch bei aktivem Filter die Zahl der **Spalte** vor dem Schrägstrich, etwa "7/5" — also genau die Zahl, aus der die Warnfarbe kommt. Der Tooltip nennt beide: Wie viele Karten wirklich in der Spalte liegen und wie viele der Filter davon zeigt. Solange das Limit eingehalten wird, zeigt die Zahl bei aktivem Filter schlicht die Treffer, ohne Schrägstrich; ein Verhältnis aus gefilterten Karten und Limit wäre eine Zahl aus zwei verschiedenen Mengen.
+- **"Neu"** (`allowAdd`): legt fest, welche Spalten neue Karten erlauben. Am Spaltenfuß erscheint dann der Knopf zum Anlegen neuer Karten - ein "+" auf farbigem Grund.
 - **"Erledigt"-Spalte** (`isDone`): Karten, die hierher verschoben werden, gelten als erledigt (`doneAt` wird gesetzt, Wiederholungen werden ausgelöst). Ihr Titel wird **durchgestrichen** dargestellt, darunter steht der Zeitpunkt des Erledigens in Klammern, zum Beispiel `(Erledigt: 26.07.2026 20:09)`, im Datums- und Zeitformat der Instanz. Die Zeile setzt einen gesetzten `doneAt` voraus; Karten, die nie durch eine Erledigt-Spalte gegangen sind, zeigen sie nicht.
-- **Erledigt ein-/ausblenden (Augen-Symbol):** Jede Erledigt-Spalte hat oben rechts einen Augen-Umschalter, der die erledigten Karten ein- oder ausblendet (pro Gerät gespeichert).
-- **Limit sichtbarer erledigter Karten:** Per URL-Parameter `doneLimit=N` (siehe [Ansichten teilen / URL-Parameter](#ansichten-teilen--url-parameter)) lassen sich nur die N zuletzt erledigten Karten anzeigen - praktisch für kompakte, geteilte Ansichten.
-- **Erledigte Karte kopieren:** Neben dem Titel einer erledigten Karte sitzt ein kleines Kopier-Symbol. Es öffnet den Editor mit denselben Inhalten als **neue** Karte. Sie landet beim Speichern in der ersten Spalte mit "Neu"-Häkchen, Checklisten-Punkte starten unerledigt, und als Fälligkeit wird das **heutige Datum** vorgeschlagen, sofern das Original überhaupt eines hatte (eine gesetzte Uhrzeit bleibt erhalten). Gedacht für wiederkehrende Aufgaben, die keine feste Wiederholung haben.
+- **Erledigt ein-/ausblenden (Augen-Symbol):** Jede Erledigt-Spalte hat oben rechts einen Umschalter in Form eines Auges, der die erledigten Karten ein- oder ausblendet (Diese Einstellung wird pro Gerät gespeichert).
+- **Limit sichtbarer erledigter Karten:** Per URL-Parameter `doneLimit=N` (siehe [Ansichten teilen / URL-Parameter](#ansichten-teilen--url-parameter)) lassen sich nur die N zuletzt erledigten Karten anzeigen; praktisch für kompakte, geteilte Ansichten.
+- **Erledigte Karte kopieren:** Neben dem Titel einer erledigten Karte sitzt ein kleines Kopier-Symbol. Es öffnet den Editor mit denselben Inhalten als **neue** Karte. Sie landet beim Speichern in der ersten Spalte mit "Neu"-Häkchen, Checklisten-Punkte starten unerledigt, und als Fälligkeit wird das **heutige Datum** vorgeschlagen, sofern das Original überhaupt eines hatte (eine gesetzte Uhrzeit bleibt erhalten).
 
 <a id="zahlen-im-spaltenkopf"></a>
 #### Zahlen im Spaltenkopf (ab 0.3.2)
 
-Neben dem Spaltentitel steht nicht nur die Kartenanzahl, sondern auf Wunsch auch, **wie dringend** der Inhalt der Spalte ist.
+Neben dem Spaltentitel steht nicht nur die Kartenanzahl, sondern auf Wunsch auch, die Anzahl von Karten der Spalte, die morgen, heute fällig oder bereits überfällig sind.
 
-Ein Klick auf eine der Zahlen öffnet ein kleines Menü mit vier Haken. Jeder gesetzte Haken steht anschließend als eigenes Abzeichen daneben.
+Ein Klick auf eine der Zahlen öffnet ein kleines Menü mit vier Optionen. Jeder gesetzte Haken steht anschließend als eigenes Abzeichen daneben.
 
 | Eintrag | Zeigt |
 |---|---|
@@ -319,26 +320,26 @@ Ein Klick auf eine der Zahlen öffnet ein kleines Menü mit vier Haken. Jeder ge
 
 Die drei Fälligkeitszahlen tragen **dieselben Farben wie die Abzeichen auf den Karten** und folgen derselben Rechnung, samt Uhrzeit. "Morgen" heisst dabei genau der nächste Kalendertag, unabhängig davon, was in den Instanzeinstellungen als Vorlauf für die Erinnerungsmail steht. Steht eine Zahl auf `0`, bleibt das Abzeichen stehen und verliert nur die Warnfarbe; so springt die Kopfzeile nicht bei jeder Änderung, und das Menü bleibt in Reichweite.
 
-Mindestens eine Zahl bleibt stehen: Der letzte gesetzte Haken lässt sich nicht entfernen, sonst gäbe es kein Ziel mehr, über das sich das Menü wieder aufrufen lässt. Er ist deshalb abgeblendet dargestellt.
+Mindestens eine Zahl bleibt stehen: Der letzte gesetzte Haken lässt sich nicht entfernen, sonst gäbe es kein Ziel mehr, über das sich das Menü wieder aufrufen lässt.
 
 Die Auswahl gilt **je Spalte** und wird **pro Gerät** gespeichert, wie der Sortiermodus und das Augen-Symbol. Ein Personen- oder Label-Filter wirkt auf alle vier Zahlen gleich. In der Erledigt-Spalte und im Papierkorb fehlt das Menü: Dort gilt jede Karte als erledigt, es gäbe nichts einzufärben.
 
 Bedienen lässt sich das auch mit der Tastatur. Tab erreicht die Zahlen, Enter öffnet das Menü, die Pfeiltasten wandern darin, Enter setzt oder löscht einen Haken, Escape schließt und gibt den Fokus zurück. Dasselbe gilt für das Sortiermenü.
 
+![Zahlen im Spaltenkopf, daneben das Auswahlmenü](img/col-counts.png)
+
 <a id="papierkorb"></a>
 #### Papierkorb (ab 0.3.0)
 
-Jedes Board hat eine **Systemspalte "Papierkorb"**. Gelöschte Karten verschwinden nicht sofort, sondern liegen dort **30 Tage** und lassen sich jederzeit zurückholen. Erst danach werden sie endgültig entfernt.
+Jedes Board hat eine **Systemspalte "Papierkorb"**. Gelöschte Karten verschwinden nicht sofort, sondern liegen dort **30 Tage** und lassen sich jederzeit wiederherstellen. Erst danach werden sie endgültig entfernt.
 
 - **Sichtbarkeit:** Der Papierkorb ist **standardmäßig ausgeblendet**. Einblenden lässt er sich unten in den Board-Einstellungen über **"Papierkorb einblenden"**. Diese Einstellung gilt **nur für das jeweilige Gerät**, andere Nutzer sehen ihr Board unverändert.
 - **Was dort landet:** alles, was über den **Löschen**-Button im Karten-Editor entfernt wird, Karten, die **per Drag & Drop** in den Papierkorb gezogen werden, sowie die Karten aus dem [automatischen Aufräumen](#erledigte-karten-in-den-papierkorb).
 - **Zurückholen:** Karte aus dem Papierkorb herausziehen oder das **Wiederherstellen**-Symbol auf der Karte antippen. Sie landet dann in der ersten offenen Spalte.
-- **Sofort endgültig löschen:** Das zweite Symbol auf der Karte entfernt sie unwiderruflich. Am Spaltenkopf leert der Besen-Button den **kompletten** Papierkorb. Beides fragt vorher nach. Auch über API und Webhook greift `purgeCard` **nur auf Karten im Papierkorb** - bei einer aktiven Karte kommt `400` mit "Karte '...' liegt nicht im Papierkorb". Der Weg an der Aufbewahrungsfrist vorbei führt also immer erst durch den Papierkorb.
-- **Rückfragen richtig lesen:** Der Bestätigungsdialog beim Löschen einer Karte sagt selbst, was passiert: "Karte in den Papierkorb verschieben? Von dort ist sie 30 Tage lang wiederherstellbar." Wirklich unwiderruflich sind nur das zweite Symbol auf einer Karte **im** Papierkorb und der Besen-Button am Spaltenkopf; deren Dialoge sagen das ausdrücklich.
+- **Sofort endgültig löschen:** Das zweite Symbol auf der Karte entfernt sie unwiderruflich. Am Spaltenkopf leert der Button mit dem Besen-Symbol den **kompletten** Papierkorb. Beides fragt vorher nach. Auch über API und Webhook greift `purgeCard` **nur auf Karten im Papierkorb** - bei einer aktiven Karte kommt ein Return `400` mit "Karte '...' liegt nicht im Papierkorb". Der Weg an der Aufbewahrungsfrist vorbei führt also immer erst durch den Papierkorb.
 - **Restlaufzeit:** Jede Karte zeigt an, wie lange sie noch aufbewahrt wird, zum Beispiel "noch 30 Tage".
 - **Eigene Optik:** Die Spalte ist bewusst neutral grau gehalten, unabhängig von Theme und Akzentfarbe, damit sie sich von den Arbeitsspalten abhebt.
-- **Sonderstellung:** Der Papierkorb steht immer ganz rechts, lässt sich nicht umbenennen, verschieben oder löschen und taucht in der Spalten-Konfiguration nicht auf. Er kennt kein WIP-Limit und keinen "Neu"-Button und trägt zum Zähler anderer Spalten nicht bei. Den **Sortier-Umschalter** hat er seit 0.3.2 wie jede andere Spalte; er sitzt rechts im Spaltenkopf, der Besen links daneben. Voreingestellt bleibt die Reihenfolge nach Löschzeitpunkt, älteste zuerst - oben steht also, was der endgültigen Löschung am nächsten ist.
-- **Bestehende Boards:** Beim ersten Start von 0.3.0 bekommt jedes vorhandene Board automatisch einen Papierkorb. An bestehenden Karten ändert sich dabei nichts.
+- **Sonderstellung:** Der Papierkorb steht immer ganz rechts, lässt sich nicht umbenennen, verschieben oder löschen und taucht in der Spalten-Konfiguration nicht auf. Er kennt kein WIP-Limit und keinen "Neu"-Button und trägt zum Zähler anderer Spalten nicht bei. Den **Sortier-Umschalter** hat er seit 0.3.2 wie jede andere Spalte. Voreingestellt ist die Reihenfolge nach Löschzeitpunkt, älteste zuerst - oben steht also, was der endgültigen Löschung am nächsten ist.
 
 <a id="erledigte-karten-in-den-papierkorb"></a>
 #### Erledigte Karten in den Papierkorb (ab 0.3.0)
@@ -353,13 +354,19 @@ Damit sich die Erledigt-Spalte nicht endlos füllt, kann jedes Board alte erledi
 
 Der Lauf startet **einmal täglich** sowie **beim Adapterstart**. Grundlage ist der Erledigt-Zeitpunkt (`doneAt`); Karten ohne diesen Zeitstempel bleiben unangetastet. Er überlebt den Papierkorb: Wer eine erledigte Karte löscht und zurückholt, findet ihren ursprünglichen Erledigt-Zeitpunkt wieder vor. Weil die Karten nur in den Papierkorb wandern, bleiben weitere 30 Tage Zeit, etwas zurückzuholen.
 
+![Papierkorb mit zwei gelöschten Karten](img/trash.png)
+
+*Auf jeder Karte steht die Restlaufzeit, darunter Wiederherstellen und endgültig Löschen. Am Spaltenkopf leert der Besen den ganzen Papierkorb.*
+
 #### Labels
 
 Labels sind farbige Schlagworte und werden **pro Board** im Tab *Board* verwaltet (anlegen, umbenennen, umfärben, löschen). Auf der Karte erscheinen sie als farbiges Badge mit automatisch kontrastierender Schrift; im [Ansichten-Dialog](#ansichten-teilen--url-parameter) lassen sie sich als Blacklist zum Ausblenden nutzen.
 
-Neue Labels bekommen ihre Farbe reihum aus einer Palette von acht, damit nacheinander angelegte Labels sich schon an der Farbe unterscheiden.
+Die **Reihenfolge** der Labels lässt sich wie die der Spalten am Anfasser ziehen, und sie gilt überall: auf den Karten, in der Auswahl im Karteneditor und in der Zusammenfassung der Abschnittszeile. Zwei Karten mit denselben Labels sehen damit gleich aus.
 
-Die **Reihenfolge** der Labels lässt sich wie die der Spalten am Anfasser ziehen, und sie gilt überall: auf den Karten, in der Auswahl im Karteneditor und in der Zusammenfassung der Abschnittszeile. Zwei Karten mit denselben Labels sehen damit gleich aus. Wer es alphabetisch will, zieht die Liste einmal in diese Reihenfolge.
+![Dieselben Labels auf zwei Karten](img/card-labels.png)
+
+*Beide Karten tragen Frontend, Backend und Bug - und zwar in derselben Reihenfolge, egal in welcher sie angeklickt wurden.*
 
 #### Link in Benachrichtigungen (ab 0.2.0)
 
@@ -369,9 +376,13 @@ Je Board lässt sich festlegen, wohin der "Karte öffnen"-Link in den Benachrich
 
 ### Karten: alle Felder
 
-**Aufbau einer Karte:** Die **Zuständigen** stehen als Avatarstapel oben rechts, der Titeltext umfließt sie. Ein Zeigen mit der Maus oder ein Tipp auf den Stapel fächert die Gesichter nach links auf, ohne den Zeilenumbruch zu verändern. Lange Titel werden nach **zwei Zeilen** mit "..." abgeschnitten, der vollständige Titel steht im Tooltip. Trägt die Karte eine **Checkliste**, bekommt sie einen Kartenfuß: links der Fortschritt, mittig der Chevron zum Auf- und Zuklappen und rechts die Symbole für **Beschreibung, Link und Wiederholung** in dieser Reihenfolge. Ohne Checkliste gibt es keinen Fuß, dieselben Symbole stehen dann am rechten Ende der Label- oder Abzeichenzeile. Ein Klick auf das Beschreibungssymbol öffnet die Beschreibung in einem **Lesefenster** mit gerendertem Markdown; Links darin öffnen immer in einem neuen Tab. Die Klickfläche des Chevrons ist bewusst größer als das Symbol selbst, damit sie auch per Touch gut zu treffen ist: gemessen 119 x 26 px gegenüber einem Symbol von 14 x 14 px. Sie liegt als unsichtbare Fläche darüber, der Knopf selbst misst deshalb nur 90 x 11 px. Ob eine Checkliste auf- oder zugeklappt ist, wird **pro Gerät und Board gemerkt** - genau wie die Sortierung der Spalten - und bleibt nach einem Neuladen erhalten.
+**Aufbau einer Karte:** Der oder die **Zuständigen** stehen als Avatar oder bei mehreren als Avatarstapel oben rechts, der Titeltext umfließt sie. Im Falle mehrerer Zuständiger fächern die Gesichter nach links auf, ohne den Zeilenumbruch zu verändern, sobald man mit der Maus darüberfährt oder darauf tippt. Lange Titel werden nach **zwei Zeilen** mit "..." abgeschnitten, der vollständige Titel steht im Tooltip. Trägt die Karte eine **Checkliste**, bekommt sie einen Kartenfuß: links der Fortschritt, mittig der Chevron zum Auf- und Zuklappen und rechts die Symbole für **Beschreibung, Link und Wiederholung** in dieser Reihenfolge. Ohne Checkliste gibt es keinen Fuß, dieselben Symbole stehen dann am rechten Ende der Label- oder Abzeichenzeile. Ein Klick auf das Beschreibungssymbol öffnet die Beschreibung in einem **Lesefenster** mit gerendertem Markdown; Links darin öffnen immer in einem neuen Tab. Ob eine Checkliste auf- oder zugeklappt ist, wird **pro Gerät und Board gemerkt** - genau wie die Sortierung der Spalten - und bleibt nach einem Neuladen erhalten.
+
+![Aufbau einer Karte](img/card.png)
 
 **Die Symbole auf einer Karte** in der Reihenfolge, in der sie auftauchen:
+
+///// Bitte für die einzelnen Symbole Screenshots einbauen
 
 | Symbol | Wo | Bedeutung |
 |---|---|---|
@@ -387,21 +398,19 @@ Je Board lässt sich festlegen, wohin der "Karte öffnen"-Link in den Benachrich
 | Kreispfeil | daneben | Wiederkehrende Aufgabe |
 | Haken mit `3/12` | im Kartenfuß links | Stand der Checkliste. Das Dreieck daneben klappt sie auf. |
 
-Der Editor öffnet sich **ausschließlich über das Stift-Symbol direkt rechts neben dem Titel**; ein Klick irgendwo auf die Karte öffnet ihn nicht. Das verhindert, dass der Editor beim Scrollen oder Antippen versehentlich aufgeht. Karten lassen sich überall anfassen und ziehen.
+Der Editor öffnet sich über das Stift-Symbol direkt rechts neben dem Titel; ein Klick irgendwo auf die Karte öffnet ihn nicht. Das verhindert, dass der Editor beim Scrollen oder Antippen versehentlich geöffnet wird. Karten lassen sich überall anfassen und ziehen.
 
 Oben stehen die beiden Pflichtfelder: **Titel**, direkt darunter **Zuständig**. Es folgt die Zeile mit Fälligkeit, Uhrzeit, Priorität und Spalte, darunter die Kalender-Einladung. Alles Weitere steckt in **aufklappbaren Abschnitten**: Beschreibung, Labels und Kartenfarbe, Link, Ort, Wiederholung, Checkliste.
 
-Rechts in jeder Abschnittszeile steht, was darin steckt: ein Auszug der Beschreibung, die gewählten Labels samt Farbtupfer, der Ort, das Wiederholungsmuster, der Stand der Checkliste. Ein zugeklappter Abschnitt verbirgt also nichts, er fasst zusammen. Welche Abschnitte offen sind, **merkt sich das Gerät** und gilt auch für die nächste neue Karte; frisch installiert ist nur die Beschreibung offen. Labels und Kartenfarbe teilen sich auf breiten Bildschirmen eine Kopfzeile, unter 600 px trägt jedes seine eigene und lässt sich einzeln klappen.
+Rechts in jeder Abschnittszeile steht, was darin steckt: ein Auszug der Beschreibung, die gewählten Labels samt Farbmarkierung, der Ort, das Wiederholungsmuster, der Stand der Checkliste. Welche Abschnitte offen sind, **merkt sich das Gerät** und gilt auch für die nächste neue Karte; frisch installiert ist nur die Beschreibung offen.
 
 In der Fußzeile stehen **Löschen**, **Verwalten** (übertragen/klonen), **Abbrechen** und **Speichern**. Oben rechts schließt ein **×** den Dialog, wie in allen Dialogen des Boards.
 
-**Ungespeicherte Änderungen** gehen nicht verloren. Escape, das Schließkreuz und die **Zurück-Taste des Browsers** fragen nach, sobald am Inhalt etwas geändert wurde. Auf dem Tablet ist die Zurück-Taste die wichtigste der drei, denn dort ist die Zurück-Geste der übliche Weg aus einem Dialog heraus. Die Rückfrage hat drei Knöpfe: **Speichern**, **Verwerfen** und **Abbrechen**. "Abbrechen" ist der wichtigste - er lässt den Editor offen und alles Getippte stehen, man kann also einfach weiterarbeiten.
+**Ungespeicherte Änderungen** gehen nicht verloren. Escape, ein Klick auf das X und die **Zurück-Taste des Browsers** fragen nach, sobald am Inhalt etwas geändert wurde. Auf dem Tablet ist die Zurück-Taste die wichtigste der drei, denn dort ist die Zurück-Geste der übliche Weg aus einem Dialog heraus. Die Rückfrage hat drei Knöpfe: **Speichern**, **Verwerfen** und **Abbrechen**.
 
-Der Knopf **Abbrechen** in der Fußzeile des Editors ist etwas anderes: Er schließt ohne Rückfrage, denn wer ihn drückt, meint ihn auch.
+**Mit der Tastatur** lässt sich der Editor vollständig bedienen. Tab springt von Feld zu Feld und dabei auch auf die Abschnittsköpfe; Enter oder Leertaste klappt einen Abschnitt auf. Die Chip-Gruppen (Zuständige, Labels, Kartenfarbe, Linktypen) sind je ein einziger Tab-Halt: darin bewegen die Pfeiltasten, Pos1 und Ende springen an die Ränder, Leertaste oder Enter wählt aus. In der Checkliste legt Enter den nächsten Punkt an, gespeichert wird von dort aus mit Strg + Enter.
 
-**Mit der Tastatur** lässt sich der Editor vollständig bedienen. Tab springt von Feld zu Feld und dabei auch auf die Abschnittsköpfe; Enter oder Leertaste klappt einen Abschnitt auf. Die Chip-Gruppen (Zuständige, Labels, Kartenfarbe, Linktypen) sind je ein einziger Tab-Halt: darin bewegen die Pfeiltasten, Pos1 und Ende springen an die Ränder, Leertaste oder Enter wählt aus. In der Checkliste legt Enter den nächsten Punkt an, gespeichert wird von dort aus mit Strg und Enter.
-
-**Gehört eine Karte jemandem, den es nicht mehr gibt**, steht die alte Kennung als eigener Chip im Feld *Zuständig*, gestrichelt und mit dem Zusatz "(gelöscht)". Abwählen lässt sie sich hier, umhängen unter [⚙ → Benutzer](#benutzer-umbenennen).
+**Gehört eine Karte jemandem, den es nicht mehr gibt**, steht die alte Kennung als eigener Chip im Feld *Zuständig*, gestrichelt und mit dem Zusatz "(gelöscht)". Abwählen lässt sie sich hier, umhängen unter [Einstellungen → Benutzer](#benutzer-umbenennen).
 
 Eine Karte hat folgende inhaltliche Felder (per API unter denselben Namen setzbar):
 
@@ -414,8 +423,8 @@ Eine Karte hat folgende inhaltliche Felder (per API unter denselben Namen setzba
 | **due** | `YYYY-MM-DD` | Fälligkeitsdatum. Das Badge färbt sich je nach Zustand, siehe [Farben der Fälligkeit](#farben-der-fälligkeit). |
 | **dueTime** | `HH:MM` | Optionale Uhrzeit. Wird über eine Checkbox aktiviert und erscheint auf der Karte hinter dem Datum. Nur wirksam zusammen mit `due`. |
 | **priority** | `0`/`1`/`2` | Normal / Hoch / Dringend. Auf der Karte zeigt sich das als Badge unter dem Titel (vor Fälligkeit und Ort): bei **Normal** erscheint nichts, bei **Hoch** ein oranges `!`, bei **Dringend** ein rotes `!!`. Andere Werte werden abgelehnt, per API mit einem Fehler - siehe [Antworten & Fehler](#antworten--fehler). |
-| **assignees** | Liste von Benutzer-IDs | Zuständige. Steuern, wer Benachrichtigungen erhält. **Pflichtfeld, auch über die API:** Mindestens eine Person muss angegeben sein, und jede angegebene ID muss in den Instanzeinstellungen existieren - sonst antwortet die Schnittstelle mit `400` und nennt die vorhandenen Kennungen. **Ausnahme:** Gibt es genau einen Benutzer, wird die Angabe automatisch ergänzt statt abgewiesen. Eine ID, die **bereits auf der Karte steht**, bleibt beim Bearbeiten erlaubt, auch wenn es den Benutzer nicht mehr gibt - sonst wäre ausgerechnet die verwaiste Karte gesperrt. Zeigt die **Mitgliederliste eines Boards ins Leere**, sind **alle** Benutzer zuweisbar. |
-| **labels** | Liste von Label-IDs | Farbige Schlagworte. Labels werden pro Board verwaltet (anlegen, umbenennen, umfärben, löschen). Kommt über die API ein Label an, das das Board nicht kennt, wird es **angelegt** statt abgelehnt (Titel = Kennung, Farbe reihum aus derselben Palette wie in der Oberfläche; beides danach änderbar). Andernfalls trüge die Karte ein Label, das das Board nicht führt - hinter einem `onlyLabel`-Filter bliebe sie damit unsichtbar. |
+| **assignees** | Liste von Benutzer-IDs | Zuständige. Steuert, wer Benachrichtigungen erhält. **Pflichtfeld, auch über die API:** Mindestens eine Person muss angegeben sein, und jede angegebene ID muss in den Instanzeinstellungen existieren - sonst antwortet die Schnittstelle mit `400` und nennt die vorhandenen Kennungen. **Ausnahme:** Gibt es genau einen Benutzer, wird die Angabe automatisch ergänzt, statt abgewiesen. Eine ID, die **bereits auf der Karte steht**, bleibt beim Bearbeiten erlaubt, auch wenn es den Benutzer nicht mehr gibt - sonst wäre ausgerechnet die verwaiste Karte gesperrt. Per Default sind **alle** Benutzer einer Instanz zuweisbar. Dies kann durch die Definition der Mitglieder eines Boards angepasst werden.|
+| **labels** | Liste von Label-IDs | Farbige Schlagworte. Labels werden pro Board verwaltet (anlegen, umbenennen, umfärben, löschen). Kommt über die API ein Label an, das das Board nicht kennt, wird es **angelegt** statt abgelehnt (Titel = Kennung, Farbe reihum aus derselben Palette wie in der Oberfläche; beides danach änderbar). |
 | **color** | Hex-Farbe | Farbiger Balken links an der Karte. Wählbar über einen eingebetteten Colorpicker (Farbfeld + Farbton-Regler + Hex-Eingabe) oder Presets. |
 | **link** | URL | Verknüpfung. Auf der Karte erscheint ein **typabhängiges Icon** - siehe [Link-Typen](#link-typen). |
 | **location** | Text | Ort. Erscheint als Orts-Badge (Pin-Symbol) auf der Karte und wird als `LOCATION` in die Kalender-Einladung übernommen. |
@@ -428,7 +437,7 @@ Zusätzlich verwaltet der Adapter automatisch: `id`, `columnId`, `order`, `creat
 
 Jedes Kartenobjekt der **REST-API** enthält ab 0.3.0 außerdem das berechnete Feld **`dueAt`** - die Fälligkeit inklusive Uhrzeit als ISO-Zeitstempel mit lokalem Offset (z. B. `2026-08-01T13:30:00+02:00`; ohne Uhrzeit `00:00`, ohne Datum `null`). Es ist identisch mit dem `dueAt` der Ereignisse, wird **nicht gespeichert** und beim Schreiben ignoriert - Automatisierungen müssen also nicht selbst aus `due` + `dueTime` + Zeitzone rechnen.
 
-`movedAt` hält fest, **seit wann eine Karte in ihrer aktuellen Spalte liegt**, und ist damit die Grundlage für den Sortiermodus "Alter in Spalte". Der Zeitstempel wird nur bei einem echten Spaltenwechsel neu gesetzt; das Umsortieren innerhalb derselben Spalte lässt ihn unverändert. `trashedAt` markiert den Zeitpunkt, zu dem eine Karte in den Papierkorb gewandert ist, und steuert die 30-Tage-Frist.
+`movedAt` hält fest, **seit wann eine Karte in ihrer aktuellen Spalte liegt**, und ist damit die Grundlage für den Sortiermodus "Alter in Spalte". Der Zeitstempel wird nur bei einem echten Spaltenwechsel neu gesetzt; das Umsortieren innerhalb derselben Spalte im manuellen Sortiermodus lässt ihn unverändert. `trashedAt` markiert den Zeitpunkt, zu dem eine Karte in den Papierkorb gewandert ist, und steuert die 30-Tage-Frist.
 
 #### Karte übertragen oder klonen (ab 0.3.0)
 
@@ -455,7 +464,7 @@ Aus der eingetragenen Adresse leitet das Board automatisch ein passendes Icon ab
 | <img src="../icons/navigation.svg" width="22" alt="Icon"> | Route: `waze.com`, `/maps/dir/`, `daddr=` | `https://www.waze.com/ul?ll=52.52,13.405` |
 | <img src="../icons/map-marker.svg" width="22" alt="Icon"> | Ort: Google/Apple Maps, OpenStreetMap, `geo:` | `geo:52.52,13.405` |
 | <img src="../icons/lan.svg" width="22" alt="Icon"> | interne Adresse: private Bereiche (`10.`, `172.16.`-`172.31.`, `192.168.`), `127.`, `169.254.`, `localhost` sowie Hostnamen auf `.local` `.lan` `.home` `.internal` `.fritz.box` | `http://192.168.1.10:8123/` |
-| <img src="../icons/web.svg" width="22" alt="Icon"> | alles Übrige | `https://example.com` |
+| <img src="../icons/web.svg" width="22" alt="Icon"> | externe Weblinks | `https://example.com` |
 
 Über dem Link-Feld steht eine **Leiste mit diesen neun Symbolen**, in der Reihenfolge Weblink, interne Adresse, E-Mail, Telefon, YouTube, PDF, Bild, Route, Ort. Ein Klick darauf setzt ein passendes Beispiel als Platzhalter ins Feld, etwa `tel:+49123456789` statt `https://...`. Der eingetippte Wert bleibt dabei unangetastet. Umgekehrt hebt die Leiste hervor, welche Art zu einer bereits eingetragenen Adresse passt, und läuft beim Tippen mit.
 
@@ -489,24 +498,26 @@ Auch der **Papierkorb** hat dieses Menü. Dort bedeuten "Drag & Drop" und "Anfas
 
 Unabhängig davon färbt sich das Fälligkeits-Badge, sodass Dringendes auffällt, egal an welcher Position es steht.
 
+![Sortiermenü einer Spalte](img/sort-menu.png)
+
 <a id="farben-der-fälligkeit"></a>
 #### Farben der Fälligkeit
 
 | Farbe | Zustand |
 |---|---|
-| **rot** | vorbei: Datum in der Vergangenheit, oder die Uhrzeit der Karte ist verstrichen |
-| **orange** | heute fällig, Uhrzeit noch nicht erreicht |
-| **gelb** | morgen fällig, also am nächsten Kalendertag |
-| neutral | später fällig |
-| **grün** | erledigt |
+| **rot** | Die Fälligkeit liegt in der Vergangenheit |
+| **orange** | Die Karte ist heute fällig, der Fälligkeitszeitpunkt ist aber noch nicht überschritten |
+| **gelb** | Die Karte ist morgen fällig, also am nächsten Kalendertag |
+| neutral | Die Karte ist erst übermorgen oder danach fällig |
+| **grün** | Die Aufgabe der Karte wurde erledigt |
 
 Dahinter stehen zwei verschieden gerechnete Fragen. Das **Vorwarnfenster** (gelb) ist Planung und zählt in **Kalendertagen**: Gelb ist genau der nächste Kalendertag. Kein rollendes 24-Stunden-Fenster, "morgen" bleibt den ganzen Tag morgen.
 
 > Die Einstellung [**Erinnern X Tage vor Fälligkeit**](#tab-benachrichtigungen) steuert allein, wie früh die **Erinnerungsmail** rausgeht. Auf die Farben am Board wirkt sie nicht.
 
-Die Grenze zu **rot** ist dagegen eine Tatsache. Trägt die Karte eine **Uhrzeit**, zählt sie: Um 17:01 ist 17:00 vorbei, und genau dann feuert auch das Ereignis `cardDue` mit `detail.exact`. Ohne Uhrzeit wechselt die Farbe um Mitternacht. Die Zustände [`overdueCount` und `overdueList`](#iobroker-states--objekte) rechnen nach derselben Regel: Farbe und Datenpunkt springen zur selben Minute.
+Karte überfällig: Trägt die Karte eine **Uhrzeit**, z. B. 17:00 Uhr, ist sie um 17:01 überfällig und genau dann feuert auch das Ereignis `cardDue` mit `detail.exact`. Ohne Uhrzeit wechselt die Farbe um Mitternacht. Die Zustände [`overdueCount` und `overdueList`](#iobroker-states--objekte) rechnen nach derselben Regel: Farbe und Datenpunkt springen zur selben Minute.
 
-Was eine Farbe bedeutet, steht im Tooltip des Abzeichens: überfällig, heute fällig, morgen fällig, später fällig, erledigt. In einer zweiten Zeile steht die Einteilung dazu, damit man sie nicht raten muss. Eine Legende in der Oberfläche gibt es nicht, und eine Farbe allein sagt nicht, ob sie schlimmer ist als die daneben.
+Was eine Farbe bedeutet, steht im Tooltip des Abzeichens: überfällig, heute fällig, morgen fällig, später fällig, erledigt.
 
 Die Farben lassen sich über [eigenes CSS](#faq--fallstricke) ändern: `--danger` für rot, `--warn` für orange und `--due-upcoming` samt `--due-upcoming-text` für gelb. Dieselbe Einteilung steckt hinter den [Zahlen im Spaltenkopf](#zahlen-im-spaltenkopf).
 
@@ -528,7 +539,7 @@ Wird eine wiederkehrende Karte **ohne** manuelles Datum angelegt, setzt der Adap
 | `every_n_days_done` | Alle X Tage **ab dem Erledigen** | `interval`: N |
 | `cron` | Cron-Ausdruck als Muster | `cron`: `"0 8 * * 1-5"` |
 
-Die beiden Arten mit **X Tagen** sehen sich ähnlich und rechnen doch verschieden. "Alle X Tage" hält ein festes Raster ab dem Startdatum ein: Wird eine Karte, die alle 30 Tage fällig ist, zehn Tage zu spät erledigt, liegt der nächste Termin auf dem nächsten Rasterpunkt, also schon in 20 Tagen. "Alle X Tage (nach Erledigung des Vorgängers)" zählt dagegen ab dem Haken, hier wären es volle 30 Tage. Gedacht ist das für Wartungen, bei denen die Standzeit ab dem Handgriff zählt, etwa ein Filterwechsel.
+Die beiden Arten mit **X Tagen** sehen sich ähnlich und rechnen doch verschieden. "Alle X Tage" hält ein festes Raster ab dem Startdatum ein: Wird eine Karte, die alle 30 Tage fällig ist, zehn Tage zu spät erledigt, liegt der nächste Termin auf dem nächsten Rasterpunkt, also schon in 20 Tagen. "Alle X Tage (nach Erledigung des Vorgängers)" zählt dagegen ab der Erledigung der Vorgängerkarte, hier wären es volle 30 Tage.
 
 Bei allen kalendergebundenen Arten gilt: Der nächste Termin liegt immer **in der Zukunft**. Bleibt eine tägliche Karte zwei Wochen liegen und wird dann abgehakt, bekommt die Folgekarte den morgigen Tag, nicht einen Tag aus der vergangenen Woche. Wird **früher** als geplant erledigt, bleibt dagegen der Kalender der Bezugspunkt - sonst würde sich der Termin bei jedem vorzeitigen Haken nach vorn schieben.
 
@@ -563,7 +574,7 @@ Unter dem Eingabefeld zeigt der Editor die Regel im Klartext und die nächsten d
 
 Für die **Arbeitstag-Wiederholungen** ermittelt der Adapter die gesetzlichen Feiertage selbst (Osterformel + feste Tage + Buß- und Bettag), damit auch weit in der Zukunft liegende Termine korrekt berechnet werden.
 
-- Ist der ioBroker-Adapter **`feiertage`** installiert, übernimmt der Kanban-Adapter dessen **Bundesland-Konfiguration** (welche Feiertage gelten). Es zählen nur die tatsächlich gesetzlich arbeitsfreien Tage, reine Dekotage (z. B. Valentinstag) werden ignoriert.
+- Ist der ioBroker-Adapter **`feiertage`** installiert, übernimmt der Kanban-Adapter dessen **Bundesland-Konfiguration** (welche Feiertage gelten). Es zählen nur die tatsächlich gesetzlich arbeitsfreien Tage, nicht arbeitsfreie Tage (z. B. Valentinstag) werden ignoriert.
 - Ohne `feiertage`-Adapter greift ein **Fallback** mit den bundesweit einheitlichen gesetzlichen Feiertagen.
 
 > Änderungen am `feiertage`-Adapter werden beim nächsten Start von `kanban.0` übernommen.
@@ -574,13 +585,13 @@ Welche Personen es überhaupt gibt, kommt aus den Instanzeinstellungen ([Tab "Be
 
 **Gibt es nur eine Person**, verschwindet die ganze Zuständigkeit aus der Oberfläche: keine Chips in der Kopfzeile, keine Avatare auf den Karten, kein Feld *Zuständig* im Karteneditor und keine Benutzerauswahl im Ansichten-Dialog. Es gäbe dort nichts zu wählen und nichts zu filtern. Neue Karten bekommen diese Person automatisch, auch über die Schnittstelle: Ein `POST` ohne `assignees` wird dann nicht mehr mit `400` abgewiesen, sondern still ergänzt. Eine angegebene Kennung wird weiterhin geprüft.
 
+Sobald ein zweiter Benutzer in den Instanzeinstellungen steht, ist alles wieder da. Karten, die in der Zwischenzeit entstanden sind, tragen die eine Person und zeigen sie ab dann auch an. Trägt eine Karte eine Kennung, die es nicht mehr gibt, bleibt die stehen und wird nicht stillschweigend umgehängt; dafür gibt es die [Reparatur verwaister Zuständiger](#benutzer-umbenennen).
+
 **Gibt es gar keine Person**, lässt sich keine Karte anlegen: Die Zuständigkeit ist ein Pflichtfeld, und niemand ist nicht dasselbe wie irgendjemand. Der Knopf "+ Karte" ist deshalb gesperrt und sagt beim Anklicken, dass zuerst ein Benutzer in den Instanzeinstellungen fehlt, ebenso das "+" am Fuß der Spalten. Dieser Zustand ist ohne Warnung erreichbar, indem man dort alle Zeilen löscht.
 
 Dasselbe gilt für ein **Board ohne Spalten**: Ohne Spalte gibt es keinen Ort für die Karte, der Knopf sagt es und der Editor geht gar nicht erst auf.
 
 > **In einer Erledigt-Spalte entstehen keine Karten.** Sie wandern dorthin, sie werden dort nicht angelegt: Der Karteneditor bietet Erledigt-Spalten beim Anlegen und Kopieren nicht an, am Fuß einer solchen Spalte steht kein "+", und über die Schnittstelle wird der Versuch abgewiesen. Der Grund ist der Erledigt-Zeitpunkt. Eine dort angelegte Karte hätte keinen, fiele damit aus der Sortierung [Alter in Spalte](#sortierung--reihenfolge), aus dem [Anzeige-Limit](#spalten) für Erledigte und aus dem [automatischen Aufräumen](#erledigte-karten-in-den-papierkorb) heraus und bliebe für immer liegen. Beim **Verschieben** und beim Bearbeiten einer bestehenden Karte bleibt die Erledigt-Spalte wählbar, das ist der übliche Weg zum Abschließen.
-
-Sobald ein zweiter Benutzer in den Instanzeinstellungen steht, ist alles wieder da. Karten, die in der Zwischenzeit entstanden sind, tragen die eine Person und zeigen sie ab dann auch an. Trägt eine Karte eine Kennung, die es nicht mehr gibt, bleibt die stehen und wird nicht stillschweigend umgehängt; dafür gibt es die [Reparatur verwaister Zuständiger](#benutzer-umbenennen).
 
 **Kopf-Chips als Filter:** Die Benutzer-Chips in der Kopfzeile sind zugleich ein **Mehrfach-Filter**, Antippen wählt Personen an oder ab. Bei einer Teilauswahl zeigt das Board nur Karten der gewählten Personen; sind **alle oder keine** Chips aktiv, werden alle Karten angezeigt. Die Auswahl wird **je Board im Browser gespeichert** und beim nächsten Aufruf wiederhergestellt.
 
@@ -604,7 +615,7 @@ Auf schmalen Bildschirmen stapelt das Board die Spalten untereinander; jede Spal
 
 ### Ansichten teilen / URL-Parameter
 
-Über das **Monitor-Symbol** in der Kopfzeile öffnet sich der Dialog **"Ansichten"**. Dort lässt sich eine gefilterte Ansicht zusammenklicken; darunter steht eine **fertige URL zum Kopieren**. Ideal zum Einbetten in Lovelace (Webpage-Card) oder zum Weitergeben.
+Über das **Monitor-Symbol** in der Kopfzeile öffnet sich der Dialog **"Ansichten"**. Dort lässt sich eine gefilterte Ansicht zusammenklicken; darunter steht eine **fertige URL zum Kopieren**. Ideal zum Einbetten in Vis 2.0, Lovelace (Webpage-Card) oder zum Weitergeben.
 
 Der Dialog deckt die **gebräuchlichsten** Filter ab: Board, Benutzer (mehrfach), Labels (mehrfach) samt Umschaltung zwischen **"Diese Labels ausblenden"** (Blacklist) und **"Nur diese Labels zeigen"** (Whitelist), sichtbare Spalten, Limit für erledigte Karten (`doneLimit`) sowie das Ausblenden von Bedienelementen (`hideSettings`, `embed`). **Nicht** im Dialog, sondern **nur als URL-Parameter** gibt es `theme`, `accent`, `lang`, `card` und `focus` - die kommen bei Bedarf von Hand an die erzeugte Adresse.
 

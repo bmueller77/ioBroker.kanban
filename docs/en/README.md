@@ -84,7 +84,7 @@ These settings live in the **ioBroker admin** under *Instances → `kanban.0` �
 | **Default theme** | `auto` (system), `light` or `dark`. |
 | **Accent color** | Color of the controls (default `#7E57C2`). |
 | **Language** | UI language. Eleven languages are available, listed under [Language / internationalization](#language--internationalization). Empty/automatic = ioBroker system language. Can be overridden per URL with `?lang=xx`. |
-| **Date format** | Display format of the due date. The field is **empty by default**, which means the **ioBroker system format** applies. Tokens see the table below; `DD.MM.` is one possible pattern among them. On start the adapter checks whether the format carries a day, month or year at all. A typo is discarded, the log says why, and the display falls back to the system format. |
+| **Date format** | Display format of the due date. The field is **empty by default** and then uses the **ioBroker system format**. Tokens see the table below; `DD.MM.` is one possible pattern among them. On start the adapter checks whether the format carries a day, month or year at all. Bad input is discarded (with the reason in the log) and the display falls back to the system format. |
 | **Time format** | `24 hours (14:00)` or `12 hours (2:00 PM)`. Applies to the optional time of day on cards. |
 | **Custom CSS** | Served as `/api/custom.css`, for individual tweaks. |
 
@@ -94,7 +94,7 @@ The common moment/Day.js notation applies (case-sensitive):
 
 | Token | Meaning | Example (20 July 2026) |
 |---|---|---|
-| `D` / `DD` | day without / with leading zero | `20` / `20` |
+| `D` / `DD` | day without / with leading zero | `5` / `05` |
 | `M` / `MM` | month as a number without / with leading zero | `7` / `07` |
 | `MMM` / `MMMM` | month name short / full | `Jul` / `July` |
 | `YY` / `YYYY` | year two / four digits | `26` / `2026` |
@@ -106,24 +106,24 @@ Month and weekday names are rendered in the board language. Examples: `DD.MM.` �
 
 ### Tab "Users"
 
-This is where **the people are defined**; the list applies to the entire instance. In the board they appear as chips in the header bar and can be assigned to cards.
+This is where the users are created. The list applies to the entire instance. In the board they appear as chips in the header bar and can be assigned to cards.
 
 ![Instance settings, Users tab](img/admin-users.png)
 
 | Field | Meaning |
 |---|---|
 | **ID** (`name`) | Internal ID, lowercase, no special characters (e.g. `bjoern`). Used in URL parameters and assignments. |
-| **Display name** (`displayName`) | Display name (e.g. `Björn`). |
+| **Display name** (`displayName`) | Display name of the user (e.g. `Björn`). |
 | **E-mail** (`email`) | Optional. Target address for e-mail notifications. |
 | **notify...** | Nine per-user checkboxes controlling notifications, see [Tab "Notifications"](#tab-notifications). |
 
 Add a row with the **"+"** in the table header; the bin icon at the end of a row removes it again (without asking). The two arrows next to it move a row up or down; the order of the table is the order the people appear in within the board. Rows without an ID are dropped when saving. A fresh instance ships with **no** users; until the first one is added, the "+ Card" button in the board is blocked and says so.
 
-> **The ID is the key, and it is locked once created.** Boards and cards find their people through the *ID* column; the avatar pictures and the addresses of shared views hang on it as well. Changing it later would leave all of that pointing nowhere, and the adapter could not even clean up afterwards: a rename cannot be told apart from "deleted and newly created". The field is therefore locked as soon as the user has been saved once. The adapter writes a marker into the instance configuration on the next start and restarts once while doing so. That happens once per new user, never again after that.
+> **The ID cannot be changed once created.** Boards and cards find their people through it, and the avatar pictures and the addresses of shared views hang on it as well. Changing it later would leave all of that pointing nowhere, and the adapter could not even clean up afterwards: a rename cannot be told apart from "deleted and newly created". The adapter therefore fixes the ID as soon as the user has been saved once. To do so it writes a marker into the instance configuration on the next start and restarts once while doing so - once per new user, never again after that.
 >
-> **When the field locks at all:** only once something hangs on the ID, meaning a card is assigned to it or it carries an avatar image. Until then it can be changed freely; an ID nothing points at is safe to rename. A freshly set up instance with users but no cards therefore never writes its configuration back and never restarts itself.
+> **When the field locks:** only once something hangs on the ID, meaning a card is assigned to it or it carries an avatar image. Until then it can be changed freely; an ID nothing points at is safe to rename. A freshly set up instance with users but no cards therefore never writes its configuration back and never restarts itself.
 >
-> **If the field stays editable:** the adapter writes the marker back on start. Saving the instance settings at exactly that moment overwrites it again with what the form still held. The adapter then retries up to three times, after that it logs "Could not freeze the user ID(s)" and leaves the fields editable. The state shows in the *ID* column still being typeable - but only **after a full reload of the admin page**. Inside the open page the field stays typeable even when the adapter locked it long ago, and switching to another menu entry and back is not enough. Without knowing that, a successful run looks like a failure. The log is more reliable than the field: it says either "User ID(s) ... are now fixed" or the warning. The remedy for a real failure: restart the instance once and check that the fields are locked **before** creating any cards.
+> **If the field stays typeable:** saving the instance settings at exactly the moment the adapter writes the marker back overwrites it again with what the form still held. The adapter retries up to three times, after that it logs "Could not freeze the user ID(s)" and leaves the fields typeable. That state only shows **after a full reload of the admin page**, though: inside the open page the field stays typeable even when the adapter locked it long ago. The log is the more reliable source; it says either "User ID(s) ... are now fixed" or the warning. In a real failure, restart the instance once and check that the fields are locked **before** creating any cards.
 >
 > The **display name** stays freely editable. "Tom Reich" becomes "Tommy Reich" without a single card noticing.
 >
@@ -132,17 +132,15 @@ Add a row with the **"+"** in the table header; the bin icon at the end of a row
 > <a id="renaming-a-user"></a>
 > **If cards do point nowhere**, the adapter reports it on start in the log and in the state `info.orphanedAssignees`, and the gear icon in the board header gets a small dot. That happens when someone was deleted and created again, or when a card came in through the API with a foreign ID.
 >
-> The repair lives under **⚙ → Users → Orphaned assignees**. That section only exists while there is something to repair - with everything in order the tab shows nothing but the user avatars. Each orphaned ID gets a row with its extent and the boards involved; the card count expands into the list of cards, so nothing gets moved unseen. Next to it a dropdown with the existing people and a button that asks first. The trash stays out of it: what is on its way to deletion does not need to belong to anyone.
+> The repair lives under **Settings → Users → Orphaned assignees**. That section only exists while there is something to repair - with everything in order the tab shows nothing but the user avatars. Each orphaned ID gets a row with its extent and the boards involved; the card count expands into the list of cards, so nothing gets moved unseen. Next to it a dropdown with the existing people and a button that asks first. The trash stays out of it: what is on its way to deletion does not need to belong to anyone.
 >
 > The same thing works through the interface:
 >
 > ```bash
-> curl -X POST "http://<host>:8095/webhook/<TOKEN>/action" >   -H 'Content-Type: application/json' >   -d '{"cmd":"reassignUser","from":"bjoern_old","to":"bjoern"}'
+> curl -X POST "http://<host>:8095/webhook/<TOKEN>/action" -H 'Content-Type: application/json' -d '{"cmd":"reassignUser","from":"bjoern_old","to":"bjoern"}'
 > ```
 >
-> This carries over the assignees of every card, the member lists of the boards **and** the avatar picture. The picture only if the target person does not have one yet. If the new ID was already on a card, no duplicate entry appears. The target ID must exist in the instance settings, otherwise the call fails with `400`.
-
-> **Not here:** user colour, avatar image and the assignment to individual boards are maintained directly in the web UI. See [Users in the board](#users-in-the-board).
+> This carries over the assignees of every card, the member lists of the boards **and** the avatar picture. The picture only if the target person has none yet. If the new ID was already on a card, no duplicate entry appears. The target ID has to exist in the instance settings, otherwise the call fails with `400`.
 
 ### Tab "Notifications"
 
@@ -155,11 +153,11 @@ Notifications are triggered on card events and delivered via **e-mail** (through
 | **Email adapter instance** | Which `email.x` instance is used for sending. |
 | **Sender** | Optional sender address (empty = email adapter default). |
 | **Reminder time** | `HH:MM`, when due cards are checked (default `08:00`). |
-| **Remind X days before due** | Lead time for `cardDue` reminders (`0` to `30`, default `1`). Affects **only** the reminder e-mail, not the colours on the board. |
-| **Fire "card due" at the card's time of day** | **Off** by default. In addition to the daily reminder, cards with a **time of day** fire `cardDue` exactly at that time (`detail.exact = true`), so automations can trigger to the minute without polling the API. **Note:** the event goes through the normal notification path, so a second "due" e-mail is also sent to everyone who has that notification enabled. To drive scripts and webhooks only, turn the "due" e-mail off per user. |
-| **Default** | Global fallback switches per event, they apply when a user has nothing set of their own (see below). |
+| **Remind X days before due** | Lead time for `cardDue` reminders (`0` to `30`, default `1`). |
+| **Fire "card due" at the card's time of day** | **Off** by default. In addition to the daily reminder, cards with a **time of day** fire `cardDue` exactly at that time (`detail.exact = true`), so automations can trigger to the minute without polling the API. **Note:** the event goes through the normal notification path, so a second "due" e-mail is also sent to everyone who has that notification enabled. To drive scripts and webhooks only, the "due" e-mail notification should be turned off for that user. |
+| **Default** | Global fallback switches per event. They apply when a user has no notification settings of their own in the Users tab (see below). |
 
-At the very bottom of the tab sits the block **"Other services (Telegram, Pushover, ...)"**. It holds no setting, only the note that e-mail is the one service built in, plus a link to [Notifications to any service](#other-services).
+At the very bottom of the tab sits the block **"Other services (Telegram, Pushover, ...)"**. It holds no setting, only the note that e-mail is the one notification path built in, plus a link to examples for connecting other adapters, Telegram for instance: [Notifications to any service](#other-services).
 
 #### Who gets notified, and when?
 
@@ -167,10 +165,10 @@ In the **"Users"** tab every user has nine checkboxes. They decide which events 
 
 | Checkbox | When exactly it fires | Recipients |
 |---|---|---|
-| **assigned** (`notifyAssigned`) | As soon as someone is **added** as an assignee, on card creation for every initial entry, and when added later. Fires **once per person**. | **Only the person concerned** |
+| **assigned** (`notifyAssigned`) | As soon as someone is set as an assignee, on card creation for every initial entry, and when added later. Fires **once per person**. | **Only the person concerned** |
 | **due** (`notifyDue`) | Daily at the reminder time (default `08:00`) for cards due today or within the lead days. A run missed due to an adapter restart is caught up. | All assignees of the card |
 | **changed** (`notifyUpdated`) | On every edit of a card (title, date, labels, checklist ...). | All assignees of the card |
-| **moved** (`notifyMoved`) | When moved to a **different** column. | All assignees of the card |
+| **moved** (`notifyMoved`) | When moved to a different column. | All assignees of the card |
 | **done** (`notifyDone`) | **In addition** to "moved", if the target column is flagged as *done*. | All assignees of the card |
 | **created** (`notifyCreated`) | **Once** when a card is created; likewise when it is copied from another board and when a recurrence spawns the next card. | **All members of the board**, regardless of who it is assigned to |
 | **trash** (`notifyDeleted`) | When a card moves to the **trash**, whether deleted by hand or by the automatic cleanup. Default: off. | All assignees of the card |
@@ -189,7 +187,7 @@ The core difference between **assigned** and **created**: "assigned" is the **pe
 | Switch the column in the card editor to a done column | **changed** + **moved** + **done** |
 | Switch the column in the card editor to an open column | **changed** + **moved** |
 
-For most setups **"assigned" alone** is therefore enough. "created" pays off where cards that *others* create matter too, with a shared assignment.
+For most setups **"assigned"** alone is therefore enough. **"created"** pays off where cards that *others* create matter too, with a shared assignment.
 
 **Fallback:** if a user has nothing set for an event, the **global default** applies (tab "Notifications", section "Default"). This way existing users keep receiving notifications without having to configure everything individually.
 
@@ -199,7 +197,7 @@ For most setups **"assigned" alone** is therefore enough. "created" pays off whe
 
 > **The route counts too.** Moving a card by dragging produces the events of a move. Switching the same column in the **card editor** counts as a change to the card as well, so **changed** comes on top. With every checkbox set, one gesture produces three messages.
 
-> **Trash events:** "moved to trash", "restored" and "permanently deleted" have their own checkboxes, all **off** by default. An **automatic cleanup run** does not send one mail per card but **one summary mail per user** listing every affected card. Deleting a single card by hand still sends a normal individual mail. The **broom** empties the whole trash at once and therefore also sends a summary mail rather than one message per card.
+> **Trash events:** "moved to trash", "restored" and "permanently deleted" have their own checkboxes, all **off** by default. An **automatic cleanup run** does not send one mail per card but **one summary mail per user** listing every affected card. Deleting a single card by hand still sends a normal individual mail. The button with the **broom icon** empties the whole trash at once and therefore also sends a summary mail rather than one message per card.
 
 #### Calendar invite (.ics)
 
@@ -260,26 +258,28 @@ The structure of the JSON payload and the delivery details are in [Part C](#webh
 
 ## Part B: The board (web UI)
 
-The web UI at **`http://<host>:8095/`** is the actual workspace. Everything in this part is configured **directly in the browser** and takes effect immediately, no adapter restart. Thanks to live sync, changes show up on all open devices right away.
+The web UI at **`http://<host>:8095/`** is the actual workspace. Everything in this part is configured directly in the browser and takes effect immediately, no adapter restart. Thanks to live sync, changes show up on all open devices right away.
 
 ### Header bar
 
 The **header bar** contains, left to right: the **board selector**, the **user chips** (doubling as a person filter, see [Users in the board](#users-in-the-board)), the **"+ Card"** button, the **theme toggle** (sun/moon), the **"Views"** dialog (monitor icon, see [Sharing views](#sharing-views--url-parameters)) and the **settings** (gear).
 
-The gear opens the **board manager**, which covers the sections below. In embed mode (`embed=1`) the header bar is hidden entirely.
+*Note: in embed mode (`embed=1`) the header bar is hidden entirely.*
+
+![The board's header bar](img/topbar.png)
 
 ### Boards, columns & labels
 
-The **gear (⚙)** opens the board manager. It has two tabs: **Board** and **Users** (colours and avatars, see [Users in the board](#users-in-the-board)). The former third tab "Boards" was folded into the Board tab. Changes are only applied on **Save**.
+The button with the **gear icon** opens the board manager. It has two tabs: **Board** and **Users** (colours and avatars, see [Users in the board](#users-in-the-board)). Changes are only applied on **Save**.
 
 At the very top of the Board tab sits a row with three elements. The fourth entry of the table, "Delete board", sits at the bottom of the tab:
 
 | Element | Effect |
 |---|---|
-| **Board picker** | Selects which board is being **edited**. The board displayed in the background does not change. With unsaved changes the dialog asks first (save, discard, cancel). |
-| **Arrow button** | Switches the **displayed** board to the one being edited, while the dialog stays open. It is greyed out when the active board is already selected. |
+| **Board picker** | Selects which board is being edited. The board displayed in the background does not change. With unsaved changes the dialog asks first (save, discard, cancel). |
+| **Arrow button** | Switches the displayed board to the one being edited, while the dialog stays open. It is greyed out when the active board is already selected. |
 | **Name field + "Create"** | Creates a new board. It immediately becomes the board being edited and starts with all known users as members plus its own trash column. |
-| **"Delete board"** (at the bottom) | Deletes the board being edited after a confirmation. The last remaining board cannot be deleted **in the web UI**. Via API and webhook (`deleteBoard`) that lock does **not** apply: the last board can be removed there as well, after which the instance shows "No board yet" again. |
+| **"Delete board"** (at the bottom) | Deletes the board being edited after a confirmation. The last remaining board cannot be deleted in the web UI. Via API and webhook (`deleteBoard`) that lock does **not** apply: the last board can be removed there as well, after which the instance shows "No board yet" again. |
 
 Below that follow the board title, the member selection (see [Users in the board](#users-in-the-board)), columns, labels, the notification link target and the [Move done cards to the trash](#cleanup) section.
 
@@ -291,24 +291,24 @@ Columns can be created, reordered by drag & drop, renamed and deleted. **Deletin
 
 ![Settings: board, columns, labels](img/settings.png)
 
-Above the column list sits a header row with the field names (**Title · Max · WIP · New · Done**). Every heading carries a tooltip with the full explanation.
+Above the column list sits a header row with the field names (**Title · Max · WIP · New · Done**).
 
-- **Column ID:** besides its visible title every column carries an **immutable ID**. The three default columns are called `todo`, `doing` and `done`, newly created columns get a generated ID like `col_msd0mu8tkck68`. **Renaming keeps the ID**, so shared `columns=` links and `moveCard` calls keep working unchanged. You can look the IDs up via `GET /api/boards/<id>` (see [REST API](#rest-api)). IDs must be **unique**: if a `PATCH` sends the same ID twice, or the ID of the trash column, the affected column receives a freshly generated one.
+- **Column ID:** besides its visible title every column carries an **immutable ID**. The three default columns are called `todo`, `doing` and `done`, newly created columns get a generated, unique ID. **Renaming keeps the ID**, so shared `columns=` links and `moveCard` calls keep working unchanged. The IDs can be looked up via `GET /api/boards/<id>` (see [REST API](#rest-api)).
 - **Column width:** columns always share the **full width of the window**, so two columns each take up half. Only once less than 280 px would be left per column does the board become horizontally scrollable.
-- **Display limit (Max):** a number > 0 shows only the first N cards in that column; `+X more` appears directly under the last one, with the add button below that. `0` = show all. Useful so a long backlog does not blow up the board. The counter in the column header still counts **all** cards of the column. `+X more` is a **button**: one click shows the remaining cards, the line then reads `- hide X again`, and a second click collapses them. The limit on the board stays untouched; only the local browser remembers the deviation, like the sort mode and the eye icon.
+- **Display limit (Max):** a number > 0 shows only the first N cards in that column; `+X more` appears directly under the last one, with the add button below that. `0` = show all. The counter in the column header still counts **all** cards of the column. `+X more` is a **button**: one click shows the remaining cards, the line then reads `- hide X again`, and a second click collapses them. The limit on the board stays untouched; only the local browser remembers the deviation, like the sort mode and the eye icon.
 - **WIP limit** (work in progress): a number > 0 caps the recommended card count. If exceeded, the column warns visually (counter & header are highlighted). `0` = no limit. The limit is a **warning**, not a hard block. It always refers to the **total** number of cards in the column, even while a person/label filter is showing fewer. Once it is exceeded, the **column** count sits before the slash even with a filter on, so "7/5" - exactly the number the warning colour comes from. The tooltip names both: how many cards the column really holds and how many the filter shows. While the limit is kept, an active filter simply shows the matches without a slash; a ratio of filtered cards to the limit would mix two different sets.
-- **"New"** (`allowAdd`): controls in which columns the add button appears at the foot of the column - a "+" on a coloured pad. Its only label is the tooltip, which reads "+ Add card".
+- **"New"** (`allowAdd`): controls which columns accept new cards. Such a column carries the add button at its foot - a "+" on a coloured pad.
 - **"Done" column** (`isDone`): cards moved here count as completed (`doneAt` is set, recurrences are triggered). Their title is shown with a **strikethrough**, and below it the completion time appears in brackets, for example `(Done: 26/07/2026 20:09)`, in the instance's date and time format. That line needs a `doneAt` to be set; cards that never passed through a done column do not show it.
-- **Show/hide done (eye icon):** every done column has an eye toggle at the top right that shows or hides the completed cards (stored per device).
-- **Limit of visible done cards:** the URL parameter `doneLimit=N` (see [Sharing views / URL parameters](#sharing-views--url-parameters)) shows only the N most recently completed cards, which is handy for compact, shared views.
-- **Copy a completed card:** next to the title of a done card sits a small copy icon. It opens the editor with the same content as a **new** card. On save it lands in the first column flagged "New", checklist items start unticked, and the due date is prefilled with **today** if the original had one at all (a time of day is kept). Meant for recurring chores that have no fixed recurrence rule.
+- **Show/hide done (eye icon):** every done column has a toggle in the shape of an eye at the top right that shows or hides the completed cards (this setting is stored per device).
+- **Limit of visible done cards:** the URL parameter `doneLimit=N` (see [Sharing views / URL parameters](#sharing-views--url-parameters)) shows only the N most recently completed cards; handy for compact, shared views.
+- **Copy a completed card:** next to the title of a done card sits a small copy icon. It opens the editor with the same content as a **new** card. On save it lands in the first column flagged "New", checklist items start unticked, and the due date is prefilled with **today** if the original had one at all (a time of day is kept).
 
 <a id="counts-in-the-column-header"></a>
 #### Counts in the column header (since 0.3.2)
 
-Next to the column title sits not only the card count but, on request, also **how urgent** the column's content is.
+Next to the column title sits not only the card count but, on request, also the number of cards in that column that are due tomorrow, due today or already overdue.
 
-Clicking one of the numbers opens a small menu with four checkmarks. Every ticked entry appears as its own badge next to the others.
+Clicking one of the numbers opens a small menu with four options. Every ticked entry appears as its own badge next to the others.
 
 | Entry | Shows |
 |---|---|
@@ -319,25 +319,27 @@ Clicking one of the numbers opens a small menu with four checkmarks. Every ticke
 
 The three due-date numbers carry **the same colours as the badges on the cards** and follow the same arithmetic, time of day included. "Tomorrow" means exactly the next calendar day, whatever lead time the instance settings hold for the reminder mail. When a number is `0` the badge stays in place and merely loses its warning colour, so the header does not jump on every change and the menu stays within reach.
 
-At least one number stays: the last remaining checkmark cannot be removed, because otherwise there would be nothing left to reopen the menu with. It is shown dimmed for that reason.
+At least one number stays: the last remaining checkmark cannot be removed, because otherwise there would be nothing left to reopen the menu with.
 
 The selection applies **per column** and is stored **per device**, like the sort mode and the eye icon. A person or label filter affects all four numbers alike. The done column and the trash have no menu: every card there counts as completed, so there would be nothing to colour.
 
 The keyboard reaches all of it. Tab lands on the numbers, Enter opens the menu, the arrow keys move inside it, Enter ticks or unticks, Escape closes and hands the focus back. The same is true of the sort menu.
 
+![Counts in the column header with the menu open](img/col-counts.png)
+
 <a id="trash"></a>
 #### Trash (since 0.3.0)
 
-Every board has a **"Trash" system column**. Deleted cards do not vanish straight away: they sit there for **30 days** and can be pulled back at any time. Only afterwards are they removed for good.
+Every board has a **"Trash" system column**. Deleted cards do not vanish straight away: they sit there for **30 days** and can be restored at any time. Only afterwards are they removed for good.
 
 - **Visibility:** the trash is **hidden by default**. Show it via **"Show trash"** at the bottom of the board settings. That setting applies to **the local device only**, so other people keep seeing their usual board.
 - **What ends up there:** anything removed with the **Delete** button in the card editor, cards **dragged** into the trash, and the cards from the [automatic cleanup](#cleanup).
 - **Bringing a card back:** drag it out of the trash or tap the **restore** icon on the card. It returns to the first open column.
-- **Deleting for good right away:** the second icon on the card removes it irreversibly. The broom button in the column header empties the **entire** trash. Both ask first. Via API and webhook, `purgeCard` likewise applies **only to cards in the trash**: on an active card it answers `400` with "Karte '...' liegt nicht im Papierkorb". Getting past the retention period therefore always leads through the trash first.
+- **Deleting for good right away:** the second icon on the card removes it irreversibly. The button with the broom icon in the column header empties the **entire** trash. Both ask first. Via API and webhook, `purgeCard` likewise applies **only to cards in the trash**: on an active card it returns `400` with "Karte '...' liegt nicht im Papierkorb". Getting past the retention period therefore always leads through the trash first.
 - **Reading the confirmations correctly:** the confirmation when deleting a card says what actually happens: "Move this card to the trash? You can restore it from there for 30 days." Truly irreversible are only the second icon on a card **inside** the trash and the broom button in the column header; their dialogs say so explicitly.
 - **Remaining time:** every card shows how long it will still be kept, for example "30 days left".
 - **Its own look:** the column is deliberately kept neutral grey, independent of theme and accent colour, so it stands apart from the working columns.
-- **Special status:** the trash always sits on the far right, cannot be renamed, moved or deleted and does not show up in the column configuration. It has no WIP limit and no "+ Add card" link, and it does not count towards the counters of other columns. It does have the **sort toggle**, like every other column; it sits on the right of the column header, with the broom to its left. The default remains deletion time, oldest first - so whatever is closest to being removed for good sits on top.
+- **Special status:** the trash always sits on the far right, cannot be renamed, moved or deleted and does not show up in the column configuration. It has no WIP limit and no "+ Add card" link, and it does not count towards the counters of other columns. It does have the **sort toggle**, like every other column. The default is deletion time, oldest first - so whatever is closest to being removed for good sits on top.
 - **Existing boards:** on the first start of 0.3.0 every existing board gets a trash column automatically. Existing cards are not touched.
 
 <a id="cleanup"></a>
@@ -353,13 +355,19 @@ To stop the done column from growing forever, each board can move old completed 
 
 The run happens **once a day** and **on adapter start**. It uses the completion timestamp (`doneAt`); cards without one are left alone. It survives the trash: delete a done card and restore it, and its original completion time is still there. Because the cards only move to the trash, another 30 days remain to pull something back.
 
+![Trash holding two deleted cards](img/trash.png)
+
+*Every card shows how long it will be kept, with restore and delete-for-good below. The broom in the column header empties the whole trash.*
+
 #### Labels
 
 Labels are coloured tags and are managed **per board** in the *Board* tab (create, rename, recolour, delete). On a card they appear as a coloured badge with automatically contrasting text; in the [Views dialog](#sharing-views--url-parameters) they can be used as a blacklist to hide cards.
 
-New labels take their colour from a palette of eight in rotation, so labels created one after another differ by colour alone.
+The labels carry a drag handle like the columns above, so their **order** can be set freely, and that order applies everywhere: on the cards, in the picker inside the card editor, and in the summary of the section header. Two cards carrying the same labels therefore look alike.
 
-The labels carry a drag handle like the columns above, so their **order** can be set freely, and that order applies everywhere: on the cards, in the picker inside the card editor, and in the summary of the section header. Two cards carrying the same labels therefore look alike. For an alphabetical order, drag the list into it once.
+![The same labels on two cards](img/card-labels.png)
+
+*Both cards carry Frontend, Backend and Bug - in the same order, no matter which was clicked first.*
 
 #### Link in notifications (from 0.2.0)
 
@@ -369,7 +377,9 @@ Each board decides where the "open card" link in notification e-mails points: **
 
 ### Cards: all fields
 
-**Card anatomy:** the **assignees** sit as a stack of avatars in the top right corner and the title text flows around them. Hovering or tapping the stack fans the faces out to the left without changing the line breaks. Long titles are cut off after **two lines** with an ellipsis, the full title stays available as a tooltip. If the card carries a **checklist**, it gets a footer: progress on the left, the expand chevron in the middle and the icons for **description, link and recurrence** on the right, in that order. Without a checklist there is no footer, and the same icons sit at the right end of the label or badge row. Clicking the description icon opens the description in a **read-only window** with rendered Markdown; links inside always open in a new tab. The chevron's hit area is deliberately larger than the symbol itself so it is easy to hit by touch: measured 119 x 26 px against a symbol of 14 x 14 px. It sits as an invisible area on top, so the button itself measures only 90 x 11 px. Whether a checklist is expanded or collapsed is **remembered per device and board**, just like the column sort modes, and survives a reload.
+**Card anatomy:** the **assignee**, or with several of them the stack of avatars, sits in the top right corner and the title text flows around it. With several assignees the faces fan out to the left on hover or tap, without changing the line breaks. Long titles are cut off after **two lines** with an ellipsis, the full title stays available as a tooltip. If the card carries a **checklist**, it gets a footer: progress on the left, the expand chevron in the middle and the icons for **description, link and recurrence** on the right, in that order. Without a checklist there is no footer, and the same icons sit at the right end of the label or badge row. Clicking the description icon opens the description in a **read-only window** with rendered Markdown; links inside always open in a new tab. Whether a checklist is expanded or collapsed is **remembered per device and board**, just like the column sort modes, and survives a reload.
+
+![Anatomy of a card](img/card.png)
 
 **The icons on a card**, in the order they appear:
 
@@ -387,21 +397,19 @@ Each board decides where the "open card" link in notification e-mails points: **
 | Circular arrows | next to it | Recurring task |
 | Check mark with `3/12` | bottom left of the card | State of the checklist. The triangle beside it expands it. |
 
-The editor opens **only via the pencil icon right next to the end of the title**; clicking anywhere on the card does not open it. That keeps the editor from popping up by accident while scrolling or tapping. Cards can still be grabbed and dragged anywhere.
+The editor opens via the pencil icon right next to the end of the title; clicking anywhere on the card does not open it. That keeps the editor from being opened by accident while scrolling or tapping. Cards can still be grabbed and dragged anywhere.
 
 The two required fields come first: **title**, and directly below it **assignees**. Then the row with due date, time, priority and column, and below that the calendar invite. Everything else sits in **collapsible sections**: description, labels and card colour, link, location, recurrence, checklist.
 
-The right-hand end of each section header says what is inside: an excerpt of the description, the chosen labels with a colour dot, the location, the recurrence pattern, the state of the checklist. A collapsed section therefore hides nothing, it summarises. Which sections are open is **remembered per device** and applies to the next new card as well; on a fresh install only the description is open. Labels and card colour share one header on wide screens; below 600 px each gets its own and collapses separately.
+The right-hand end of each section header says what is inside: an excerpt of the description, the chosen labels with a colour marker, the location, the recurrence pattern, the state of the checklist. Which sections are open is **remembered per device** and applies to the next new card as well; on a fresh install only the description is open.
 
 The footer holds **Delete**, **Manage** (transfer/clone), **Cancel** and **Save**. A **×** in the top right closes the dialog, as in every dialog of the board.
 
-**Unsaved changes** do not disappear. Escape, the close cross and the **browser's back button** ask first as soon as something in the card was changed. On a tablet the back button matters most, because the back gesture is the usual way out of a dialog there. The prompt has three buttons: **Save**, **Discard** and **Cancel**. "Cancel" is the important one - it leaves the editor open with everything typed still there, so work can simply carry on.
+**Unsaved changes** do not disappear. Escape, a click on the X and the **browser's back button** ask first as soon as something in the card was changed. On a tablet the back button matters most, because the back gesture is the usual way out of a dialog there. The prompt has three buttons: **Save**, **Discard** and **Cancel**.
 
-The **Cancel** button in the editor's footer is a different thing: it closes without asking, because someone pressing it means it.
+**The keyboard reaches everything.** Tab moves from field to field and also onto the section headers; Enter or space opens a section. The chip groups (assignees, labels, card colour, link types) are a single tab stop each: inside them the arrow keys move, Home and End jump to the ends, space or Enter selects. Inside the checklist Enter creates the next item; from there Ctrl + Enter saves.
 
-**The keyboard reaches everything.** Tab moves from field to field and also onto the section headers; Enter or space opens a section. The chip groups (assignees, labels, card colour, link types) are a single tab stop each: inside them the arrow keys move, Home and End jump to the ends, space or Enter selects. Inside the checklist Enter creates the next item; from there Ctrl and Enter saves.
-
-**If a card belongs to someone who no longer exists**, the old ID appears as its own chip in the *assignees* field, dashed and marked "(deleted)". It can be deselected here; moving it over happens under [⚙ → Users](#renaming-a-user).
+**If a card belongs to someone who no longer exists**, the old ID appears as its own chip in the *assignees* field, dashed and marked "(deleted)". It can be deselected here; moving it over happens under [Settings → Users](#renaming-a-user).
 
 A card has the following content fields (settable via the API under the same names):
 
@@ -414,8 +422,8 @@ A card has the following content fields (settable via the API under the same nam
 | **due** | `YYYY-MM-DD` | Due date. The badge is coloured by state, see [Due date colours](#due-date-colours). |
 | **dueTime** | `HH:MM` | Optional time of day. Enabled via a checkbox, shown on the card after the date. Only effective together with `due`. |
 | **priority** | `0`/`1`/`2` | Normal / High / Urgent. On the card this shows as a badge below the title (before due date and location): **Normal** shows nothing, **High** an orange `!`, **Urgent** a red `!!`. Other values are rejected, via the API with an error (see [Responses & errors](#responses--errors)). |
-| **assignees** | list of user IDs | Assignees. Determine who receives notifications. **Required, through the API as well:** at least one person must be given, and every ID must exist in the instance settings. Otherwise the interface answers with `400` and names the IDs it knows. **Exception:** with exactly one user configured the field is filled in automatically instead of being rejected. An ID that is **already on the card** remains allowed when editing, even if the user no longer exists - otherwise the orphaned card would be the one card nobody could touch. If a board's **member list matches no existing user**, **all** users are assignable. |
-| **labels** | list of label IDs | Colored tags. Labels are managed per board (create, rename, recolor, delete). If a label arrives through the API that the board does not know, it is **created** rather than rejected (title = ID, colour taken in turn from the same palette as in the interface; both editable afterwards). Otherwise the card would carry a label the board does not list, which makes it invisible behind an `onlyLabel` filter. |
+| **assignees** | list of user IDs | Assignees. Determines who receives notifications. **Required, through the API as well:** at least one person must be given, and every ID must exist in the instance settings. Otherwise the interface answers with `400` and names the IDs it knows. **Exception:** with exactly one user configured the field is filled in automatically instead of being rejected. An ID that is **already on the card** remains allowed when editing, even if the user no longer exists - otherwise the orphaned card would be the one card nobody could touch. By default **all** users of an instance are assignable; the member list of a board narrows that down. |
+| **labels** | list of label IDs | Colored tags. Labels are managed per board (create, rename, recolor, delete). If a label arrives through the API that the board does not know, it is **created** rather than rejected (title = ID, colour taken in turn from the same palette as in the interface; both editable afterwards). |
 | **color** | hex color | Colored bar on the left edge of the card. Chosen via an embedded color picker (color field + hue slider + hex input) or presets. |
 | **link** | URL | A link. The card shows a **type-dependent icon** (see [Link types](#link-types)). |
 | **location** | text | Location. Shown as a location badge (pin icon) on the card and copied into the calendar invite as `LOCATION`. |
@@ -428,7 +436,7 @@ The adapter also manages automatically: `id`, `columnId`, `order`, `createdAt`, 
 
 Every card object of the **REST API** additionally carries the computed field **`dueAt`**, the due date including time as an ISO timestamp with local offset (e.g. `2026-08-01T13:30:00+02:00`; `00:00` without a time, `null` without a date). It is identical to the `dueAt` of the events, is **not stored** and is ignored on write, so automations do not have to combine `due` + `dueTime` + time zone themselves.
 
-`movedAt` records **since when a card has been sitting in its current column** and is the basis for the "age in column" sort mode. It is only refreshed on a real column change; reordering within the same column leaves it untouched. `trashedAt` marks when a card went to the trash and drives the 30-day deadline.
+`movedAt` records **since when a card has been sitting in its current column** and is the basis for the "age in column" sort mode. It is only refreshed on a real column change; reordering within the same column in manual sort mode leaves it untouched. `trashedAt` marks when a card went to the trash and drives the 30-day deadline.
 
 #### Transfer or clone a card (since 0.3.0)
 
@@ -455,7 +463,7 @@ The board derives a matching icon (Material Design Icons) from the address enter
 | <img src="../icons/navigation.svg" width="22" alt="icon"> | route: `waze.com`, `/maps/dir/`, `daddr=` | `https://www.waze.com/ul?ll=52.52,13.405` |
 | <img src="../icons/map-marker.svg" width="22" alt="icon"> | place: Google/Apple Maps, OpenStreetMap, `geo:` | `geo:52.52,13.405` |
 | <img src="../icons/lan.svg" width="22" alt="icon"> | internal address: private ranges (`10.`, `172.16.` to `172.31.`, `192.168.`), `127.`, `169.254.`, `localhost` plus host names ending in `.local` `.lan` `.home` `.internal` `.fritz.box` | `http://192.168.1.10:8123/` |
-| <img src="../icons/web.svg" width="22" alt="icon"> | everything else | `https://example.com` |
+| <img src="../icons/web.svg" width="22" alt="icon"> | external web links | `https://example.com` |
 
 A **bar with these nine icons** sits above the link field, in the order web link, internal address, e-mail, phone, YouTube, PDF, image, route, location. Clicking one puts a matching example into the field as a placeholder, for example `tel:+49123456789` instead of `https://...`. Anything already typed stays untouched. The other way round, the bar highlights which type matches the address currently entered, and follows along while typing.
 
@@ -489,24 +497,26 @@ The **trash** has this menu too. There, "drag & drop" and "drag handles" do not 
 
 Independently of all this, the due badge is coloured, so anything urgent stands out regardless of its position.
 
+![A column's sort menu](img/sort-menu.png)
+
 <a id="due-date-colours"></a>
 #### Due date colours
 
 | Colour | State |
 |---|---|
-| **red** | past: the date has gone by, or the card's time of day has passed |
-| **orange** | due today, time of day not reached yet |
-| **yellow** | due tomorrow, meaning the next calendar day |
-| neutral | due later |
-| **green** | done |
+| **red** | The due date lies in the past |
+| **orange** | The card is due today, but its due time has not passed yet |
+| **yellow** | The card is due tomorrow, meaning the next calendar day |
+| neutral | The card is not due until the day after tomorrow or later |
+| **green** | The task on the card has been completed |
 
 Two differently computed questions sit behind this. The **early-warning window** (yellow) is planning and counts in **calendar days**: yellow is exactly the next calendar day. Not a rolling 24 hour window, so tomorrow stays tomorrow all day.
 
 > The setting [**Remind X days before due**](#tab-notifications) governs how early the **reminder mail** goes out, nothing else. The colours on the board do not depend on it.
 
-The boundary to **red** is a fact instead. When the card carries a **time of day**, that time counts: at 17:01 the 17:00 slot has passed, which is exactly when the `cardDue` event fires with `detail.exact`. Without a time, the colour changes at midnight. The states [`overdueCount` and `overdueList`](#iobroker-states--objects) follow the same rule, so colour and counter change in the same minute.
+Card overdue: when the card carries a **time of day**, 17:00 for instance, it is overdue at 17:01, and that is exactly when the `cardDue` event fires with `detail.exact`. Without a time, the colour changes at midnight. The states [`overdueCount` and `overdueList`](#iobroker-states--objects) follow the same rule, so colour and counter change in the same minute.
 
-The tooltip on the badge says what a colour means: overdue, due today, due tomorrow, due later, done. A second line spells out the scale, so nobody has to guess it. There is no legend in the interface, and a colour on its own does not say whether it is worse than the one beside it.
+The tooltip on the badge says what a colour means: overdue, due today, due tomorrow, due later, done.
 
 The colours can be changed through [custom CSS](#faq--pitfalls): `--danger` for red, `--warn` for orange, and `--due-upcoming` with `--due-upcoming-text` for yellow. The same grouping sits behind the [counts in the column header](#counts-in-the-column-header).
 
@@ -528,7 +538,7 @@ If a recurring card is created **without** a manual date, the adapter automatica
 | `every_n_days_done` | Every X days **from completion** | `interval`: N |
 | `cron` | Cron expression used as a pattern | `cron`: `"0 8 * * 1-5"` |
 
-The two **X days** kinds look alike and count differently. "Every X days" keeps a fixed grid from the start date: a card due every 30 days that is finished ten days late has its next date on the next grid point, so in 20 days. "Every X days (after the previous one is done)" counts from the moment of the tick, which would be a full 30 days. It is meant for maintenance where the interval starts at the actual job, a filter change for instance.
+The two **X days** kinds look alike and count differently. "Every X days" keeps a fixed grid from the start date: a card due every 30 days that is finished ten days late has its next date on the next grid point, so in 20 days. "Every X days (after the previous one is done)" counts from the completion of the preceding card, which would be a full 30 days.
 
 For every calendar-bound kind the next date is always **in the future**. A daily card left alone for two weeks and then ticked off produces a follow-up card due tomorrow, not on some day last week. Finished **early**, the calendar stays the reference instead, otherwise the date would creep forward with every early tick.
 
@@ -563,7 +573,7 @@ Below the input the editor shows the rule in plain words and the next three date
 
 For the **working-day recurrences** the adapter computes public holidays itself (Easter formula + fixed dates + the German "Buß- und Bettag"), so even dates far in the future are calculated correctly.
 
-- If the ioBroker **`feiertage`** adapter is installed, the Kanban adapter adopts its **state/region configuration** (which holidays apply). Only genuinely work-free public holidays count, decorative days (e.g. Valentine's Day) are ignored.
+- If the ioBroker **`feiertage`** adapter is installed, the Kanban adapter adopts its **state/region configuration** (which holidays apply). Only genuinely work-free public holidays count, days that are not work-free (e.g. Valentine's Day) are ignored.
 - Without the `feiertage` adapter a **fallback** with the nationwide public holidays is used.
 
 > Changes to the `feiertage` adapter are picked up on the next start of `kanban.0`.
@@ -604,7 +614,7 @@ On narrow screens the board stacks the columns vertically; each column collapses
 
 ### Sharing views / URL parameters
 
-The **monitor icon** in the header opens the **"Views"** dialog. It assembles a filtered view and offers a **ready-to-copy URL** below. Ideal for embedding in Lovelace (webpage card) or for sharing.
+The **monitor icon** in the header opens the **"Views"** dialog. It assembles a filtered view and offers a **ready-to-copy URL** below. Ideal for embedding in Vis 2.0, Lovelace (webpage card) or for sharing.
 
 The dialog covers the **most common** filters: board, users (multiple), labels (multiple) including the switch between **"Hide these labels"** (blacklist) and **"Show only these labels"** (whitelist), visible columns, the done-card limit (`doneLimit`) and the controls to hide (`hideSettings`, `embed`). **Not** in the dialog, but available **as URL parameters only**, are `theme`, `accent`, `lang`, `card` and `focus`. They go onto the generated address by hand where needed.
 
