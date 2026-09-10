@@ -4,7 +4,22 @@ A **Kanban board as a dedicated ioBroker adapter**. It ships its own web server,
 
 > **Who is it for?** Households that manage tasks together, whether that is a family, a flat-share or the maintenance plan for a house, and want those tasks where ioBroker already runs. Every event lands in a state that scripts and Node-RED can read, and the board embeds into Lovelace as a webpage card.
 
-> **Version 0.3.2**, switchable counts in the column header (total, tomorrow, today, overdue), collapsible sections in the card editor with a summary, an icon bar above the link field, user IDs locked as soon as something hangs on them, repair for orphaned assignees in the UI, one label order everywhere plus a draggable label list, single-user mode without assignment fields, reworked keyboard operation, "every X days (after the previous one is done)" as a new recurrence kind, yellow now means exactly the next calendar day, no new cards in done columns, calendar cancellation on delete.
+> **Version 0.3.2**
+>
+> - Switchable counts in the column header: total, tomorrow, today, overdue
+> - Collapsible sections in the card editor, each summarised in its header
+> - An icon bar above the link field
+> - User IDs locked as soon as a card or an avatar hangs on them
+> - Repair for orphaned assignees in the UI
+> - One label order everywhere, and the label list can be dragged
+> - Single-user mode without assignment fields
+> - Reworked keyboard operation
+> - "Every X days (after the previous one is done)" as a new recurrence kind
+> - Yellow now means exactly the next calendar day
+> - No new cards in done columns
+> - Calendar cancellation when a card with an invite is deleted
+> - The sort toggle in the trash as well
+> - Fresh instances without preset users
 
 ![Kanban board overview](img/board.png)
 

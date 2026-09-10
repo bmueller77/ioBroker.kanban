@@ -4,7 +4,22 @@ Ein **Kanban-Board als eigener ioBroker-Adapter**. Er bringt seinen eigenen Webs
 
 > **Für wen?** Für Haushalte, die Aufgaben gemeinsam verwalten wollen - Familie, WG, Wartungsplan fürs Haus - und sie dort haben möchten, wo ohnehin ioBroker läuft. Jedes Ereignis landet in einem State, den Skripte und Node-RED auswerten können, und das Board lässt sich als Webpage-Card in Lovelace einbetten.
 
-> **Version 0.3.2**, Zahlen im Spaltenkopf umschaltbar (Gesamt, Morgen, Heute, Überfällig), aufklappbare Abschnitte im Karteneditor mit Zusammenfassung, Symbolleiste über dem Link-Feld, Benutzer-IDs gesperrt, sobald etwas an ihnen hängt, Reparatur verwaister Zuständiger in der Oberfläche, eine Reihenfolge für Labels an allen Stellen und eine ziehbare Labelliste, Ein-Benutzer-Betrieb ohne Zuständigkeitsfelder, überarbeitete Tastaturbedienung, "Alle X Tage (nach Erledigung des Vorgängers)" als neue Wiederholungsart, Gelb heißt jetzt genau der nächste Kalendertag, keine neuen Karten in Erledigt-Spalten, Kalender-Absage beim Löschen.
+> **Version 0.3.2**
+>
+> - Zahlen im Spaltenkopf umschaltbar: Gesamt, Morgen, Heute, Überfällig
+> - Aufklappbare Abschnitte im Karteneditor, jeder mit Zusammenfassung in der Kopfzeile
+> - Symbolleiste über dem Link-Feld
+> - Benutzer-IDs gesperrt, sobald eine Karte oder ein Avatarbild daran hängt
+> - Reparatur verwaister Zuständiger in der Oberfläche
+> - Eine Reihenfolge für Labels an allen Stellen, die Labelliste lässt sich ziehen
+> - Ein-Benutzer-Betrieb ohne Zuständigkeitsfelder
+> - Überarbeitete Tastaturbedienung
+> - "Alle X Tage (nach Erledigung des Vorgängers)" als neue Wiederholungsart
+> - Gelb heißt jetzt genau der nächste Kalendertag
+> - Keine neuen Karten in Erledigt-Spalten
+> - Kalender-Absage beim Löschen einer Karte mit Einladung
+> - Sortier-Umschalter auch im Papierkorb
+> - Frische Instanzen ohne vorbelegte Benutzer
 
 ![Kanban-Board - Übersicht](img/board.png)
 
