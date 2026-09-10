@@ -298,19 +298,10 @@ button.count:focus-visible { outline: 2px solid var(--focus, var(--accent, #7E57
 .sort-item.count-item-locked { opacity: .5; cursor: default; }
 .sort-item.count-item-locked:hover { background: none; }
 
-/* Dieselben Farben wie die Faelligkeits-Abzeichen auf den Karten - und
-   dieselbe Haarlinie, wo die Flaeche gegen den Spaltengrund unter 3:1 bleibt.
-   Der durchsichtige Rand steht in der Grundregel, damit die Zahl nicht um zwei
-   Pixel springt, wenn sie die Stufe wechselt (G4). */
-.count.due-overdue,
-.count.due-today,
-.count.due-soon { border: 1px solid transparent; }
+/* Dieselben Farben wie die Faelligkeits-Abzeichen auf den Karten */
 .count.due-overdue { background: var(--danger); color: #fff; }
 .count.due-today { background: var(--warn); color: #fff; }
-.count.due-soon { background: var(--due-upcoming, #ffd800); color: var(--due-upcoming-text, #1c1a17); border-color: var(--due-upcoming-text, #1c1a17); }
-html[data-theme="dark"] .count.due-soon { border-color: transparent; }
-html[data-theme="dark"] .count.due-overdue,
-html[data-theme="dark"] .count.due-today { border-color: rgba(255, 255, 255, .9); }
+.count.due-soon { background: var(--due-upcoming, #ffd800); color: var(--due-upcoming-text, #1c1a17); }
 /* Bei Null bleibt die Zahl stehen: sonst spraenge die Kopfzeile bei jeder
    Aenderung, und ohne Abzeichen gaebe es kein Ziel fuer das Menue mehr. */
 .count.count-zero { background: var(--surface); color: var(--muted); }
@@ -539,18 +530,6 @@ html[data-theme="dark"] .count.due-today { border-color: rgba(255, 255, 255, .9)
 .card .badge.due-today,
 .card .badge.due-soon,
 .card .badge.due-done { border-color: transparent; }
-/* Die Farbflaeche traegt die Information, also braucht sie 3:1 gegen ihren
-   Untergrund (WCAG 1.4.11). Vier der acht Faelle blieben darunter, in beiden
-   Themes verschiedene: hell verschwand das gelbe Abzeichen (1,39:1 auf der
-   weissen Karte), dunkel liefen rot, orange und gruen mit ihr zusammen (2,66
-   bis 2,98:1). Die Haarlinie nimmt die eigene Schriftfarbe des Abzeichens und
-   bringt jeden dieser Faelle ueber 11:1, ohne eine neue Farbe einzufuehren.
-   Die vier Faelle, die schon bestanden, bleiben randlos (G4). */
-.card .badge.due-soon { border-color: var(--due-upcoming-text, #1c1a17); }
-html[data-theme="dark"] .card .badge.due-soon { border-color: transparent; }
-html[data-theme="dark"] .card .badge.due-overdue,
-html[data-theme="dark"] .card .badge.due-today,
-html[data-theme="dark"] .card .badge.due-done { border-color: rgba(255, 255, 255, .9); }
 
 .card .badges > .badge, .card .badges > .label-pill { box-shadow: var(--chip-shadow); }
 .badge svg { display: inline-block; width: 14px; height: 14px; vertical-align: -2px; }
