@@ -304,7 +304,7 @@ Spalten lassen sich anlegen, per Drag & Drop sortieren, umbenennen und löschen.
 <a id="zahlen-im-spaltenkopf"></a>
 #### Zahlen im Spaltenkopf (ab 0.3.2)
 
-Ab 0.3.2: Neben dem Spaltentitel steht nicht nur die Kartenanzahl, sondern auf Wunsch auch, **wie dringend** der Inhalt der Spalte ist.
+Neben dem Spaltentitel steht nicht nur die Kartenanzahl, sondern auf Wunsch auch, **wie dringend** der Inhalt der Spalte ist.
 
 Ein Klick auf eine der Zahlen öffnet ein kleines Menü mit vier Haken. Jeder gesetzte Haken steht anschließend als eigenes Abzeichen daneben.
 
