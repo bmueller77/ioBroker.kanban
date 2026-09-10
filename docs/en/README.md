@@ -600,7 +600,7 @@ On narrow screens the board stacks the columns vertically; each column collapses
 
 <img src="img/mobile.png" alt="Mobile view, stacked columns" width="330"> <img src="img/mobile-drag.png" alt="Mobile view, quick-move menu while dragging a card" width="330">
 
-*Left: columns stacked as an accordion. Right: the quick-move menu that appears over the target columns while dragging a card.*
+*Left the team board: columns stacked as an accordion, the first one collapsed. Right a different board, the household one, showing the quick-move menu that appears over the target columns while dragging a card.*
 
 ### Sharing views / URL parameters
 

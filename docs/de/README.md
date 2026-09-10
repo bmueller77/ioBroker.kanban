@@ -600,7 +600,7 @@ Auf schmalen Bildschirmen stapelt das Board die Spalten untereinander; jede Spal
 
 <img src="img/mobile.png" alt="Mobile Ansicht, gestapelte Spalten" width="330"> <img src="img/mobile-drag.png" alt="Mobile Ansicht, Schnellmenü beim Ziehen einer Karte" width="330">
 
-*Links: gestapelte Spalten als Akkordeon. Rechts: das Schnellmenü, das beim Ziehen einer Karte über den Zielspalten erscheint.*
+*Links das Team-Board: gestapelte Spalten als Akkordeon, die erste zugeklappt. Rechts ein anderes Board, das Haushaltsbrett, und darauf das Schnellmenü, das beim Ziehen einer Karte über den Zielspalten erscheint.*
 
 ### Ansichten teilen / URL-Parameter
 

@@ -11,10 +11,10 @@ Systemsprache).
 |---|---|---|
 | "board.png" | Board-Uebersicht | Board im Browser |
 | "card-editor.png" | Karten-Dialog, Checkliste aufgeklappt | Stift-Symbol neben dem Kartentitel anklicken |
-| "settings.png" | Board-Manager, Tab "Board" (Spalten mit Max/WIP/Neu/Erledigt) | Zahnrad |
-| "settings-labels.png" | Board-Manager: Labels, Link-Ziel und Aufraeumen | Zahnrad, Tab "Board", unten |
+| "settings-boards.png" | Board-Manager, Tab "Board", ganz oben | Zahnrad |
+| "settings.png" | derselbe Reiter, ein Stueck weiter unten | Zahnrad |
+| "settings-labels.png" | derselbe Reiter, ganz unten | Zahnrad |
 | "settings-users.png" | Board-Manager, Tab "Benutzer" (Avatare und Farben) | Zahnrad, Tab "Benutzer" |
-| "settings-boards.png" | Board-Manager: Board-Auswahl, Titel, Mitglieder | Zahnrad, Tab "Board", oben |
 | "share.png" | Dialog "Ansichten" | Monitor-Symbol in der Kopfleiste |
 | "admin-general.png" | Instanzeinstellungen, Tab "Allgemein" | ioBroker-Admin |
 | "admin-users.png" | Instanzeinstellungen, Tab "Benutzer" | ioBroker-Admin |
@@ -34,7 +34,7 @@ Ansichten-Dialogs am Inhalt.
 
 | Bild | Fenster | Ergebnis |
 |---|---|---|
-| "board.png" | 1868 x 890 (de), 1868 x 512 (en) | so gross wie das Fenster |
+| "board.png" | 1868 x 890 | so gross wie das Fenster |
 | "card-editor.png" | 1403 x 1050 | 1122 x 1002 |
 | "settings*.png" | 1403 x 1000 | 1122 x 952 |
 | "share.png" | 1403 x 1000 | 1122 x 661 |
@@ -42,7 +42,12 @@ Ansichten-Dialogs am Inhalt.
 
 Die Fensterhoehe fuers Board richtet sich nach dem Inhalt: So hoch, dass die
 laengste Spalte gerade noch ganz hineinpasst und darunter nicht mehr als ein
-Rand Leerraum steht. Deshalb sind die beiden Sprachen hier verschieden hoch.
+Rand Leerraum steht. Weil beide Sprachen dieselben Karten tragen, ist sie in
+beiden gleich.
+
+Die drei "settings"-Bilder zeigen denselben Reiter in drei Scrollpositionen,
+nicht drei verschiedene Bereiche: Der Reiter ist laenger als das Fenster, und
+die Ausschnitte ueberlappen sich.
 
 Die Admin-Bilder sind auf die Konfigurationsflaeche zugeschnitten, ohne
 ioBroker-Rahmen und Seitenleiste, und 1504 px breit. Schmaler geht nicht mehr:
@@ -66,3 +71,27 @@ eine heute, eine morgen, eine spaeter und eine ohne Datum.
 **Die Zahlen im Spaltenkopf stehen im localStorage.** Ohne Zutun zeigt jede
 Spalte nur ihre Gesamtzahl. Fuer "board.png" wird "kanban.countModes" vorher
 gesetzt, damit die erste Spalte auch die drei Faelligkeitszahlen zeigt.
+
+**Beide Sprachen zeigen dasselbe Board.** Das englische Team-Board ist eine
+Uebersetzung des deutschen: dieselben fuenfzehn Karten, dieselben Spalten,
+Labels und Faelligkeiten, dieselbe Akzentfarbe. Vorher war es eine eigene,
+duenner besetzte Welt in Tuerkis, und die englische Fassung illustrierte
+dadurch systematisch weniger - kein Ort, keine Wiederholung, kein Link, leere
+Abschnittszeilen im Karteneditor und keine Erledigt-Zeitstempel. Wer die
+Demo-Daten einer Sprache aendert, zieht die andere mit.
+
+**Die erledigten Karten brauchen einen Erledigt-Zeitpunkt.** Der entsteht nur
+beim Verschieben in eine Erledigt-Spalte, nicht beim Anlegen. Ueber die
+Schnittstelle also erst in einer offenen Spalte anlegen und danach per
+"POST .../move" umhaengen, sonst fehlt auf der Karte die Zeile
+"(Erledigt: ...)", die das Handbuch mit Beispiel nennt.
+
+**Im Ansichten-Dialog steht die echte Adresse.** Das Feld "Generierte URL"
+zeigt Rechner und Port der Aufnahmeumgebung. Fuer das Bild werden beide gegen
+die Beispieladresse aus dem Handbuch getauscht, "192.168.1.10:8095"; der Rest
+der erzeugten Adresse bleibt unangetastet.
+
+**Auf dem Telefon ist die erste Spalte zugeklappt.** Sonst fuellt sie den
+Schirm allein, und die Bildunterschrift verspricht gestapelte Spalten, von
+denen keine zweite zu sehen ist. Geklappt wird ueber
+"kanban.collapsedCols" im localStorage.
