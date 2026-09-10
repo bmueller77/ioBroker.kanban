@@ -27,7 +27,7 @@
   "dependencies": {
     "@iobroker/adapter-core": "^3.4.3",
     "express": "^5.2.1",
-    "ws": "^8.21.1"
+    "ws": "^8.21.3"
   },
   "main": "main.js",
   "files": [
@@ -61,7 +61,7 @@
     "@iobroker/adapter-dev": "^1.5.0",
     "@iobroker/eslint-config": "^2.2.0",
     "@iobroker/testing": "^5.2.2",
-    "@tsconfig/node22": "^22.0.5",
+    "@tsconfig/node22": "^22.0.6",
     "@types/node": "^22.0.0"
   }
 }
