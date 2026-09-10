@@ -46,8 +46,8 @@ Rand Leerraum steht. Deshalb sind die beiden Sprachen hier verschieden hoch.
 
 Die Admin-Bilder sind auf die Konfigurationsflaeche zugeschnitten, ohne
 ioBroker-Rahmen und Seitenleiste, und 1504 px breit. Schmaler geht nicht mehr:
-Die Benutzertabelle hat seit 0.3.0 elf Ereignis-Spalten, die sonst rechts aus
-dem Bild laufen.
+Die Benutzertabelle hat neun Ereignis-Spalten, dazu ID, Anzeigename, E-Mail und
+die Sortierpfeile - schmaler laufen sie rechts aus dem Bild.
 
 ## Was leicht schiefgeht
 
