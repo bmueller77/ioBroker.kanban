@@ -1,0 +1,1193 @@
+{
+  "kanban.1.action": {
+    "_id": "kanban.1.action",
+    "type": "state",
+    "common": {
+      "name": "Command input (JSON, same commands as sendTo/webhook)",
+      "type": "string",
+      "role": "json",
+      "read": true,
+      "write": true,
+      "def": ""
+    },
+    "native": {},
+    "from": "system.adapter.kanban.1",
+    "ts": 1790032367643,
+    "acl": {
+      "object": 1636,
+      "state": 1636,
+      "owner": "system.user.admin",
+      "ownerGroup": "system.group.administrator"
+    },
+    "user": "system.user.admin"
+  },
+  "kanban.1.boards": {
+    "_id": "kanban.1.boards",
+    "type": "channel",
+    "common": {
+      "name": "Boards"
+    },
+    "native": {},
+    "from": "system.adapter.kanban.1",
+    "ts": 1790032367647,
+    "acl": {
+      "object": 1636,
+      "owner": "system.user.admin",
+      "ownerGroup": "system.group.administrator"
+    },
+    "user": "system.user.admin"
+  },
+  "kanban.1.boards.team-board": {
+    "type": "channel",
+    "common": {
+      "name": "Team-Board"
+    },
+    "native": {},
+    "from": "system.adapter.kanban.1",
+    "user": "system.user.admin",
+    "ts": 1783928860959,
+    "_id": "kanban.1.boards.team-board",
+    "acl": {
+      "object": 1636,
+      "owner": "system.user.admin",
+      "ownerGroup": "system.group.administrator"
+    }
+  },
+  "kanban.1.boards.team-board.cardCount": {
+    "type": "state",
+    "common": {
+      "name": "Card count",
+      "type": "number",
+      "role": "value",
+      "read": true,
+      "write": false
+    },
+    "native": {},
+    "from": "system.adapter.kanban.1",
+    "user": "system.user.admin",
+    "ts": 1790032292154,
+    "_id": "kanban.1.boards.team-board.cardCount",
+    "acl": {
+      "object": 1636,
+      "state": 1636,
+      "owner": "system.user.admin",
+      "ownerGroup": "system.group.administrator"
+    }
+  },
+  "kanban.1.boards.team-board.data": {
+    "type": "state",
+    "common": {
+      "name": "Board JSON",
+      "type": "string",
+      "role": "json",
+      "read": true,
+      "write": false
+    },
+    "native": {},
+    "from": "system.adapter.kanban.1",
+    "user": "system.user.admin",
+    "ts": 1783928860960,
+    "_id": "kanban.1.boards.team-board.data",
+    "acl": {
+      "object": 1636,
+      "state": 1636,
+      "owner": "system.user.admin",
+      "ownerGroup": "system.group.administrator"
+    }
+  },
+  "kanban.1.boards.team-board.overdueCount": {
+    "type": "state",
+    "common": {
+      "name": "Overdue cards",
+      "type": "number",
+      "role": "value",
+      "read": true,
+      "write": false
+    },
+    "native": {},
+    "from": "system.adapter.kanban.1",
+    "user": "system.user.admin",
+    "ts": 1790032292170,
+    "_id": "kanban.1.boards.team-board.overdueCount",
+    "acl": {
+      "object": 1636,
+      "state": 1636,
+      "owner": "system.user.admin",
+      "ownerGroup": "system.group.administrator"
+    }
+  },
+  "kanban.1.boards.team-board.rev": {
+    "type": "state",
+    "common": {
+      "name": "Revision",
+      "type": "number",
+      "role": "value",
+      "read": true,
+      "write": false
+    },
+    "native": {},
+    "from": "system.adapter.kanban.1",
+    "user": "system.user.admin",
+    "ts": 1783928860962,
+    "_id": "kanban.1.boards.team-board.rev",
+    "acl": {
+      "object": 1636,
+      "state": 1636,
+      "owner": "system.user.admin",
+      "ownerGroup": "system.group.administrator"
+    }
+  },
+  "kanban.1.boards.wohnung": {
+    "type": "channel",
+    "common": {
+      "name": "Wohnung"
+    },
+    "native": {},
+    "from": "system.adapter.kanban.1",
+    "user": "system.user.admin",
+    "ts": 1783928861025,
+    "_id": "kanban.1.boards.wohnung",
+    "acl": {
+      "object": 1636,
+      "owner": "system.user.admin",
+      "ownerGroup": "system.group.administrator"
+    }
+  },
+  "kanban.1.boards.wohnung.cardCount": {
+    "type": "state",
+    "common": {
+      "name": "Card count",
+      "type": "number",
+      "role": "value",
+      "read": true,
+      "write": false
+    },
+    "native": {},
+    "from": "system.adapter.kanban.1",
+    "user": "system.user.admin",
+    "ts": 1790032292151,
+    "_id": "kanban.1.boards.wohnung.cardCount",
+    "acl": {
+      "object": 1636,
+      "state": 1636,
+      "owner": "system.user.admin",
+      "ownerGroup": "system.group.administrator"
+    }
+  },
+  "kanban.1.boards.wohnung.data": {
+    "type": "state",
+    "common": {
+      "name": "Board JSON",
+      "type": "string",
+      "role": "json",
+      "read": true,
+      "write": false
+    },
+    "native": {},
+    "from": "system.adapter.kanban.1",
+    "user": "system.user.admin",
+    "ts": 1783928861030,
+    "_id": "kanban.1.boards.wohnung.data",
+    "acl": {
+      "object": 1636,
+      "state": 1636,
+      "owner": "system.user.admin",
+      "ownerGroup": "system.group.administrator"
+    }
+  },
+  "kanban.1.boards.wohnung.overdueCount": {
+    "type": "state",
+    "common": {
+      "name": "Overdue cards",
+      "type": "number",
+      "role": "value",
+      "read": true,
+      "write": false
+    },
+    "native": {},
+    "from": "system.adapter.kanban.1",
+    "user": "system.user.admin",
+    "ts": 1790032292156,
+    "_id": "kanban.1.boards.wohnung.overdueCount",
+    "acl": {
+      "object": 1636,
+      "state": 1636,
+      "owner": "system.user.admin",
+      "ownerGroup": "system.group.administrator"
+    }
+  },
+  "kanban.1.boards.wohnung.rev": {
+    "type": "state",
+    "common": {
+      "name": "Revision",
+      "type": "number",
+      "role": "value",
+      "read": true,
+      "write": false
+    },
+    "native": {},
+    "from": "system.adapter.kanban.1",
+    "user": "system.user.admin",
+    "ts": 1783928861035,
+    "_id": "kanban.1.boards.wohnung.rev",
+    "acl": {
+      "object": 1636,
+      "state": 1636,
+      "owner": "system.user.admin",
+      "ownerGroup": "system.group.administrator"
+    }
+  },
+  "kanban.1.info": {
+    "_id": "kanban.1.info",
+    "type": "channel",
+    "common": {
+      "name": "Info"
+    },
+    "native": {},
+    "from": "system.adapter.kanban.1",
+    "ts": 1790032367640,
+    "acl": {
+      "object": 1636,
+      "owner": "system.user.admin",
+      "ownerGroup": "system.group.administrator"
+    },
+    "user": "system.user.admin"
+  },
+  "kanban.1.info.apiSecret": {
+    "type": "state",
+    "common": {
+      "name": "API write secret",
+      "type": "string",
+      "role": "text",
+      "read": true,
+      "write": false
+    },
+    "native": {},
+    "from": "system.adapter.kanban.1",
+    "user": "system.user.admin",
+    "ts": 1783941546674,
+    "_id": "kanban.1.info.apiSecret",
+    "acl": {
+      "object": 1636,
+      "state": 1636,
+      "owner": "system.user.admin",
+      "ownerGroup": "system.group.administrator"
+    }
+  },
+  "kanban.1.info.connection": {
+    "_id": "kanban.1.info.connection",
+    "type": "state",
+    "common": {
+      "name": "Web server running",
+      "type": "boolean",
+      "role": "indicator.connected",
+      "read": true,
+      "write": false,
+      "def": false
+    },
+    "native": {},
+    "from": "system.adapter.kanban.1",
+    "ts": 1790032367641,
+    "acl": {
+      "object": 1636,
+      "state": 1636,
+      "owner": "system.user.admin",
+      "ownerGroup": "system.group.administrator"
+    },
+    "user": "system.user.admin"
+  },
+  "kanban.1.info.freezeRetries": {
+    "type": "state",
+    "common": {
+      "name": "Attempts to write the frozen marker back",
+      "type": "number",
+      "role": "value",
+      "read": true,
+      "write": false,
+      "def": 0
+    },
+    "native": {},
+    "from": "system.adapter.kanban.1",
+    "user": "system.user.admin",
+    "ts": 1788780456835,
+    "_id": "kanban.1.info.freezeRetries",
+    "acl": {
+      "object": 1636,
+      "state": 1636,
+      "owner": "system.user.admin",
+      "ownerGroup": "system.group.administrator"
+    }
+  },
+  "kanban.1.info.frozenUserIds": {
+    "type": "state",
+    "common": {
+      "name": "User IDs that have been frozen",
+      "type": "string",
+      "role": "json",
+      "read": true,
+      "write": false,
+      "def": "[]"
+    },
+    "native": {},
+    "from": "system.adapter.kanban.1",
+    "user": "system.user.admin",
+    "ts": 1787644590055,
+    "_id": "kanban.1.info.frozenUserIds",
+    "acl": {
+      "object": 1636,
+      "state": 1636,
+      "owner": "system.user.admin",
+      "ownerGroup": "system.group.administrator"
+    }
+  },
+  "kanban.1.info.orphanedAssignees": {
+    "type": "state",
+    "common": {
+      "name": "Assignees without a matching user",
+      "type": "string",
+      "role": "json",
+      "read": true,
+      "write": false,
+      "def": "[]"
+    },
+    "native": {},
+    "from": "system.adapter.kanban.1",
+    "user": "system.user.admin",
+    "ts": 1787599742347,
+    "_id": "kanban.1.info.orphanedAssignees",
+    "acl": {
+      "object": 1636,
+      "state": 1636,
+      "owner": "system.user.admin",
+      "ownerGroup": "system.group.administrator"
+    }
+  },
+  "kanban.1.lastEvent": {
+    "_id": "kanban.1.lastEvent",
+    "type": "state",
+    "common": {
+      "name": "Last board event (JSON)",
+      "type": "string",
+      "role": "json",
+      "read": true,
+      "write": false,
+      "def": ""
+    },
+    "native": {},
+    "from": "system.adapter.kanban.1",
+    "ts": 1790032367645,
+    "acl": {
+      "object": 1636,
+      "state": 1636,
+      "owner": "system.user.admin",
+      "ownerGroup": "system.group.administrator"
+    },
+    "user": "system.user.admin"
+  },
+  "kanban.1.users": {
+    "_id": "kanban.1.users",
+    "type": "channel",
+    "common": {
+      "name": "Users"
+    },
+    "native": {},
+    "from": "system.adapter.kanban.1",
+    "ts": 1790032367648,
+    "acl": {
+      "object": 1636,
+      "owner": "system.user.admin",
+      "ownerGroup": "system.group.administrator"
+    },
+    "user": "system.user.admin"
+  },
+  "kanban.1.users.anna": {
+    "type": "channel",
+    "common": {
+      "name": "anna"
+    },
+    "native": {},
+    "from": "system.adapter.kanban.1",
+    "user": "system.user.admin",
+    "ts": 1783928781051,
+    "_id": "kanban.1.users.anna",
+    "acl": {
+      "object": 1636,
+      "owner": "system.user.admin",
+      "ownerGroup": "system.group.administrator"
+    }
+  },
+  "kanban.1.users.anna.assignedCount": {
+    "type": "state",
+    "common": {
+      "name": "Assigned open cards",
+      "type": "number",
+      "role": "value",
+      "read": true,
+      "write": false
+    },
+    "native": {},
+    "from": "system.adapter.kanban.1",
+    "user": "system.user.admin",
+    "ts": 1790032292207,
+    "_id": "kanban.1.users.anna.assignedCount",
+    "acl": {
+      "object": 1636,
+      "state": 1636,
+      "owner": "system.user.admin",
+      "ownerGroup": "system.group.administrator"
+    }
+  },
+  "kanban.1.users.anna.overdueCount": {
+    "type": "state",
+    "common": {
+      "name": "Overdue cards",
+      "type": "number",
+      "role": "value",
+      "read": true,
+      "write": false
+    },
+    "native": {},
+    "from": "system.adapter.kanban.1",
+    "user": "system.user.admin",
+    "ts": 1790032292171,
+    "_id": "kanban.1.users.anna.overdueCount",
+    "acl": {
+      "object": 1636,
+      "state": 1636,
+      "owner": "system.user.admin",
+      "ownerGroup": "system.group.administrator"
+    }
+  },
+  "kanban.1.users.anna.overdueList": {
+    "type": "state",
+    "common": {
+      "name": "Overdue cards (list)",
+      "type": "string",
+      "role": "json",
+      "read": true,
+      "write": false
+    },
+    "native": {},
+    "from": "system.adapter.kanban.1",
+    "user": "system.user.admin",
+    "ts": 1790032292178,
+    "_id": "kanban.1.users.anna.overdueList",
+    "acl": {
+      "object": 1636,
+      "state": 1636,
+      "owner": "system.user.admin",
+      "ownerGroup": "system.group.administrator"
+    }
+  },
+  "kanban.1.users.ben": {
+    "type": "channel",
+    "common": {
+      "name": "ben"
+    },
+    "native": {},
+    "from": "system.adapter.kanban.1",
+    "user": "system.user.admin",
+    "ts": 1783928781060,
+    "_id": "kanban.1.users.ben",
+    "acl": {
+      "object": 1636,
+      "owner": "system.user.admin",
+      "ownerGroup": "system.group.administrator"
+    }
+  },
+  "kanban.1.users.ben.assignedCount": {
+    "type": "state",
+    "common": {
+      "name": "Assigned open cards",
+      "type": "number",
+      "role": "value",
+      "read": true,
+      "write": false
+    },
+    "native": {},
+    "from": "system.adapter.kanban.1",
+    "user": "system.user.admin",
+    "ts": 1790032292144,
+    "_id": "kanban.1.users.ben.assignedCount",
+    "acl": {
+      "object": 1636,
+      "state": 1636,
+      "owner": "system.user.admin",
+      "ownerGroup": "system.group.administrator"
+    }
+  },
+  "kanban.1.users.ben.overdueCount": {
+    "type": "state",
+    "common": {
+      "name": "Overdue cards",
+      "type": "number",
+      "role": "value",
+      "read": true,
+      "write": false
+    },
+    "native": {},
+    "from": "system.adapter.kanban.1",
+    "user": "system.user.admin",
+    "ts": 1790032292137,
+    "_id": "kanban.1.users.ben.overdueCount",
+    "acl": {
+      "object": 1636,
+      "state": 1636,
+      "owner": "system.user.admin",
+      "ownerGroup": "system.group.administrator"
+    }
+  },
+  "kanban.1.users.ben.overdueList": {
+    "type": "state",
+    "common": {
+      "name": "Overdue cards (list)",
+      "type": "string",
+      "role": "json",
+      "read": true,
+      "write": false
+    },
+    "native": {},
+    "from": "system.adapter.kanban.1",
+    "user": "system.user.admin",
+    "ts": 1790032292168,
+    "_id": "kanban.1.users.ben.overdueList",
+    "acl": {
+      "object": 1636,
+      "state": 1636,
+      "owner": "system.user.admin",
+      "ownerGroup": "system.group.administrator"
+    }
+  },
+  "kanban.1.users.bjoern": {
+    "type": "channel",
+    "common": {
+      "name": "bjoern"
+    },
+    "native": {},
+    "from": "system.adapter.kanban.1",
+    "user": "system.user.admin",
+    "ts": 1783928756232,
+    "_id": "kanban.1.users.bjoern",
+    "acl": {
+      "object": 1636,
+      "owner": "system.user.admin",
+      "ownerGroup": "system.group.administrator"
+    }
+  },
+  "kanban.1.users.bjoern.assignedCount": {
+    "type": "state",
+    "common": {
+      "name": "Assigned open cards",
+      "type": "number",
+      "role": "value",
+      "read": true,
+      "write": false
+    },
+    "native": {},
+    "from": "system.adapter.kanban.1",
+    "user": "system.user.admin",
+    "ts": 1790032292209,
+    "_id": "kanban.1.users.bjoern.assignedCount",
+    "acl": {
+      "object": 1636,
+      "state": 1636,
+      "owner": "system.user.admin",
+      "ownerGroup": "system.group.administrator"
+    }
+  },
+  "kanban.1.users.bjoern.overdueCount": {
+    "type": "state",
+    "common": {
+      "name": "Overdue cards",
+      "type": "number",
+      "role": "value",
+      "read": true,
+      "write": false
+    },
+    "native": {},
+    "from": "system.adapter.kanban.1",
+    "user": "system.user.admin",
+    "ts": 1790032292199,
+    "_id": "kanban.1.users.bjoern.overdueCount",
+    "acl": {
+      "object": 1636,
+      "state": 1636,
+      "owner": "system.user.admin",
+      "ownerGroup": "system.group.administrator"
+    }
+  },
+  "kanban.1.users.bjoern.overdueList": {
+    "type": "state",
+    "common": {
+      "name": "Overdue cards (list)",
+      "type": "string",
+      "role": "json",
+      "read": true,
+      "write": false
+    },
+    "native": {},
+    "from": "system.adapter.kanban.1",
+    "user": "system.user.admin",
+    "ts": 1790032292161,
+    "_id": "kanban.1.users.bjoern.overdueList",
+    "acl": {
+      "object": 1636,
+      "state": 1636,
+      "owner": "system.user.admin",
+      "ownerGroup": "system.group.administrator"
+    }
+  },
+  "kanban.1.users.carla": {
+    "type": "channel",
+    "common": {
+      "name": "carla"
+    },
+    "native": {},
+    "from": "system.adapter.kanban.1",
+    "user": "system.user.admin",
+    "ts": 1783928781067,
+    "_id": "kanban.1.users.carla",
+    "acl": {
+      "object": 1636,
+      "owner": "system.user.admin",
+      "ownerGroup": "system.group.administrator"
+    }
+  },
+  "kanban.1.users.carla.assignedCount": {
+    "type": "state",
+    "common": {
+      "name": "Assigned open cards",
+      "type": "number",
+      "role": "value",
+      "read": true,
+      "write": false
+    },
+    "native": {},
+    "from": "system.adapter.kanban.1",
+    "user": "system.user.admin",
+    "ts": 1790032292194,
+    "_id": "kanban.1.users.carla.assignedCount",
+    "acl": {
+      "object": 1636,
+      "state": 1636,
+      "owner": "system.user.admin",
+      "ownerGroup": "system.group.administrator"
+    }
+  },
+  "kanban.1.users.carla.overdueCount": {
+    "type": "state",
+    "common": {
+      "name": "Overdue cards",
+      "type": "number",
+      "role": "value",
+      "read": true,
+      "write": false
+    },
+    "native": {},
+    "from": "system.adapter.kanban.1",
+    "user": "system.user.admin",
+    "ts": 1790032292174,
+    "_id": "kanban.1.users.carla.overdueCount",
+    "acl": {
+      "object": 1636,
+      "state": 1636,
+      "owner": "system.user.admin",
+      "ownerGroup": "system.group.administrator"
+    }
+  },
+  "kanban.1.users.carla.overdueList": {
+    "type": "state",
+    "common": {
+      "name": "Overdue cards (list)",
+      "type": "string",
+      "role": "json",
+      "read": true,
+      "write": false
+    },
+    "native": {},
+    "from": "system.adapter.kanban.1",
+    "user": "system.user.admin",
+    "ts": 1790032292197,
+    "_id": "kanban.1.users.carla.overdueList",
+    "acl": {
+      "object": 1636,
+      "state": 1636,
+      "owner": "system.user.admin",
+      "ownerGroup": "system.group.administrator"
+    }
+  },
+  "kanban.1.users.david": {
+    "type": "channel",
+    "common": {
+      "name": "david"
+    },
+    "native": {},
+    "from": "system.adapter.kanban.1",
+    "user": "system.user.admin",
+    "ts": 1783928781075,
+    "_id": "kanban.1.users.david",
+    "acl": {
+      "object": 1636,
+      "owner": "system.user.admin",
+      "ownerGroup": "system.group.administrator"
+    }
+  },
+  "kanban.1.users.david.assignedCount": {
+    "type": "state",
+    "common": {
+      "name": "Assigned open cards",
+      "type": "number",
+      "role": "value",
+      "read": true,
+      "write": false
+    },
+    "native": {},
+    "from": "system.adapter.kanban.1",
+    "user": "system.user.admin",
+    "ts": 1790032292165,
+    "_id": "kanban.1.users.david.assignedCount",
+    "acl": {
+      "object": 1636,
+      "state": 1636,
+      "owner": "system.user.admin",
+      "ownerGroup": "system.group.administrator"
+    }
+  },
+  "kanban.1.users.david.overdueCount": {
+    "type": "state",
+    "common": {
+      "name": "Overdue cards",
+      "type": "number",
+      "role": "value",
+      "read": true,
+      "write": false
+    },
+    "native": {},
+    "from": "system.adapter.kanban.1",
+    "user": "system.user.admin",
+    "ts": 1790032292180,
+    "_id": "kanban.1.users.david.overdueCount",
+    "acl": {
+      "object": 1636,
+      "state": 1636,
+      "owner": "system.user.admin",
+      "ownerGroup": "system.group.administrator"
+    }
+  },
+  "kanban.1.users.david.overdueList": {
+    "type": "state",
+    "common": {
+      "name": "Overdue cards (list)",
+      "type": "string",
+      "role": "json",
+      "read": true,
+      "write": false
+    },
+    "native": {},
+    "from": "system.adapter.kanban.1",
+    "user": "system.user.admin",
+    "ts": 1790032292187,
+    "_id": "kanban.1.users.david.overdueList",
+    "acl": {
+      "object": 1636,
+      "state": 1636,
+      "owner": "system.user.admin",
+      "ownerGroup": "system.group.administrator"
+    }
+  },
+  "kanban.1.users.eva": {
+    "type": "channel",
+    "common": {
+      "name": "eva"
+    },
+    "native": {},
+    "from": "system.adapter.kanban.1",
+    "user": "system.user.admin",
+    "ts": 1783928781083,
+    "_id": "kanban.1.users.eva",
+    "acl": {
+      "object": 1636,
+      "owner": "system.user.admin",
+      "ownerGroup": "system.group.administrator"
+    }
+  },
+  "kanban.1.users.eva.assignedCount": {
+    "type": "state",
+    "common": {
+      "name": "Assigned open cards",
+      "type": "number",
+      "role": "value",
+      "read": true,
+      "write": false
+    },
+    "native": {},
+    "from": "system.adapter.kanban.1",
+    "user": "system.user.admin",
+    "ts": 1790032292189,
+    "_id": "kanban.1.users.eva.assignedCount",
+    "acl": {
+      "object": 1636,
+      "state": 1636,
+      "owner": "system.user.admin",
+      "ownerGroup": "system.group.administrator"
+    }
+  },
+  "kanban.1.users.eva.overdueCount": {
+    "type": "state",
+    "common": {
+      "name": "Overdue cards",
+      "type": "number",
+      "role": "value",
+      "read": true,
+      "write": false
+    },
+    "native": {},
+    "from": "system.adapter.kanban.1",
+    "user": "system.user.admin",
+    "ts": 1790032292159,
+    "_id": "kanban.1.users.eva.overdueCount",
+    "acl": {
+      "object": 1636,
+      "state": 1636,
+      "owner": "system.user.admin",
+      "ownerGroup": "system.group.administrator"
+    }
+  },
+  "kanban.1.users.eva.overdueList": {
+    "type": "state",
+    "common": {
+      "name": "Overdue cards (list)",
+      "type": "string",
+      "role": "json",
+      "read": true,
+      "write": false
+    },
+    "native": {},
+    "from": "system.adapter.kanban.1",
+    "user": "system.user.admin",
+    "ts": 1790032292185,
+    "_id": "kanban.1.users.eva.overdueList",
+    "acl": {
+      "object": 1636,
+      "state": 1636,
+      "owner": "system.user.admin",
+      "ownerGroup": "system.group.administrator"
+    }
+  },
+  "kanban.1.users.heike": {
+    "type": "channel",
+    "common": {
+      "name": "heike"
+    },
+    "native": {},
+    "from": "system.adapter.kanban.1",
+    "user": "system.user.admin",
+    "ts": 1783928756242,
+    "_id": "kanban.1.users.heike",
+    "acl": {
+      "object": 1636,
+      "owner": "system.user.admin",
+      "ownerGroup": "system.group.administrator"
+    }
+  },
+  "kanban.1.users.heike.assignedCount": {
+    "type": "state",
+    "common": {
+      "name": "Assigned open cards",
+      "type": "number",
+      "role": "value",
+      "read": true,
+      "write": false
+    },
+    "native": {},
+    "from": "system.adapter.kanban.1",
+    "user": "system.user.admin",
+    "ts": 1790032292202,
+    "_id": "kanban.1.users.heike.assignedCount",
+    "acl": {
+      "object": 1636,
+      "state": 1636,
+      "owner": "system.user.admin",
+      "ownerGroup": "system.group.administrator"
+    }
+  },
+  "kanban.1.users.heike.overdueCount": {
+    "type": "state",
+    "common": {
+      "name": "Overdue cards",
+      "type": "number",
+      "role": "value",
+      "read": true,
+      "write": false
+    },
+    "native": {},
+    "from": "system.adapter.kanban.1",
+    "user": "system.user.admin",
+    "ts": 1790032292149,
+    "_id": "kanban.1.users.heike.overdueCount",
+    "acl": {
+      "object": 1636,
+      "state": 1636,
+      "owner": "system.user.admin",
+      "ownerGroup": "system.group.administrator"
+    }
+  },
+  "kanban.1.users.heike.overdueList": {
+    "type": "state",
+    "common": {
+      "name": "Overdue cards (list)",
+      "type": "string",
+      "role": "json",
+      "read": true,
+      "write": false
+    },
+    "native": {},
+    "from": "system.adapter.kanban.1",
+    "user": "system.user.admin",
+    "ts": 1790032292192,
+    "_id": "kanban.1.users.heike.overdueList",
+    "acl": {
+      "object": 1636,
+      "state": 1636,
+      "owner": "system.user.admin",
+      "ownerGroup": "system.group.administrator"
+    }
+  },
+  "kanban.1.users.tesz": {
+    "type": "channel",
+    "common": {
+      "name": "tesz"
+    },
+    "native": {},
+    "from": "system.adapter.kanban.1",
+    "user": "system.user.admin",
+    "ts": 1787645128031,
+    "_id": "kanban.1.users.tesz",
+    "acl": {
+      "object": 1636,
+      "owner": "system.user.admin",
+      "ownerGroup": "system.group.administrator"
+    }
+  },
+  "kanban.1.users.tesz.assignedCount": {
+    "type": "state",
+    "common": {
+      "name": "Assigned open cards",
+      "type": "number",
+      "role": "value",
+      "read": true,
+      "write": false
+    },
+    "native": {},
+    "from": "system.adapter.kanban.1",
+    "user": "system.user.admin",
+    "ts": 1790032292176,
+    "_id": "kanban.1.users.tesz.assignedCount",
+    "acl": {
+      "object": 1636,
+      "state": 1636,
+      "owner": "system.user.admin",
+      "ownerGroup": "system.group.administrator"
+    }
+  },
+  "kanban.1.users.tesz.overdueCount": {
+    "type": "state",
+    "common": {
+      "name": "Overdue cards",
+      "type": "number",
+      "role": "value",
+      "read": true,
+      "write": false
+    },
+    "native": {},
+    "from": "system.adapter.kanban.1",
+    "user": "system.user.admin",
+    "ts": 1790032292163,
+    "_id": "kanban.1.users.tesz.overdueCount",
+    "acl": {
+      "object": 1636,
+      "state": 1636,
+      "owner": "system.user.admin",
+      "ownerGroup": "system.group.administrator"
+    }
+  },
+  "kanban.1.users.tesz.overdueList": {
+    "type": "state",
+    "common": {
+      "name": "Overdue cards (list)",
+      "type": "string",
+      "role": "json",
+      "read": true,
+      "write": false
+    },
+    "native": {},
+    "from": "system.adapter.kanban.1",
+    "user": "system.user.admin",
+    "ts": 1790032292200,
+    "_id": "kanban.1.users.tesz.overdueList",
+    "acl": {
+      "object": 1636,
+      "state": 1636,
+      "owner": "system.user.admin",
+      "ownerGroup": "system.group.administrator"
+    }
+  },
+  "kanban.1.users.tom": {
+    "type": "channel",
+    "common": {
+      "name": "tom"
+    },
+    "native": {},
+    "from": "system.adapter.kanban.1",
+    "user": "system.user.admin",
+    "ts": 1783928781092,
+    "_id": "kanban.1.users.tom",
+    "acl": {
+      "object": 1636,
+      "owner": "system.user.admin",
+      "ownerGroup": "system.group.administrator"
+    }
+  },
+  "kanban.1.users.tom.assignedCount": {
+    "type": "state",
+    "common": {
+      "name": "Assigned open cards",
+      "type": "number",
+      "role": "value",
+      "read": true,
+      "write": false
+    },
+    "native": {},
+    "from": "system.adapter.kanban.1",
+    "user": "system.user.admin",
+    "ts": 1790032292142,
+    "_id": "kanban.1.users.tom.assignedCount",
+    "acl": {
+      "object": 1636,
+      "state": 1636,
+      "owner": "system.user.admin",
+      "ownerGroup": "system.group.administrator"
+    }
+  },
+  "kanban.1.users.tom.overdueCount": {
+    "type": "state",
+    "common": {
+      "name": "Overdue cards",
+      "type": "number",
+      "role": "value",
+      "read": true,
+      "write": false
+    },
+    "native": {},
+    "from": "system.adapter.kanban.1",
+    "user": "system.user.admin",
+    "ts": 1790032292195,
+    "_id": "kanban.1.users.tom.overdueCount",
+    "acl": {
+      "object": 1636,
+      "state": 1636,
+      "owner": "system.user.admin",
+      "ownerGroup": "system.group.administrator"
+    }
+  },
+  "kanban.1.users.tom.overdueList": {
+    "type": "state",
+    "common": {
+      "name": "Overdue cards (list)",
+      "type": "string",
+      "role": "json",
+      "read": true,
+      "write": false
+    },
+    "native": {},
+    "from": "system.adapter.kanban.1",
+    "user": "system.user.admin",
+    "ts": 1790032292146,
+    "_id": "kanban.1.users.tom.overdueList",
+    "acl": {
+      "object": 1636,
+      "state": 1636,
+      "owner": "system.user.admin",
+      "ownerGroup": "system.group.administrator"
+    }
+  },
+  "kanban.1.users.tommy": {
+    "type": "channel",
+    "common": {
+      "name": "tommy"
+    },
+    "native": {},
+    "from": "system.adapter.kanban.1",
+    "user": "system.user.admin",
+    "ts": 1787641780559,
+    "_id": "kanban.1.users.tommy",
+    "acl": {
+      "object": 1636,
+      "owner": "system.user.admin",
+      "ownerGroup": "system.group.administrator"
+    }
+  },
+  "kanban.1.users.tommy.assignedCount": {
+    "type": "state",
+    "common": {
+      "name": "Assigned open cards",
+      "type": "number",
+      "role": "value",
+      "read": true,
+      "write": false
+    },
+    "native": {},
+    "from": "system.adapter.kanban.1",
+    "user": "system.user.admin",
+    "ts": 1790032292183,
+    "_id": "kanban.1.users.tommy.assignedCount",
+    "acl": {
+      "object": 1636,
+      "state": 1636,
+      "owner": "system.user.admin",
+      "ownerGroup": "system.group.administrator"
+    }
+  },
+  "kanban.1.users.tommy.overdueCount": {
+    "type": "state",
+    "common": {
+      "name": "Overdue cards",
+      "type": "number",
+      "role": "value",
+      "read": true,
+      "write": false
+    },
+    "native": {},
+    "from": "system.adapter.kanban.1",
+    "user": "system.user.admin",
+    "ts": 1790032292139,
+    "_id": "kanban.1.users.tommy.overdueCount",
+    "acl": {
+      "object": 1636,
+      "state": 1636,
+      "owner": "system.user.admin",
+      "ownerGroup": "system.group.administrator"
+    }
+  },
+  "kanban.1.users.tommy.overdueList": {
+    "type": "state",
+    "common": {
+      "name": "Overdue cards (list)",
+      "type": "string",
+      "role": "json",
+      "read": true,
+      "write": false
+    },
+    "native": {},
+    "from": "system.adapter.kanban.1",
+    "user": "system.user.admin",
+    "ts": 1790032292204,
+    "_id": "kanban.1.users.tommy.overdueList",
+    "acl": {
+      "object": 1636,
+      "state": 1636,
+      "owner": "system.user.admin",
+      "ownerGroup": "system.group.administrator"
+    }
+  }
+}
