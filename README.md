@@ -13,6 +13,8 @@ Kanban board adapter for ioBroker with its **own web server**, live sync, webhoo
 
 **Full documentation:** [English](docs/en/README.md) · [Deutsch](docs/de/README.md)
 
+**Questions, ideas, bug reports:** [GitHub issues](https://github.com/bmueller77/ioBroker.kanban/issues), or the ioBroker forum threads [Kanban board (English)](https://forum.iobroker.net/topic/85031/new-adapter-kanban-board) and [KanBan-Board (deutsch)](https://forum.iobroker.net/topic/85030/test-kanban-board).
+
 ## Installation
 
 Install the adapter from the ioBroker admin: *Adapters* → filter for `kanban` → install. Then create an instance `kanban.0` and open the web UI at `http://<host>:8095/`.
@@ -122,6 +124,12 @@ Details: [Security & access control](docs/en/README.md#security--access-control)
 
 <!-- Der Platzhalter bleibt stehen. release-script trägt hier die
      nächste Version ein und ersetzt die Überschrift. -->
+### 0.3.3 (2026-09-21)
+* (bmueller77) **Everything the adapter says is in English now.** Thirty-five error messages were German, from `title fehlt` to `Karte '…' existiert nicht`. They reach users in the log, as REST responses and as the answer to a `sendTo` call, so a German message left half the ioBroker world guessing. Cron messages are included
+* (bmueller77) **Five state names were German** and are English now: `Card count`, `Overdue cards`, `Overdue cards (list)` and `Assigned open cards`. Since these objects are created only when they are missing, a new name never reached an existing installation. The adapter now corrects the names of its own objects once at startup, so boards that have been running for months are renamed as well
+* (bmueller77) The HTTP status code of the REST API no longer depends on the wording of an error. It used to test the message for the German `existiert nicht` to decide between 404 and 400, which would have broken silently with the translation. An error that stands for something missing now carries its status itself
+* (bmueller77) `reminderDaysBefore` is held to the range 0 to 30 in the code as well, not only in the settings dialog. The configuration can be edited by hand, and a value far outside that range moved the reminder threshold somewhere nobody would find
+
 ### 0.3.2 (2026-09-10)
 * (bmueller77) **The trash has the sort toggle now**, like every other column. The default stays deletion time, oldest first, so whatever is closest to being removed for good sits on top; sorting by due date, priority or age is available all the same. The broom moved to the left of the toggle so that the sorting sits in the same place in every column
 * (bmueller77) Fix: the **focus ring** took the accent colour unchanged. That works in the light theme; in the dark one the same dark tone stood against dark surfaces and was barely visible. The ring colour is computed now: lightened or darkened from the accent colour, only as far as it takes to stand out against every surface it lands on, so the instance keeps its colour family
