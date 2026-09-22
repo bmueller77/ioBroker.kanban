@@ -180,7 +180,7 @@ describe('Verwaiste Zuständige', () => {
         await store.createBoard({ id: 'b', title: 'B' });
         store.addCard('b', { title: 'Karte', columnId: 'todo', assignees: ['bjoern'] }, 'test');
 
-        await assert.rejects(() => store.reassignUser('bjoern', 'gibtsnicht', 'test'), /existiert nicht/);
+        await assert.rejects(() => store.reassignUser('bjoern', 'gibtsnicht', 'test'), /does not exist/);
         await assert.rejects(() => store.reassignUser('bjoern', 'bjoern', 'test'), /identisch/);
         await assert.rejects(() => store.reassignUser('', 'anna', 'test'), /Pflichtfeld/);
     });
@@ -279,10 +279,10 @@ describe('API-Pruefung: Zustaendige und Labels', () => {
         const { store } = newStore();
         await store.createBoard({ id: 'b', title: 'B' });
 
-        assert.throws(() => store.addCard('b', { title: 'Ohne', columnId: 'todo' }, 'test'), /assignees fehlt/);
+        assert.throws(() => store.addCard('b', { title: 'Ohne', columnId: 'todo' }, 'test'), /assignees is missing/);
         assert.throws(
             () => store.addCard('b', { title: 'Leer', columnId: 'todo', assignees: [] }, 'test'),
-            /assignees fehlt/,
+            /assignees is missing/,
         );
     });
 
@@ -292,7 +292,7 @@ describe('API-Pruefung: Zustaendige und Labels', () => {
 
         assert.throws(
             () => store.addCard('b', { title: 'Karte', columnId: 'todo', assignees: ['default'] }, 'test'),
-            /unbekannte zuständige Person: default.*anna/s,
+            /unknown assignee: default.*anna/s,
         );
     });
 
@@ -313,7 +313,7 @@ describe('API-Pruefung: Zustaendige und Labels', () => {
         await store.createBoard({ id: 'b', title: 'B' });
         const c = store.addCard('b', { title: 'Karte', columnId: 'todo', assignees: ['anna'] }, 'test');
 
-        assert.throws(() => store.updateCard('b', c.id, { assignees: ['gustav'] }, 'test'), /unbekannte/);
+        assert.throws(() => store.updateCard('b', c.id, { assignees: ['gustav'] }, 'test'), /unknown assignee/);
     });
 
     it('legt ein unbekanntes Label am Board an, statt es abzulehnen', async () => {
@@ -402,7 +402,7 @@ describe('Ein einziger Benutzer', () => {
     it('fordert sie bei zwei Benutzern weiter ein', async () => {
         const { store } = newStore();
         await store.createBoard({ id: 'b', title: 'B' });
-        assert.throws(() => store.addCard('b', { title: 'Ohne', columnId: 'todo' }, 'test'), /assignees fehlt/);
+        assert.throws(() => store.addCard('b', { title: 'Ohne', columnId: 'todo' }, 'test'), /assignees is missing/);
     });
 
     it('fordert sie ohne jeden Benutzer weiter ein', async () => {
@@ -411,7 +411,7 @@ describe('Ein einziger Benutzer', () => {
         entferne('anna');
         entferne('bjoern');
         await store.createBoard({ id: 'b', title: 'B' });
-        assert.throws(() => store.addCard('b', { title: 'Ohne', columnId: 'todo' }, 'test'), /assignees fehlt/);
+        assert.throws(() => store.addCard('b', { title: 'Ohne', columnId: 'todo' }, 'test'), /assignees is missing/);
     });
 
     it('prueft eine angegebene Kennung trotzdem', async () => {
@@ -422,7 +422,7 @@ describe('Ein einziger Benutzer', () => {
         await store.createBoard({ id: 'b', title: 'B' });
         assert.throws(
             () => store.addCard('b', { title: 'Karte', columnId: 'todo', assignees: ['default'] }, 'test'),
-            /unbekannte zuständige Person: default/,
+            /unknown assignee: default/,
         );
     });
 });
@@ -512,7 +512,7 @@ describe('Erledigt-Spalte: anlegen, loeschen, wiederherstellen', () => {
         await store.createBoard({ id: 'b', title: 'B' });
         assert.throws(
             () => store.addCard('b', { title: 'K', columnId: 'done', assignees: ['anna'] }, 'test'),
-            /Erledigt-Spalte/,
+            /done column/,
         );
     });
 

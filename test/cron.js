@@ -101,7 +101,7 @@ describe('Cron: Anbindung an die Wiederholung', () => {
         // Regression: die token-freie Prüfroute nahm kilobytegroße Ausdrücke an und
         // zerlegte sie für jeden Kandidatentag neu — 6 KB blockierten rund 300 ms.
         const riesig = `${Array.from({ length: 1200 }, (_, i) => i % 60).join(',')} 0 30 2 *`;
-        assert.match(validateCron(riesig).error, /zu lang/);
+        assert.match(validateCron(riesig).error, /too long/);
         assert.equal(validateCron(riesig).ok, false);
         assert.deepEqual(nextCronDates(riesig, 3), []);
         // Das längste sinnvolle Muster bleibt zulässig.

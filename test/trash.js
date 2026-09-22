@@ -102,7 +102,7 @@ describe('Papierkorb: endgültiges Löschen', () => {
         // Regression: purgeCard prüfte die Spalte nicht und entfernte jede aktive
         // Karte sofort unwiderruflich, an der 30-Tage-Frist vorbei.
         const { store, card } = await boardWithCard();
-        assert.throws(() => store.purgeCard('b', card.id, 'test'), /nicht im Papierkorb/);
+        assert.throws(() => store.purgeCard('b', card.id, 'test'), /not in the trash/);
         assert.equal(store.getBoard('b').cards.length, 1);
 
         store.deleteCard('b', card.id, 'test');

@@ -11,7 +11,7 @@ const { cardWithDueAt, boardWithDueAt } = require('./lib/dueat');
 const { Server } = require('./lib/server');
 
 const { freezePlan, prunePlan } = require('./lib/freeze');
-const { hasDateToken } = require('./lib/store');
+const { hasDateToken, notFound } = require('./lib/store');
 
 // Wie oft der Adapter versucht, das Merkmal `fixed` in die Benutzerliste
 // zurueckzuschreiben, bevor er aufgibt. Mehr als einer, weil ein Speichern der
@@ -55,6 +55,8 @@ class Kanban extends utils.Adapter {
         // angelegt und braucht dafür den lokalisierten Namen.
         await this._resolveLanguage();
         await this.store.load();
+        // Namen aus alten Installationen nachziehen (siehe migrateStateNames).
+        await this.store.migrateStateNames();
         // Erst nach dem Laden: Ob eine Kennung festgeschrieben werden muss,
         // haengt daran, ob Karten auf sie zeigen, und die kennt der Store
         // vorher nicht. Schreibt der Adapter dabei seine eigene Konfiguration,
@@ -418,7 +420,7 @@ class Kanban extends utils.Adapter {
                 // Nicht still null liefern: ein Skript, das nur den Statuscode prüft,
                 // hielte das sonst für einen Erfolg.
                 if (!b) {
-                    throw new Error(`Board '${boardId}' existiert nicht`);
+                    throw notFound(`board '${boardId}' does not exist`);
                 }
                 return board(b);
             }
@@ -439,11 +441,11 @@ class Kanban extends utils.Adapter {
             case 'doneCard': {
                 const b = this.store.getBoard(boardId);
                 if (!b) {
-                    throw new Error(`Board '${boardId}' existiert nicht`);
+                    throw notFound(`board '${boardId}' does not exist`);
                 }
                 const doneCol = b.columns.find(c => c.isDone);
                 if (!doneCol) {
-                    throw new Error(`Board '${boardId}' hat keine Erledigt-Spalte`);
+                    throw new Error(`board '${boardId}' has no done column`);
                 }
                 return card(this.store.moveCard(boardId, cardId, doneCol.id, undefined, source));
             }
@@ -472,7 +474,7 @@ class Kanban extends utils.Adapter {
                     ),
                 );
             default:
-                throw new Error(`Unbekanntes Kommando '${cmd}'`);
+                throw new Error(`unknown command '${cmd}'`);
         }
     }
 

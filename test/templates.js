@@ -104,7 +104,7 @@ describe('Vorlagen: was gespeichert wird', () => {
     });
 
     it('besteht auf einem Namen', () => {
-        assert.throws(() => normalizeTemplate({ description: 'ohne Namen' }), /Namen/);
+        assert.throws(() => normalizeTemplate({ description: 'ohne Namen' }), /without a name/);
     });
 
     it('vergibt eine ID, wenn keine mitkommt', () => {
@@ -192,7 +192,7 @@ describe('Vorlagen: Verweise, die es nicht mehr gibt', () => {
         const store = newStore([{ name: 'anna' }, { name: 'ben' }]);
         await store.createBoard({ id: 'b', title: 'B' });
         store.updateBoard('b', { members: ['ben'], templates: [{ ...VORLAGE, assignees: ['anna'] }] });
-        assert.throws(() => store.addCard('b', { template: 'Filterwechsel', columnId: 'todo' }, 'test'), /zuständig/i);
+        assert.throws(() => store.addCard('b', { template: 'Filterwechsel', columnId: 'todo' }, 'test'), /assignees is missing/);
     });
 });
 
