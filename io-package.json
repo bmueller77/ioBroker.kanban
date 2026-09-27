@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "kanban",
-    "version": "0.3.3",
+    "version": "0.3.4",
     "titleLang": {
       "en": "Kanban Board",
       "de": "Kanban Board",
@@ -43,7 +43,7 @@
       "zh-cn": "带有独立 Web 服务器、Webhook、多用户支持和电子邮件通知的看板"
     },
     "authors": [
-      "Björn Müller"
+      "Björn Müller <bjoern@mueller.family>"
     ],
     "platform": "Javascript/Node.js",
     "mode": "daemon",
@@ -74,6 +74,19 @@
       "license": "MIT"
     },
     "news": {
+      "0.3.4": {
+        "de": "- Copyright-Zeile in LICENSE und Autoreneintrag in io-package.json tragen jetzt eine E-Mail-Adresse",
+        "en": "- The copyright line in LICENSE and the author entry in io-package.json now carry an e-mail address",
+        "ru": "- Строка авторского права в LICENSE и запись автора в io-package.json теперь содержат адрес электронной почты",
+        "pt": "- A linha de direitos de autor em LICENSE e a entrada do autor em io-package.json incluem agora um endereço de e-mail",
+        "nl": "- De copyrightregel in LICENSE en de auteursvermelding in io-package.json bevatten nu een e-mailadres",
+        "fr": "- La ligne de copyright dans LICENSE et la mention d'auteur dans io-package.json comportent désormais une adresse e-mail",
+        "it": "- La riga di copyright in LICENSE e la voce autore in io-package.json contengono ora un indirizzo e-mail",
+        "es": "- La línea de copyright en LICENSE y la entrada de autor en io-package.json incluyen ahora una dirección de correo electrónico",
+        "pl": "- Wiersz praw autorskich w LICENSE oraz wpis autora w io-package.json zawierają teraz adres e-mail",
+        "uk": "- Рядок авторського права в LICENSE та запис автора в io-package.json тепер містять адресу електронної пошти",
+        "zh-cn": "- LICENSE 中的版权行和 io-package.json 中的作者条目现在都带有电子邮件地址"
+      },
       "0.3.3": {
         "de": "- Alle Meldungen des Adapters sind jetzt auf Englisch\n- Fünf Zustandsnamen waren deutsch und heißen jetzt \"Card count\", \"Overdue cards\", \"Overdue cards (list)\" und \"Assigned open cards\"; bestehende Installationen werden beim Start umbenannt\n- Der HTTP-Statuscode der REST-Schnittstelle hängt nicht mehr am Wortlaut der Fehlermeldung\n- \"reminderDaysBefore\" wird auch im Code auf 0 bis 30 begrenzt",
         "en": "- Every message the adapter produces is in English now\n- Five state names were German and are now \"Card count\", \"Overdue cards\", \"Overdue cards (list)\" and \"Assigned open cards\"; existing installations are renamed at startup\n- The HTTP status code of the REST API no longer depends on the wording of the error message\n- \"reminderDaysBefore\" is held to the range 0 to 30 in the code as well",

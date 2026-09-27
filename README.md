@@ -124,6 +124,9 @@ Details: [Security & access control](docs/en/README.md#security--access-control)
 
 <!-- Der Platzhalter bleibt stehen. release-script trägt hier die
      nächste Version ein und ersetzt die Überschrift. -->
+### 0.3.4 (2026-09-27)
+* (bmueller77) The copyright line in `LICENSE` and the author entry in `io-package.json` carry an e-mail address now. The repository checker asks for one in both places, and it was only in `package.json`
+
 ### 0.3.3 (2026-09-21)
 * (bmueller77) **Everything the adapter says is in English now.** Thirty-five error messages were German, from `title fehlt` to `Karte '…' existiert nicht`. They reach users in the log, as REST responses and as the answer to a `sendTo` call, so a German message left half the ioBroker world guessing. Cron messages are included
 * (bmueller77) **Five state names were German** and are English now: `Card count`, `Overdue cards`, `Overdue cards (list)` and `Assigned open cards`. Since these objects are created only when they are missing, a new name never reached an existing installation. The adapter now corrects the names of its own objects once at startup, so boards that have been running for months are renamed as well
