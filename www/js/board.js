@@ -1571,6 +1571,18 @@ export function renderBoard(container, state, actions) {
             // gegriffen hat. Mit Touch-Ereignissen tritt das nicht auf, weil
             // Sortable dort selbst preventDefault ruft.
             supportPointer: false,
+            // Mitscrollen am Rand. Sortable entscheidet von sich aus zwischen
+            // seiner eigenen Scroll-Schleife und dem Weiterreichen an den
+            // Browser; in der WebView des Tablets kam dabei nichts heraus, das
+            // Board blieb stehen und Spalten jenseits des Randes waren
+            // unerreichbar. Mit forceAutoScrollFallback laeuft immer die eigene
+            // Schleife.
+            forceAutoScrollFallback: true,
+            // Voreingestellt sind 30 Pixel. Das ist ein Streifen, den man mit der
+            // Maus trifft und mit dem Finger nicht: Die Hand haelt vor dem
+            // Bildschirmrand an, und die Fingerkuppe verdeckt genau die Stelle,
+            // an der man gerade zielt.
+            scrollSensitivity: 70,
             // Grid-Modus: nur ueber den Anfasser ziehen
             ...(withGrip ? { handle: '.card-grip' } : {}),
             // Automatische Modi: eigenes Umsortieren waere wirkungslos, Verschieben
