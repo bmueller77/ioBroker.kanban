@@ -2233,6 +2233,44 @@ export function initDialogs(state, actions) {
     }
 
     // ---------------------------------------------------------- Karte übertragen (Feature 6)
+    /**
+     * Eine Karte in eine Vorlage uebersetzen.
+     *
+     * Zwei Dinge fehlen bewusst. Das Faelligkeitsdatum altert: Eine im Januar
+     *  gespeicherte Vorlage legte im Maerz Karten mit einem Datum von vorgestern
+     *  an. Und die Haken der Checkliste fallen weg, weil eine Vorlage die Punkte
+     *  festhaelt, nicht den Stand. Die Uhrzeit bleibt, 17:00 ist eine Eigenschaft
+     *  der Aufgabe und altert nicht.
+     *
+     * Der Server baut die Vorlage ohnehin aus den erlaubten Feldern neu auf; hier
+     *  wird sie sauber geschickt, damit im Board-Zustand nichts Fremdes steht,
+     *  bevor die Antwort da ist.
+     *
+     * @param card Karte, aus der die Vorlage entsteht
+     * @param name Name der Vorlage, zugleich Titel spaeterer Karten
+     * @param id ID einer bestehenden Vorlage, die ersetzt wird
+     * @returns Vorlagenobjekt
+     */
+    function templateFromCard(card, name, id) {
+        return {
+            ...(id ? { id } : {}),
+            name,
+            title: card.title || name,
+            description: card.description || '',
+            assignees: [...(card.assignees || [])],
+            dueTime: card.dueTime || '',
+            labels: [...(card.labels || [])],
+            color: card.color || '',
+            priority: Number(card.priority) || 0,
+            checklist: (card.checklist || []).map(i => ({ text: (i && i.text) || '', done: false })),
+            link: card.link || '',
+            location: card.location || '',
+            calendarInvite: !!card.calendarInvite,
+            calendarDuration: card.calendarDuration || '01:00',
+            recurrence: card.recurrence || null,
+        };
+    }
+
     async function openTransfer(cardId) {
         const card = state.board && state.board.cards.find(c => c.id === cardId);
         if (!card) return;
@@ -2247,21 +2285,58 @@ export function initDialogs(state, actions) {
         const cancel = el('button', null, t('boards.close')); cancel.type = 'button';
         cancel.addEventListener('click', () => tdlg.close());
 
-        // Klonen (im selben Board), Kopieren oder Verschieben (auf ein anderes Board)
+        // Klonen (im selben Board), Kopieren oder Verschieben (auf ein anderes
+        // Board) oder als Vorlage speichern.
         let mode = 'clone';
         let targetBoard = null;
         const overrideSel = new Set();
         const labelName = l => String((l && (l.title || l.name)) || '').trim().toLowerCase();
 
+        // Echte Radioknoepfe untereinander statt Schaltflaechen nebeneinander:
+        // Die Pfeiltasten laufen dadurch durch die Auswahl, die Vorlesehilfe sagt
+        // "eins von vier", und es ist Platz fuer eine Erklaerzeile je Art. Neben-
+        // einander war dafuer keiner - die vier Beschriftungen wurden schon
+        // abgeschnitten.
         const modeWrap = el('div', 'transfer-mode');
-        const mkMode = (val, label) => {
-            const b = el('button', 'transfer-mode-btn' + (val === mode ? ' active' : ''), label);
-            b.type = 'button'; b.dataset.mode = val; b.title = label;
-            if (val !== 'clone' && !others.length) { b.disabled = true; b.title = t('transfer.noOtherBoards'); }
-            b.addEventListener('click', () => setMode(val));
-            return b;
-        };
-        modeWrap.append(mkMode('clone', t('transfer.clone')), mkMode('copy', t('transfer.copy')), mkMode('move', t('transfer.move')));
+        const MODI = [
+            { val: 'clone', label: t('transfer.clone'), hint: t('transfer.cloneHint'), brauchtBoard: false },
+            { val: 'copy', label: t('transfer.copy'), hint: t('transfer.copyHint'), brauchtBoard: true },
+            { val: 'move', label: t('transfer.move'), hint: t('transfer.moveHint'), brauchtBoard: true },
+            { val: 'template', label: t('transfer.template'), hint: t('transfer.templateHint'), brauchtBoard: false },
+        ];
+        const radios = new Map();
+        for (const m of MODI) {
+            const row = el('label', 'transfer-mode-row');
+            const inp = document.createElement('input');
+            inp.type = 'radio';
+            inp.name = 'transferMode';
+            inp.value = m.val;
+            if (m.brauchtBoard && !others.length) {
+                inp.disabled = true;
+                row.title = t('transfer.noOtherBoards');
+                row.classList.add('disabled');
+            }
+            inp.addEventListener('change', () => {
+                if (inp.checked) {
+                    setMode(m.val);
+                }
+            });
+            const txt = el('span', 'transfer-mode-text');
+            txt.append(el('span', 'transfer-mode-label', m.label), el('span', 'transfer-mode-hint', m.hint));
+            row.append(inp, txt);
+            modeWrap.appendChild(row);
+            radios.set(m.val, inp);
+        }
+
+        // Name der Vorlage, vorbelegt mit dem Kartentitel. Er ist zugleich der
+        // Titel der Karten, die spaeter daraus entstehen.
+        const nameLbl = el('label', null, t('transfer.templateName'));
+        const nameInput = document.createElement('input');
+        nameInput.type = 'text';
+        nameInput.maxLength = 80;
+        nameInput.value = card.title || '';
+        nameLbl.appendChild(nameInput);
+        nameLbl.hidden = true;
 
         const boardLbl = el('label', null, t('transfer.targetBoard'));
         const boardSel = document.createElement('select');
@@ -2281,11 +2356,34 @@ export function initDialogs(state, actions) {
         // Modus wechseln: Ziel-Board nur bei Kopieren/Verschieben, Klonen bleibt im Board
         function setMode(val) {
             mode = val;
-            for (const x of modeWrap.children) x.classList.toggle('active', x.dataset.mode === mode);
+            const r = radios.get(val);
+            if (r && !r.checked) {
+                r.checked = true;
+            }
+            const vorlage = mode === 'template';
             const clone = mode === 'clone';
-            boardLbl.hidden = clone;
-            ok.textContent = clone ? t('transfer.clone') : (mode === 'copy' ? t('transfer.copy') : t('transfer.move'));
-            if (clone) { targetBoard = state.board; recompute(); } else loadTarget(boardSel.value);
+            // Eine Vorlage hat kein Ziel: kein Board, keine Spalte, und auch die
+            // Hinweise ueber wegfallende Labels und Zustaendige gelten nicht.
+            boardLbl.hidden = clone || vorlage;
+            colLbl.hidden = vorlage;
+            nameLbl.hidden = !vorlage;
+            if (vorlage) {
+                note.hidden = true;
+                assignLbl.hidden = true;
+                assignWrap.hidden = true;
+                ok.textContent = t('transfer.template');
+                ok.disabled = !nameInput.value.trim();
+                nameInput.focus();
+                nameInput.select();
+                return;
+            }
+            ok.textContent = clone ? t('transfer.clone') : mode === 'copy' ? t('transfer.copy') : t('transfer.move');
+            if (clone) {
+                targetBoard = state.board;
+                recompute();
+            } else {
+                loadTarget(boardSel.value);
+            }
         }
         function recompute() {
             if (!targetBoard) return;
@@ -2341,7 +2439,16 @@ export function initDialogs(state, actions) {
             recompute();
         }
         boardSel.addEventListener('change', () => loadTarget(boardSel.value));
+        nameInput.addEventListener('input', () => {
+            if (mode === 'template') {
+                ok.disabled = !nameInput.value.trim();
+            }
+        });
         ok.addEventListener('click', async () => {
+            if (mode === 'template') {
+                await saveAsTemplate();
+                return;
+            }
             try {
                 const toBoard = mode === 'clone' ? state.board.id : boardSel.value;
                 await actions.transferCard(cardId, toBoard, colSel.value, mode === 'move' ? 'move' : 'copy', [...overrideSel]);
@@ -2350,11 +2457,56 @@ export function initDialogs(state, actions) {
             } catch (e) { showHint(t('error.saveFailed', { msg: e.message }), 'error'); }
         });
 
-        body.append(modeWrap, boardLbl, colLbl, note, assignLbl, assignWrap);
+        /**
+         * Die Karte als Vorlage ablegen.
+         *
+         * Ein schon vergebener Name ueberschreibt nach Rueckfrage. Das ist zugleich
+         *  der Weg, den Inhalt einer Vorlage zu aendern: Karte anpassen, unter
+         *  demselben Namen speichern, bestaetigen. Ein zweiter vollstaendiger
+         *  Editor nur fuer Vorlagen waere der Aufwand, der diese Sache von klein
+         *  nach gross kippt.
+         */
+        async function saveAsTemplate() {
+            const name = nameInput.value.trim();
+            if (!name) {
+                return;
+            }
+            const liste = [...(state.board.templates || [])];
+            const i = liste.findIndex(x => String(x.name || '').toLowerCase() === name.toLowerCase());
+            if (i >= 0) {
+                const weiter = await confirmDialog({
+                    title: t('templates.overwriteTitle'),
+                    message: t('templates.overwriteMsg', { name }),
+                    ok: t('templates.overwrite'),
+                });
+                if (weiter !== true) {
+                    return;
+                }
+            }
+            // Die ID der ueberschriebenen Vorlage bleibt, damit sie im Auswahlfeld
+            // an ihrem Platz stehen bleibt und nicht nach unten rutscht.
+            const tpl = templateFromCard(card, name, i >= 0 ? liste[i].id : undefined);
+            if (i >= 0) {
+                liste[i] = tpl;
+            } else {
+                liste.push(tpl);
+            }
+            try {
+                await actions.patchBoard({ templates: liste });
+                tdlg.close();
+                showHint(t('templates.saved', { name }));
+            } catch (e) {
+                showHint(t('error.saveFailed', { msg: e.message }), 'error');
+            }
+        }
+
+        body.append(modeWrap, boardLbl, colLbl, nameLbl, note, assignLbl, assignWrap);
         foot.append(el('span', 'spacer'), cancel, ok);
         body.appendChild(foot);
         if (others.length) boardSel.value = others[0].id;
-        setMode('clone');
+        // Gibt es nur ein Board, sind Kopieren und Verschieben gesperrt. Dann ist
+        // das Speichern als Vorlage der Grund, aus dem man diesen Dialog oeffnet.
+        setMode(others.length ? 'clone' : 'template');
         tdlg.showModal();
         focusFirst(tdlg);
     }

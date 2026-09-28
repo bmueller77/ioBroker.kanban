@@ -1399,9 +1399,26 @@ dialog label.inline-num { flex-direction: row; align-items: center; gap: 6px; }
 dialog label.inline-num input { width: 80px; }
 
 /* ---- 0.3.0: Übertragen-Dialog (Feature 6) ---- */
-.transfer-mode { display: flex; gap: 8px; }
-.transfer-mode-btn { flex: 1 1 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.transfer-mode-btn.active { background: var(--accent); border-color: var(--accent); color: var(--accent-text, #fff); }
+/* Vier Arten untereinander, jede mit einer Erklaerzeile. Nebeneinander war der
+   Text schon bei drei Schaltflaechen abgeschnitten. */
+.transfer-mode { display: flex; flex-direction: column; gap: 2px; }
+.transfer-mode-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 8px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+.transfer-mode-row:hover { background: var(--hover, rgba(127, 127, 127, .10)); }
+.transfer-mode-row.disabled { opacity: .45; cursor: default; }
+.transfer-mode-row.disabled:hover { background: none; }
+/* Der Knopf sitzt auf der Hoehe der ersten Zeile, nicht in der Mitte des
+   zweizeiligen Blocks. */
+.transfer-mode-row > input[type="radio"] { margin: 3px 0 0; flex: none; }
+.transfer-mode-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.transfer-mode-label { font-weight: 600; }
+.transfer-mode-hint { font-size: 12px; color: var(--muted); }
 dialog button:disabled { opacity: 0.45; cursor: default; filter: grayscale(0.6); }
 /* Hinweis in der Seite statt Browserbox. Sitzt unter der Kopfleiste, nimmt
    keinen Fokus und verschwindet von selbst. */
