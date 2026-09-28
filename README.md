@@ -124,6 +124,14 @@ Details: [Security & access control](docs/en/README.md#security--access-control)
 
 <!-- Der Platzhalter bleibt stehen. release-script trägt hier die
      nächste Version ein und ersetzt die Überschrift. -->
+### 0.3.5 (2026-09-28)
+* (bmueller77) **Dragging a card with a finger works again.** On a tablet a card could not be picked up at all, whatever you grabbed it by. Two causes, both in the drag library's settings:
+  * The hold that starts a drag was cancelled by the smallest movement. The tolerance was zero pixels, which a mouse pointer keeps and a finger never does. That is why it worked at a desk and never on a tablet
+  * The library listens to pointer events where the browser offers them, and ends a drag when the browser cancels the pointer. A tablet WebView claims the gesture for itself after about a second, so the drag was over before it did anything. It now uses touch events, where it keeps control of the gesture itself
+* (bmueller77) **The board scrolls along** when a card is dragged to the edge. Without it, a column beyond the edge was simply out of reach. The strip that triggers the scroll is also wider now: 30 px is something a mouse hits and a finger does not, because the hand stops short of the screen edge and the fingertip covers the spot you are aiming at
+* (bmueller77) **The quick-move bar now appears on tablets too.** It used to depend on screen width, but the question is not how wide the screen is, it is whether all columns fit on it. With five columns and three and a half of them visible, every move to the last column meant dragging and scrolling at the same time. The bar appears when the board scrolls sideways and a coarse pointer is in use, so a mouse is left out: there the edge strip is easy to hit and scrolling works
+* (bmueller77) Fix: the quick-move bar always offered the trash as a target, even on a device where the trash column is hidden. A target appeared mid-drag that was nowhere on screen, and one slip put the card in it. The trash is offered only while its column is shown
+
 ### 0.3.4 (2026-09-27)
 * (bmueller77) The copyright line in `LICENSE` and the author entry in `io-package.json` carry an e-mail address now. The repository checker asks for one in both places, and it was only in `package.json`
 
