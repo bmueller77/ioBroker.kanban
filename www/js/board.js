@@ -1554,6 +1554,23 @@ export function renderBoard(container, state, actions) {
             animation: 150,
             delay: 150,               // Touch: kurz halten zum Ziehen, damit Scrollen möglich bleibt
             delayOnTouchOnly: true,
+            // Waehrend der Haltezeit darf der Finger zittern. Voreingestellt
+            // steht touchStartThreshold auf 0, und dann bricht schon eine
+            // Bewegung um einen Pixel den wartenden Zug ab. Ein Finger liegt nie
+            // vollkommen still, ein Mauszeiger schon - deshalb fiel es am
+            // Schreibtisch nicht auf und auf dem Tablet immer.
+            touchStartThreshold: 5,
+            // Sortable nimmt von sich aus Pointer-Ereignisse, sobald der Browser
+            // sie kennt, und bindet dabei pointercancel an sein _onDrop:
+            //   a.supportPointer ? (on(doc,'pointerup',_onDrop),
+            //     on(doc,'pointercancel',_onDrop)) : (mouseup/touchend/touchcancel)
+            // Die WebView des Tablets schickt pointercancel mitten in der
+            // Bewegung, weil sie die Geste fuer sich beansprucht - auf dem Galaxy
+            // Tab S5e nach 749 ms gemessen. Der Zug endet damit, bevor er wirkt,
+            // und zwar unabhaengig davon, ob man die Karte oder den Anfasser
+            // gegriffen hat. Mit Touch-Ereignissen tritt das nicht auf, weil
+            // Sortable dort selbst preventDefault ruft.
+            supportPointer: false,
             // Grid-Modus: nur ueber den Anfasser ziehen
             ...(withGrip ? { handle: '.card-grip' } : {}),
             // Automatische Modi: eigenes Umsortieren waere wirkungslos, Verschieben
