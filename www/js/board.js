@@ -130,19 +130,35 @@ function saveCheckExpanded() {
 /**
  * Landezonen beim Ziehen anbieten?
  *
- * Nur auf schmalen Schirmen, wo die Spalten untereinander stehen und ein Ziel
- * sonst ausserhalb des Bildes laege. Auf grossen Schirmen liegen die Spalten
- * nebeneinander und lassen sich direkt anziehen — auch mit dem Finger, seit das
- * Kontextmenue der WebView den Zug nicht mehr abbricht (siehe initDragTrace).
- * Dort waeren die Zonen nur im Weg.
+ * Nicht die Bildschirmbreite entscheidet, sondern ob alle Spalten ins Bild
+ * passen. Passen sie, liegt jedes Ziel in Reichweite und die Leiste waere nur im
+ * Weg. Passen sie nicht, liegt das Ziel jenseits des Randes, und man muss
+ * ziehend dorthin scrollen — auf einem Tablet mit fuenf Spalten, von denen
+ * dreieinhalb sichtbar sind, ist das der Normalfall.
+ *
+ * Die zweite Bedingung ist der Finger. Mit der Maus ist der Zeiger genau, der
+ * Streifen am Rand leicht zu treffen und das Mitscrollen zuverlaessig; dort
+ * braucht es die Zonen nicht. "pointer: coarse" trifft Tablets und Telefone und
+ * laesst Geraete mit Maus aussen vor, auch wenn deren Schirm Beruehrung kann.
+ *
+ * @returns true, wenn die Landezonen erscheinen sollen
  */
 function wantsQuickMove() {
-    return window.matchMedia('(max-width: 820px)').matches;
+    const board = document.getElementById('board');
+    // Die vier Pixel Zugabe fangen Rundungen bei gebrochenen Zoomstufen ab.
+    const scrollt = !!board && board.scrollWidth > board.clientWidth + 4;
+    if (!scrollt) {
+        return false;
+    }
+    return window.matchMedia('(pointer: coarse)').matches || window.matchMedia('(max-width: 820px)').matches;
 }
 
-function buildQuickMove(evt, sourceCol, board) {
+function buildQuickMove(evt, sourceCol, board, showTrash) {
     removeQuickMove();
-    const others = board.columns.filter(c => c.id !== sourceCol.id);
+    // Der Papierkorb bekommt nur eine Zone, wenn er auf diesem Geraet auch als
+    // Spalte zu sehen ist. Sonst taucht mitten im Zug ein Ziel auf, das es im
+    // Bild gar nicht gibt, und die Karte ist mit einem Handgriff dort gelandet.
+    const others = board.columns.filter(c => c.id !== sourceCol.id && (showTrash || !c.isTrash));
     if (!others.length) return;
 
     // Waagerechte Leiste am oberen Rand: Sie verdeckt die aufgenommene Karte
@@ -1594,7 +1610,7 @@ export function renderBoard(container, state, actions) {
 
             onStart: evt => {
                 dragActive = true;
-                if (wantsQuickMove()) buildQuickMove(evt, col, board);
+                if (wantsQuickMove()) buildQuickMove(evt, col, board, !!state.showTrash);
             },
             onEnd: evt => {
                 dragActive = false;
