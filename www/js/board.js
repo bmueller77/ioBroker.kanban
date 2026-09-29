@@ -151,6 +151,54 @@ function saveCheckExpanded() {
  *
  * @returns true, wenn die Landezonen erscheinen sollen
  */
+/**
+ * NUR ZUR DIAGNOSE. Wird nach dem Befund wieder ausgebaut.
+ *
+ * Auf dem Tablet gibt es keine erreichbare Konsole, und im Kiosk-Modus laesst
+ *  sich die Adresse nicht aendern. Also schickt das Board beim Aufnehmen einer
+ *  Karte einmal seine Messwerte an den Adapter; von dort sind sie per curl
+ *  abholbar. Geraten wurde bei diesem Geraet schon dreimal falsch.
+ *
+ * @param zonen Ergebnis von wantsQuickMove
+ * @param evt Ereignis von SortableJS
+ */
+function traceDrag(zonen, evt) {
+    try {
+        const b = document.getElementById('board');
+        const spalten = b ? b.querySelectorAll('.column') : [];
+        const aussen = b ? b.getBoundingClientRect() : null;
+        const letzte = spalten.length ? spalten[spalten.length - 1].getBoundingClientRect() : null;
+        const daten = {
+            zonen,
+            zeiger: letzterZeiger,
+            ereignis: evt && evt.originalEvent ? evt.originalEvent.type : null,
+            zeigerTyp: evt && evt.originalEvent ? evt.originalEvent.pointerType || null : null,
+            innen: [window.innerWidth, window.innerHeight],
+            dpr: window.devicePixelRatio,
+            scrollWidth: b ? b.scrollWidth : null,
+            clientWidth: b ? b.clientWidth : null,
+            spalten: spalten.length,
+            boardRechts: aussen ? Math.round(aussen.right) : null,
+            letzteRechts: letzte ? Math.round(letzte.right) : null,
+            overflowX: b ? getComputedStyle(b).overflowX : null,
+            coarse: window.matchMedia('(pointer: coarse)').matches,
+            fine: window.matchMedia('(pointer: fine)').matches,
+            hoverNone: window.matchMedia('(hover: none)').matches,
+            bis820: window.matchMedia('(max-width: 820px)').matches,
+            maxTouch: navigator.maxTouchPoints,
+            ua: String(navigator.userAgent).slice(0, 160),
+        };
+        const tok = (document.querySelector('meta[name=kanban-token]') || {}).content || '';
+        fetch('api/debug/drag', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-Kanban-Token': tok },
+            body: JSON.stringify(daten),
+        }).catch(() => {});
+    } catch {
+        /* Diagnose darf den Zug nicht stoeren */
+    }
+}
+
 function spaltenPassenNicht() {
     const board = document.getElementById('board');
     if (!board) {
@@ -1646,7 +1694,9 @@ export function renderBoard(container, state, actions) {
 
             onStart: evt => {
                 dragActive = true;
-                if (wantsQuickMove()) buildQuickMove(evt, col, board, !!state.showTrash);
+                const zonen = wantsQuickMove();
+                traceDrag(zonen, evt);   // NUR ZUR DIAGNOSE, siehe traceDrag
+                if (zonen) buildQuickMove(evt, col, board, !!state.showTrash);
             },
             onEnd: evt => {
                 dragActive = false;
