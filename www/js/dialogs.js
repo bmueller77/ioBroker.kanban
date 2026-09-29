@@ -1478,6 +1478,7 @@ export function initDialogs(state, actions) {
         let titleInput = null, colBox = null, labelBox = null, linkTargetSel = null, linkUrlInput = null;
         let cleanupModeSel = null, cleanupDaysInp = null, cleanupCountInp = null, memberWrap = null;
         let saveBtn = null, boardPanel = null, boardSel = null;
+        let tplBox = null, tplPanel = null;
 
         const validateMembers = () => {
             if (!saveBtn) return;
@@ -1569,9 +1570,21 @@ export function initDialogs(state, actions) {
             if (limitNeu.length) {
                 actions.forgetExpanded(editBoard.id, limitNeu);
             }
+            // Nur Name und Reihenfolge kommen aus dem Reiter; der Inhalt einer
+            // Vorlage bleibt, wie er ist. Geaendert wird er ueber Verwalten an
+            // einer Karte, unter demselben Namen.
+            const templates = tplBox
+                ? [...tplBox.children]
+                      .map(row => {
+                          const alt = (editBoard.templates || []).find(x => x.id === row.dataset.tplId);
+                          const name = row.querySelector('input[type=text]').value.trim();
+                          return alt && name ? { ...alt, name } : null;
+                      })
+                      .filter(Boolean)
+                : undefined;
             await actions.patchBoardById(editBoard.id, {
                 title: titleInput.value.trim() || editBoard.title,
-                columns, labels,
+                columns, labels, templates,
                 linkTarget: linkTargetSel ? linkTargetSel.value : undefined,
                 linkUrl: linkUrlInput ? linkUrlInput.value.trim() : undefined,
                 cleanup: cleanupModeSel ? { mode: cleanupModeSel.value, days: Number(cleanupDaysInp.value) || 90, count: Number(cleanupCountInp.value) || 100 } : undefined,
@@ -1598,6 +1611,9 @@ export function initDialogs(state, actions) {
             editId = id;
             await loadEdit(editId);
             buildBoardPanel(boardPanel);
+            if (tplPanel) {
+                buildTemplatePanel(tplPanel);
+            }
             validateMembers();
         }
 
@@ -1890,9 +1906,56 @@ export function initDialogs(state, actions) {
             panel.addEventListener('change', touch);
         }
 
+        /**
+         * Reiter "Vorlagen": umbenennen, loeschen, Reihenfolge.
+         *
+         * Kein Knopf zum Anlegen, denn eine Vorlage entsteht immer aus einer Karte,
+         *  ueber "Verwalten". Die Reihenfolge kommt wie bei den Labels aus dem DOM
+         *  und bestimmt, in welcher Folge die Vorlagen im Auswahlfeld des
+         *  Karteneditors stehen: Wer seine meistbenutzte oben haben will, zieht sie
+         *  nach oben. Sonst muesste ich zwischen alphabetisch und "zuletzt
+         *  angelegt" entscheiden, und beides waere fuer jemanden falsch.
+         *
+         * @param panel Zielelement des Reiters
+         */
+        function buildTemplatePanel(panel) {
+            panel.textContent = '';
+            const liste = (editBoard && editBoard.templates) || [];
+            // Der Kasten entsteht immer, auch leer. Wuerde er bei einer leeren
+            // Liste fehlen, waere beim Speichern nicht zu unterscheiden, ob es nie
+            // Vorlagen gab oder ob gerade die letzte geloescht wurde - im zweiten
+            // Fall waere die Loeschung verloren.
+            panel.appendChild(el('div', 'hint', liste.length ? t('templates.manageHint') : t('templates.noneYet')));
+            tplBox = el('div');
+            tplBox.style.cssText = 'display:flex;flex-direction:column;gap:6px';
+            for (const tpl of liste) {
+                const row = el('div', 'label-edit');
+                row.dataset.tplId = tpl.id || '';
+                const drag = el('span', 'drag', '⠳');
+                drag.title = t('boards.dragTitle');
+                const name = document.createElement('input');
+                name.type = 'text';
+                name.value = tpl.name || '';
+                name.maxLength = 80;
+                name.addEventListener('input', () => { dirty = true; });
+                const rm = el('button', 'rm', '×');
+                rm.type = 'button';
+                rm.title = t('templates.deleteTitle');
+                rm.addEventListener('click', () => { row.remove(); dirty = true; });
+                row.append(drag, name, rm);
+                tplBox.appendChild(row);
+            }
+            panel.appendChild(tplBox);
+            // eslint-disable-next-line no-undef
+            Sortable.create(tplBox, { handle: '.drag', animation: 150, onEnd: () => { dirty = true; } });
+        }
+
         // ---- Tab: Board ----
         await loadEdit(editId);
         addTab('board', t('settings.tabBoard'), panel => { boardPanel = panel; buildBoardPanel(panel); });
+
+        // ---- Tab: Vorlagen ----
+        addTab('templates', t('settings.tabTemplates'), panel => { tplPanel = panel; buildTemplatePanel(panel); });
 
         // ---- Tab: Benutzer (Avatare/Farben) ----
         if ((state.users || []).length) {
