@@ -1578,7 +1578,15 @@ export function initDialogs(state, actions) {
                       .map(row => {
                           const alt = (editBoard.templates || []).find(x => x.id === row.dataset.tplId);
                           const name = row.querySelector('input[type=text]').value.trim();
-                          return alt && name ? { ...alt, name } : null;
+                          if (!alt || !name) {
+                              return null;
+                          }
+                          // Beim Umbenennen wandert der Titel mit: Name und Titel
+                          // sind nach der Absprache dasselbe, und im Auswahlfeld
+                          // stand sonst der neue Name, waehrend die Karte den
+                          // alten Titel bekam. Bleibt der Name, bleibt auch ein
+                          // ueber die Schnittstelle abweichend gesetzter Titel.
+                          return { ...alt, name, title: name !== alt.name ? name : alt.title };
                       })
                       .filter(Boolean)
                 : undefined;

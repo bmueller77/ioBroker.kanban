@@ -87,11 +87,19 @@ export function mdiIcon(pathData) {
 // passierte das nicht — deshalb ging es mal und mal nicht, je nachdem wo man
 // die Karte angefasst hat.
 let dragActive = false;
+// Art des Zeigers der letzten Beruehrung: 'touch', 'pen' oder 'mouse'. Gemessen
+// an der Geste, weil die Abfrage 'pointer: coarse' in einer WebView nicht
+// zwingend stimmt.
+let letzterZeiger = '';
 let ctxGuardReady = false;
 
 function initCtxGuard() {
     if (ctxGuardReady || typeof document === 'undefined') return;
     ctxGuardReady = true;
+    // Zwei Wege, weil eine WebView das eine oder das andere liefert.
+    document.addEventListener('pointerdown', ev => { letzterZeiger = ev.pointerType || letzterZeiger; }, true);
+    document.addEventListener('touchstart', () => { letzterZeiger = 'touch'; }, { capture: true, passive: true });
+    document.addEventListener('mousedown', ev => { if (!ev.sourceCapabilities || !ev.sourceCapabilities.firesTouchEvents) letzterZeiger = 'mouse'; }, true);
     document.addEventListener('contextmenu', ev => {
         const onCard = ev.target && ev.target.closest && ev.target.closest('.card');
         if (onCard || dragActive) ev.preventDefault();
@@ -143,11 +151,39 @@ function saveCheckExpanded() {
  *
  * @returns true, wenn die Landezonen erscheinen sollen
  */
-function wantsQuickMove() {
+function spaltenPassenNicht() {
     const board = document.getElementById('board');
+    if (!board) {
+        return false;
+    }
     // Die vier Pixel Zugabe fangen Rundungen bei gebrochenen Zoomstufen ab.
-    const scrollt = !!board && board.scrollWidth > board.clientWidth + 4;
-    if (!scrollt) {
+    if (board.scrollWidth > board.clientWidth + 4) {
+        return true;
+    }
+    // Zweiter, unabhaengiger Weg: Reicht die letzte Spalte ueber den sichtbaren
+    // Rand hinaus? "scrollWidth" ist in mancher WebView nicht verlaesslich, und
+    // dann fehlten die Zonen genau dort, wo sie gebraucht werden.
+    const spalten = board.querySelectorAll('.column');
+    if (!spalten.length) {
+        return false;
+    }
+    const aussen = board.getBoundingClientRect();
+    const letzte = spalten[spalten.length - 1].getBoundingClientRect();
+    return letzte.right > aussen.right + 4;
+}
+
+function wantsQuickMove() {
+    if (!spaltenPassenNicht()) {
+        return false;
+    }
+    // Die Art des Zeigers wird an der laufenden Geste gemessen, nicht beim
+    // Browser erfragt. "pointer: coarse" beantwortet eine WebView nicht
+    // zwingend richtig - auf dem Tablet fehlten die Zonen deshalb, obwohl die
+    // Abfrage in der Nachstellung zutraf.
+    if (letzterZeiger === 'touch' || letzterZeiger === 'pen') {
+        return true;
+    }
+    if (letzterZeiger === 'mouse') {
         return false;
     }
     return window.matchMedia('(pointer: coarse)').matches || window.matchMedia('(max-width: 820px)').matches;
