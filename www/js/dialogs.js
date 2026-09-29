@@ -177,6 +177,10 @@ export function initDialogs(state, actions) {
     // Listener nur setzen, wenn das Feld existiert (robust gegen veraltetes HTML)
     const on = (name, ev, fn) => { const e = form.elements[name]; if (e) e.addEventListener(ev, fn); };
     let editingCardId = null;
+    // Spalte, in der eine neu angelegte Karte landen soll. Wird beim Oeffnen
+    // gemerkt, weil das Uebernehmen einer Vorlage die Spaltenauswahl neu aufbaut
+    // und die Vorgabe sonst verloren waere.
+    let openDefaultCol = null;
     // Stand der bearbeiteten Karte beim Oeffnen, fuer den Abgleich beim
     // Speichern (F3)
     let cardBasis = '';
@@ -859,15 +863,21 @@ export function initDialogs(state, actions) {
     });
     form.addEventListener('change', () => updateFoldInfo());
 
-    function openCard(cardId, defaultColumnId) {
-        const card = cardId && state.board ? state.board.cards.find(c => c.id === cardId) : null;
-        editingCardId = card ? card.id : null;
-        document.getElementById('cardDialogTitleText').textContent = card ? t('card.titleEdit') : t('card.titleNew');
-        document.getElementById('deleteCardBtn').hidden = !card;
-        // Auch bei nur einem Board sinnvoll: der Dialog kann die Karte klonen
-        document.getElementById('transferCardBtn').hidden = !card;
-        form.elements.title.value = card ? card.title : '';
-        form.elements.description.value = card ? card.description : '';
+    /**
+     * Kartendaten in die Felder des Editors schreiben.
+     *
+     * Herausgezogen aus "openCard", weil eine Vorlage denselben Weg nimmt. Gaebe es
+     *  zwei, wuerde das dreizehnte Feld, das irgendwann dazukommt, in einem von
+     *  beiden vergessen - und das faellt erst auf, wenn eine Karte aus einer
+     *  Vorlage etwas nicht mitbringt.
+     *
+     * @param card Karte oder Vorlage; null leert alle Felder
+     * @param defaultColumnId Spalte fuer eine neue Karte
+     * @param neu true, wenn keine bestehende Karte bearbeitet wird
+     */
+    function fillForm(card, defaultColumnId, neu) {
+        form.elements.title.value = (card && card.title) || '';
+        form.elements.description.value = (card && card.description) || '';
         form.elements.due.value = (card && card.due) || '';
         form.elements.dueTime.value = (card && card.dueTime) || '';
         form.elements.dueTimeEnabled.checked = !!(card && card.dueTime);
@@ -878,9 +888,9 @@ export function initDialogs(state, actions) {
         form.elements.calendarInvite.checked = !!(card && card.calendarInvite);
         form.elements.calendarDuration.value = (card && card.calendarDuration) || '01:00';
         updateCalDurUI();
-        fillColumnSelect(card ? card.columnId : defaultColumnId, !card);
-        selAssignees = new Set(card ? card.assignees : []);
-        selLabels = new Set(card ? card.labels : []);
+        fillColumnSelect(!neu && card ? card.columnId : defaultColumnId, !!neu);
+        selAssignees = new Set((card && card.assignees) || []);
+        selLabels = new Set((card && card.labels) || []);
         selColor = (card && card.color) || '';
         renderAssigneePick();
         renderLabelPick();
@@ -888,9 +898,6 @@ export function initDialogs(state, actions) {
         const box = document.getElementById('checklistEdit');
         box.textContent = '';
         for (const item of (card && card.checklist) || []) addCheckRow(item);
-        // Stand der Karte beim Oeffnen. Damit laesst sich beim Speichern
-        // erkennen, ob sie inzwischen woanders geaendert wurde (F3).
-        cardBasis = card ? kartenKern(card) : '';
         updateCheckGrips();
         loadRecurrence(card && card.recurrence);
         updatePreview();
@@ -898,9 +905,123 @@ export function initDialogs(state, actions) {
         syncLinkType();
         updateLinkValidity();
         applyFolds();
+    }
+
+    function openCard(cardId, defaultColumnId) {
+        const card = cardId && state.board ? state.board.cards.find(c => c.id === cardId) : null;
+        editingCardId = card ? card.id : null;
+        document.getElementById('cardDialogTitleText').textContent = card ? t('card.titleEdit') : t('card.titleNew');
+        document.getElementById('deleteCardBtn').hidden = !card;
+        // Auch bei nur einem Board sinnvoll: der Dialog kann die Karte klonen
+        document.getElementById('transferCardBtn').hidden = !card;
+        openDefaultCol = defaultColumnId || null;
+        fillForm(card, defaultColumnId, !card);
+        fillTemplatePick(!card);
+        // Stand der Karte beim Oeffnen. Damit laesst sich beim Speichern
+        // erkennen, ob sie inzwischen woanders geaendert wurde (F3).
+        cardBasis = card ? kartenKern(card) : '';
         cardStand = JSON.stringify(readCard());
         dlg.showModal();
         verlaufAn();
+    }
+
+    /**
+     * Das Auswahlfeld fuer Vorlagen fuellen oder ganz entfernen.
+     *
+     * Es steht nur beim Anlegen da, an der Stelle, an der beim Bearbeiten
+     *  "Loeschen" und "Verwalten" liegen. Hat das Board keine Vorlagen, ist das
+     *  Feld nicht ausgegraut, sondern weg: Wer nie Vorlagen anlegt, soll kein
+     *  totes Bedienelement mit sich herumtragen.
+     *
+     * @param neu true, wenn eine neue Karte angelegt wird
+     */
+    function fillTemplatePick(neu) {
+        const sel = document.getElementById('templatePick');
+        if (!sel) {
+            return;
+        }
+        const liste = (state.board && state.board.templates) || [];
+        sel.hidden = !neu || !liste.length;
+        sel.textContent = '';
+        if (sel.hidden) {
+            return;
+        }
+        const platzhalter = document.createElement('option');
+        platzhalter.value = '';
+        platzhalter.textContent = t('templates.pick');
+        sel.appendChild(platzhalter);
+        for (const tpl of liste) {
+            const o = document.createElement('option');
+            o.value = tpl.id;
+            o.textContent = tpl.name;
+            sel.appendChild(o);
+        }
+        sel.value = '';
+    }
+
+    /**
+     * Eine Vorlage in den Editor uebernehmen.
+     *
+     * Gesetzt wird vollstaendig, auch die in der Vorlage leeren Felder. Ein Mischen
+     *  aus Vorlage und schon Eingetipptem ergibt Karten, die niemand so gewollt
+     *  hat, und man sieht ihnen hinterher nicht an, woher welcher Teil kam. Steht
+     *  im Editor schon etwas, kommt deshalb vorher eine Rueckfrage.
+     *
+     * Das Feld springt danach auf seinen Platzhalter zurueck. Bliebe die Vorlage
+     *  stehen, laese sich das wie eine Bindung, die es nicht gibt: Die Karte ist
+     *  nach dem Anlegen eine gewoehnliche Karte.
+     *
+     * @param id ID der Vorlage
+     * @param defaultColumnId Spalte, in der die Karte entstehen soll
+     */
+    async function applyTemplate(id, defaultColumnId) {
+        const sel = document.getElementById('templatePick');
+        const tpl = ((state.board && state.board.templates) || []).find(x => x.id === id);
+        if (!tpl) {
+            if (sel) {
+                sel.value = '';
+            }
+            return;
+        }
+        let geaendert = false;
+        try {
+            geaendert = JSON.stringify(readCard()) !== cardStand;
+        } catch {
+            geaendert = false;
+        }
+        if (geaendert) {
+            const weiter = await confirmDialog({
+                title: t('templates.replaceTitle'),
+                message: t('templates.replaceMsg', { name: tpl.name }),
+                ok: t('templates.replaceOk'),
+            });
+            if (weiter !== true) {
+                if (sel) {
+                    sel.value = '';
+                }
+                return;
+            }
+        }
+        // Labels und Zustaendige, die es nicht mehr gibt, fallen weg. Dieselbe
+        // Regel gilt auf dem Server; hier wird sie angewandt, damit der Editor
+        // nicht auf etwas zeigt, was das Board nicht mehr fuehrt.
+        const labelIds = new Set(((state.board && state.board.labels) || []).map(l => l && l.id));
+        const members = new Set(boardMembers(state.board, state.users));
+        fillForm(
+            {
+                ...tpl,
+                due: '',
+                labels: (tpl.labels || []).filter(x => labelIds.has(x)),
+                assignees: (tpl.assignees || []).filter(a => members.has(a)),
+                checklist: (tpl.checklist || []).map(i => ({ text: (i && i.text) || '', done: false })),
+            },
+            defaultColumnId,
+            true,
+        );
+        if (sel) {
+            sel.value = '';
+        }
+        cardStand = JSON.stringify(readCard());
     }
 
     // ---- Wiederholung ------------------------------------------------------
@@ -1181,6 +1302,15 @@ export function initDialogs(state, actions) {
         return r === 'extra';
     }
 
+    const templatePickEl = document.getElementById('templatePick');
+    if (templatePickEl) {
+        templatePickEl.addEventListener('change', () => {
+            const id = templatePickEl.value;
+            if (id) {
+                applyTemplate(id, openDefaultCol);
+            }
+        });
+    }
     addCloseX(document.getElementById('cardDialogTitle'), async () => { if (await guardCard()) dlg.close(); });
     dlg.addEventListener('cancel', async ev => {
         ev.preventDefault();

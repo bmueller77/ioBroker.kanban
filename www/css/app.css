@@ -829,9 +829,12 @@ dialog .row { display: flex; gap: 10px; flex-wrap: wrap; }
 .fold-inner > .fold-body { display: flex; padding: 0; }
 .fold-inner { border-top: 0; }
 
-dialog footer { display: flex; gap: 8px; margin-top: 8px; }
+dialog footer { display: flex; gap: 8px; margin-top: 8px; align-items: center; }
 /* Beschriftungen werden bei wenig Platz mit … gekuerzt statt umzubrechen */
 dialog footer > button { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* Vorlagenauswahl in der Fusszeile des Karteneditors: nimmt nur den Platz, den
+   sie braucht, und laesst dem Titel der laengsten Vorlage Raum. */
+#templatePick { max-width: 45%; }
 
 .hint { font-weight: 400; color: var(--muted); font-size: 13px; }
 
@@ -1174,6 +1177,8 @@ button.mini {
     }
     dialog footer .spacer { display: none; }          /* kein Auseinanderdruecken auf Mobil */
     dialog footer > button { flex: 1 1 0; min-width: 0; }
+    /* Auf Mobil sitzt die Vorlagenauswahl in derselben Reihe und darf schrumpfen */
+    #templatePick { flex: 1 1 0; min-width: 0; max-width: none; }
 
     .col-chevron { display: inline !important; }      /* schlaegt die spaetere Basisregel */
 }

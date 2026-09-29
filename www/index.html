@@ -172,6 +172,10 @@
         <footer>
             <button type="button" id="deleteCardBtn" class="danger" hidden data-i18n="card.delete">Löschen</button>
             <button type="button" id="transferCardBtn" hidden data-i18n="card.manage" data-i18n-title="card.manageTitle">Verwalten</button>
+            <!-- Steht beim Anlegen an der Stelle, an der beim Bearbeiten
+                 "Löschen" und "Verwalten" liegen. Ohne Vorlagen am Board ganz
+                 ausgeblendet, nicht ausgegraut. -->
+            <select id="templatePick" hidden data-i18n-title="templates.pickTitle"></select>
             <span class="spacer"></span>
             <button type="button" value="cancel" id="cancelCardBtn" data-i18n="card.cancel">Abbrechen</button>
             <button type="submit" class="primary" id="saveCardBtn" data-i18n="card.save">Speichern</button>
