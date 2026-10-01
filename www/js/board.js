@@ -221,6 +221,19 @@ function spaltenPassenNicht() {
 }
 
 function wantsQuickMove() {
+    // Auf schmalen Schirmen stehen die Spalten untereinander, "overflow-x" ist
+    // "hidden", und es gibt keinen waagerechten Ueberlauf: Das Ziel liegt
+    // senkrecht ausser Reichweite. Gemessen auf einem Telefon mit 374 Pixeln,
+    // scrollWidth gleich clientWidth. Diese Regel stand hier von Anfang an und
+    // war die eigentliche; ich hatte sie durch den Ueberlauftest ersetzt statt
+    // sie zu ergaenzen, und damit die Zonen genau dort abgeschaltet, wofuer sie
+    // gebaut wurden. Hier gilt sie unabhaengig von der Art des Zeigers, denn ein
+    // schmales Fenster am Schreibtisch stapelt die Spalten genauso.
+    if (window.matchMedia('(max-width: 820px)').matches) {
+        return true;
+    }
+    // Darueber hinaus: breiter Schirm, aber die Spalten passen trotzdem nicht
+    // ins Bild. Das ist der Tablet-Fall mit fuenf Spalten.
     if (!spaltenPassenNicht()) {
         return false;
     }
