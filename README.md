@@ -124,6 +124,15 @@ Details: [Security & access control](docs/en/README.md#security--access-control)
 
 <!-- Der Platzhalter bleibt stehen. release-script trägt hier die
      nächste Version ein und ersetzt die Überschrift. -->
+### 0.4.0-beta.0 (in Arbeit)
+* (bmueller77) **Card templates.** A template is a named set of card fields that belongs to a board. It is created from an existing card through "Manage", it fills the editor when a new card is made, and it can travel to another board or another instance as a file
+  * Two things deliberately stay behind: the **due date**, because a fixed date ages and a template saved in January would otherwise create cards dated the day before yesterday in March, and the **checklist ticks**, because a template holds the items rather than their state. The time of day stays, since 17:00 is a property of the task
+  * If the template carries a recurrence and no date is given, the next date is worked out and the pattern is anchored to today. A template of "every 30 days" creates a card due today and counts from there, not from a pattern set half a year ago
+  * Labels and assignees are checked when the template is used, not when it is saved. A template sits on a board for months while labels are deleted and members leave; whatever no longer exists is dropped, and a label is never recreated from an old template
+  * The "Manage" dialog now offers four kinds below one another as radio buttons, each with a line explaining it. Side by side there was no room, and the labels were already being cut off at three
+  * Scripts and webhooks can use templates too: `addCard` takes a `template` field, matched by ID first and by name second. Fields given explicitly beat the template. An unknown name is an error rather than a quiet omission, so that a typo does not produce half-filled cards for months
+  * Export and import carry labels by name, not by ID, since an ID from another board means nothing on this one. An import appends and never replaces, because there is no telling what hides behind a name in a file; a name that already exists gets a counter
+
 ### 0.3.5 (2026-09-28)
 * (bmueller77) **Dragging a card with a finger works again.** On a tablet a card could not be picked up at all, whatever you grabbed it by. Two causes, both in the drag library's settings:
   * The hold that starts a drag was cancelled by the smallest movement. The tolerance was zero pixels, which a mouse pointer keeps and a finger never does. That is why it worked at a desk and never on a tablet

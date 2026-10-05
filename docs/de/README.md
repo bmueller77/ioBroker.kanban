@@ -41,6 +41,7 @@ Ein **Kanban-Board als eigener ioBroker-Adapter**. Er bringt seinen eigenen Webs
     - [Papierkorb](#papierkorb)
     - [Erledigte Karten in den Papierkorb](#erledigte-karten-in-den-papierkorb)
   - [Karten: alle Felder](#karten-alle-felder)
+  - [Kartenvorlagen](#kartenvorlagen)
   - [Sortierung & Reihenfolge](#sortierung--reihenfolge)
   - [Wiederholungen](#wiederholungen)
   - [Feiertage](#feiertage)
@@ -312,7 +313,7 @@ Spalten lassen sich anlegen, per Drag & Drop sortieren, umbenennen und löschen.
 - **Spalten-ID:** Neben dem sichtbaren Titel trägt jede Spalte eine **unveränderliche ID**. Die drei Standardspalten heißen `todo`, `doing` und `done`, neu angelegte Spalten bekommen eine erzeugte eindeutige ID. Beim **Umbenennen bleibt die ID erhalten** - geteilte `columns=`-Links und `moveCard`-Aufrufe funktionieren also unverändert weiter. Nachschlagen lassen sich die IDs über `GET /api/boards/<id>` (siehe [REST-API](#rest-api)).
 - **Spaltenbreite:** Die Spalten teilen sich immer die **volle Fensterbreite** - zwei Spalten nehmen also je die Hälfte ein. Erst wenn rechnerisch weniger als 280 px je Spalte übrig bleiben, wird das Board waagerecht scrollbar.
 - **Anzeige-Limit (Max):** Zahl > 0 zeigt in dieser Spalte nur die ersten N Karten; direkt unter der letzten erscheint `+X weitere`, darunter der Knopf zum Anlegen. `0` = alle anzeigen. Der Zähler in der Spaltenkopfzeile zählt weiterhin **alle** Karten der Spalte. `+X weitere` ist ein **Button**: Ein Klick zeigt die übrigen Karten, die Zeile heißt dann `- X wieder ausblenden`, ein zweiter Klick klappt sie zu. Das Limit am Board bleibt dabei unangetastet, die Abweichung merkt sich nur der eigene Browser, wie der Sortiermodus und das Augen-Symbol <img src="../icons/eye.svg" width="18" alt="Auge">.
-- **WIP-Limit** (Work-in-Progress): Zahl > 0 begrenzt die empfohlene Kartenanzahl. Wird sie überschritten, warnt die Spalte optisch (Zähler & Kopf werden hervorgehoben). `0` = kein Limit. Das Limit ist eine **Warnung**, keine harte Sperre. Sie bezieht sich immer auf die **Gesamtzahl** der Spalte, auch wenn der Personen-/Label-Filter gerade weniger Karten anzeigt. Ist es überschritten, steht auch bei aktivem Filter die Zahl der **Spalte** vor dem Schrägstrich, etwa "7/5" — also genau die Zahl, aus der die Warnfarbe kommt. Der Tooltip nennt beide: Wie viele Karten wirklich in der Spalte liegen und wie viele der Filter davon zeigt. Solange das Limit eingehalten wird, zeigt die Zahl bei aktivem Filter schlicht die Treffer, ohne Schrägstrich; ein Verhältnis aus gefilterten Karten und Limit wäre eine Zahl aus zwei verschiedenen Mengen.
+- **WIP-Limit** (Work-in-Progress): Zahl > 0 begrenzt die empfohlene Kartenanzahl. Wird sie überschritten, warnt die Spalte optisch (Zähler & Kopf werden hervorgehoben). `0` = kein Limit. Das Limit ist eine **Warnung**, keine harte Sperre. Sie bezieht sich immer auf die **Gesamtzahl** der Spalte, auch wenn der Personen-/Label-Filter gerade weniger Karten anzeigt. Ist es überschritten, steht auch bei aktivem Filter die Zahl der **Spalte** vor dem Schrägstrich, etwa "7/5", also genau die Zahl, aus der die Warnfarbe kommt. Der Tooltip nennt beide: Wie viele Karten wirklich in der Spalte liegen und wie viele der Filter davon zeigt. Solange das Limit eingehalten wird, zeigt die Zahl bei aktivem Filter schlicht die Treffer, ohne Schrägstrich; ein Verhältnis aus gefilterten Karten und Limit wäre eine Zahl aus zwei verschiedenen Mengen.
 - **"Neu"** (`allowAdd`): legt fest, welche Spalten neue Karten erlauben. Am Spaltenfuß erscheint dann der Knopf zum Anlegen neuer Karten - ein "+" auf farbigem Grund.
 - **"Erledigt"-Spalte** (`isDone`): Karten, die hierher verschoben werden, gelten als erledigt (`doneAt` wird gesetzt, Wiederholungen werden ausgelöst). Ihr Titel wird **durchgestrichen** dargestellt, darunter steht der Zeitpunkt des Erledigens in Klammern, zum Beispiel `(Erledigt: 26.07.2026 20:09)`, im Datums- und Zeitformat der Instanz. Die Zeile setzt einen gesetzten `doneAt` voraus; Karten, die nie durch eine Erledigt-Spalte gegangen sind, zeigen sie nicht.
 - **Erledigt ein-/ausblenden (Augen-Symbol <img src="../icons/eye.svg" width="18" alt="Auge">):** Jede Erledigt-Spalte hat oben rechts einen Umschalter in Form eines Auges, der die erledigten Karten ein- oder ausblendet (Diese Einstellung wird pro Gerät gespeichert).
@@ -482,6 +483,47 @@ Aus der eingetragenen Adresse leitet das Board automatisch ein passendes Icon ab
 Über dem Link-Feld steht eine **Leiste mit diesen neun Symbolen**, in der Reihenfolge Weblink, interne Adresse, E-Mail, Telefon, YouTube, PDF, Bild, Route, Ort. Ein Klick darauf setzt ein passendes Beispiel als Platzhalter ins Feld, etwa `tel:+49123456789` statt `https://...`. Der eingetippte Wert bleibt dabei unangetastet. Umgekehrt hebt die Leiste hervor, welche Art zu einer bereits eingetragenen Adresse passt, und läuft beim Tippen mit.
 
 Anklickbar sind nur die sicheren Schemata `http(s)`, `mailto:`, `tel:` und `geo:` - siehe [Sicherheit & Zugriffsschutz](#sicherheit--zugriffsschutz). **Das Feld nimmt genau das an, was das Board später auch darstellt:** zusätzlich zu den Schemata also relative Pfade und Adressen ohne Schema wie `example.com`, die um `https://` ergänzt werden. Alles Übrige, etwa `javascript:` oder `data:`, wird schon beim Speichern abgewiesen.
+
+### Kartenvorlagen
+
+Eine Vorlage ist ein benannter Satz Kartenfelder. Sie gehört zu einem Board, steht neben den Karten und ist ein Stempel, keine Verbindung: Was aus ihr entsteht, ist danach eine gewöhnliche Karte und weiß nichts mehr von ihrer Herkunft.
+
+**Anlegen.** An einer bestehenden Karte auf "Verwalten" gehen und dort "Als Vorlage speichern" wählen. Das Namensfeld ist mit dem Kartentitel vorbelegt; der Name ist zugleich der Titel, den spätere Karten bekommen. Gibt es den Namen schon, fragt der Adapter nach und ersetzt den Inhalt der bestehenden Vorlage. Das ist zugleich der Weg, eine Vorlage inhaltlich zu ändern, ohne sie im Reiter zu öffnen.
+
+**Zwei Dinge wandern bewusst nicht mit.** Das Fälligkeitsdatum bleibt weg, weil ein festes Datum altert: Eine im Januar gespeicherte Vorlage legte im März Karten mit einem Datum von vorgestern an. Und die Haken der Checkliste werden zurückgesetzt, weil eine Vorlage die Punkte festhält, nicht den Stand. Die Uhrzeit bleibt dagegen erhalten, denn 17:00 ist eine Eigenschaft der Aufgabe.
+
+**Benutzen.** Beim Anlegen einer Karte steht links unten im Editor ein Auswahlfeld mit den Vorlagen des Boards, an der Stelle, an der beim Bearbeiten "Löschen" und "Verwalten" stehen. Hat das Board keine Vorlagen, fehlt das Feld ganz. Eine Auswahl setzt **alle** Felder neu, auch die in der Vorlage leeren; steht im Editor schon etwas, kommt vorher eine Rückfrage. Danach springt das Feld auf seinen Platzhalter zurück.
+
+Trägt die Vorlage eine Wiederholung und bleibt das Fälligkeitsfeld leer, rechnet der Adapter den nächsten Termin selbst aus und hängt das Raster an den heutigen Tag. Eine Vorlage "alle 30 Tage" erzeugt also eine Karte, die heute fällig ist und von dort an zählt, nicht nach einem Raster von vor einem halben Jahr.
+
+**Verwalten.** Einstellungen → Reiter "Vorlagen". Dort steht je Vorlage eine Zeile mit Auswahlkästchen, Griff zum Ziehen, Namensfeld und drei Knöpfen:
+
+| Knopf | Wirkung |
+|---|---|
+| ✎ | öffnet die Vorlage im Karteneditor; der Name bleibt aus dem Reiter |
+| ↗ | gibt genau diese eine Vorlage aus |
+| × | löscht die Vorlage |
+
+Die Reihenfolge der Zeilen bestimmt die Reihenfolge im Auswahlfeld des Karteneditors. Umbenennen zieht den Titel mit, den spätere Karten bekommen. Einen Knopf zum Anlegen gibt es hier nicht, denn eine Vorlage entsteht immer aus einer Karte. Alle Änderungen in diesem Reiter werden erst mit dem Speichern-Knopf des Dialogs wirksam.
+
+**Ausgeben und einlesen.** Unter der Liste stehen zwei Knöpfe. Der linke heißt "Alle exportieren", solange alle Kästchen angehakt sind, und sonst "Auswahl exportieren" mit der Zahl der angehakten. Beides öffnet einen Dialog mit dem Text, einem Knopf zum Herunterladen und einem zum Kopieren. Der Text ist nicht nur Beiwerk: Auf einem Tablet im Kiosk-Modus gibt es weder Dateiauswahl noch Downloadordner, und dort ist das Kopieren der einzige Weg.
+
+"Importieren" nimmt eine Datei oder eingefügten Text. Nach dem Einlesen erscheint die Liste der gefundenen Vorlagen mit Haken, aus der sich einzelne abwählen lassen. Dabei gilt:
+
+- **Angehängt, nie ersetzt.** Beim Einlesen ist nicht erkennbar, was hinter einem Namen in der Datei steckt, und ein falsch bestätigtes Überschreiben wäre nicht zurückzuholen. Ein Name, den es schon gibt, bekommt einen Zähler, also "Filterwechsel (2)".
+- **Labels werden über den Namen zugeordnet**, kleingeschrieben verglichen. Eine Label-ID aus einem anderen Board bedeutet im Ziel nichts. Was sich nicht findet, fällt weg; ein Import erweitert das Zielboard nicht ungefragt um Labels.
+- **Zuständige, die auf dem Zielboard kein Mitglied sind, fallen weg.** Bleibt niemand übrig, verlangt der Editor beim Anlegen eine Auswahl.
+- Je Board sind höchstens 50 Vorlagen möglich.
+
+Der Hinweis nach dem Einlesen nennt die Bilanz: übernommen, umbenannt, weggefallene Labels, nicht mehr hineingepasst.
+
+**Aus einem Skript.** Das Kommando `addCard` nimmt ein Feld `template`, gesucht wird erst über die ID, dann über den Namen:
+
+```json
+{ "cmd": "addCard", "board": "haus", "template": "Filterwechsel", "due": "2026-10-01" }
+```
+
+Ausdrücklich mitgeschickte Felder stechen die Vorlage, alles andere kommt aus ihr. Ein unbekannter Name ist ein Fehler und legt keine Karte an - ein Tippfehler im Skript soll nicht monatelang unauffällig halbe Karten erzeugen.
 
 ### Sortierung & Reihenfolge
 

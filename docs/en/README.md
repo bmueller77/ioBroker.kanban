@@ -41,6 +41,7 @@ A **Kanban board as a dedicated ioBroker adapter**. It ships its own web server,
     - [Trash](#trash)
     - [Move done cards to the trash](#cleanup)
   - [Cards: all fields](#cards-all-fields)
+  - [Card templates](#card-templates)
   - [Sorting & order](#sorting--order)
   - [Recurrence](#recurrence)
   - [Public holidays](#public-holidays)
@@ -483,6 +484,47 @@ The board derives a matching icon (Material Design Icons) from the address enter
 A **bar with these nine icons** sits above the link field, in the order web link, internal address, e-mail, phone, YouTube, PDF, image, route, location. Clicking one puts a matching example into the field as a placeholder, for example `tel:+49123456789` instead of `https://...`. Anything already typed stays untouched. The other way round, the bar highlights which type matches the address currently entered, and follows along while typing.
 
 Only the safe schemes `http(s)`, `mailto:`, `tel:` and `geo:` are clickable (see [Security & access control](#security--access-control)). **The field accepts exactly what the board later renders:** on top of those schemes that means relative paths and addresses without a scheme such as `example.com`, which get `https://` prepended. Everything else, `javascript:` or `data:` for instance, is rejected on save.
+
+### Card templates
+
+A template is a named set of card fields. It belongs to a board, sits next to the cards, and works as a stamp rather than a link: whatever comes out of it is an ordinary card afterwards and knows nothing of its origin.
+
+**Creating one.** On an existing card choose "Manage" and then "Save as template". The name field is prefilled with the card title; the name is also the title that later cards receive. If the name already exists, the adapter asks before replacing the contents of that template. This is also the way to change a template's contents without opening it in the tab.
+
+**Two things deliberately stay behind.** The due date is dropped, because a fixed date ages: a template saved in January would create cards dated the day before yesterday in March. And the checklist ticks are reset, because a template holds the items, not their state. The time of day does travel along, since 17:00 is a property of the task.
+
+**Using one.** While creating a card, a picker sits at the bottom left of the editor, in the place where "Delete" and "Manage" sit while editing. With no templates on the board the picker is absent. A choice sets **every** field anew, including those empty in the template; if the editor already holds something, a question comes first. The picker then returns to its placeholder.
+
+If the template carries a recurrence and the due field is left empty, the adapter works out the next date itself and anchors the pattern to today. A template of "every 30 days" therefore creates a card that is due today and counts from there, not from a pattern set half a year ago.
+
+**Managing them.** Settings → "Templates" tab. Each template gets a row with a checkbox, a drag handle, a name field and three buttons:
+
+| Button | Effect |
+|---|---|
+| ✎ | opens the template in the card editor; the name stays as set in the tab |
+| ↗ | exports this one template |
+| × | deletes the template |
+
+The order of the rows is the order in the picker of the card editor. Renaming carries the title along that later cards receive. There is no button to create one here, because a template always comes from a card. Everything changed in this tab takes effect with the dialog's save button.
+
+**Exporting and importing.** Two buttons sit below the list. The left one reads "Export all" while every box is ticked, and "Export selection" with the count otherwise. Both open a dialog holding the text, a download button and a copy button. The text is not decoration: on a tablet in kiosk mode there is neither a file picker nor a download folder, and copying is the only way there.
+
+"Import" takes a file or pasted text. After reading it, the list of templates found appears with ticks, so individual ones can be left out. The rules are:
+
+- **Appended, never replaced.** On import there is no telling what hides behind a name in the file, and a wrongly confirmed overwrite could not be undone. A name that already exists gets a counter, as in "Filter change (2)".
+- **Labels are matched by name**, compared in lower case. A label ID from another board means nothing on this one. Whatever does not match is dropped; an import does not add labels to the target board unasked.
+- **Assignees who are not members of the target board are dropped.** If none remain, the editor asks for a choice when the card is created.
+- At most 50 templates per board.
+
+The notice after an import states the balance: added, renamed, labels dropped, did not fit.
+
+**From a script.** The `addCard` command takes a `template` field, matched against the ID first and the name second:
+
+```json
+{ "cmd": "addCard", "board": "house", "template": "Filter change", "due": "2026-10-01" }
+```
+
+Fields given explicitly beat the template, everything else comes from it. An unknown name is an error and creates no card, so that a typo in a script does not quietly produce half-filled cards for months.
 
 ### Sorting & order
 
