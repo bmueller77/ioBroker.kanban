@@ -259,6 +259,8 @@
   "templates.manageHint": "Trascina per l'ordine, modifica i nomi, rimuovi con \"×\". Il contenuto di un modello si cambia su una carta tramite \"Gestisci\".",
   "templates.noneYet": "Ancora nessun modello. Un modello si crea su una carta tramite \"Gestisci\", voce \"Salva come modello\".",
   "templates.deleteTitle": "Elimina modello",
+  "templates.editTitle": "Modifica modello",
+  "templates.editedLocal": "Modello \"{name}\" modificato. Non ancora salvato.",
   "templates.pickForExport": "Selezionare per l'esportazione",
   "templates.export": "Esportare",
   "templates.import": "Importare",

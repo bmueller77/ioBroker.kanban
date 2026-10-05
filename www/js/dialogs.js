@@ -181,6 +181,9 @@ export function initDialogs(state, actions) {
     // gemerkt, weil das Uebernehmen einer Vorlage die Spaltenauswahl neu aufbaut
     // und die Vorgabe sonst verloren waere.
     let openDefaultCol = null;
+    // Wird der Karteneditor gerade fuer eine Vorlage benutzt? Dann traegt das
+    // Feld die ID und die Rueckgabe, und der Submit schreibt keine Karte.
+    let editingTemplate = null;
     // Stand der bearbeiteten Karte beim Oeffnen, fuer den Abgleich beim
     // Speichern (F3)
     let cardBasis = '';
@@ -908,6 +911,12 @@ export function initDialogs(state, actions) {
     }
 
     function openCard(cardId, defaultColumnId) {
+        editingTemplate = null;
+        const spalte = document.getElementById('cardColumnRow') || form.elements.columnId;
+        const spaltenZeile = spalte && spalte.closest ? spalte.closest('label') : null;
+        if (spaltenZeile) {
+            spaltenZeile.hidden = false;
+        }
         const card = cardId && state.board ? state.board.cards.find(c => c.id === cardId) : null;
         editingCardId = card ? card.id : null;
         document.getElementById('cardDialogTitleText').textContent = card ? t('card.titleEdit') : t('card.titleNew');
@@ -1415,6 +1424,19 @@ export function initDialogs(state, actions) {
         const data = readCard();
         if (!data.title) return;
         if (!data.assignees.length) { updateAssigneeValidity(); const p = document.getElementById('assigneeValidity'); if (p) p.reportValidity(); return; }
+        if (editingTemplate) {
+            // Der Name bleibt, der kommt aus dem Reiter. Das Faelligkeitsdatum
+            // faellt weg und die Haken werden zurueckgesetzt, wie bei jeder
+            // Vorlage.
+            const tpl = templateFromCard(data, editingTemplate.name, editingTemplate.id);
+            const zurueck = editingTemplate.zurueck;
+            editingTemplate = null;
+            dlg.close();
+            if (zurueck) {
+                zurueck(tpl);
+            }
+            return;
+        }
         if (!await guardFremdaenderung()) {
             return;
         }
@@ -1479,7 +1501,7 @@ export function initDialogs(state, actions) {
         let cleanupModeSel = null, cleanupDaysInp = null, cleanupCountInp = null, memberWrap = null;
         let saveBtn = null, boardPanel = null, boardSel = null;
         let tplBox = null, tplPanel = null, tplExportBtn = null;
-        let tplImportiert = new Map();
+        let tplLokal = new Map();
 
         const validateMembers = () => {
             if (!saveBtn) return;
@@ -1931,13 +1953,13 @@ export function initDialogs(state, actions) {
          * Inhalt einer Vorlage zu einer Zeile im Reiter.
          *
          * Eine eingelesene Vorlage steht noch nicht am Board, deshalb erst dort
-         *  nachsehen und dann in "tplImportiert".
+         *  nachsehen und dann in "tplLokal".
          *
          * @param id ID aus der Zeile
          * @returns Vorlagenobjekt oder null
          */
         function tplInhalt(id) {
-            return ((editBoard && editBoard.templates) || []).find(x => x.id === id) || tplImportiert.get(id) || null;
+            return ((editBoard && editBoard.templates) || []).find(x => x.id === id) || tplLokal.get(id) || null;
         }
 
         /**
@@ -1961,11 +1983,30 @@ export function initDialogs(state, actions) {
             name.value = tpl.name || '';
             name.maxLength = 80;
             name.addEventListener('input', () => { dirty = true; });
+            const edit = el('button', 'rm tpl-edit-btn', '✎');
+            edit.type = 'button';
+            edit.title = t('templates.editTitle');
+            edit.addEventListener('click', () => {
+                const inhalt = tplInhalt(row.dataset.tplId);
+                if (!inhalt) {
+                    return;
+                }
+                openTemplateEditor({ ...inhalt, name: name.value.trim() || inhalt.name }, geaendert => {
+                    // Nicht sofort schreiben: Die geaenderte Fassung liegt lokal und
+                    // geht mit dem Speichern-Knopf weg, wie Umbenennen und
+                    // Umsortieren auch. Sonst waeren anstehende Aenderungen im
+                    // Reiter beim Schreiben verworfen.
+                    tplLokal.set(geaendert.id, geaendert);
+                    name.value = geaendert.name;
+                    dirty = true;
+                    showHint(t('templates.editedLocal', { name: geaendert.name }));
+                });
+            });
             const rm = el('button', 'rm', '×');
             rm.type = 'button';
             rm.title = t('templates.deleteTitle');
             rm.addEventListener('click', () => { row.remove(); dirty = true; tplExportKnopf(); });
-            row.append(pick, drag, name, rm);
+            row.append(pick, drag, name, edit, rm);
             return row;
         }
 
@@ -1980,7 +2021,7 @@ export function initDialogs(state, actions) {
         function buildTemplatePanel(panel) {
             panel.textContent = '';
             const liste = (editBoard && editBoard.templates) || [];
-            tplImportiert = new Map();
+            tplLokal = new Map();
             // Der Kasten entsteht immer, auch leer. Wuerde er bei einer leeren
             // Liste fehlen, waere beim Speichern nicht zu unterscheiden, ob es nie
             // Vorlagen gab oder ob gerade die letzte geloescht wurde - im zweiten
@@ -1996,9 +2037,12 @@ export function initDialogs(state, actions) {
             Sortable.create(tplBox, { handle: '.drag', animation: 150, onEnd: () => { dirty = true; } });
 
             const knoepfe = el('div', 'tpl-actions');
-            tplExportBtn = el('button', 'linkbtn', t('templates.export'));
+            // Richtige Knoepfe, keine Textlinks: Bjoern hat sie als "linkbtn" nicht
+            // gefunden, und zwei Funktionen, die man sucht, duerfen nicht aussehen
+            // wie ein Satz im Hinweistext.
+            tplExportBtn = el('button', null, t('templates.export'));
             tplExportBtn.type = 'button';
-            const importBtn = el('button', 'linkbtn', t('templates.import'));
+            const importBtn = el('button', null, t('templates.import'));
             importBtn.type = 'button';
             knoepfe.append(tplExportBtn, importBtn);
             panel.appendChild(knoepfe);
@@ -2258,7 +2302,7 @@ export function initDialogs(state, actions) {
                     calendarDuration: String(roh.calendarDuration || '01:00'),
                     recurrence: roh.recurrence && roh.recurrence.type ? roh.recurrence : null,
                 };
-                tplImportiert.set(tpl.id, tpl);
+                tplLokal.set(tpl.id, tpl);
                 tplBox.appendChild(tplZeile(tpl));
             }
             dirty = true;
@@ -2789,6 +2833,42 @@ export function initDialogs(state, actions) {
             calendarDuration: card.calendarDuration || '01:00',
             recurrence: card.recurrence || null,
         };
+    }
+
+    /**
+     * Eine Vorlage im Karteneditor bearbeiten.
+     *
+     * Eine Vorlage ist ein Satz Kartenfelder, also ist der Karteneditor das
+     *  richtige Werkzeug dafuer. Ein zweiter, eigener Editor waere dieselbe Maske
+     *  ein zweites Mal, und das dreizehnte Feld wuerde darin fehlen.
+     *
+     * Was anders ist: kein Loeschen, kein Verwalten, keine Vorlagenauswahl, keine
+     *  Spalte (eine Vorlage landet nirgends), und der Speichern-Knopf gibt die
+     *  Fassung zurueck, statt eine Karte zu schreiben.
+     *
+     * @param tpl Vorlage
+     * @param zurueck Rueckgabe der geaenderten Fassung
+     */
+    function openTemplateEditor(tpl, zurueck) {
+        editingTemplate = { id: tpl.id, name: tpl.name, zurueck };
+        editingCardId = null;
+        openDefaultCol = null;
+        document.getElementById('cardDialogTitleText').textContent = t('templates.editTitle');
+        document.getElementById('deleteCardBtn').hidden = true;
+        document.getElementById('transferCardBtn').hidden = true;
+        const pick = document.getElementById('templatePick');
+        if (pick) {
+            pick.hidden = true;
+        }
+        fillForm(tpl, null, true);
+        const spalte = document.getElementById('cardColumnRow') || form.elements.columnId;
+        const spaltenZeile = spalte && spalte.closest ? spalte.closest('label') : null;
+        if (spaltenZeile) {
+            spaltenZeile.hidden = true;
+        }
+        cardBasis = '';
+        cardStand = JSON.stringify(readCard());
+        dlg.showModal();
     }
 
     async function openTransfer(cardId) {

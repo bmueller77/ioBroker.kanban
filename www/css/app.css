@@ -838,6 +838,10 @@ dialog footer > button { overflow: hidden; text-overflow: ellipsis; white-space:
 /* Reiter "Vorlagen": Zeile mit Auswahlkaestchen, Griff, Namensfeld und "x" */
 .tpl-edit { display: flex; align-items: center; gap: 6px; }
 .tpl-actions { display: flex; gap: 8px; align-items: center; margin-top: 6px; flex-wrap: wrap; }
+/* Der Stift traegt dieselbe Groesse wie das "x" daneben, aber nicht dessen
+   Bedeutung: Loeschen ist endgueltig, Bearbeiten nicht. */
+.tpl-edit-btn { color: var(--muted); }
+.tpl-edit-btn:hover { color: var(--accent); }
 
 .hint { font-weight: 400; color: var(--muted); font-size: 13px; }
 

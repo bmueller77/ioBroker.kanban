@@ -259,6 +259,8 @@
   "templates.manageHint": "Reihenfolge ziehen, Namen ändern, mit \"×\" löschen. Der Inhalt einer Vorlage wird an einer Karte über \"Verwalten\" geändert.",
   "templates.noneYet": "Noch keine Vorlage. Eine Vorlage entsteht an einer Karte über \"Verwalten\", Punkt \"Als Vorlage speichern\".",
   "templates.deleteTitle": "Vorlage löschen",
+  "templates.editTitle": "Vorlage bearbeiten",
+  "templates.editedLocal": "Vorlage \"{name}\" geändert. Noch nicht gespeichert.",
   "templates.pickForExport": "Für den Export auswählen",
   "templates.export": "Exportieren",
   "templates.import": "Importieren",

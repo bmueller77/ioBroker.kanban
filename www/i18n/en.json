@@ -259,6 +259,8 @@
   "templates.manageHint": "Drag to reorder, edit the names, remove with \"×\". The contents of a template are changed on a card via \"Manage\".",
   "templates.noneYet": "No template yet. A template is created on a card via \"Manage\", option \"Save as template\".",
   "templates.deleteTitle": "Delete template",
+  "templates.editTitle": "Edit template",
+  "templates.editedLocal": "Template \"{name}\" changed. Not saved yet.",
   "templates.pickForExport": "Select for export",
   "templates.export": "Export",
   "templates.import": "Import",

@@ -259,6 +259,8 @@
   "templates.manageHint": "Glissez pour l'ordre, modifiez les noms, supprimez avec \"×\". Le contenu d'un modèle se modifie sur une carte via \"Gérer\".",
   "templates.noneYet": "Aucun modèle pour l'instant. Un modèle se crée sur une carte via \"Gérer\", option \"Enregistrer comme modèle\".",
   "templates.deleteTitle": "Supprimer le modèle",
+  "templates.editTitle": "Modifier le modèle",
+  "templates.editedLocal": "Modèle \"{name}\" modifié. Pas encore enregistré.",
   "templates.pickForExport": "Sélectionner pour l'export",
   "templates.export": "Exporter",
   "templates.import": "Importer",

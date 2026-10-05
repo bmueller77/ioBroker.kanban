@@ -259,6 +259,8 @@
   "templates.manageHint": "Sleep voor de volgorde, wijzig de namen, verwijder met \"×\". De inhoud van een sjabloon wijzigt u op een kaart via \"Beheren\".",
   "templates.noneYet": "Nog geen sjabloon. Een sjabloon maakt u op een kaart via \"Beheren\", optie \"Als sjabloon opslaan\".",
   "templates.deleteTitle": "Sjabloon verwijderen",
+  "templates.editTitle": "Sjabloon bewerken",
+  "templates.editedLocal": "Sjabloon \"{name}\" gewijzigd. Nog niet opgeslagen.",
   "templates.pickForExport": "Selecteren voor export",
   "templates.export": "Exporteren",
   "templates.import": "Importeren",

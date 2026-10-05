@@ -259,6 +259,8 @@
   "templates.manageHint": "Arraste para ordenar, edite os nomes, remova com \"×\". O conteúdo de um modelo altera-se num cartão através de \"Gerir\".",
   "templates.noneYet": "Ainda sem modelos. Um modelo cria-se num cartão através de \"Gerir\", opção \"Guardar como modelo\".",
   "templates.deleteTitle": "Eliminar modelo",
+  "templates.editTitle": "Editar modelo",
+  "templates.editedLocal": "Modelo \"{name}\" alterado. Ainda não guardado.",
   "templates.pickForExport": "Selecionar para exportação",
   "templates.export": "Exportar",
   "templates.import": "Importar",

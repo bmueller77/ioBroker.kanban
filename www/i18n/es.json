@@ -259,6 +259,8 @@
   "templates.manageHint": "Arrastre para ordenar, edite los nombres, elimine con \"×\". El contenido de una plantilla se cambia en una tarjeta mediante \"Gestionar\".",
   "templates.noneYet": "Todavía no hay plantillas. Una plantilla se crea en una tarjeta mediante \"Gestionar\", opción \"Guardar como plantilla\".",
   "templates.deleteTitle": "Eliminar plantilla",
+  "templates.editTitle": "Editar plantilla",
+  "templates.editedLocal": "Plantilla \"{name}\" modificada. Aún sin guardar.",
   "templates.pickForExport": "Seleccionar para la exportación",
   "templates.export": "Exportar",
   "templates.import": "Importar",
