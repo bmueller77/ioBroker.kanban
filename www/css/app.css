@@ -1412,20 +1412,29 @@ dialog label.inline-num input { width: 80px; }
 .transfer-mode { display: flex; flex-direction: column; gap: 2px; }
 .transfer-mode-row {
     display: flex;
-    align-items: flex-start;
-    gap: 10px;
-    padding: 8px 10px;
+    align-items: baseline;
+    gap: 8px;
+    padding: 4px 8px;
     border-radius: 6px;
     cursor: pointer;
 }
 .transfer-mode-row:hover { background: var(--hover, rgba(127, 127, 127, .10)); }
 .transfer-mode-row.disabled { opacity: .45; cursor: default; }
 .transfer-mode-row.disabled:hover { background: none; }
-/* Der Knopf sitzt auf der Hoehe der ersten Zeile, nicht in der Mitte des
-   zweizeiligen Blocks. */
-.transfer-mode-row > input[type="radio"] { margin: 3px 0 0; flex: none; }
-.transfer-mode-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-.transfer-mode-label { font-weight: 600; }
+.transfer-mode-row > input[type="radio"] { margin: 0; flex: none; }
+/* Beschriftung und Erklaerung in einer Zeile, die Erklaerung hinter dem Namen.
+   Untereinander brauchte jede Art zwei Zeilen und der Dialog wurde unnoetig
+   hoch. Bei wenig Platz bricht nur die Erklaerung um, der Name bleibt am
+   Radioknopf. */
+.transfer-mode-text {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 2px 8px;
+    min-width: 0;
+}
+.transfer-mode-label { font-weight: 600; white-space: nowrap; }
 .transfer-mode-hint { font-size: 12px; color: var(--muted); }
 dialog button:disabled { opacity: 0.45; cursor: default; filter: grayscale(0.6); }
 /* Hinweis in der Seite statt Browserbox. Sitzt unter der Kopfleiste, nimmt
