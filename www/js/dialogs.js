@@ -161,6 +161,102 @@ function slugify(text) {
         .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'x';
 }
 
+/**
+ * Eine Karte in eine Vorlage uebersetzen.
+ *
+ * Zwei Dinge fehlen bewusst. Das Faelligkeitsdatum altert: Eine im Januar
+ *  gespeicherte Vorlage legte im Maerz Karten mit einem Datum von vorgestern an.
+ *  Und die Haken der Checkliste fallen weg, weil eine Vorlage die Punkte
+ *  festhaelt, nicht den Stand. Die Uhrzeit bleibt, 17:00 ist eine Eigenschaft
+ *  der Aufgabe und altert nicht.
+ *
+ * Der Server baut die Vorlage ohnehin aus den erlaubten Feldern neu auf; hier
+ *  wird sie sauber geschickt, damit im Board-Zustand nichts Fremdes steht, bevor
+ *  die Antwort da ist.
+ *
+ * @param card Karte, aus der die Vorlage entsteht
+ * @param name Name der Vorlage, zugleich Titel spaeterer Karten
+ * @param id ID einer bestehenden Vorlage, die ersetzt wird
+ * @returns Vorlagenobjekt
+ */
+export function templateFromCard(card, name, id) {
+    return {
+        ...(id ? { id } : {}),
+        name,
+        title: card.title || name,
+        description: card.description || '',
+        assignees: [...(card.assignees || [])],
+        dueTime: card.dueTime || '',
+        labels: [...(card.labels || [])],
+        color: card.color || '',
+        priority: Number(card.priority) || 0,
+        checklist: (card.checklist || []).map(i => ({ text: (i && i.text) || '', done: false })),
+        link: card.link || '',
+        location: card.location || '',
+        calendarInvite: !!card.calendarInvite,
+        calendarDuration: card.calendarDuration || '01:00',
+        recurrence: card.recurrence || null,
+    };
+}
+
+/**
+ * Eine eingelesene Vorlage fuer dieses Board zurechtlegen.
+ *
+ * Angehaengt, nie ersetzt: Beim Import weiss man nicht, was hinter einem Namen in
+ *  der Datei steckt, und ein falsch bestaetigtes Ueberschreiben ist nicht
+ *  zurueckzuholen. Namensgleiche bekommen deshalb einen Zaehler.
+ *
+ * Labels werden ueber den Namen zugeordnet, kleingeschrieben verglichen. Was sich
+ *  nicht findet, faellt weg: Ein Import soll das Zielboard nicht ungefragt um
+ *  Labels erweitern.
+ *
+ * @param roh Vorlage aus der Datei
+ * @param labelNachName Map von kleingeschriebenem Labelnamen auf Label-ID
+ * @param vergeben Set der schon vergebenen Namen, kleingeschrieben; wird ergaenzt
+ * @param neueId Funktion, die eine frische ID liefert
+ * @returns {{tpl: object, umbenannt: boolean, labelsWeg: number}}
+ */
+export function templateFromImport(roh, labelNachName, vergeben, neueId) {
+    let name = String(roh.name || '').trim();
+    let umbenannt = false;
+    if (vergeben.has(name.toLowerCase())) {
+        let n = 2;
+        while (vergeben.has(`${name} (${n})`.toLowerCase())) {
+            n++;
+        }
+        name = `${name} (${n})`;
+        umbenannt = true;
+    }
+    vergeben.add(name.toLowerCase());
+    const namen = Array.isArray(roh.labelNames) ? roh.labelNames : [];
+    const labels = namen.map(x => labelNachName.get(String(x).trim().toLowerCase())).filter(Boolean);
+    return {
+        umbenannt,
+        labelsWeg: namen.length - labels.length,
+        tpl: {
+            // Frische ID, sonst scheitert das zweite Einlesen derselben Datei.
+            id: neueId(),
+            name,
+            title: String(roh.title || name),
+            description: String(roh.description || ''),
+            assignees: Array.isArray(roh.assignees) ? roh.assignees.filter(a => typeof a === 'string') : [],
+            dueTime: String(roh.dueTime || ''),
+            labels,
+            color: String(roh.color || ''),
+            priority: Number(roh.priority) || 0,
+            checklist: (Array.isArray(roh.checklist) ? roh.checklist : []).map(i => ({
+                text: String((i && i.text) || ''),
+                done: false,
+            })),
+            link: String(roh.link || ''),
+            location: String(roh.location || ''),
+            calendarInvite: !!roh.calendarInvite,
+            calendarDuration: String(roh.calendarDuration || '01:00'),
+            recurrence: roh.recurrence && roh.recurrence.type ? roh.recurrence : null,
+        },
+    };
+}
+
 export function initDialogs(state, actions) {
     const dlg = document.getElementById('cardDialog');
     // Abzug des Formulars beim Oeffnen. Der Vergleich damit beantwortet die
@@ -2296,47 +2392,13 @@ export function initDialogs(state, actions) {
             );
             let umbenannt = 0;
             let labelsWeg = 0;
+            const neueId = () => `tpl_${Date.now().toString(36)}${Math.random().toString(36).slice(2, 7)}`;
             for (const roh of nehmen) {
-                let name = String(roh.name).trim();
-                if (vorhandeneNamen.has(name.toLowerCase())) {
-                    let n = 2;
-                    while (vorhandeneNamen.has(`${name} (${n})`.toLowerCase())) {
-                        n++;
-                    }
-                    name = `${name} (${n})`;
-                    umbenannt++;
-                }
-                vorhandeneNamen.add(name.toLowerCase());
-                // Labels ueber den Namen zuordnen. Was sich nicht findet, faellt weg:
-                // Ein Import soll das Zielboard nicht ungefragt um Labels erweitern.
-                const namen = Array.isArray(roh.labelNames) ? roh.labelNames : [];
-                const labels = namen
-                    .map(x => labelNachName.get(String(x).trim().toLowerCase()))
-                    .filter(Boolean);
-                labelsWeg += namen.length - labels.length;
-                const tpl = {
-                    // Frische ID, sonst scheitert das zweite Einlesen derselben Datei.
-                    id: `tpl_${Date.now().toString(36)}${Math.random().toString(36).slice(2, 7)}`,
-                    name,
-                    title: String(roh.title || name),
-                    description: String(roh.description || ''),
-                    assignees: Array.isArray(roh.assignees) ? roh.assignees.filter(a => typeof a === 'string') : [],
-                    dueTime: String(roh.dueTime || ''),
-                    labels,
-                    color: String(roh.color || ''),
-                    priority: Number(roh.priority) || 0,
-                    checklist: (Array.isArray(roh.checklist) ? roh.checklist : []).map(i => ({
-                        text: String((i && i.text) || ''),
-                        done: false,
-                    })),
-                    link: String(roh.link || ''),
-                    location: String(roh.location || ''),
-                    calendarInvite: !!roh.calendarInvite,
-                    calendarDuration: String(roh.calendarDuration || '01:00'),
-                    recurrence: roh.recurrence && roh.recurrence.type ? roh.recurrence : null,
-                };
-                tplLokal.set(tpl.id, tpl);
-                tplBox.appendChild(tplZeile(tpl));
+                const r = templateFromImport(roh, labelNachName, vorhandeneNamen, neueId);
+                umbenannt += r.umbenannt ? 1 : 0;
+                labelsWeg += r.labelsWeg;
+                tplLokal.set(r.tpl.id, r.tpl);
+                tplBox.appendChild(tplZeile(r.tpl));
             }
             dirty = true;
             flaeche.textContent = '';
@@ -2830,43 +2892,6 @@ export function initDialogs(state, actions) {
     }
 
     // ---------------------------------------------------------- Karte übertragen (Feature 6)
-    /**
-     * Eine Karte in eine Vorlage uebersetzen.
-     *
-     * Zwei Dinge fehlen bewusst. Das Faelligkeitsdatum altert: Eine im Januar
-     *  gespeicherte Vorlage legte im Maerz Karten mit einem Datum von vorgestern
-     *  an. Und die Haken der Checkliste fallen weg, weil eine Vorlage die Punkte
-     *  festhaelt, nicht den Stand. Die Uhrzeit bleibt, 17:00 ist eine Eigenschaft
-     *  der Aufgabe und altert nicht.
-     *
-     * Der Server baut die Vorlage ohnehin aus den erlaubten Feldern neu auf; hier
-     *  wird sie sauber geschickt, damit im Board-Zustand nichts Fremdes steht,
-     *  bevor die Antwort da ist.
-     *
-     * @param card Karte, aus der die Vorlage entsteht
-     * @param name Name der Vorlage, zugleich Titel spaeterer Karten
-     * @param id ID einer bestehenden Vorlage, die ersetzt wird
-     * @returns Vorlagenobjekt
-     */
-    function templateFromCard(card, name, id) {
-        return {
-            ...(id ? { id } : {}),
-            name,
-            title: card.title || name,
-            description: card.description || '',
-            assignees: [...(card.assignees || [])],
-            dueTime: card.dueTime || '',
-            labels: [...(card.labels || [])],
-            color: card.color || '',
-            priority: Number(card.priority) || 0,
-            checklist: (card.checklist || []).map(i => ({ text: (i && i.text) || '', done: false })),
-            link: card.link || '',
-            location: card.location || '',
-            calendarInvite: !!card.calendarInvite,
-            calendarDuration: card.calendarDuration || '01:00',
-            recurrence: card.recurrence || null,
-        };
-    }
 
     /**
      * Eine Vorlage im Karteneditor bearbeiten.
