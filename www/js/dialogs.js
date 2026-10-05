@@ -1971,11 +1971,6 @@ export function initDialogs(state, actions) {
         function tplZeile(tpl) {
             const row = el('div', 'label-edit tpl-edit');
             row.dataset.tplId = tpl.id || '';
-            const pick = document.createElement('input');
-            pick.type = 'checkbox';
-            pick.checked = true;
-            pick.title = t('templates.pickForExport');
-            pick.addEventListener('change', () => tplExportKnopf());
             const drag = el('span', 'drag', '⠳');
             drag.title = t('boards.dragTitle');
             const name = document.createElement('input');
@@ -2002,20 +1997,29 @@ export function initDialogs(state, actions) {
                     showHint(t('templates.editedLocal', { name: geaendert.name }));
                 });
             });
+            const aus = el('button', 'rm tpl-edit-btn', '↗');
+            aus.type = 'button';
+            aus.title = t('templates.exportOne');
+            aus.addEventListener('click', () => {
+                const inhalt = tplInhalt(row.dataset.tplId);
+                if (inhalt) {
+                    tplExportDialog([{ ...inhalt, name: name.value.trim() || inhalt.name }]);
+                }
+            });
             const rm = el('button', 'rm', '×');
             rm.type = 'button';
             rm.title = t('templates.deleteTitle');
-            rm.addEventListener('click', () => { row.remove(); dirty = true; tplExportKnopf(); });
-            row.append(pick, drag, name, edit, rm);
+            rm.addEventListener('click', () => { row.remove(); dirty = true; });
+            row.append(drag, name, edit, aus, rm);
             return row;
         }
 
-        /** Der Export-Knopf ist nur brauchbar, wenn mindestens eine Zeile angehakt ist. */
+        /** Ohne Vorlagen gibt es nichts zu exportieren. */
         function tplExportKnopf() {
             if (!tplBox || !tplExportBtn) {
                 return;
             }
-            tplExportBtn.disabled = ![...tplBox.children].some(r => r.querySelector('input[type=checkbox]').checked);
+            tplExportBtn.disabled = !tplBox.children.length;
         }
 
         function buildTemplatePanel(panel) {
@@ -2040,7 +2044,7 @@ export function initDialogs(state, actions) {
             // Richtige Knoepfe, keine Textlinks: Bjoern hat sie als "linkbtn" nicht
             // gefunden, und zwei Funktionen, die man sucht, duerfen nicht aussehen
             // wie ein Satz im Hinweistext.
-            tplExportBtn = el('button', null, t('templates.export'));
+            tplExportBtn = el('button', null, t('templates.exportAll'));
             tplExportBtn.type = 'button';
             const importBtn = el('button', null, t('templates.import'));
             importBtn.type = 'button';
@@ -2053,13 +2057,25 @@ export function initDialogs(state, actions) {
             const flaeche = el('div');
             panel.appendChild(flaeche);
 
-            tplExportBtn.addEventListener('click', () => tplExport(flaeche));
+            tplExportBtn.addEventListener('click', () => {
+                const alle = [...tplBox.children]
+                    .map(r => {
+                        const inhalt = tplInhalt(r.dataset.tplId);
+                        if (!inhalt) {
+                            return null;
+                        }
+                        const name = r.querySelector('input[type=text]').value.trim() || inhalt.name;
+                        return { ...inhalt, name };
+                    })
+                    .filter(Boolean);
+                tplExportDialog(alle);
+            });
             importBtn.addEventListener('click', () => tplImportFormular(flaeche));
             tplExportKnopf();
         }
 
         /**
-         * Die angehakten Vorlagen ausgeben.
+         * Vorlagen ausgeben, in einem eigenen Dialog.
          *
          * Zum Herunterladen und zusaetzlich als Text zum Kopieren. Der Kasten ist
          *  kein Beiwerk: Auf einem Tablet im Kiosk-Modus gibt es weder Dateiauswahl
@@ -2068,29 +2084,17 @@ export function initDialogs(state, actions) {
          * Labels reisen als Name mit. Eine Label-ID aus einem anderen Board bedeutet
          *  im Ziel nichts; ueber den Namen laesst sich zuordnen.
          *
-         * @param flaeche Zielelement unter den Knoepfen
+         * @param liste Vorlagen, eine oder alle
          */
-        function tplExport(flaeche) {
+        function tplExportDialog(liste) {
             const labelName = id => {
                 const l = ((editBoard && editBoard.labels) || []).find(x => x && x.id === id);
                 return (l && (l.title || l.name)) || '';
             };
-            const gewaehlt = [...tplBox.children].filter(r => r.querySelector('input[type=checkbox]').checked);
-            const templates = gewaehlt
-                .map(r => {
-                    const inhalt = tplInhalt(r.dataset.tplId);
-                    if (!inhalt) {
-                        return null;
-                    }
-                    const name = r.querySelector('input[type=text]').value.trim() || inhalt.name;
-                    return {
-                        ...inhalt,
-                        name,
-                        title: name !== inhalt.name ? name : inhalt.title,
-                        labelNames: (inhalt.labels || []).map(labelName).filter(Boolean),
-                    };
-                })
-                .filter(Boolean);
+            const templates = liste.map(tpl => ({
+                ...tpl,
+                labelNames: (tpl.labels || []).map(labelName).filter(Boolean),
+            }));
             const paket = {
                 type: 'iobroker.kanban.templates',
                 version: 1,
@@ -2100,16 +2104,36 @@ export function initDialogs(state, actions) {
             };
             const text = JSON.stringify(paket, null, 2);
             const datum = new Date().toISOString().slice(0, 10);
-            const datei = `kanban-vorlagen-${(editBoard && editBoard.id) || 'board'}-${datum}.json`;
+            const einzeln = templates.length === 1 ? `-${slugify(templates[0].name)}` : '';
+            const datei = `kanban-vorlagen-${(editBoard && editBoard.id) || 'board'}${einzeln}-${datum}.json`;
 
-            flaeche.textContent = '';
-            flaeche.appendChild(el('div', 'hint', t('templates.exportHint', { n: templates.length })));
+            const xdlg = document.getElementById('exportDialog');
+            const body = document.getElementById('exportBody');
+            body.textContent = '';
+            const h = el('h3', null, t('templates.exportTitle'));
+            addCloseX(h, () => xdlg.close());
+            body.appendChild(h);
+            body.appendChild(el('div', 'hint', t('templates.exportHint', { n: templates.length })));
             const feld = document.createElement('textarea');
-            feld.rows = 6;
+            feld.rows = 10;
             feld.readOnly = true;
             feld.value = text;
-            flaeche.appendChild(feld);
-            const reihe = el('div', 'tpl-actions');
+            body.appendChild(feld);
+            const foot = el('footer');
+            const laden = el('button', null, t('templates.download'));
+            laden.type = 'button';
+            laden.addEventListener('click', () => {
+                try {
+                    const url = URL.createObjectURL(new Blob([text], { type: 'application/json' }));
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = datei;
+                    a.click();
+                    setTimeout(() => URL.revokeObjectURL(url), 2000);
+                } catch (e) {
+                    showHint(t('templates.downloadFailed'), 'error');
+                }
+            });
             const kopieren = el('button', null, t('share.copy'));
             kopieren.type = 'button';
             kopieren.addEventListener('click', async () => {
@@ -2126,22 +2150,12 @@ export function initDialogs(state, actions) {
                 kopieren.textContent = t('share.copied');
                 setTimeout(() => { kopieren.textContent = t('share.copy'); }, 1500);
             });
-            const laden = el('button', null, t('templates.download'));
-            laden.type = 'button';
-            laden.addEventListener('click', () => {
-                try {
-                    const url = URL.createObjectURL(new Blob([text], { type: 'application/json' }));
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = datei;
-                    a.click();
-                    setTimeout(() => URL.revokeObjectURL(url), 2000);
-                } catch (e) {
-                    showHint(t('templates.downloadFailed'), 'error');
-                }
-            });
-            reihe.append(laden, kopieren);
-            flaeche.appendChild(reihe);
+            const zu = el('button', 'primary', t('boards.close'));
+            zu.type = 'button';
+            zu.addEventListener('click', () => xdlg.close());
+            foot.append(laden, kopieren, el('span', 'spacer'), zu);
+            body.appendChild(foot);
+            xdlg.showModal();
         }
 
         /**

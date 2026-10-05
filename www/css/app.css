@@ -842,6 +842,9 @@ dialog footer > button { overflow: hidden; text-overflow: ellipsis; white-space:
    Bedeutung: Loeschen ist endgueltig, Bearbeiten nicht. */
 .tpl-edit-btn { color: var(--muted); }
 .tpl-edit-btn:hover { color: var(--accent); }
+/* Export-Dialog: das Textfeld soll den Platz bekommen, nicht der Rahmen. */
+#exportDialog { min-width: min(620px, 92vw); }
+#exportBody textarea { width: 100%; font-family: monospace; font-size: 12px; }
 
 .hint { font-weight: 400; color: var(--muted); font-size: 13px; }
 
