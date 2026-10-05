@@ -1959,7 +1959,10 @@ export function initDialogs(state, actions) {
          * @returns Vorlagenobjekt oder null
          */
         function tplInhalt(id) {
-            return ((editBoard && editBoard.templates) || []).find(x => x.id === id) || tplLokal.get(id) || null;
+            // Die lokale Fassung zuerst. Andersherum gewann beim Bearbeiten einer
+            // bestehenden Vorlage der Stand vom Board, und die Aenderung ging beim
+            // Speichern verloren, ohne dass irgendwo etwas zu sehen war.
+            return tplLokal.get(id) || ((editBoard && editBoard.templates) || []).find(x => x.id === id) || null;
         }
 
         /**
