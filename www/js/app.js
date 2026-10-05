@@ -26,6 +26,10 @@ const state = {
     theme: qs.get('theme') || localStorage.getItem('kanban.theme') || '',
     accent: qs.get('accent') || '',
     embed: qs.get('embed') === '1',
+    // Landezonen erzwingen. Sie erscheinen von selbst, sobald nicht alle
+    // Spalten ins Bild passen; dieser Parameter schaltet sie unabhaengig davon
+    // ein. Gedacht fuer eine feste Kiosk-Adresse, die keinen Speicher braucht.
+    zonesAlways: qs.get('zones') === '1',
     collapsedCols: new Set((localStorage.getItem('kanban.collapsedCols') || '').split(',').filter(Boolean)),
     sortModes: (() => { try { return JSON.parse(localStorage.getItem('kanban.sortModes') || '{}') || {}; } catch (e) { return {}; } })(),
     countModes: (() => { try { return JSON.parse(localStorage.getItem('kanban.countModes') || '{}') || {}; } catch (e) { return {}; } })(),

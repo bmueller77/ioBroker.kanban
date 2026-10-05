@@ -620,7 +620,7 @@ Dasselbe gilt für ein **Board ohne Spalten**: Ohne Spalte gibt es keinen Ort f�
 
 ### Mobile Ansicht
 
-Auf schmalen Bildschirmen stapelt das Board die Spalten untereinander; jede Spalte lässt sich als Akkordeon ein-/ausklappen (Zustand wird je Gerät gemerkt). Karten-, Board- und Ansichten-Dialog öffnen im Vollbild mit fester Aktionsleiste unten. Zum Verschieben eine Karte kurz gedrückt halten, beim Ziehen erscheint ein Schnellmenü mit den Zielspalten. Das Schnellmenü erscheint auch auf einem Tablet, sobald nicht alle Spalten ins Bild passen und man mit dem Finger arbeitet. Der Papierkorb steht darin nur, wenn er auch als Spalte eingeblendet ist.
+Auf schmalen Bildschirmen stapelt das Board die Spalten untereinander; jede Spalte lässt sich als Akkordeon ein-/ausklappen (Zustand wird je Gerät gemerkt). Karten-, Board- und Ansichten-Dialog öffnen im Vollbild mit fester Aktionsleiste unten. Zum Verschieben eine Karte kurz gedrückt halten, beim Ziehen erscheint ein Schnellmenü mit den Zielspalten. Das Schnellmenü erscheint immer dann, wenn nicht alle Spalten vollständig ins Bild passen, unabhängig davon, ob mit dem Finger oder mit der Maus gezogen wird. Im Dialog "Ansichten" lässt es sich über "Landezonen beim Ziehen immer anzeigen" auch dauerhaft einschalten; der Schalter wandert als Parameter in die erzeugte Adresse. Der Papierkorb steht darin nur, wenn er auch als Spalte eingeblendet ist.
 
 <img src="img/mobile.png" alt="Mobile Ansicht, gestapelte Spalten" width="330"> <img src="img/mobile-drag.png" alt="Mobile Ansicht, Schnellmenü beim Ziehen einer Karte" width="330">
 

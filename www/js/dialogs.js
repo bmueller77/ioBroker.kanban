@@ -2252,7 +2252,7 @@ export function initDialogs(state, actions) {
         const opt = {
             board: (state.board && state.board.id) || (state.boards[0] && state.boards[0].id) || '',
             users: [], labels: [], labelMode: 'hide', columns: null, doneLimit: null,
-            hideSettings: false, embed: false,
+            hideSettings: false, embed: false, zones: false,
         };
 
         const mkCheck = (text) => {
@@ -2328,6 +2328,7 @@ export function initDialogs(state, actions) {
 
         const cHideSettings = mkCheck(t('share.hideSettings'));
         const cEmbed = mkCheck(t('share.embed'));
+        const cZones = mkCheck(t('share.zones'));
 
         // Sichtbare Spalten (des gewählten Boards) – alle an = kein Filter
         let curColumns = [];
@@ -2374,6 +2375,7 @@ export function initDialogs(state, actions) {
             if (opt.doneLimit != null) p.set('doneLimit', String(opt.doneLimit));
             if (opt.hideSettings) p.set('hideSettings', '1');
             if (opt.embed) p.set('embed', '1');
+            if (opt.zones) p.set('zones', '1');
             const q = p.toString();
             return location.origin + location.pathname + (q ? '?' + q : '');
         };
@@ -2383,6 +2385,7 @@ export function initDialogs(state, actions) {
         doneLimitInp.addEventListener('input', () => { opt.doneLimit = doneLimitInp.value === '' ? null : Math.max(0, parseInt(doneLimitInp.value, 10) || 0); update(); });
         cHideSettings.inp.addEventListener('change', () => { opt.hideSettings = cHideSettings.inp.checked; update(); });
         cEmbed.inp.addEventListener('change', () => { opt.embed = cEmbed.inp.checked; update(); });
+        cZones.inp.addEventListener('change', () => { opt.zones = cZones.inp.checked; update(); });
         copyBtn.addEventListener('click', async () => {
             const done = () => { copyBtn.textContent = t('share.copied'); setTimeout(() => { copyBtn.textContent = t('share.copy'); }, 1500); };
             try { await navigator.clipboard.writeText(urlField.value); done(); }
@@ -2390,7 +2393,7 @@ export function initDialogs(state, actions) {
         });
 
         body.append(board.lab, usersLabel, usersWrap, labelsLabel, labelsWrap, colsLabel, colsWrap, doneLimitLbl,
-            cHideSettings.lab, cEmbed.lab,
+            cHideSettings.lab, cEmbed.lab, cZones.lab,
             el('label', null, t('share.generatedUrl')), urlWrap);
 
         const foot = el('footer');

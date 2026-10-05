@@ -87,19 +87,11 @@ export function mdiIcon(pathData) {
 // passierte das nicht — deshalb ging es mal und mal nicht, je nachdem wo man
 // die Karte angefasst hat.
 let dragActive = false;
-// Art des Zeigers der letzten Beruehrung: 'touch', 'pen' oder 'mouse'. Gemessen
-// an der Geste, weil die Abfrage 'pointer: coarse' in einer WebView nicht
-// zwingend stimmt.
-let letzterZeiger = '';
 let ctxGuardReady = false;
 
 function initCtxGuard() {
     if (ctxGuardReady || typeof document === 'undefined') return;
     ctxGuardReady = true;
-    // Zwei Wege, weil eine WebView das eine oder das andere liefert.
-    document.addEventListener('pointerdown', ev => { letzterZeiger = ev.pointerType || letzterZeiger; }, true);
-    document.addEventListener('touchstart', () => { letzterZeiger = 'touch'; }, { capture: true, passive: true });
-    document.addEventListener('mousedown', ev => { if (!ev.sourceCapabilities || !ev.sourceCapabilities.firesTouchEvents) letzterZeiger = 'mouse'; }, true);
     document.addEventListener('contextmenu', ev => {
         const onCard = ev.target && ev.target.closest && ev.target.closest('.card');
         if (onCard || dragActive) ev.preventDefault();
@@ -136,20 +128,14 @@ function saveCheckExpanded() {
 }
 
 /**
- * Landezonen beim Ziehen anbieten?
+ * Passen alle Spalten ins Bild?
  *
- * Nicht die Bildschirmbreite entscheidet, sondern ob alle Spalten ins Bild
- * passen. Passen sie, liegt jedes Ziel in Reichweite und die Leiste waere nur im
- * Weg. Passen sie nicht, liegt das Ziel jenseits des Randes, und man muss
- * ziehend dorthin scrollen — auf einem Tablet mit fuenf Spalten, von denen
- * dreieinhalb sichtbar sind, ist das der Normalfall.
+ * Zwei unabhaengige Messungen, eine genuegt: der waagerechte Ueberlauf von
+ *  "#board", und ob die letzte Spalte ueber den sichtbaren Rand hinausreicht.
+ *  "scrollWidth" ist in mancher WebView nicht verlaesslich, und dann fehlten
+ *  die Zonen genau dort, wo sie gebraucht werden.
  *
- * Die zweite Bedingung ist der Finger. Mit der Maus ist der Zeiger genau, der
- * Streifen am Rand leicht zu treffen und das Mitscrollen zuverlaessig; dort
- * braucht es die Zonen nicht. "pointer: coarse" trifft Tablets und Telefone und
- * laesst Geraete mit Maus aussen vor, auch wenn deren Schirm Beruehrung kann.
- *
- * @returns true, wenn die Landezonen erscheinen sollen
+ * @returns true, wenn ein Ziel jenseits des rechten Randes liegt
  */
 function spaltenPassenNicht() {
     const board = document.getElementById('board');
@@ -172,34 +158,35 @@ function spaltenPassenNicht() {
     return letzte.right > aussen.right + 4;
 }
 
-function wantsQuickMove() {
-    // Auf schmalen Schirmen stehen die Spalten untereinander, "overflow-x" ist
-    // "hidden", und es gibt keinen waagerechten Ueberlauf: Das Ziel liegt
-    // senkrecht ausser Reichweite. Gemessen auf einem Telefon mit 374 Pixeln,
-    // scrollWidth gleich clientWidth. Diese Regel stand hier von Anfang an und
-    // war die eigentliche; ich hatte sie durch den Ueberlauftest ersetzt statt
-    // sie zu ergaenzen, und damit die Zonen genau dort abgeschaltet, wofuer sie
-    // gebaut wurden. Hier gilt sie unabhaengig von der Art des Zeigers, denn ein
-    // schmales Fenster am Schreibtisch stapelt die Spalten genauso.
+/**
+ * Landezonen beim Ziehen anbieten?
+ *
+ * Eine Frage, eine Antwort: Liegt ein Ziel ausser Reichweite? Die Art des
+ *  Zeigers spielt keine Rolle mehr. Mit der Maus ist das Ziehen an den Rand und
+ *  das Warten auf das Mitscrollen genauso muehsam, und jede Erkennung der
+ *  Geraeteklasse war eine Fehlerquelle: "pointer: coarse" beantwortet eine
+ *  WebView nicht zwingend richtig, und Fully Kiosk verschleiert sogar die
+ *  Plattform in der Kennung ("diordnA" statt "Android").
+ *
+ * Zwei Faelle, einer genuegt:
+ *  - Schmaler Schirm. Dort stehen die Spalten untereinander, "overflow-x" ist
+ *    "hidden", und es gibt keinen waagerechten Ueberlauf; das Ziel liegt
+ *    senkrecht ausser Reichweite. Gemessen auf einem Telefon mit 374 Pixeln.
+ *  - Breiter Schirm, aber die Spalten passen nicht ins Bild. Gemessen auf einem
+ *    Tab S5e: 1024 Pixel sichtbar, 1180 gebraucht.
+ *
+ * Dazu der Parameter "zones=1", der sie unabhaengig davon einschaltet.
+ *
+ * @returns true, wenn die Leiste mit den Zielspalten erscheinen soll
+ */
+function wantsQuickMove(immer) {
+    if (immer) {
+        return true;
+    }
     if (window.matchMedia('(max-width: 820px)').matches) {
         return true;
     }
-    // Darueber hinaus: breiter Schirm, aber die Spalten passen trotzdem nicht
-    // ins Bild. Das ist der Tablet-Fall mit fuenf Spalten.
-    if (!spaltenPassenNicht()) {
-        return false;
-    }
-    // Die Art des Zeigers wird an der laufenden Geste gemessen, nicht beim
-    // Browser erfragt. "pointer: coarse" beantwortet eine WebView nicht
-    // zwingend richtig - auf dem Tablet fehlten die Zonen deshalb, obwohl die
-    // Abfrage in der Nachstellung zutraf.
-    if (letzterZeiger === 'touch' || letzterZeiger === 'pen') {
-        return true;
-    }
-    if (letzterZeiger === 'mouse') {
-        return false;
-    }
-    return window.matchMedia('(pointer: coarse)').matches || window.matchMedia('(max-width: 820px)').matches;
+    return spaltenPassenNicht();
 }
 
 function buildQuickMove(evt, sourceCol, board, showTrash) {
@@ -1659,7 +1646,7 @@ export function renderBoard(container, state, actions) {
 
             onStart: evt => {
                 dragActive = true;
-                if (wantsQuickMove()) buildQuickMove(evt, col, board, !!state.showTrash);
+                if (wantsQuickMove(!!state.zonesAlways)) buildQuickMove(evt, col, board, !!state.showTrash);
             },
             onEnd: evt => {
                 dragActive = false;

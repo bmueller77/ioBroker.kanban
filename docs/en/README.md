@@ -621,7 +621,7 @@ As soon as a second user appears in the instance settings, all of it is back. Ca
 
 ### Mobile view
 
-On narrow screens the board stacks the columns vertically; each column collapses as an accordion (state is remembered per device). The card, board and views dialogs open full-screen with a fixed action bar at the bottom. To move a card, press and hold briefly, while dragging, a quick-move menu with the target columns appears. The same menu appears on a tablet as soon as the columns no longer fit on screen and a finger is doing the dragging. The trash is listed in it only while the trash column itself is shown.
+On narrow screens the board stacks the columns vertically; each column collapses as an accordion (state is remembered per device). The card, board and views dialogs open full-screen with a fixed action bar at the bottom. To move a card, press and hold briefly, while dragging, a quick-move menu with the target columns appears. The same menu appears whenever the columns no longer fit on screen in full, whether a finger or a mouse is doing the dragging. The "Views" dialog can switch it on for good through "Always show the drop zones while dragging"; that switch travels as a parameter in the generated link. The trash is listed in it only while the trash column itself is shown.
 
 <img src="img/mobile.png" alt="Mobile view, stacked columns" width="330"> <img src="img/mobile-drag.png" alt="Mobile view, quick-move menu while dragging a card" width="330">
 

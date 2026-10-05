@@ -150,6 +150,7 @@
   "share.doneLimitAll": "все",
   "share.hideSettings": "Скрыть шестерёнку настроек",
   "share.embed": "Режим встраивания (компактный, для iframe)",
+  "share.zones": "Всегда показывать зоны перемещения при перетаскивании",
   "share.generatedUrl": "Готовая ссылка",
   "share.copy": "Копировать",
   "share.copied": "Скопировано ✓",

@@ -150,6 +150,7 @@
   "share.doneLimitAll": "all",
   "share.hideSettings": "Hide settings gear",
   "share.embed": "Embed mode (compact, for iframe)",
+  "share.zones": "Always show the drop zones while dragging",
   "share.generatedUrl": "Generated URL",
   "share.copy": "Copy",
   "share.copied": "Copied ✓",
