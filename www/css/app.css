@@ -835,6 +835,9 @@ dialog footer > button { overflow: hidden; text-overflow: ellipsis; white-space:
 /* Vorlagenauswahl in der Fusszeile des Karteneditors: nimmt nur den Platz, den
    sie braucht, und laesst dem Titel der laengsten Vorlage Raum. */
 #templatePick { max-width: 45%; }
+/* Reiter "Vorlagen": Zeile mit Auswahlkaestchen, Griff, Namensfeld und "x" */
+.tpl-edit { display: flex; align-items: center; gap: 6px; }
+.tpl-actions { display: flex; gap: 8px; align-items: center; margin-top: 6px; flex-wrap: wrap; }
 
 .hint { font-weight: 400; color: var(--muted); font-size: 13px; }
 

@@ -1478,7 +1478,8 @@ export function initDialogs(state, actions) {
         let titleInput = null, colBox = null, labelBox = null, linkTargetSel = null, linkUrlInput = null;
         let cleanupModeSel = null, cleanupDaysInp = null, cleanupCountInp = null, memberWrap = null;
         let saveBtn = null, boardPanel = null, boardSel = null;
-        let tplBox = null, tplPanel = null;
+        let tplBox = null, tplPanel = null, tplExportBtn = null;
+        let tplImportiert = new Map();
 
         const validateMembers = () => {
             if (!saveBtn) return;
@@ -1576,7 +1577,7 @@ export function initDialogs(state, actions) {
             const templates = tplBox
                 ? [...tplBox.children]
                       .map(row => {
-                          const alt = (editBoard.templates || []).find(x => x.id === row.dataset.tplId);
+                          const alt = tplInhalt(row.dataset.tplId);
                           const name = row.querySelector('input[type=text]').value.trim();
                           if (!alt || !name) {
                               return null;
@@ -1926,9 +1927,60 @@ export function initDialogs(state, actions) {
          *
          * @param panel Zielelement des Reiters
          */
+        /**
+         * Inhalt einer Vorlage zu einer Zeile im Reiter.
+         *
+         * Eine eingelesene Vorlage steht noch nicht am Board, deshalb erst dort
+         *  nachsehen und dann in "tplImportiert".
+         *
+         * @param id ID aus der Zeile
+         * @returns Vorlagenobjekt oder null
+         */
+        function tplInhalt(id) {
+            return ((editBoard && editBoard.templates) || []).find(x => x.id === id) || tplImportiert.get(id) || null;
+        }
+
+        /**
+         * Eine Zeile des Reiters bauen.
+         *
+         * @param tpl Vorlage
+         * @returns Zeilenelement
+         */
+        function tplZeile(tpl) {
+            const row = el('div', 'label-edit tpl-edit');
+            row.dataset.tplId = tpl.id || '';
+            const pick = document.createElement('input');
+            pick.type = 'checkbox';
+            pick.checked = true;
+            pick.title = t('templates.pickForExport');
+            pick.addEventListener('change', () => tplExportKnopf());
+            const drag = el('span', 'drag', '⠳');
+            drag.title = t('boards.dragTitle');
+            const name = document.createElement('input');
+            name.type = 'text';
+            name.value = tpl.name || '';
+            name.maxLength = 80;
+            name.addEventListener('input', () => { dirty = true; });
+            const rm = el('button', 'rm', '×');
+            rm.type = 'button';
+            rm.title = t('templates.deleteTitle');
+            rm.addEventListener('click', () => { row.remove(); dirty = true; tplExportKnopf(); });
+            row.append(pick, drag, name, rm);
+            return row;
+        }
+
+        /** Der Export-Knopf ist nur brauchbar, wenn mindestens eine Zeile angehakt ist. */
+        function tplExportKnopf() {
+            if (!tplBox || !tplExportBtn) {
+                return;
+            }
+            tplExportBtn.disabled = ![...tplBox.children].some(r => r.querySelector('input[type=checkbox]').checked);
+        }
+
         function buildTemplatePanel(panel) {
             panel.textContent = '';
             const liste = (editBoard && editBoard.templates) || [];
+            tplImportiert = new Map();
             // Der Kasten entsteht immer, auch leer. Wuerde er bei einer leeren
             // Liste fehlen, waere beim Speichern nicht zu unterscheiden, ob es nie
             // Vorlagen gab oder ob gerade die letzte geloescht wurde - im zweiten
@@ -1937,25 +1989,289 @@ export function initDialogs(state, actions) {
             tplBox = el('div');
             tplBox.style.cssText = 'display:flex;flex-direction:column;gap:6px';
             for (const tpl of liste) {
-                const row = el('div', 'label-edit');
-                row.dataset.tplId = tpl.id || '';
-                const drag = el('span', 'drag', '⠳');
-                drag.title = t('boards.dragTitle');
-                const name = document.createElement('input');
-                name.type = 'text';
-                name.value = tpl.name || '';
-                name.maxLength = 80;
-                name.addEventListener('input', () => { dirty = true; });
-                const rm = el('button', 'rm', '×');
-                rm.type = 'button';
-                rm.title = t('templates.deleteTitle');
-                rm.addEventListener('click', () => { row.remove(); dirty = true; });
-                row.append(drag, name, rm);
-                tplBox.appendChild(row);
+                tplBox.appendChild(tplZeile(tpl));
             }
             panel.appendChild(tplBox);
             // eslint-disable-next-line no-undef
             Sortable.create(tplBox, { handle: '.drag', animation: 150, onEnd: () => { dirty = true; } });
+
+            const knoepfe = el('div', 'tpl-actions');
+            tplExportBtn = el('button', 'linkbtn', t('templates.export'));
+            tplExportBtn.type = 'button';
+            const importBtn = el('button', 'linkbtn', t('templates.import'));
+            importBtn.type = 'button';
+            knoepfe.append(tplExportBtn, importBtn);
+            panel.appendChild(knoepfe);
+
+            // Arbeitsflaeche fuer Export und Import. Beides spielt hier im Reiter,
+            // nicht in einem weiteren Dialog: Ein Dialog auf dem Einstellungsdialog
+            // auf dem Karteneditor ist eine Ebene zu viel.
+            const flaeche = el('div');
+            panel.appendChild(flaeche);
+
+            tplExportBtn.addEventListener('click', () => tplExport(flaeche));
+            importBtn.addEventListener('click', () => tplImportFormular(flaeche));
+            tplExportKnopf();
+        }
+
+        /**
+         * Die angehakten Vorlagen ausgeben.
+         *
+         * Zum Herunterladen und zusaetzlich als Text zum Kopieren. Der Kasten ist
+         *  kein Beiwerk: Auf einem Tablet im Kiosk-Modus gibt es weder Dateiauswahl
+         *  noch Downloadordner, und dort faellt der Weg ueber die Datei weg.
+         *
+         * Labels reisen als Name mit. Eine Label-ID aus einem anderen Board bedeutet
+         *  im Ziel nichts; ueber den Namen laesst sich zuordnen.
+         *
+         * @param flaeche Zielelement unter den Knoepfen
+         */
+        function tplExport(flaeche) {
+            const labelName = id => {
+                const l = ((editBoard && editBoard.labels) || []).find(x => x && x.id === id);
+                return (l && (l.title || l.name)) || '';
+            };
+            const gewaehlt = [...tplBox.children].filter(r => r.querySelector('input[type=checkbox]').checked);
+            const templates = gewaehlt
+                .map(r => {
+                    const inhalt = tplInhalt(r.dataset.tplId);
+                    if (!inhalt) {
+                        return null;
+                    }
+                    const name = r.querySelector('input[type=text]').value.trim() || inhalt.name;
+                    return {
+                        ...inhalt,
+                        name,
+                        title: name !== inhalt.name ? name : inhalt.title,
+                        labelNames: (inhalt.labels || []).map(labelName).filter(Boolean),
+                    };
+                })
+                .filter(Boolean);
+            const paket = {
+                type: 'iobroker.kanban.templates',
+                version: 1,
+                board: (editBoard && editBoard.id) || '',
+                exportedAt: new Date().toISOString(),
+                templates,
+            };
+            const text = JSON.stringify(paket, null, 2);
+            const datum = new Date().toISOString().slice(0, 10);
+            const datei = `kanban-vorlagen-${(editBoard && editBoard.id) || 'board'}-${datum}.json`;
+
+            flaeche.textContent = '';
+            flaeche.appendChild(el('div', 'hint', t('templates.exportHint', { n: templates.length })));
+            const feld = document.createElement('textarea');
+            feld.rows = 6;
+            feld.readOnly = true;
+            feld.value = text;
+            flaeche.appendChild(feld);
+            const reihe = el('div', 'tpl-actions');
+            const kopieren = el('button', null, t('share.copy'));
+            kopieren.type = 'button';
+            kopieren.addEventListener('click', async () => {
+                try {
+                    await navigator.clipboard.writeText(text);
+                } catch {
+                    feld.select();
+                    try {
+                        document.execCommand('copy');
+                    } catch {
+                        /* dann bleibt das Markieren von Hand */
+                    }
+                }
+                kopieren.textContent = t('share.copied');
+                setTimeout(() => { kopieren.textContent = t('share.copy'); }, 1500);
+            });
+            const laden = el('button', null, t('templates.download'));
+            laden.type = 'button';
+            laden.addEventListener('click', () => {
+                try {
+                    const url = URL.createObjectURL(new Blob([text], { type: 'application/json' }));
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = datei;
+                    a.click();
+                    setTimeout(() => URL.revokeObjectURL(url), 2000);
+                } catch (e) {
+                    showHint(t('templates.downloadFailed'), 'error');
+                }
+            });
+            reihe.append(laden, kopieren);
+            flaeche.appendChild(reihe);
+        }
+
+        /**
+         * Formular zum Einlesen: Datei auswaehlen oder Text einfuegen.
+         *
+         * @param flaeche Zielelement unter den Knoepfen
+         */
+        function tplImportFormular(flaeche) {
+            flaeche.textContent = '';
+            flaeche.appendChild(el('div', 'hint', t('templates.importHint')));
+            const datei = document.createElement('input');
+            datei.type = 'file';
+            datei.accept = 'application/json,.json';
+            flaeche.appendChild(datei);
+            const feld = document.createElement('textarea');
+            feld.rows = 5;
+            feld.placeholder = t('templates.importPaste');
+            flaeche.appendChild(feld);
+            const reihe = el('div', 'tpl-actions');
+            const weiter = el('button', 'primary', t('templates.importRead'));
+            weiter.type = 'button';
+            reihe.appendChild(weiter);
+            flaeche.appendChild(reihe);
+
+            datei.addEventListener('change', () => {
+                const f = datei.files && datei.files[0];
+                if (!f) {
+                    return;
+                }
+                const leser = new FileReader();
+                leser.onload = () => { feld.value = String(leser.result || ''); };
+                leser.readAsText(f);
+            });
+            weiter.addEventListener('click', () => tplImportPruefen(flaeche, feld.value));
+        }
+
+        /**
+         * Eingelesenes pruefen und zur Auswahl stellen.
+         *
+         * Eine fremde Datei soll nicht als Vorlagensammlung durchgehen, deshalb nennt
+         *  sich das Paket selbst. Passt es nicht, kommt eine klare Meldung statt eines
+         *  halben Imports.
+         *
+         * @param flaeche Zielelement
+         * @param text Inhalt der Datei oder des Textfelds
+         */
+        function tplImportPruefen(flaeche, text) {
+            let paket = null;
+            try {
+                paket = JSON.parse(String(text || ''));
+            } catch (e) {
+                showHint(t('templates.badJson'), 'error');
+                return;
+            }
+            if (!paket || paket.type !== 'iobroker.kanban.templates' || Number(paket.version) !== 1) {
+                showHint(t('templates.badFile'), 'error');
+                return;
+            }
+            const liste = Array.isArray(paket.templates) ? paket.templates.filter(x => x && x.name) : [];
+            if (!liste.length) {
+                showHint(t('templates.badFile'), 'error');
+                return;
+            }
+            flaeche.textContent = '';
+            flaeche.appendChild(el('div', 'hint', t('templates.importPick', { board: String(paket.board || '?') })));
+            const kasten = el('div');
+            kasten.style.cssText = 'display:flex;flex-direction:column;gap:4px';
+            for (const tpl of liste) {
+                const lab = el('label', 'inline');
+                const inp = document.createElement('input');
+                inp.type = 'checkbox';
+                inp.checked = true;
+                lab.append(inp, document.createTextNode(` ${tpl.name}`));
+                lab.dataset.idx = String(liste.indexOf(tpl));
+                kasten.appendChild(lab);
+            }
+            flaeche.appendChild(kasten);
+            const reihe = el('div', 'tpl-actions');
+            const ok = el('button', 'primary', t('templates.importApply'));
+            ok.type = 'button';
+            ok.addEventListener('click', () => {
+                const gewaehlt = [...kasten.children]
+                    .filter(l => l.querySelector('input').checked)
+                    .map(l => liste[Number(l.dataset.idx)]);
+                tplImportAnwenden(gewaehlt, flaeche);
+            });
+            reihe.appendChild(ok);
+            flaeche.appendChild(reihe);
+        }
+
+        /**
+         * Eingelesene Vorlagen an die Liste im Reiter anhaengen.
+         *
+         * Angehaengt, nie ersetzt. Beim Import weiss man nicht, was hinter einem
+         *  Namen in der Datei steckt, und ein falsch bestaetigtes Ueberschreiben ist
+         *  nicht zurueckzuholen. Namensgleiche bekommen einen Zaehler.
+         *
+         * Geschrieben wird nicht sofort: Die Zeilen landen in der Liste und gehen mit
+         *  dem Speichern-Knopf weg. Ein sofortiges Schreiben haette anstehende
+         *  Umbenennungen und Umsortierungen im Reiter verworfen.
+         *
+         * @param liste Eingelesene Vorlagen
+         * @param flaeche Zielelement, wird geleert
+         */
+        function tplImportAnwenden(liste, flaeche) {
+            const platz = 50 - tplBox.children.length;
+            if (platz <= 0) {
+                showHint(t('templates.limit', { n: 50 }), 'error');
+                return;
+            }
+            const nehmen = liste.slice(0, platz);
+            const vorhandeneNamen = new Set(
+                [...tplBox.children].map(r => r.querySelector('input[type=text]').value.trim().toLowerCase()),
+            );
+            const labelNachName = new Map(
+                ((editBoard && editBoard.labels) || [])
+                    .filter(l => l && (l.title || l.name))
+                    .map(l => [String(l.title || l.name).trim().toLowerCase(), l.id]),
+            );
+            let umbenannt = 0;
+            let labelsWeg = 0;
+            for (const roh of nehmen) {
+                let name = String(roh.name).trim();
+                if (vorhandeneNamen.has(name.toLowerCase())) {
+                    let n = 2;
+                    while (vorhandeneNamen.has(`${name} (${n})`.toLowerCase())) {
+                        n++;
+                    }
+                    name = `${name} (${n})`;
+                    umbenannt++;
+                }
+                vorhandeneNamen.add(name.toLowerCase());
+                // Labels ueber den Namen zuordnen. Was sich nicht findet, faellt weg:
+                // Ein Import soll das Zielboard nicht ungefragt um Labels erweitern.
+                const namen = Array.isArray(roh.labelNames) ? roh.labelNames : [];
+                const labels = namen
+                    .map(x => labelNachName.get(String(x).trim().toLowerCase()))
+                    .filter(Boolean);
+                labelsWeg += namen.length - labels.length;
+                const tpl = {
+                    // Frische ID, sonst scheitert das zweite Einlesen derselben Datei.
+                    id: `tpl_${Date.now().toString(36)}${Math.random().toString(36).slice(2, 7)}`,
+                    name,
+                    title: String(roh.title || name),
+                    description: String(roh.description || ''),
+                    assignees: Array.isArray(roh.assignees) ? roh.assignees.filter(a => typeof a === 'string') : [],
+                    dueTime: String(roh.dueTime || ''),
+                    labels,
+                    color: String(roh.color || ''),
+                    priority: Number(roh.priority) || 0,
+                    checklist: (Array.isArray(roh.checklist) ? roh.checklist : []).map(i => ({
+                        text: String((i && i.text) || ''),
+                        done: false,
+                    })),
+                    link: String(roh.link || ''),
+                    location: String(roh.location || ''),
+                    calendarInvite: !!roh.calendarInvite,
+                    calendarDuration: String(roh.calendarDuration || '01:00'),
+                    recurrence: roh.recurrence && roh.recurrence.type ? roh.recurrence : null,
+                };
+                tplImportiert.set(tpl.id, tpl);
+                tplBox.appendChild(tplZeile(tpl));
+            }
+            dirty = true;
+            flaeche.textContent = '';
+            tplExportKnopf();
+            showHint(
+                t('templates.imported', {
+                    n: nehmen.length,
+                    umbenannt,
+                    labels: labelsWeg,
+                    uebrig: liste.length - nehmen.length,
+                }),
+            );
         }
 
         // ---- Tab: Board ----
