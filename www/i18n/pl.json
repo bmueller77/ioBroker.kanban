@@ -263,6 +263,8 @@
   "templates.editedLocal": "Szablon \"{name}\" zmieniony. Jeszcze nie zapisano.",
   "templates.import": "Importuj",
   "templates.exportAll": "Eksportuj wszystko",
+  "templates.pickForExport": "Wybierz do eksportu",
+  "templates.exportSelected": "Eksportuj wybrane ({n})",
   "templates.exportOne": "Eksportuj ten szablon",
   "templates.exportTitle": "Eksport szablonów",
   "templates.exportHint": "Szablony: {n}. Pobierz plik albo skopiuj tekst i wklej go na tablicy docelowej.",

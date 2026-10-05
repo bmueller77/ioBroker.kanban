@@ -1974,6 +1974,11 @@ export function initDialogs(state, actions) {
         function tplZeile(tpl) {
             const row = el('div', 'label-edit tpl-edit');
             row.dataset.tplId = tpl.id || '';
+            const pick = document.createElement('input');
+            pick.type = 'checkbox';
+            pick.checked = true;
+            pick.title = t('templates.pickForExport');
+            pick.addEventListener('change', () => tplExportKnopf());
             const drag = el('span', 'drag', '⠳');
             drag.title = t('boards.dragTitle');
             const name = document.createElement('input');
@@ -2012,17 +2017,27 @@ export function initDialogs(state, actions) {
             const rm = el('button', 'rm', '×');
             rm.type = 'button';
             rm.title = t('templates.deleteTitle');
-            rm.addEventListener('click', () => { row.remove(); dirty = true; });
-            row.append(drag, name, edit, aus, rm);
+            rm.addEventListener('click', () => { row.remove(); dirty = true; tplExportKnopf(); });
+            row.append(pick, drag, name, edit, aus, rm);
             return row;
         }
 
-        /** Ohne Vorlagen gibt es nichts zu exportieren. */
+        /**
+         * Beschriftung und Zustand des Export-Knopfs nachziehen.
+         *
+         * Er soll jederzeit sagen, was er tun wird: Sind alle angehakt, heisst er
+         *  "Alle exportieren", sonst "Auswahl exportieren" mit der Zahl. Damit ist
+         *  ein Kaestchen nie wirkungslos, und man sieht vor dem Klick, was kommt.
+         */
         function tplExportKnopf() {
             if (!tplBox || !tplExportBtn) {
                 return;
             }
-            tplExportBtn.disabled = !tplBox.children.length;
+            const zeilen = [...tplBox.children];
+            const n = zeilen.filter(r => r.querySelector('input[type=checkbox]').checked).length;
+            tplExportBtn.disabled = !n;
+            tplExportBtn.textContent =
+                n === zeilen.length ? t('templates.exportAll') : t('templates.exportSelected', { n });
         }
 
         function buildTemplatePanel(panel) {
@@ -2062,6 +2077,7 @@ export function initDialogs(state, actions) {
 
             tplExportBtn.addEventListener('click', () => {
                 const alle = [...tplBox.children]
+                    .filter(r => r.querySelector('input[type=checkbox]').checked)
                     .map(r => {
                         const inhalt = tplInhalt(r.dataset.tplId);
                         if (!inhalt) {

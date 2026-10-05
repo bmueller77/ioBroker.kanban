@@ -263,6 +263,8 @@
   "templates.editedLocal": "Vorlage \"{name}\" geändert. Noch nicht gespeichert.",
   "templates.import": "Importieren",
   "templates.exportAll": "Alle exportieren",
+  "templates.pickForExport": "Für den Export auswählen",
+  "templates.exportSelected": "Auswahl exportieren ({n})",
   "templates.exportOne": "Diese Vorlage exportieren",
   "templates.exportTitle": "Vorlagen exportieren",
   "templates.exportHint": "{n} Vorlage(n). Als Datei herunterladen oder den Text kopieren und im Zielboard einfügen.",

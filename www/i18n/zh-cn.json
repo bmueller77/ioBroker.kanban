@@ -263,6 +263,8 @@
   "templates.editedLocal": "模板 \"{name}\" 已修改。尚未保存。",
   "templates.import": "导入",
   "templates.exportAll": "全部导出",
+  "templates.pickForExport": "选择以导出",
+  "templates.exportSelected": "导出所选 ({n})",
   "templates.exportOne": "导出此模板",
   "templates.exportTitle": "导出模板",
   "templates.exportHint": "共 {n} 个模板。可下载为文件，或复制文本并粘贴到目标看板。",

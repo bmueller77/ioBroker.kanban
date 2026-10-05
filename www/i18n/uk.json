@@ -263,6 +263,8 @@
   "templates.editedLocal": "Шаблон \"{name}\" змінено. Ще не збережено.",
   "templates.import": "Імпортувати",
   "templates.exportAll": "Експортувати все",
+  "templates.pickForExport": "Вибрати для експорту",
+  "templates.exportSelected": "Експортувати вибране ({n})",
   "templates.exportOne": "Експортувати цей шаблон",
   "templates.exportTitle": "Експорт шаблонів",
   "templates.exportHint": "Шаблонів: {n}. Завантажте файл або скопіюйте текст і вставте його на цільовій дошці.",

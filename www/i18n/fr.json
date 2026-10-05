@@ -263,6 +263,8 @@
   "templates.editedLocal": "Modèle \"{name}\" modifié. Pas encore enregistré.",
   "templates.import": "Importer",
   "templates.exportAll": "Tout exporter",
+  "templates.pickForExport": "Sélectionner pour l'export",
+  "templates.exportSelected": "Exporter la sélection ({n})",
   "templates.exportOne": "Exporter ce modèle",
   "templates.exportTitle": "Exporter des modèles",
   "templates.exportHint": "{n} modèle(s). Téléchargez le fichier, ou copiez le texte et collez-le sur le tableau cible.",

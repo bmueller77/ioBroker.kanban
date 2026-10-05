@@ -263,6 +263,8 @@
   "templates.editedLocal": "Plantilla \"{name}\" modificada. Aún sin guardar.",
   "templates.import": "Importar",
   "templates.exportAll": "Exportar todo",
+  "templates.pickForExport": "Seleccionar para la exportación",
+  "templates.exportSelected": "Exportar selección ({n})",
   "templates.exportOne": "Exportar esta plantilla",
   "templates.exportTitle": "Exportar plantillas",
   "templates.exportHint": "{n} plantilla(s). Descargue el archivo, o copie el texto y péguelo en el tablero de destino.",

@@ -263,6 +263,8 @@
   "templates.editedLocal": "Template \"{name}\" changed. Not saved yet.",
   "templates.import": "Import",
   "templates.exportAll": "Export all",
+  "templates.pickForExport": "Select for export",
+  "templates.exportSelected": "Export selection ({n})",
   "templates.exportOne": "Export this template",
   "templates.exportTitle": "Export templates",
   "templates.exportHint": "{n} template(s). Download as a file, or copy the text and paste it on the target board.",

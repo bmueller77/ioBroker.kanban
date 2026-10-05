@@ -263,6 +263,8 @@
   "templates.editedLocal": "Sjabloon \"{name}\" gewijzigd. Nog niet opgeslagen.",
   "templates.import": "Importeren",
   "templates.exportAll": "Alles exporteren",
+  "templates.pickForExport": "Selecteren voor export",
+  "templates.exportSelected": "Selectie exporteren ({n})",
   "templates.exportOne": "Dit sjabloon exporteren",
   "templates.exportTitle": "Sjablonen exporteren",
   "templates.exportHint": "{n} sjabloon(en). Download als bestand, of kopieer de tekst en plak die op het doelbord.",
