@@ -1,6 +1,6 @@
 {
   "name": "iobroker.kanban",
-  "version": "0.3.5",
+  "version": "0.3.6",
   "description": "Kanban board for ioBroker with webhooks, multi-user support and email notifications",
   "author": {
     "name": "Björn Müller",
@@ -61,7 +61,7 @@
     "@alcalzone/release-script-plugin-manual-review": "^5.2.0",
     "@iobroker/adapter-dev": "^1.5.0",
     "@iobroker/eslint-config": "^2.2.0",
-    "@iobroker/testing": "^6.2.2",
+    "@iobroker/testing": "^6.3.0",
     "@tsconfig/node22": "^22.0.6",
     "@types/node": "^22.20.4"
   }

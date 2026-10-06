@@ -124,6 +124,11 @@ Details: [Security & access control](docs/en/README.md#security--access-control)
 
 <!-- Der Platzhalter bleibt stehen. release-script trägt hier die
      nächste Version ein und ersetzt die Überschrift. -->
+### 0.3.6 (2026-10-06)
+* (bmueller77) **Eleven more error messages are English now.** Ten of them come out of the REST API, so every script and integration that talks to the adapter was reading German; the eleventh explains a malformed cron expression. The earlier pass searched for one particular shape of error and missed every message built in another, which is why these survived it
+* (bmueller77) Dutch: "Urgent" as a priority is "Dringend"
+* (bmueller77) `@iobroker/testing` on 6.3.0
+
 ### 0.3.5 (2026-09-28)
 * (bmueller77) **Dragging a card with a finger works again.** On a tablet a card could not be picked up at all, whatever you grabbed it by. Two causes, both in the drag library's settings:
   * The hold that starts a drag was cancelled by the smallest movement. The tolerance was zero pixels, which a mouse pointer keeps and a finger never does. That is why it worked at a desk and never on a tablet
