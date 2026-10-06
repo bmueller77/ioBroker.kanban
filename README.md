@@ -124,6 +124,7 @@ Details: [Security & access control](docs/en/README.md#security--access-control)
 
 <!-- Der Platzhalter bleibt stehen. release-script trägt hier die
      nächste Version ein und ersetzt die Überschrift. -->
+<<<<<<< HEAD
 ### 0.4.0-beta.0 (in Arbeit)
 * (bmueller77) **Card templates.** A template is a named set of card fields that belongs to a board. It is created from an existing card through "Manage", it fills the editor when a new card is made, and it can travel to another board or another instance as a file
   * Two things deliberately stay behind: the **due date**, because a fixed date ages and a template saved in January would otherwise create cards dated the day before yesterday in March, and the **checklist ticks**, because a template holds the items rather than their state. The time of day stays, since 17:00 is a property of the task
@@ -132,6 +133,12 @@ Details: [Security & access control](docs/en/README.md#security--access-control)
   * The "Manage" dialog now offers four kinds below one another as radio buttons, each with a line explaining it. Side by side there was no room, and the labels were already being cut off at three
   * Scripts and webhooks can use templates too: `addCard` takes a `template` field, matched by ID first and by name second. Fields given explicitly beat the template. An unknown name is an error rather than a quiet omission, so that a typo does not produce half-filled cards for months
   * Export and import carry labels by name, not by ID, since an ID from another board means nothing on this one. An import appends and never replaces, because there is no telling what hides behind a name in a file; a name that already exists gets a counter
+=======
+### 0.3.6 (2026-10-06)
+* (bmueller77) **Eleven more error messages are English now.** Ten of them come out of the REST API, so every script and integration that talks to the adapter was reading German; the eleventh explains a malformed cron expression. The earlier pass searched for one particular shape of error and missed every message built in another, which is why these survived it
+* (bmueller77) Dutch: "Urgent" as a priority is "Dringend"
+* (bmueller77) `@iobroker/testing` on 6.3.0
+>>>>>>> main
 
 ### 0.3.5 (2026-09-28)
 * (bmueller77) **Dragging a card with a finger works again.** On a tablet a card could not be picked up at all, whatever you grabbed it by. Two causes, both in the drag library's settings:

@@ -74,6 +74,19 @@
       "license": "MIT"
     },
     "news": {
+      "0.3.6": {
+        "de": "- Elf weitere Fehlermeldungen auf Englisch, zehn davon aus der REST-Schnittstelle\n- Niederländisch: \"Urgent\" heißt als Priorität \"Dringend\"",
+        "en": "- Eleven more error messages in English, ten of them from the REST API\n- Dutch: \"Urgent\" as a priority is \"Dringend\"",
+        "ru": "- Ещё одиннадцать сообщений об ошибках на английском, десять из них из REST-интерфейса\n- Нидерландский: приоритет \"Urgent\" теперь \"Dringend\"",
+        "pt": "- Mais onze mensagens de erro em inglês, dez delas da API REST\n- Neerlandês: a prioridade \"Urgent\" passa a \"Dringend\"",
+        "nl": "- Nog elf foutmeldingen in het Engels, tien daarvan uit de REST-API\n- Nederlands: de prioriteit \"Urgent\" heet nu \"Dringend\"",
+        "fr": "- Onze messages d'erreur de plus en anglais, dont dix issus de l'API REST\n- Néerlandais : la priorité \"Urgent\" devient \"Dringend\"",
+        "it": "- Altri undici messaggi di errore in inglese, dieci dei quali dall'API REST\n- Olandese: la priorità \"Urgent\" diventa \"Dringend\"",
+        "es": "- Once mensajes de error más en inglés, diez de ellos de la API REST\n- Neerlandés: la prioridad \"Urgent\" pasa a ser \"Dringend\"",
+        "pl": "- Kolejnych jedenaście komunikatów o błędach po angielsku, dziesięć z nich z interfejsu REST\n- Niderlandzki: priorytet \"Urgent\" to teraz \"Dringend\"",
+        "uk": "- Ще одинадцять повідомлень про помилки англійською, десять із них з інтерфейсу REST\n- Нідерландська: пріоритет \"Urgent\" тепер \"Dringend\"",
+        "zh-cn": "- 另有十一条错误消息改为英文，其中十条来自 REST 接口\n- 荷兰语：优先级 \"Urgent\" 现为 \"Dringend\""
+      },
       "0.3.5": {
         "de": "- Karten lassen sich auf dem Tablet wieder mit dem Finger ziehen\n- Das Board scrollt beim Ziehen an den Rand mit, der auslösende Streifen ist breiter\n- Die Leiste mit den Zielspalten erscheint jetzt auch auf Tablets, sobald nicht alle Spalten ins Bild passen\n- Der Papierkorb steht nur noch in dieser Leiste, wenn die Spalte auch eingeblendet ist",
         "en": "- Dragging cards with a finger works again on tablets\n- The board scrolls along when a card is dragged to the edge, and the strip that triggers it is wider\n- The bar with the target columns now appears on tablets as well, as soon as the columns no longer fit on screen\n- The trash is offered in that bar only while the trash column is shown",
