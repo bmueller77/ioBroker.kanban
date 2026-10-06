@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "kanban",
-    "version": "0.3.6",
+    "version": "0.3.7",
     "titleLang": {
       "en": "Kanban Board",
       "de": "Kanban Board",
@@ -74,6 +74,19 @@
       "license": "MIT"
     },
     "news": {
+      "0.3.7": {
+        "de": "- Sechs weitere deutsche Meldungen auf Englisch, gefunden über eine Wortliste statt über ein Muster\n- Gedankenstriche und typografische Anführungszeichen aus den Sprachdateien mit lateinischer Schrift",
+        "en": "- Six more German messages in English, found with a word list instead of a pattern\n- Dashes and typographic quotes removed from the language files in Latin script",
+        "ru": "- Ещё шесть немецких сообщений переведены на английский\n- Тире и типографские кавычки убраны из языковых файлов на латинице",
+        "pt": "- Mais seis mensagens em alemão passaram para inglês\n- Travessões e aspas tipográficas removidos dos ficheiros de idioma em alfabeto latino",
+        "nl": "- Nog zes Duitse meldingen in het Engels\n- Gedachtestreepjes en typografische aanhalingstekens uit de taalbestanden in Latijns schrift",
+        "fr": "- Six messages allemands de plus passés en anglais\n- Tirets et guillemets typographiques retirés des fichiers de langue en alphabet latin",
+        "it": "- Altri sei messaggi in tedesco passati all'inglese\n- Lineette e virgolette tipografiche rimosse dai file di lingua in alfabeto latino",
+        "es": "- Seis mensajes más en alemán pasan a inglés\n- Rayas y comillas tipográficas eliminadas de los archivos de idioma en alfabeto latino",
+        "pl": "- Kolejnych sześć niemieckich komunikatów po angielsku\n- Myślniki i cudzysłowy typograficzne usunięte z plików językowych w alfabecie łacińskim",
+        "uk": "- Ще шість німецьких повідомлень англійською\n- Тире та типографські лапки прибрано з мовних файлів на латиниці",
+        "zh-cn": "- 另有六条德语消息改为英文\n- 从拉丁字母语言文件中移除了破折号和印刷体引号"
+      },
       "0.3.6": {
         "de": "- Elf weitere Fehlermeldungen auf Englisch, zehn davon aus der REST-Schnittstelle\n- Niederländisch: \"Urgent\" heißt als Priorität \"Dringend\"",
         "en": "- Eleven more error messages in English, ten of them from the REST API\n- Dutch: \"Urgent\" as a priority is \"Dringend\"",

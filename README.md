@@ -124,6 +124,10 @@ Details: [Security & access control](docs/en/README.md#security--access-control)
 
 <!-- Der Platzhalter bleibt stehen. release-script trägt hier die
      nächste Version ein und ersetzt die Überschrift. -->
+### 0.3.7 (2026-10-06)
+* (bmueller77) **Six more German messages, found by looking for the right thing.** Two come out of renaming a user, two out of a malformed cron expression, two out of reading an image in older browsers. The previous pass filtered for umlauts and German word order, and not one of these six has an umlaut; one even begins with two English words. A word list beats a pattern here, and the same search now runs over the web interface as well
+* (bmueller77) Dashes, typographic quotes and ellipses are gone from the eight language files in Latin script, in both `www/i18n` and `admin/i18n`. Russian, Ukrainian and Chinese keep theirs, where they are ordinary typography
+
 ### 0.3.6 (2026-10-06)
 * (bmueller77) **Eleven more error messages are English now.** Ten of them come out of the REST API, so every script and integration that talks to the adapter was reading German; the eleventh explains a malformed cron expression. The earlier pass searched for one particular shape of error and missed every message built in another, which is why these survived it
 * (bmueller77) Dutch: "Urgent" as a priority is "Dringend"
@@ -141,7 +145,7 @@ Details: [Security & access control](docs/en/README.md#security--access-control)
 * (bmueller77) The copyright line in `LICENSE` and the author entry in `io-package.json` carry an e-mail address now. The repository checker asks for one in both places, and it was only in `package.json`
 
 ### 0.3.3 (2026-09-21)
-* (bmueller77) **Everything the adapter says is in English now.** Thirty-five error messages were German, from `title fehlt` to `Karte '…' existiert nicht`. They reach users in the log, as REST responses and as the answer to a `sendTo` call, so a German message left half the ioBroker world guessing. Cron messages are included
+* (bmueller77) **Everything the adapter says is in English now.** Thirty-five error messages were German, from `title fehlt` to `Karte '...' existiert nicht`. They reach users in the log, as REST responses and as the answer to a `sendTo` call, so a German message left half the ioBroker world guessing. Cron messages are included
 * (bmueller77) **Five state names were German** and are English now: `Card count`, `Overdue cards`, `Overdue cards (list)` and `Assigned open cards`. Since these objects are created only when they are missing, a new name never reached an existing installation. The adapter now corrects the names of its own objects once at startup, so boards that have been running for months are renamed as well
 * (bmueller77) The HTTP status code of the REST API no longer depends on the wording of an error. It used to test the message for the German `existiert nicht` to decide between 404 and 400, which would have broken silently with the translation. An error that stands for something missing now carries its status itself
 * (bmueller77) `reminderDaysBefore` is held to the range 0 to 30 in the code as well, not only in the settings dialog. The configuration can be edited by hand, and a value far outside that range moved the reminder threshold somewhere nobody would find

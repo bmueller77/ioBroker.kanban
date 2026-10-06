@@ -181,8 +181,8 @@ describe('Verwaiste Zuständige', () => {
         store.addCard('b', { title: 'Karte', columnId: 'todo', assignees: ['bjoern'] }, 'test');
 
         await assert.rejects(() => store.reassignUser('bjoern', 'gibtsnicht', 'test'), /does not exist/);
-        await assert.rejects(() => store.reassignUser('bjoern', 'bjoern', 'test'), /identisch/);
-        await assert.rejects(() => store.reassignUser('', 'anna', 'test'), /Pflichtfeld/);
+        await assert.rejects(() => store.reassignUser('bjoern', 'bjoern', 'test'), /are the same/);
+        await assert.rejects(() => store.reassignUser('', 'anna', 'test'), /are required/);
     });
 
     it('laesst Karten im Papierkorb unangetastet', async () => {
