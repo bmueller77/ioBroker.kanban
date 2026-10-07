@@ -147,10 +147,10 @@ function loadImageSource(file) {
         fr.onload = function () {
             var img = new Image();
             img.onload = function () { resolve(img); };
-            img.onerror = function () { reject(new Error('Bild konnte nicht gelesen werden')); };
+            img.onerror = function () { reject(new Error('the image could not be read')); };
             img.src = fr.result;
         };
-        fr.onerror = function () { reject(new Error('Datei konnte nicht gelesen werden')); };
+        fr.onerror = function () { reject(new Error('the file could not be read')); };
         fr.readAsDataURL(file);
     });
 }
