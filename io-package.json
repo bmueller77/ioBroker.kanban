@@ -74,6 +74,19 @@
       "license": "MIT"
     },
     "news": {
+        "0.3.8": {
+            "de": "- Landezonen beim Ziehen auf Telefonen und Tablets wieder da (Fehler seit 0.3.5)\n- Neuer Schalter im Teilen-Dialog zeigt sie dauerhaft an\n- Benutzernamen werden fuer die Objekt-IDs bereinigt, bestehende Instanzen beim Start umgestellt\n- Die Dateien der Oberflaeche werden nicht mehr zwischengespeichert",
+            "en": "- Drop zones while dragging are back on phones and tablets (broken since 0.3.5)\n- A new switch in the share dialog shows them permanently\n- User names are sanitized for object IDs, existing instances are migrated on startup\n- The web interface files are no longer cached",
+            "ru": "- Зоны переноса снова работают на телефонах и планшетах (ошибка с 0.3.5)\n- Новый переключатель в диалоге обмена показывает их постоянно\n- Имена пользователей очищаются для ID объектов, существующие экземпляры переносятся при запуске\n- Файлы интерфейса больше не кешируются",
+            "pt": "- As zonas de destino ao arrastar voltaram em telefones e tablets (erro desde 0.3.5)\n- Um novo interruptor no diálogo de partilha mostra-as permanentemente\n- Os nomes de utilizador são limpos para os IDs de objeto, instâncias existentes são migradas no arranque\n- Os ficheiros da interface já não são colocados em cache",
+            "nl": "- Doelzones tijdens het slepen zijn terug op telefoons en tablets (fout sinds 0.3.5)\n- Een nieuwe schakelaar in het deelvenster toont ze permanent\n- Gebruikersnamen worden opgeschoond voor de object-ID's, bestaande instanties worden bij het starten omgezet\n- De bestanden van de interface worden niet meer gecachet",
+            "fr": "- Les zones de dépôt pendant le glissement sont de retour sur téléphones et tablettes (erreur depuis 0.3.5)\n- Un nouvel interrupteur dans la boîte de partage les affiche en permanence\n- Les noms d'utilisateur sont nettoyés pour les ID d'objet, les instances existantes sont migrées au démarrage\n- Les fichiers de l'interface ne sont plus mis en cache",
+            "it": "- Le zone di rilascio durante il trascinamento sono tornate su telefoni e tablet (errore dalla 0.3.5)\n- Un nuovo interruttore nella finestra di condivisione le mostra in permanenza\n- I nomi utente vengono ripuliti per gli ID degli oggetti, le istanze esistenti vengono migrate all'avvio\n- I file dell'interfaccia non vengono più messi in cache",
+            "es": "- Las zonas de destino al arrastrar vuelven en teléfonos y tabletas (error desde 0.3.5)\n- Un nuevo interruptor en el diálogo de compartir las muestra de forma permanente\n- Los nombres de usuario se depuran para los ID de objeto, las instancias existentes se migran al arrancar\n- Los archivos de la interfaz ya no se almacenan en caché",
+            "pl": "- Strefy upuszczania podczas przeciągania wróciły na telefonach i tabletach (błąd od 0.3.5)\n- Nowy przełącznik w oknie udostępniania pokazuje je na stałe\n- Nazwy użytkowników są oczyszczane dla identyfikatorów obiektów, istniejące instancje są migrowane przy starcie\n- Pliki interfejsu nie są już buforowane",
+            "uk": "- Зони перетягування знову працюють на телефонах і планшетах (помилка з 0.3.5)\n- Новий переключач у діалозі поширення показує їх постійно\n- Імена користувачів очищаються для ID об’єктів, наявні екземпляри переносяться при запуску\n- Файли інтерфейсу більше не кешуються",
+            "zh-cn": "- 拖动时的放置区在手机和平板上恢复（0.3.5 起的错误）\n- 分享对话框中新增开关，可始终显示\n- 用户名在用作对象 ID 前会被清理，现有实例在启动时迁移\n- 界面文件不再缓存"
+        },
       "0.3.7": {
         "de": "- Sechs weitere deutsche Meldungen auf Englisch, gefunden über eine Wortliste statt über ein Muster\n- Gedankenstriche und typografische Anführungszeichen aus den Sprachdateien mit lateinischer Schrift",
         "en": "- Six more German messages in English, found with a word list instead of a pattern\n- Dashes and typographic quotes removed from the language files in Latin script",

@@ -1118,9 +1118,11 @@ Neben der Oberfläche legt der Adapter States an, die sich in Skripten, VIS/Love
 | `kanban.0.boards.<id>.rev` | number | Revision (steigt bei jeder Änderung, für Polling). |
 | `kanban.0.boards.<id>.cardCount` | number | Anzahl Karten im Board. |
 | `kanban.0.boards.<id>.overdueCount` | number | Überfällige Karten im Board, nach derselben Regel wie die rote Einfärbung: eine gesetzte Uhrzeit zählt mit, ohne Uhrzeit wechselt der Wert um Mitternacht. Erledigte Spalten und der Papierkorb bleiben außen vor. |
-| `kanban.0.users.<name>.assignedCount` | number | Offene, dieser Person zugewiesene Karten. |
-| `kanban.0.users.<name>.overdueCount` | number | Davon überfällig. |
-| `kanban.0.users.<name>.overdueList` | json | Liste der überfälligen Karten (Titel + Board/Spalte). |
+| `kanban.0.users.<id>.assignedCount` | number | Offene, dieser Person zugewiesene Karten. |
+| `kanban.0.users.<id>.overdueCount` | number | Davon überfällig. |
+| `kanban.0.users.<id>.overdueList` | json | Liste der überfälligen Karten (Titel + Board/Spalte). |
+
+Das `<id>` unter `users.*` ist der Anzeigename in Kleinbuchstaben, Umlaute ausgeschrieben, alles andere zu Bindestrichen zusammengezogen: aus "Björn Müller" wird `users.bjoern-mueller`. Bis 0.3.7 stand dort der Anzeigename unverändert, was mit Leerzeichen und Umlauten krumme Objekt-IDs ergab. Beim ersten Start von 0.3.8 wird der alte Zweig entfernt und mit der neuen ID neu angelegt; der Vorgang steht im Protokoll. Wer die alte ID in einem Skript oder einer Visualisierung verwendet, muss sie einmal nachziehen.
 
 Die `boards.*`- und `users.*`-Spiegel-States eignen sich gut für Dashboards ("Björn: 3 offen, 1 überfällig") oder Automatisierungen, ohne die REST-API abfragen zu müssen. Wird ein Benutzer in den Instanzeinstellungen gelöscht, verschwindet sein Zweig unter `users.*` mit; bis 0.3.2 blieb er samt seinen letzten Zahlen stehen und ein Dashboard zählte dauerhaft eine Person zu viel.
 

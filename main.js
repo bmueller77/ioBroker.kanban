@@ -57,6 +57,9 @@ class Kanban extends utils.Adapter {
         await this.store.load();
         // Namen aus alten Installationen nachziehen (siehe migrateStateNames).
         await this.store.migrateStateNames();
+        // Und die Kanaele unter users.*, deren Pfad bis 0.3.7 den Anzeigenamen
+        // enthielt (siehe migrateUserStates).
+        await this.store.migrateUserStates();
         // Erst nach dem Laden: Ob eine Kennung festgeschrieben werden muss,
         // haengt daran, ob Karten auf sie zeigen, und die kennt der Store
         // vorher nicht. Schreibt der Adapter dabei seine eigene Konfiguration,

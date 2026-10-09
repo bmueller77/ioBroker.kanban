@@ -101,7 +101,7 @@ setState('kanban.0.action', JSON.stringify({ cmd: 'doneCard', board: 'family', c
 |---|---|
 | `kanban.0.boards.<id>.data` | full board as JSON (read-only) |
 | `kanban.0.boards.<id>.rev` / `.cardCount` / `.overdueCount` | revision & counters |
-| `kanban.0.users.<name>.assignedCount` / `.overdueCount` / `.overdueList` | per user |
+| `kanban.0.users.<id>.assignedCount` / `.overdueCount` / `.overdueList` | per user |
 | `kanban.0.lastEvent` | last event as JSON (can trigger scripts) |
 | `kanban.0.info.orphanedAssignees` | assignees that no longer exist as users, after a user ID was renamed |
 | `kanban.0.action` | command input (write JSON, cleared after processing) |
@@ -132,6 +132,12 @@ Details: [Security & access control](docs/en/README.md#security--access-control)
   * The "Manage" dialog now offers four kinds below one another as radio buttons, each with a line explaining it. Side by side there was no room, and the labels were already being cut off at three
   * Scripts and webhooks can use templates too: `addCard` takes a `template` field, matched by ID first and by name second. Fields given explicitly beat the template. An unknown name is an error rather than a quiet omission, so that a typo does not produce half-filled cards for months
   * Export and import carry labels by name, not by ID, since an ID from another board means nothing on this one. An import appends and never replaces, because there is no telling what hides behind a name in a file; a name that already exists gets a counter
+
+### 0.3.8 (2026-10-09)
+* (bmueller77) **The drop zones are back when dragging on a phone or a tablet.** Reported in [#42](https://github.com/bmueller77/ioBroker.kanban/issues/42) and broken since 0.3.5, where a check for horizontal overflow replaced the width rule instead of adding to it. On a narrow screen the columns stack, there is no horizontal overflow, and the bar with the target columns stayed away, which leaves no way at all to reach a hidden column. The pointer type no longer decides either: a WebView does not always answer `pointer: coarse` correctly, and Fully Kiosk even reverses the platform in its user agent
+* (bmueller77) **A switch in the share dialog turns the zones on for good**, below the embed mode. They appear by themselves as soon as a column sits beyond the right edge, which on a desktop with a touch screen is not a reliable test
+* (bmueller77) **User names are sanitized before they become part of an object ID.** "Björn Müller" used to produce `users.Björn Müller`, with a space and an umlaut in the path; it is now `users.bjoern-mueller`, by the same rules as the board IDs. The display name stays in the channel name and in the cards. On the first start the old channel is removed and rebuilt under the new ID, and the log says so, so a script or a view that refers to the old one can be updated. Reported in the review for the ioBroker repository
+* (bmueller77) The files of the web interface are sent with `no-store` instead of `no-cache`. The latter permits storing the file and only asks for revalidation, which Fully Kiosk ignored for days while the server had long been serving the fix
 
 ### 0.3.7 (2026-10-06)
 * (bmueller77) **Six more German messages, found by looking for the right thing.** Two come out of renaming a user, two out of a malformed cron expression, two out of reading an image in older browsers. The previous pass filtered for umlauts and German word order, and not one of these six has an umlaut; one even begins with two English words. A word list beats a pattern here, and the same search now runs over the web interface as well
