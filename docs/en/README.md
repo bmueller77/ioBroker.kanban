@@ -1077,9 +1077,11 @@ Besides the UI, the adapter creates states for use in scripts, VIS/Lovelace or N
 | `kanban.0.boards.<id>.rev` | number | Revision (increments on every change, for polling). |
 | `kanban.0.boards.<id>.cardCount` | number | Number of cards in the board. |
 | `kanban.0.boards.<id>.overdueCount` | number | Overdue cards in the board, by the same rule as the red colouring: a time of day counts, without one the value changes at midnight. Done columns and the trash stay out of it. |
-| `kanban.0.users.<name>.assignedCount` | number | Open cards assigned to this person. |
-| `kanban.0.users.<name>.overdueCount` | number | Of those, overdue. |
-| `kanban.0.users.<name>.overdueList` | json | List of overdue cards (title + board/column). |
+| `kanban.0.users.<id>.assignedCount` | number | Open cards assigned to this person. |
+| `kanban.0.users.<id>.overdueCount` | number | Of those, overdue. |
+| `kanban.0.users.<id>.overdueList` | json | List of overdue cards (title + board/column). |
+
+The `<id>` under `users.*` is the display name in lower case, with umlauts spelled out and everything else collapsed into hyphens: "Björn Müller" becomes `users.bjoern-mueller`. Up to 0.3.7 the display name went into the path unchanged, which produced malformed object IDs for names with spaces or umlauts. On the first start of 0.3.8 the old branch is removed and recreated under the new ID, and the log says so. If you refer to the old ID in a script or a view, update it once.
 
 The `boards.*` and `users.*` mirror states are handy for dashboards ("Björn: 3 open, 1 overdue") or automations without querying the REST API. Delete a user in the instance settings and their branch under `users.*` goes with them, so a dashboard does not keep counting one person too many.
 

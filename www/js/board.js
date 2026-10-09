@@ -128,29 +128,65 @@ function saveCheckExpanded() {
 }
 
 /**
- * Landezonen beim Ziehen anbieten?
+ * Passen alle Spalten ins Bild?
  *
- * Nicht die Bildschirmbreite entscheidet, sondern ob alle Spalten ins Bild
- * passen. Passen sie, liegt jedes Ziel in Reichweite und die Leiste waere nur im
- * Weg. Passen sie nicht, liegt das Ziel jenseits des Randes, und man muss
- * ziehend dorthin scrollen — auf einem Tablet mit fuenf Spalten, von denen
- * dreieinhalb sichtbar sind, ist das der Normalfall.
+ * Zwei unabhaengige Messungen, eine genuegt: der waagerechte Ueberlauf von
+ *  "#board", und ob die letzte Spalte ueber den sichtbaren Rand hinausreicht.
+ *  "scrollWidth" ist in mancher WebView nicht verlaesslich, und dann fehlten
+ *  die Zonen genau dort, wo sie gebraucht werden.
  *
- * Die zweite Bedingung ist der Finger. Mit der Maus ist der Zeiger genau, der
- * Streifen am Rand leicht zu treffen und das Mitscrollen zuverlaessig; dort
- * braucht es die Zonen nicht. "pointer: coarse" trifft Tablets und Telefone und
- * laesst Geraete mit Maus aussen vor, auch wenn deren Schirm Beruehrung kann.
- *
- * @returns true, wenn die Landezonen erscheinen sollen
+ * @returns true, wenn ein Ziel jenseits des rechten Randes liegt
  */
-function wantsQuickMove() {
+function spaltenPassenNicht() {
     const board = document.getElementById('board');
-    // Die vier Pixel Zugabe fangen Rundungen bei gebrochenen Zoomstufen ab.
-    const scrollt = !!board && board.scrollWidth > board.clientWidth + 4;
-    if (!scrollt) {
+    if (!board) {
         return false;
     }
-    return window.matchMedia('(pointer: coarse)').matches || window.matchMedia('(max-width: 820px)').matches;
+    // Die vier Pixel Zugabe fangen Rundungen bei gebrochenen Zoomstufen ab.
+    if (board.scrollWidth > board.clientWidth + 4) {
+        return true;
+    }
+    // Zweiter, unabhaengiger Weg: Reicht die letzte Spalte ueber den sichtbaren
+    // Rand hinaus? "scrollWidth" ist in mancher WebView nicht verlaesslich, und
+    // dann fehlten die Zonen genau dort, wo sie gebraucht werden.
+    const spalten = board.querySelectorAll('.column');
+    if (!spalten.length) {
+        return false;
+    }
+    const aussen = board.getBoundingClientRect();
+    const letzte = spalten[spalten.length - 1].getBoundingClientRect();
+    return letzte.right > aussen.right + 4;
+}
+
+/**
+ * Landezonen beim Ziehen anbieten?
+ *
+ * Eine Frage, eine Antwort: Liegt ein Ziel ausser Reichweite? Die Art des
+ *  Zeigers spielt keine Rolle mehr. Mit der Maus ist das Ziehen an den Rand und
+ *  das Warten auf das Mitscrollen genauso muehsam, und jede Erkennung der
+ *  Geraeteklasse war eine Fehlerquelle: "pointer: coarse" beantwortet eine
+ *  WebView nicht zwingend richtig, und Fully Kiosk verschleiert sogar die
+ *  Plattform in der Kennung ("diordnA" statt "Android").
+ *
+ * Zwei Faelle, einer genuegt:
+ *  - Schmaler Schirm. Dort stehen die Spalten untereinander, "overflow-x" ist
+ *    "hidden", und es gibt keinen waagerechten Ueberlauf; das Ziel liegt
+ *    senkrecht ausser Reichweite. Gemessen auf einem Telefon mit 374 Pixeln.
+ *  - Breiter Schirm, aber die Spalten passen nicht ins Bild. Gemessen auf einem
+ *    Tab S5e: 1024 Pixel sichtbar, 1180 gebraucht.
+ *
+ * Dazu der Parameter "zones=1", der sie unabhaengig davon einschaltet.
+ *
+ * @returns true, wenn die Leiste mit den Zielspalten erscheinen soll
+ */
+function wantsQuickMove(immer) {
+    if (immer) {
+        return true;
+    }
+    if (window.matchMedia('(max-width: 820px)').matches) {
+        return true;
+    }
+    return spaltenPassenNicht();
 }
 
 function buildQuickMove(evt, sourceCol, board, showTrash) {
@@ -1610,7 +1646,7 @@ export function renderBoard(container, state, actions) {
 
             onStart: evt => {
                 dragActive = true;
-                if (wantsQuickMove()) buildQuickMove(evt, col, board, !!state.showTrash);
+                if (wantsQuickMove(!!state.zonesAlways)) buildQuickMove(evt, col, board, !!state.showTrash);
             },
             onEnd: evt => {
                 dragActive = false;

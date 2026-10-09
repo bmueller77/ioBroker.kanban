@@ -150,6 +150,7 @@
   "share.doneLimitAll": "全部",
   "share.hideSettings": "隐藏设置齿轮",
   "share.embed": "嵌入模式（紧凑，适用于 iframe）",
+  "share.zones": "拖动时始终显示放置区",
   "share.generatedUrl": "生成的链接",
   "share.copy": "复制",
   "share.copied": "已复制 ✓",

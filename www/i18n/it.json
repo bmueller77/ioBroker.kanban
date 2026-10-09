@@ -150,6 +150,7 @@
   "share.doneLimitAll": "tutte",
   "share.hideSettings": "Nascondi ingranaggio impostazioni",
   "share.embed": "Modalità incorporata (compatta, per iframe)",
+  "share.zones": "Mostrare sempre le zone di rilascio durante il trascinamento",
   "share.generatedUrl": "URL generato",
   "share.copy": "Copia",
   "share.copied": "Copiato ✓",
