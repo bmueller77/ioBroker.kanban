@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "kanban",
-    "version": "0.4.0-beta.0",
+    "version": "0.4.0",
     "titleLang": {
       "en": "Kanban Board",
       "de": "Kanban Board",
@@ -74,6 +74,19 @@
       "license": "MIT"
     },
     "news": {
+      "0.4.0": {
+        "de": "- Kartenvorlagen: eine Karte über \"Verwalten\" als Vorlage speichern und neue Karten daraus füllen\n- Vorlagen in den Board-Einstellungen sortieren, umbenennen, bearbeiten, löschen und als Datei zwischen Boards und Instanzen austauschen\n- Skripte und Webhooks: \"addCard\" nimmt eine Vorlage\n- Meldungen aus offenen Dialogen sind jetzt sichtbar und lassen sich schließen",
+        "en": "- Card templates: save a card as a template via \"Manage\" and fill new cards from it\n- Sort, rename, edit and delete templates in the board settings, exchange them as a file between boards and instances\n- Scripts and webhooks: \"addCard\" takes a template\n- Messages from open dialogs are now visible and can be closed",
+        "ru": "- Шаблоны карточек: сохранить карточку как шаблон через \"Управление\" и заполнять из него новые карточки\n- Шаблоны в настройках доски можно сортировать, переименовывать, редактировать, удалять и переносить файлом между досками и экземплярами\n- Скрипты и вебхуки: \"addCard\" принимает шаблон\n- Сообщения из открытых диалогов теперь видны и закрываются",
+        "pt": "- Modelos de cartão: guardar um cartão como modelo em \"Gerir\" e preencher novos cartões a partir dele\n- Ordenar, renomear, editar e eliminar modelos nas definições do quadro, trocá-los como ficheiro entre quadros e instâncias\n- Scripts e webhooks: \"addCard\" aceita um modelo\n- As mensagens de diálogos abertos ficam agora visíveis e podem ser fechadas",
+        "nl": "- Kaartsjablonen: een kaart via \"Beheren\" als sjabloon opslaan en nieuwe kaarten ermee vullen\n- Sjablonen in de bordinstellingen sorteren, hernoemen, bewerken, verwijderen en als bestand uitwisselen tussen borden en instanties\n- Scripts en webhooks: \"addCard\" accepteert een sjabloon\n- Meldingen uit geopende dialogen zijn nu zichtbaar en kunnen worden gesloten",
+        "fr": "- Modèles de carte: enregistrer une carte comme modèle via \"Gérer\" et remplir de nouvelles cartes à partir de celui-ci\n- Trier, renommer, modifier et supprimer les modèles dans les paramètres du tableau, les échanger sous forme de fichier entre tableaux et instances\n- Scripts et webhooks: \"addCard\" accepte un modèle\n- Les messages des boîtes de dialogue ouvertes sont désormais visibles et peuvent être fermés",
+        "it": "- Modelli di scheda: salvare una scheda come modello tramite \"Gestisci\" e compilare nuove schede da esso\n- Ordinare, rinominare, modificare ed eliminare i modelli nelle impostazioni della bacheca, scambiarli come file tra bacheche e istanze\n- Script e webhook: \"addCard\" accetta un modello\n- I messaggi dalle finestre di dialogo aperte ora sono visibili e si possono chiudere",
+        "es": "- Plantillas de tarjeta: guardar una tarjeta como plantilla con \"Gestionar\" y rellenar nuevas tarjetas a partir de ella\n- Ordenar, renombrar, editar y eliminar plantillas en los ajustes del tablero, intercambiarlas como archivo entre tableros e instancias\n- Scripts y webhooks: \"addCard\" acepta una plantilla\n- Los mensajes de los diálogos abiertos ahora son visibles y se pueden cerrar",
+        "pl": "- Szablony kart: zapisanie karty jako szablonu przez \"Zarządzaj\" i wypełnianie z niego nowych kart\n- Sortowanie, zmiana nazwy, edycja i usuwanie szablonów w ustawieniach tablicy, wymiana jako plik między tablicami i instancjami\n- Skrypty i webhooki: \"addCard\" przyjmuje szablon\n- Komunikaty z otwartych okien dialogowych są teraz widoczne i można je zamknąć",
+        "uk": "- Шаблони карток: зберегти картку як шаблон через \"Керування\" і заповнювати з нього нові картки\n- Шаблони в налаштуваннях дошки можна сортувати, перейменовувати, редагувати, видаляти й переносити файлом між дошками та екземплярами\n- Скрипти та вебхуки: \"addCard\" приймає шаблон\n- Повідомлення з відкритих діалогів тепер видно, і їх можна закрити",
+        "zh-cn": "- 卡片模板：通过\"管理\"将卡片保存为模板，并用它填充新卡片\n- 在看板设置中对模板排序、重命名、编辑和删除，并以文件形式在看板和实例之间交换\n- 脚本和 Webhook：\"addCard\" 可使用模板\n- 来自打开对话框的消息现在可见，并且可以关闭"
+      },
         "0.3.8": {
             "de": "- Landezonen beim Ziehen auf Telefonen und Tablets wieder da (Fehler seit 0.3.5)\n- Neuer Schalter im Teilen-Dialog zeigt sie dauerhaft an\n- Benutzernamen werden fuer die Objekt-IDs bereinigt, bestehende Instanzen beim Start umgestellt\n- Die Dateien der Oberflaeche werden nicht mehr zwischengespeichert",
             "en": "- Drop zones while dragging are back on phones and tablets (broken since 0.3.5)\n- A new switch in the share dialog shows them permanently\n- User names are sanitized for object IDs, existing instances are migrated on startup\n- The web interface files are no longer cached",

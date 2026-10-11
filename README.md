@@ -27,6 +27,7 @@ Install the adapter from the ioBroker admin: *Adapters* → filter for `kanban` 
 - **Multiple boards** with freely configurable columns (name, order, display limit, WIP limit, "new"/"done" flags)
 - **Cards** with title, Markdown description, assignees, due date (optionally with time), labels, color, priority, checklist, link, location and calendar invite
 - **Recurring tasks** (daily/weekly/monthly/yearly, n-th weekday, n-th working day incl. public-holiday calculation)
+- **Card templates**: save a card as a template, fill new cards from it, exchange templates as a file between boards and instances
 - **Drag & drop** (mouse + touch), live sync across all open views via WebSocket (polling fallback)
 - **Multi-user without login**: user registry in the admin config, assignable members per board; the header chips act as a saved per-board person filter
 - **E-mail notifications** via `iobroker.email` on assignment, due date and card events (toggleable per event type and per user)
@@ -124,14 +125,17 @@ Details: [Security & access control](docs/en/README.md#security--access-control)
 
 <!-- Der Platzhalter bleibt stehen. release-script trägt hier die
      nächste Version ein und ersetzt die Überschrift. -->
-### 0.4.0-beta.0 (in Arbeit)
+### 0.4.0 (2026-10-11)
 * (bmueller77) **Card templates.** A template is a named set of card fields that belongs to a board. It is created from an existing card through "Manage", it fills the editor when a new card is made, and it can travel to another board or another instance as a file
   * Two things deliberately stay behind: the **due date**, because a fixed date ages and a template saved in January would otherwise create cards dated the day before yesterday in March, and the **checklist ticks**, because a template holds the items rather than their state. The time of day stays, since 17:00 is a property of the task
   * If the template carries a recurrence and no date is given, the next date is worked out and the pattern is anchored to today. A template of "every 30 days" creates a card due today and counts from there, not from a pattern set half a year ago
   * Labels and assignees are checked when the template is used, not when it is saved. A template sits on a board for months while labels are deleted and members leave; whatever no longer exists is dropped, and a label is never recreated from an old template
   * The "Manage" dialog now offers four kinds below one another as radio buttons, each with a line explaining it. Side by side there was no room, and the labels were already being cut off at three
+  * The board settings have a "Templates" tab listing them: drag to reorder, rename, open one in the card editor to change its content, export, delete. Changes there take effect with Save
   * Scripts and webhooks can use templates too: `addCard` takes a `template` field, matched by ID first and by name second. Fields given explicitly beat the template. An unknown name is an error rather than a quiet omission, so that a typo does not produce half-filled cards for months
   * Export and import carry labels by name, not by ID, since an ID from another board means nothing on this one. An import appends and never replaces, because there is no telling what hides behind a name in a file; a name that already exists gets a counter
+  * Import has its own dialog, like export, and takes two steps: choose a file or paste the text of an export, then tick the templates to take over. Between picking the file in the file dialog and the file reaching the page, the browser can take several seconds, and during that time "Reading file..." stands next to the button. Errors are shown in the dialog. The imported templates join the list in the board settings and are stored with Save
+* (bmueller77) **Messages from an open dialog can be seen and closed.** The hint bar belonged to the page, and an open dialog sits above everything on the page, so any message raised from inside a dialog stayed hidden behind it: an error while saving, a failed download and so on. The bar now appears above the topmost open dialog, and its close cross can be clicked there
 
 ### 0.3.8 (2026-10-09)
 * (bmueller77) **The drop zones are back when dragging on a phone or a tablet.** Reported in [#42](https://github.com/bmueller77/ioBroker.kanban/issues/42) and broken since 0.3.5, where a check for horizontal overflow replaced the width rule instead of adding to it. On a narrow screen the columns stack, there is no horizontal overflow, and the bar with the target columns stayed away, which leaves no way at all to reach a hidden column. The pointer type no longer decides either: a WebView does not always answer `pointer: coarse` correctly, and Fully Kiosk even reverses the platform in its user agent
