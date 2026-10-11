@@ -1197,33 +1197,82 @@ export function boardMembers(board, users) {
  *        Sekunden davonmacht, ist so gut wie keine.
  */
 /**
- * Den Hinweisbalken sichtbar machen, auch ueber offenen Dialogen.
+ * Der oberste offene modale Dialog, oder null.
+ *
+ * Die Reihenfolge im Dokument sagt nichts darueber, welcher Dialog oben liegt;
+ *  das bestimmt die Reihenfolge der Aufrufe von showModal(). Darunterliegende
+ *  Dialoge sind aber inaktiv und fangen keine Treffer. Oben ist also der Dialog,
+ *  in dem ein Treffer auf seine eigene Mitte landet.
+ *
+ * @returns {HTMLDialogElement|null}
+ */
+function obersterDialog() {
+    const offen = [...document.querySelectorAll('dialog[open]')].filter(d => {
+        try {
+            return d.matches(':modal');
+        } catch {
+            return true;
+        }
+    });
+    for (const d of offen) {
+        const r = d.getBoundingClientRect();
+        const treffer = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+        if (treffer && d.contains(treffer)) {
+            return d;
+        }
+    }
+    return offen.length ? offen[offen.length - 1] : null;
+}
+
+/**
+ * Den Hinweisbalken sichtbar und bedienbar machen, auch ueber offenen Dialogen.
  *
  * Ein modaler Dialog liegt in der obersten Ebene des Browsers, ueber allem
- *  anderen, egal mit welchem z-index. Ein Balken im Seitenkoerper lag deshalb
- *  hinter jedem offenen Dialog, und Meldungen aus Dialogen heraus blieben
- *  ungesehen. Als Popover kommt der Balken in dieselbe Ebene, ueber die schon
- *  offenen Dialoge.
+ *  anderen, egal mit welchem z-index, und alles ausserhalb von ihm ist inaktiv.
+ *  Ein Balken im Seitenkoerper lag deshalb hinter jedem offenen Dialog. Auch als
+ *  Popover im Seitenkoerper waere er zwar zu sehen, sein Kreuz aber nicht
+ *  anklickbar. Darum kommt er in den obersten offenen Dialog und von dort als
+ *  Popover in die oberste Ebene, ueber den Dialog.
  *
- * Ohne Popover-Schnittstelle (Chrome vor 114, Safari vor 17) kommt er in den
- *  zuletzt geoeffneten Dialog. Fest positioniert bleibt er auch dort am
- *  Fenster ausgerichtet, weil kein Dialog ein transform traegt.
+ * Schliesst der Dialog, waehrend der Balken noch steht, wandert er eine Ebene
+ *  tiefer; eine Fehlermeldung verschwindet sonst mit dem Dialog, ungelesen.
+ *
+ * Ohne Popover-Schnittstelle (Chrome vor 114, Safari vor 17) bleibt er einfach
+ *  im Dialog. Fest positioniert ist er auch dort am Fenster ausgerichtet, weil
+ *  kein Dialog ein transform traegt.
  *
  * @param box Der fertige Balken
  */
 function hinweisZeigen(box) {
+    const dlg = obersterDialog();
+    (dlg || document.body).appendChild(box);
     if (typeof box.showPopover === 'function') {
         box.popover = 'manual';
-        document.body.appendChild(box);
         try {
             box.showPopover();
-            return;
         } catch {
             box.removeAttribute('popover');
         }
     }
-    const offen = [...document.querySelectorAll('dialog[open]')];
-    (offen.length ? offen[offen.length - 1] : document.body).appendChild(box);
+    if (dlg) {
+        dlg.addEventListener(
+            'close',
+            () => {
+                if (!box.isConnected || !dlg.contains(box)) {
+                    return;
+                }
+                if (box.popover) {
+                    try {
+                        box.hidePopover();
+                    } catch {
+                        /* war schon zu */
+                    }
+                }
+                hinweisZeigen(box);
+            },
+            { once: true },
+        );
+    }
 }
 
 export function showHint(text, art) {

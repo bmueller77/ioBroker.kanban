@@ -627,9 +627,11 @@ dialog {
    ihrem Inhalt - dort gibt es nichts, was die Hoehe veraendern koennte. */
 #cardDialog[open],
 #boardDialog[open] { height: calc(100vh - 48px); }
+/* Ohne den Hinweisbalken: Der haengt sich bei offenem Dialog in diesen hinein
+   und waere sonst eine Spalte statt einer Zeile. */
 #cardForm,
-#boardDialog > div,
-#shareDialog > div {
+#boardDialog > div:not(.app-hint),
+#shareDialog > div:not(.app-hint) {
     flex: 1 1 auto;
     min-height: 0;
     display: flex;
