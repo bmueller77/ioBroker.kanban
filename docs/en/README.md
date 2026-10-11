@@ -4,23 +4,6 @@ A **Kanban board as a dedicated ioBroker adapter**. It ships its own web server,
 
 > **Who is it for?** Households that manage tasks together, whether that is a family, a flat-share or the maintenance plan for a house, and want those tasks where ioBroker already runs. Every event lands in a state that scripts and Node-RED can read, and the board embeds into Lovelace as a webpage card.
 
-> **Version 0.3.2**
->
-> - Switchable counts in the column header: total, tomorrow, today, overdue
-> - Collapsible sections in the card editor, each summarised in its header
-> - An icon bar above the link field
-> - User IDs locked as soon as a card or an avatar hangs on them
-> - Repair for orphaned assignees in the UI
-> - One label order everywhere, and the label list can be dragged
-> - Single-user mode without assignment fields
-> - Reworked keyboard operation
-> - "Every X days (after the previous one is done)" as a new recurrence kind
-> - Yellow now means exactly the next calendar day
-> - No new cards in done columns
-> - Calendar cancellation when a card with an invite is deleted
-> - The sort toggle in the trash as well
-> - Fresh instances without preset users
-
 ![Kanban board overview](img/board.png)
 
 ---
@@ -320,7 +303,7 @@ Above the column list sits a header row with the field names (**Title · Max · 
 - **Copy a completed card:** next to the title of a done card sits a small copy icon <img src="../icons/copy.svg" width="18" alt="two offset sheets">. It opens the editor with the same content as a **new** card. On save it lands in the first column flagged "New", checklist items start unticked, and the due date is prefilled with **today** if the original had one at all (a time of day is kept).
 
 <a id="counts-in-the-column-header"></a>
-#### Counts in the column header (since 0.3.2)
+#### Counts in the column header
 
 Next to the column title sits not only the card count but, on request, also the number of cards in that column that are due tomorrow, due today or already overdue.
 
@@ -344,7 +327,7 @@ The keyboard reaches all of it. Tab lands on the numbers, Enter opens the menu, 
 ![Counts in the column header with the menu open](img/col-counts.png)
 
 <a id="trash"></a>
-#### Trash (since 0.3.0)
+#### Trash
 
 Every board has a **"Trash" system column**. Deleted cards do not vanish straight away: they sit there for **30 days** and can be restored at any time. Only afterwards are they removed for good.
 
@@ -356,10 +339,9 @@ Every board has a **"Trash" system column**. Deleted cards do not vanish straigh
 - **Remaining time:** every card shows how long it will still be kept, for example "30 days left".
 - **Its own look:** the column is deliberately kept neutral grey, independent of theme and accent colour, so it stands apart from the working columns.
 - **Special status:** the trash always sits on the far right, cannot be renamed, moved or deleted and does not show up in the column configuration. It has no WIP limit and no "+ Add card" link, and it does not count towards the counters of other columns. It does have the **sort toggle**, like every other column. The default is deletion time, oldest first - so whatever is closest to being removed for good sits on top.
-- **Existing boards:** on the first start of 0.3.0 every existing board gets a trash column automatically. Existing cards are not touched.
 
 <a id="cleanup"></a>
-#### Move done cards to the trash (since 0.3.0)
+#### Move done cards to the trash
 
 To stop the done column from growing forever, each board can move old completed cards into the trash on its own. The setting sits at the bottom of the Board tab and is **off by default**.
 
@@ -385,7 +367,7 @@ The labels carry a drag handle <img src="../icons/grip.svg" width="18" alt="drag
 
 *Both cards carry Frontend, Backend and Bug - in the same order, no matter which was clicked first.*
 
-#### Link in notifications (from 0.2.0)
+#### Link in notifications
 
 ![Board settings, labels and link target](img/settings-labels.png)
 
@@ -454,7 +436,7 @@ Every card object of the **REST API** additionally carries the computed field **
 
 `movedAt` records **since when a card has been sitting in its current column** and is the basis for the "age in column" sort mode. It is only refreshed on a real column change; reordering within the same column in manual sort mode leaves it untouched. `trashedAt` marks when a card went to the trash and drives the 30-day deadline.
 
-#### Transfer or clone a card (since 0.3.0)
+#### Transfer or clone a card
 
 In the footer of the card editor, right next to **Delete**, sits the **Manage** button. It opens the dialog of the same name, which lists four options one below the other, each with a line of explanation: **Clone**, **Copy**, **Move** and **Save as template**. The fields below and the label of the button at the bottom right follow the chosen option. What "Save as template" does is described under [Card templates](#card-templates).
 
@@ -721,7 +703,7 @@ http://192.168.1.10:8095/?board=familie&label=private&hideSettings=1
 http://192.168.1.10:8095/?board=familie&onlyLabel=care-heike&hideSettings=1&embed=1
 ```
 
-> **Lovelace/iframe:** the adapter sets **no** frame headers (`X-Frame-Options`/`frame-ancestors`). The CSP added in 0.1.1 is a `<meta>` tag and does **not** restrict embedding, so the UI can still be embedded directly in a Lovelace webpage card or an `<iframe>`.
+> **Lovelace/iframe:** the adapter sets **no** frame headers (`X-Frame-Options`/`frame-ancestors`). The CSP is a `<meta>` tag and does **not** restrict embedding, so the UI can still be embedded directly in a Lovelace webpage card or an `<iframe>`.
 
 ---
 
@@ -731,7 +713,7 @@ Boards and cards can be driven entirely from the outside, from ioBroker scripts,
 
 ### REST API
 
-For integrations on the same network there is a REST API (the same one the web UI uses). **Reading** (`GET`) is open, **writing** (`POST`/`PATCH`/`DELETE`) requires a token from 0.1.1 (see [Security & access control](#security--access-control)).
+For integrations on the same network there is a REST API (the same one the web UI uses). **Reading** (`GET`) is open, **writing** (`POST`/`PATCH`/`DELETE`) requires a token (see [Security & access control](#security--access-control)).
 
 | Method & path | Purpose |
 |---|---|
@@ -757,7 +739,7 @@ For integrations on the same network there is a REST API (the same one the web U
 | `GET /api/users/orphaned/<name>` | The cards behind an orphaned ID: title, board, column, due date, done or not. `?limit=<n>` shortens the list, the full count stays in `total`. The trash is left out. |
 | `POST /api/boards/<id>/cards/<cardId>/transfer` | Transfer a card to another board (`{ toBoard, toColumn?, mode: "move"\|"copy", assignees? }`). With `toBoard` = the same board and `mode: "copy"` the card is cloned in place. |
 
-> **Write access** to `/api` requires a token from 0.1.1 (`X-Kanban-Token`; the web UI sends it automatically), **reading** stays open on the LAN. Details and limits: [Security & access control](#security--access-control). For external access use the token-based [webhooks](#webhooks-inbound).
+> **Write access** to `/api` requires a token (`X-Kanban-Token`; the web UI sends it automatically), **reading** stays open on the LAN. Details and limits: [Security & access control](#security--access-control). For external access use the token-based [webhooks](#webhooks-inbound).
 
 #### Structure of a column object
 
@@ -923,7 +905,7 @@ Target URLs and event filters are configured in the instance settings ([Tab "Web
 }
 ```
 
-Every event has the shape `{ event, ts, board:{id,title}, card:{...}, detail:{...}, link, dueAt }`. The `detail` field varies by event type (e.g. `assignee` for `cardAssigned`, `fromColumn`/`toColumn` for `cardMoved`, `auto`/`reason` for bulk actions, `clone`/`crossBoardCopy` when cloning or copying to another board, `crossBoard` when moving to one, `exact` for the card-precise `cardDue`). `dueAt` was added in 0.3.0 and carries the due date including time as an ISO timestamp with local offset.
+Every event has the shape `{ event, ts, board:{id,title}, card:{...}, detail:{...}, link, dueAt }`. The `detail` field varies by event type (e.g. `assignee` for `cardAssigned`, `fromColumn`/`toColumn` for `cardMoved`, `auto`/`reason` for bulk actions, `clone`/`crossBoardCopy` when cloning or copying to another board, `crossBoard` when moving to one, `exact` for the card-precise `cardDue`). `dueAt` carries the due date including time as an ISO timestamp with local offset.
 
 <a id="other-services"></a>
 ### Notifications to any service (Telegram, Pushover, ...)
@@ -1103,7 +1085,7 @@ setState('kanban.0.action', JSON.stringify({
 
 The adapter executes the command and clears the state again.
 
-> **Access:** neither route uses a token: anyone allowed to run scripts or write states in ioBroker can do everything here, including `deleteBoard` and `emptyTrash`. That is intentional, as both are local ioBroker interfaces. From 0.3.0 the `action` state can be switched off under "Webhooks (in)" if no script writes to it, and irreversible commands are logged with their source. For access from outside, use the webhook route with its own token and board restriction.
+> **Access:** neither route uses a token: anyone allowed to run scripts or write states in ioBroker can do everything here, including `deleteBoard` and `emptyTrash`. That is intentional, as both are local ioBroker interfaces. The `action` state can be switched off under "Webhooks (in)" if no script writes to it, and irreversible commands are logged with their source. For access from outside, use the webhook route with its own token and board restriction.
 
 ### Live sync & deep links
 
@@ -1133,7 +1115,7 @@ Besides the UI, the adapter creates states for use in scripts, VIS/Lovelace or N
 | `kanban.0.users.<id>.overdueCount` | number | Of those, overdue. |
 | `kanban.0.users.<id>.overdueList` | json | List of overdue cards (title + board/column). |
 
-The `<id>` under `users.*` is the display name in lower case, with umlauts spelled out and everything else collapsed into hyphens: "Björn Müller" becomes `users.bjoern-mueller`. Up to 0.3.7 the display name went into the path unchanged, which produced malformed object IDs for names with spaces or umlauts. On the first start of 0.3.8 the old branch is removed and recreated under the new ID, and the log says so. If you refer to the old ID in a script or a view, update it once.
+The `<id>` under `users.*` is the display name in lower case, with umlauts spelled out and everything else collapsed into hyphens: "Björn Müller" becomes `users.bjoern-mueller`. Branches under `users.*` that belong to no configured user are removed at startup, and the log says so.
 
 The `boards.*` and `users.*` mirror states are handy for dashboards ("Björn: 3 open, 1 overdue") or automations without querying the REST API. Delete a user in the instance settings and their branch under `users.*` goes with them, so a dashboard does not keep counting one person too many.
 
@@ -1143,16 +1125,14 @@ The `boards.*` and `users.*` mirror states are handy for dashboards ("Björn: 3 
 
 ### Security & access control
 
-> **New in 0.1.1**, added after a security review.
-
 **Write protection for the REST API (token).** Read access (`GET`) to `/api` stays open on the LAN (the web UI and simple dashboards need no token). **Write** access (`POST`/`PATCH`/`DELETE`) requires a token in the `X-Kanban-Token` header or as a `_token` field in the body. Valid tokens are:
 
 - the automatically generated **SPA secret**, which the server hands to its own UI as `<meta name="kanban-token">`, the web UI sends it transparently, nothing to configure;
 - any active **inboundToken** (tab "Webhooks (in)"), so scripts/agents can also write via `/api`.
 
-Without a valid token → HTTP `401`. The native setting `apiWriteProtection: false` disables the protection (then `/api` behaves as in 0.1.0).
+Without a valid token → HTTP `401`. The native setting `apiWriteProtection: false` disables the protection (then `/api` accepts writes without a token as well).
 
-> **Also new in 0.3.0:**
+> **Also:**
 > - A token's **board restriction** ("allowed boards") applies on **both** routes: REST (`/api/boards/<id>/...`) and webhook commands (`addCard`, `moveCard`, `deleteBoard`, `transferCard`, ...). What counts is the board the call **actually touches**: for REST the board in the path, plus the target board of a transfer, and for commands the field that this particular command evaluates. Another board yields `403`. A **writing** command that names no board at all, such as `addBoard` or editing users and avatars, is closed to restricted tokens as well, no matter what else the body contains. Purely **reading** commands (`listBoards`, `getBoard`) stay open, as reading needs no token anyway.
 > - Tokens are **not accepted as a URL parameter** (`?token=...`), because URLs end up in logs, browser history and referrers. Use the header or the body field.
 > - The **SPA secret now lives in the adapter's file storage** instead of the readable state `kanban.0.info.apiSecret`; the state remains but stays empty. An existing value is migrated on first start and then cleared.

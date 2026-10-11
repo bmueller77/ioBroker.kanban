@@ -4,23 +4,6 @@ Ein **Kanban-Board als eigener ioBroker-Adapter**. Er bringt seinen eigenen Webs
 
 > **Für wen?** Für Haushalte, die Aufgaben gemeinsam verwalten wollen - Familie, WG, Wartungsplan fürs Haus - und sie dort haben möchten, wo ohnehin ioBroker läuft. Jedes Ereignis landet in einem State, den Skripte und Node-RED auswerten können, und das Board lässt sich als Webpage-Card in Lovelace einbetten.
 
-> **Version 0.3.2**
->
-> - Zahlen im Spaltenkopf umschaltbar: Gesamt, Morgen, Heute, Überfällig
-> - Aufklappbare Abschnitte im Karteneditor, jeder mit Zusammenfassung in der Kopfzeile
-> - Symbolleiste über dem Link-Feld
-> - Benutzer-IDs gesperrt, sobald eine Karte oder ein Avatarbild daran hängt
-> - Reparatur verwaister Zuständiger in der Oberfläche
-> - Eine Reihenfolge für Labels an allen Stellen, die Labelliste lässt sich ziehen
-> - Ein-Benutzer-Betrieb ohne Zuständigkeitsfelder
-> - Überarbeitete Tastaturbedienung
-> - "Alle X Tage (nach Erledigung des Vorgängers)" als neue Wiederholungsart
-> - Gelb heißt jetzt genau der nächste Kalendertag
-> - Keine neuen Karten in Erledigt-Spalten
-> - Kalender-Absage beim Löschen einer Karte mit Einladung
-> - Sortier-Umschalter auch im Papierkorb
-> - Frische Instanzen ohne vorbelegte Benutzer
-
 ![Kanban-Board - Übersicht](img/board.png)
 
 ---
@@ -321,7 +304,7 @@ Spalten lassen sich anlegen, per Drag & Drop sortieren, umbenennen und löschen.
 - **Erledigte Karte kopieren:** Neben dem Titel einer erledigten Karte sitzt ein kleines Kopier-Symbol <img src="../icons/copy.svg" width="18" alt="Zwei versetzte Blaetter">. Es öffnet den Editor mit denselben Inhalten als **neue** Karte. Sie landet beim Speichern in der ersten Spalte mit "Neu"-Häkchen, Checklisten-Punkte starten unerledigt, und als Fälligkeit wird das **heutige Datum** vorgeschlagen, sofern das Original überhaupt eines hatte (eine gesetzte Uhrzeit bleibt erhalten).
 
 <a id="zahlen-im-spaltenkopf"></a>
-#### Zahlen im Spaltenkopf (ab 0.3.2)
+#### Zahlen im Spaltenkopf
 
 Neben dem Spaltentitel steht nicht nur die Kartenanzahl, sondern auf Wunsch auch, die Anzahl von Karten der Spalte, die morgen, heute fällig oder bereits überfällig sind.
 
@@ -345,7 +328,7 @@ Bedienen lässt sich das auch mit der Tastatur. Tab erreicht die Zahlen, Enter �
 ![Zahlen im Spaltenkopf, daneben das Auswahlmenü](img/col-counts.png)
 
 <a id="papierkorb"></a>
-#### Papierkorb (ab 0.3.0)
+#### Papierkorb
 
 Jedes Board hat eine **Systemspalte "Papierkorb"**. Gelöschte Karten verschwinden nicht sofort, sondern liegen dort **30 Tage** und lassen sich jederzeit wiederherstellen. Erst danach werden sie endgültig entfernt.
 
@@ -355,10 +338,10 @@ Jedes Board hat eine **Systemspalte "Papierkorb"**. Gelöschte Karten verschwind
 - **Sofort endgültig löschen:** Das zweite Symbol auf der Karte entfernt sie unwiderruflich. Am Spaltenkopf leert der Button mit dem Besen-Symbol <img src="../icons/broom.svg" width="18" alt="Besen"> den **kompletten** Papierkorb. Beides fragt vorher nach. Auch über API und Webhook greift `purgeCard` **nur auf Karten im Papierkorb** - bei einer aktiven Karte kommt ein Return `400` mit "Karte '...' liegt nicht im Papierkorb". Der Weg an der Aufbewahrungsfrist vorbei führt also immer erst durch den Papierkorb.
 - **Restlaufzeit:** Jede Karte zeigt an, wie lange sie noch aufbewahrt wird, zum Beispiel "noch 30 Tage".
 - **Eigene Optik:** Die Spalte ist bewusst neutral grau gehalten, unabhängig von Theme und Akzentfarbe, damit sie sich von den Arbeitsspalten abhebt.
-- **Sonderstellung:** Der Papierkorb steht immer ganz rechts, lässt sich nicht umbenennen, verschieben oder löschen und taucht in der Spalten-Konfiguration nicht auf. Er kennt kein WIP-Limit und keinen "Neu"-Button und trägt zum Zähler anderer Spalten nicht bei. Den **Sortier-Umschalter** hat er seit 0.3.2 wie jede andere Spalte. Voreingestellt ist die Reihenfolge nach Löschzeitpunkt, älteste zuerst - oben steht also, was der endgültigen Löschung am nächsten ist.
+- **Sonderstellung:** Der Papierkorb steht immer ganz rechts, lässt sich nicht umbenennen, verschieben oder löschen und taucht in der Spalten-Konfiguration nicht auf. Er kennt kein WIP-Limit und keinen "Neu"-Button und trägt zum Zähler anderer Spalten nicht bei. Den **Sortier-Umschalter** hat er wie jede andere Spalte. Voreingestellt ist die Reihenfolge nach Löschzeitpunkt, älteste zuerst - oben steht also, was der endgültigen Löschung am nächsten ist.
 
 <a id="erledigte-karten-in-den-papierkorb"></a>
-#### Erledigte Karten in den Papierkorb (ab 0.3.0)
+#### Erledigte Karten in den Papierkorb
 
 Damit sich die Erledigt-Spalte nicht endlos füllt, kann jedes Board alte erledigte Karten selbsttätig in den Papierkorb räumen. Die Einstellung steht unten im Board-Tab und ist **standardmäßig aus**.
 
@@ -384,7 +367,7 @@ Die **Reihenfolge** der Labels lässt sich wie die der Spalten am Anfasser <img 
 
 *Beide Karten tragen Frontend, Backend und Bug - und zwar in derselben Reihenfolge, egal in welcher sie angeklickt wurden.*
 
-#### Link in Benachrichtigungen (ab 0.2.0)
+#### Link in Benachrichtigungen
 
 ![Board-Einstellungen - Labels und Link-Ziel](img/settings-labels.png)
 
@@ -449,11 +432,11 @@ Eine Karte hat folgende inhaltliche Felder (per API unter denselben Namen setzba
 
 Zusätzlich verwaltet der Adapter automatisch: `id`, `columnId`, `order`, `createdAt`, `createdBy`, `movedAt`, `doneAt`, `trashedAt` sowie intern `lastReminderAt`, `lastExactAt` (Merker, damit dieselbe Erinnerung bzw. dasselbe Uhrzeit-Ereignis nicht mehrfach am Tag feuert) und `icsUid`/`icsFingerprint`/`icsSeq` (Kalender-Serie: gleiche UID über die ganze Wiederholungskette, Erkennung geänderter Termindaten).
 
-Jedes Kartenobjekt der **REST-API** enthält ab 0.3.0 außerdem das berechnete Feld **`dueAt`** - die Fälligkeit inklusive Uhrzeit als ISO-Zeitstempel mit lokalem Offset (z. B. `2026-08-01T13:30:00+02:00`; ohne Uhrzeit `00:00`, ohne Datum `null`). Es ist identisch mit dem `dueAt` der Ereignisse, wird **nicht gespeichert** und beim Schreiben ignoriert - Automatisierungen müssen also nicht selbst aus `due` + `dueTime` + Zeitzone rechnen.
+Jedes Kartenobjekt der **REST-API** enthält außerdem das berechnete Feld **`dueAt`** - die Fälligkeit inklusive Uhrzeit als ISO-Zeitstempel mit lokalem Offset (z. B. `2026-08-01T13:30:00+02:00`; ohne Uhrzeit `00:00`, ohne Datum `null`). Es ist identisch mit dem `dueAt` der Ereignisse, wird **nicht gespeichert** und beim Schreiben ignoriert - Automatisierungen müssen also nicht selbst aus `due` + `dueTime` + Zeitzone rechnen.
 
 `movedAt` hält fest, **seit wann eine Karte in ihrer aktuellen Spalte liegt**, und ist damit die Grundlage für den Sortiermodus "Alter in Spalte". Der Zeitstempel wird nur bei einem echten Spaltenwechsel neu gesetzt; das Umsortieren innerhalb derselben Spalte im manuellen Sortiermodus lässt ihn unverändert. `trashedAt` markiert den Zeitpunkt, zu dem eine Karte in den Papierkorb gewandert ist, und steuert die 30-Tage-Frist.
 
-#### Karte übertragen oder klonen (ab 0.3.0)
+#### Karte übertragen oder klonen
 
 In der Fußzeile des Karten-Editors sitzt rechts neben **Löschen** der Button **Verwalten**. Er öffnet den gleichnamigen Dialog. Darin stehen vier Optionen untereinander, jede mit einer Zeile Erklärung: **Klonen**, **Kopieren**, **Verschieben** und **Als Vorlage speichern**. Die Felder darunter und die Beschriftung des Knopfs unten rechts richten sich nach der gewählten Option. Was "Als Vorlage speichern" tut, steht unter [Kartenvorlagen](#kartenvorlagen).
 
@@ -720,7 +703,7 @@ http://192.168.1.10:8095/?board=familie&label=privat&hideSettings=1
 http://192.168.1.10:8095/?board=familie&onlyLabel=pflege-heike&hideSettings=1&embed=1
 ```
 
-> **Lovelace/iframe:** Der Adapter setzt **keine** Frame-Header (`X-Frame-Options`/`frame-ancestors`). Die ab 0.1.1 gesetzte CSP steht als `<meta>` und schränkt die Einbettung **nicht** ein, die UI lässt sich also weiterhin direkt in eine Lovelace-Webpage-Card oder ein `<iframe>` einbetten.
+> **Lovelace/iframe:** Der Adapter setzt **keine** Frame-Header (`X-Frame-Options`/`frame-ancestors`). Die CSP steht als `<meta>` und schränkt die Einbettung **nicht** ein, die UI lässt sich also weiterhin direkt in eine Lovelace-Webpage-Card oder ein `<iframe>` einbetten.
 
 ---
 
@@ -730,7 +713,7 @@ Boards und Karten lassen sich vollständig von außen steuern, aus ioBroker-Skri
 
 ### REST-API
 
-Für Integrationen im gleichen Netz steht eine REST-API bereit (dieselbe, die die Web-UI nutzt). **Lesen** (`GET`) ist offen, **Schreiben** (`POST`/`PATCH`/`DELETE`) erfordert ab 0.1.1 einen Token - siehe [Sicherheit & Zugriffsschutz](#sicherheit--zugriffsschutz).
+Für Integrationen im gleichen Netz steht eine REST-API bereit (dieselbe, die die Web-UI nutzt). **Lesen** (`GET`) ist offen, **Schreiben** (`POST`/`PATCH`/`DELETE`) erfordert einen Token - siehe [Sicherheit & Zugriffsschutz](#sicherheit--zugriffsschutz).
 
 | Methode & Pfad | Zweck |
 |---|---|
@@ -756,7 +739,7 @@ Für Integrationen im gleichen Netz steht eine REST-API bereit (dieselbe, die di
 | `GET /api/users/orphaned/<name>` | Die Karten hinter einer verwaisten Kennung: Titel, Board, Spalte, Fälligkeit, erledigt ja/nein. `?limit=<n>` kürzt die Liste, die Gesamtzahl steht trotzdem in `total`. Der Papierkorb bleibt außen vor. |
 | `POST /api/boards/<id>/cards/<cardId>/transfer` | Karte auf ein anderes Board übertragen (`{ toBoard, toColumn?, mode: "move"\|"copy", assignees? }`). Mit `toBoard` = eigenes Board und `mode: "copy"` wird die Karte im selben Board geklont. |
 
-> **Schreibzugriffe** auf `/api` brauchen ab 0.1.1 einen Token (`X-Kanban-Token`; die Web-UI schickt ihn automatisch mit), **Lesen** bleibt im LAN offen. Details und Grenzen: [Sicherheit & Zugriffsschutz](#sicherheit--zugriffsschutz). Für Zugriffe von außen die tokenbasierten [Webhooks](#webhooks-eingehend) verwenden.
+> **Schreibzugriffe** auf `/api` brauchen einen Token (`X-Kanban-Token`; die Web-UI schickt ihn automatisch mit), **Lesen** bleibt im LAN offen. Details und Grenzen: [Sicherheit & Zugriffsschutz](#sicherheit--zugriffsschutz). Für Zugriffe von außen die tokenbasierten [Webhooks](#webhooks-eingehend) verwenden.
 
 #### Aufbau eines Spaltenobjekts
 
@@ -922,7 +905,7 @@ Ziel-URLs und Ereignisfilter werden in den Instanzeinstellungen gepflegt ([Tab "
 }
 ```
 
-Jedes Event hat die Struktur `{ event, ts, board:{id,title}, card:{...}, detail:{...}, link, dueAt }`. Das Feld `detail` variiert je Ereignistyp (z. B. `assignee` bei `cardAssigned`, `fromColumn`/`toColumn` bei `cardMoved`, `auto`/`reason` bei Massenaktionen, `clone`/`crossBoardCopy` beim Klonen bzw. Kopieren auf ein anderes Board, `crossBoard` beim Verschieben dorthin, `exact` beim kartengenauen `cardDue`). `dueAt` gibt es seit 0.3.0 und enthält die Fälligkeit inklusive Uhrzeit als ISO-Zeitstempel mit lokalem Offset.
+Jedes Event hat die Struktur `{ event, ts, board:{id,title}, card:{...}, detail:{...}, link, dueAt }`. Das Feld `detail` variiert je Ereignistyp (z. B. `assignee` bei `cardAssigned`, `fromColumn`/`toColumn` bei `cardMoved`, `auto`/`reason` bei Massenaktionen, `clone`/`crossBoardCopy` beim Klonen bzw. Kopieren auf ein anderes Board, `crossBoard` beim Verschieben dorthin, `exact` beim kartengenauen `cardDue`). `dueAt` enthält die Fälligkeit inklusive Uhrzeit als ISO-Zeitstempel mit lokalem Offset.
 
 <a id="andere-dienste"></a>
 ### Benachrichtigungen an beliebige Dienste (Telegram, Pushover, ...)
@@ -1102,7 +1085,7 @@ setState('kanban.0.action', JSON.stringify({
 
 Der Adapter führt das Kommando aus und leert den State wieder.
 
-> **Zugriff:** Beide Wege kennen **keinen Token** - wer in ioBroker Skripte ausführen oder States schreiben darf, darf damit alles, auch `deleteBoard` und `emptyTrash`. Das ist so gewollt, weil beides lokale ioBroker-Schnittstellen sind. Ab 0.3.0 lässt sich der `action`-State unter "Webhooks (eingehend)" abschalten, wenn kein Skript darauf schreibt, und unumkehrbare Kommandos landen mit ihrer Quelle im Log. Für Zugriffe von außen ist der Webhook-Weg mit eigenem Token und Board-Begrenzung gedacht.
+> **Zugriff:** Beide Wege kennen **keinen Token** - wer in ioBroker Skripte ausführen oder States schreiben darf, darf damit alles, auch `deleteBoard` und `emptyTrash`. Das ist so gewollt, weil beides lokale ioBroker-Schnittstellen sind. Der `action`-State lässt sich unter "Webhooks (eingehend)" abschalten, wenn kein Skript darauf schreibt, und unumkehrbare Kommandos landen mit ihrer Quelle im Log. Für Zugriffe von außen ist der Webhook-Weg mit eigenem Token und Board-Begrenzung gedacht.
 
 ### Live-Sync & Deep-Links
 
@@ -1132,9 +1115,9 @@ Neben der Oberfläche legt der Adapter States an, die sich in Skripten, VIS/Love
 | `kanban.0.users.<id>.overdueCount` | number | Davon überfällig. |
 | `kanban.0.users.<id>.overdueList` | json | Liste der überfälligen Karten (Titel + Board/Spalte). |
 
-Das `<id>` unter `users.*` ist der Anzeigename in Kleinbuchstaben, Umlaute ausgeschrieben, alles andere zu Bindestrichen zusammengezogen: aus "Björn Müller" wird `users.bjoern-mueller`. Bis 0.3.7 stand dort der Anzeigename unverändert, was mit Leerzeichen und Umlauten krumme Objekt-IDs ergab. Beim ersten Start von 0.3.8 wird der alte Zweig entfernt und mit der neuen ID neu angelegt; der Vorgang steht im Protokoll. Wer die alte ID in einem Skript oder einer Visualisierung verwendet, muss sie einmal nachziehen.
+Das `<id>` unter `users.*` ist der Anzeigename in Kleinbuchstaben, Umlaute ausgeschrieben, alles andere zu Bindestrichen zusammengezogen: aus "Björn Müller" wird `users.bjoern-mueller`. Zweige unter `users.*`, die zu keinem eingetragenen Benutzer gehören, entfernt der Adapter beim Start und vermerkt das im Protokoll.
 
-Die `boards.*`- und `users.*`-Spiegel-States eignen sich gut für Dashboards ("Björn: 3 offen, 1 überfällig") oder Automatisierungen, ohne die REST-API abfragen zu müssen. Wird ein Benutzer in den Instanzeinstellungen gelöscht, verschwindet sein Zweig unter `users.*` mit; bis 0.3.2 blieb er samt seinen letzten Zahlen stehen und ein Dashboard zählte dauerhaft eine Person zu viel.
+Die `boards.*`- und `users.*`-Spiegel-States eignen sich gut für Dashboards ("Björn: 3 offen, 1 überfällig") oder Automatisierungen, ohne die REST-API abfragen zu müssen. Wird ein Benutzer in den Instanzeinstellungen gelöscht, verschwindet sein Zweig unter `users.*` mit.
 
 ---
 
@@ -1142,16 +1125,14 @@ Die `boards.*`- und `users.*`-Spiegel-States eignen sich gut für Dashboards ("B
 
 ### Sicherheit & Zugriffsschutz
 
-> **Neu in 0.1.1**, ergänzt nach einem Sicherheits-Review.
-
 **Schreibschutz der REST-API (Token).** Lesende Zugriffe (`GET`) auf `/api` bleiben im LAN offen (Web-UI und einfache Dashboards brauchen keinen Token). **Schreibende** Zugriffe (`POST`/`PATCH`/`DELETE`) verlangen einen Token im Header `X-Kanban-Token` oder als Feld `_token` im Body. Gültig sind:
 
 - das automatisch erzeugte **SPA-Secret**, das der Server der eigenen Oberfläche als `<meta name="kanban-token">` mitgibt, die Web-UI schickt es transparent mit, einzustellen ist nichts;
 - jeder aktive **inboundToken** (Tab "Webhooks (eingehend)"), damit auch Skripte/Agenten `/api` schreibend nutzen können.
 
-Ohne gültigen Token → HTTP `401`. Über die native Einstellung `apiWriteProtection: false` lässt sich der Schutz abschalten (dann verhält sich `/api` wie in 0.1.0).
+Ohne gültigen Token → HTTP `401`. Über die native Einstellung `apiWriteProtection: false` lässt sich der Schutz abschalten (dann nimmt `/api` auch Schreibzugriffe ohne Token an).
 
-> **Ebenfalls neu in 0.3.0:**
+> **Außerdem gilt:**
 > - Die **Board-Begrenzung eines Tokens** ("Erlaubte Boards") gilt auf **beiden** Wegen: REST (`/api/boards/<id>/...`) und Webhook-Kommandos (`addCard`, `moveCard`, `deleteBoard`, `transferCard`, ...). Maßgeblich ist, welches Board der Aufruf **tatsächlich anfasst**: bei REST das Board im Pfad, beim Übertragen zusätzlich das Zielboard, bei Kommandos das Feld, das genau dieses Kommando auswertet. Ein fremdes Board ergibt `403`. Nennt ein **schreibendes** Kommando gar kein Board (etwa `addBoard` oder das Ändern von Benutzern und Avataren), ist es für einen begrenzten Token ebenfalls gesperrt, und zwar unabhängig davon, was sonst im Body steht. Rein **lesende** Kommandos (`listBoards`, `getBoard`) bleiben erlaubt, Lesen ist am Adapter ohnehin nicht token-pflichtig.
 > - Tokens werden **nicht als URL-Parameter** (`?token=...`) angenommen, da sie dort in Logs, Browser-Verlauf und Referrern landen. Header oder Body-Feld verwenden.
 > - Das **SPA-Secret liegt im Dateispeicher** des Adapters statt im lesbaren State `kanban.0.info.apiSecret`; der State bleibt leer bestehen. Ein vorhandener Wert wird beim ersten Start übernommen und gelöscht.
