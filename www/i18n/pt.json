@@ -256,7 +256,7 @@
   "templates.replaceMsg": "O editor já tem conteúdo. O modelo \"{name}\" define todos os campos de novo.",
   "templates.replaceOk": "Aplicar",
   "settings.tabTemplates": "Modelos",
-  "templates.manageHint": "Arraste para ordenar, edite os nomes, remova com \"×\". O conteúdo de um modelo altera-se num cartão através de \"Gerir\".",
+  "templates.manageHint": "Arraste para ordenar, edite os nomes, altere o conteúdo com \"✎\", remova com \"×\".",
   "templates.noneYet": "Ainda sem modelos. Um modelo cria-se num cartão através de \"Gerir\", opção \"Guardar como modelo\".",
   "templates.deleteTitle": "Eliminar modelo",
   "templates.editTitle": "Editar modelo",

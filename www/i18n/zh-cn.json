@@ -256,7 +256,7 @@
   "templates.replaceMsg": "编辑器中已有内容。模板 \"{name}\" 会重新设置所有字段。",
   "templates.replaceOk": "应用",
   "settings.tabTemplates": "模板",
-  "templates.manageHint": "拖动可调整顺序，可修改名称，用 \"×\" 删除。模板的内容在卡片上通过\"管理\"更改。",
+  "templates.manageHint": "拖动可调整顺序，可修改名称，用 \"✎\" 编辑内容，用 \"×\" 删除。",
   "templates.noneYet": "尚无模板。模板在卡片上通过\"管理\"中的\"另存为模板\"创建。",
   "templates.deleteTitle": "删除模板",
   "templates.editTitle": "编辑模板",

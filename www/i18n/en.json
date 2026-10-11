@@ -256,7 +256,7 @@
   "templates.replaceMsg": "The editor already holds something. The template \"{name}\" sets every field anew.",
   "templates.replaceOk": "Apply",
   "settings.tabTemplates": "Templates",
-  "templates.manageHint": "Drag to reorder, edit the names, remove with \"×\". The contents of a template are changed on a card via \"Manage\".",
+  "templates.manageHint": "Drag to reorder, edit the names, change the contents with \"✎\", remove with \"×\".",
   "templates.noneYet": "No template yet. A template is created on a card via \"Manage\", option \"Save as template\".",
   "templates.deleteTitle": "Delete template",
   "templates.editTitle": "Edit template",

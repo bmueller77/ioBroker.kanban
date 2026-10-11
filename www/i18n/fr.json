@@ -256,7 +256,7 @@
   "templates.replaceMsg": "L'éditeur contient déjà des données. Le modèle \"{name}\" redéfinit tous les champs.",
   "templates.replaceOk": "Appliquer",
   "settings.tabTemplates": "Modèles",
-  "templates.manageHint": "Glissez pour l'ordre, modifiez les noms, supprimez avec \"×\". Le contenu d'un modèle se modifie sur une carte via \"Gérer\".",
+  "templates.manageHint": "Glissez pour l'ordre, modifiez les noms, changez le contenu avec \"✎\", supprimez avec \"×\".",
   "templates.noneYet": "Aucun modèle pour l'instant. Un modèle se crée sur une carte via \"Gérer\", option \"Enregistrer comme modèle\".",
   "templates.deleteTitle": "Supprimer le modèle",
   "templates.editTitle": "Modifier le modèle",
