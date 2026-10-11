@@ -1196,6 +1196,36 @@ export function boardMembers(board, users) {
  *        bis jemand das Kreuz drueckt. Eine Fehlermeldung, die sich nach acht
  *        Sekunden davonmacht, ist so gut wie keine.
  */
+/**
+ * Den Hinweisbalken sichtbar machen, auch ueber offenen Dialogen.
+ *
+ * Ein modaler Dialog liegt in der obersten Ebene des Browsers, ueber allem
+ *  anderen, egal mit welchem z-index. Ein Balken im Seitenkoerper lag deshalb
+ *  hinter jedem offenen Dialog, und Meldungen aus Dialogen heraus blieben
+ *  ungesehen. Als Popover kommt der Balken in dieselbe Ebene, ueber die schon
+ *  offenen Dialoge.
+ *
+ * Ohne Popover-Schnittstelle (Chrome vor 114, Safari vor 17) kommt er in den
+ *  zuletzt geoeffneten Dialog. Fest positioniert bleibt er auch dort am
+ *  Fenster ausgerichtet, weil kein Dialog ein transform traegt.
+ *
+ * @param box Der fertige Balken
+ */
+function hinweisZeigen(box) {
+    if (typeof box.showPopover === 'function') {
+        box.popover = 'manual';
+        document.body.appendChild(box);
+        try {
+            box.showPopover();
+            return;
+        } catch {
+            box.removeAttribute('popover');
+        }
+    }
+    const offen = [...document.querySelectorAll('dialog[open]')];
+    (offen.length ? offen[offen.length - 1] : document.body).appendChild(box);
+}
+
 export function showHint(text, art) {
     const alt = document.querySelector('.app-hint');
     if (alt) {
@@ -1216,7 +1246,7 @@ export function showHint(text, art) {
     zu.setAttribute('aria-label', t('hint.close'));
     zu.addEventListener('click', () => showHint(''));
     box.appendChild(zu);
-    document.body.appendChild(box);
+    hinweisZeigen(box);
     if (!fehler) {
         // Lang genug zum Lesen, kurz genug, um nicht im Weg zu stehen. Wer
         // schneller ist, klickt das Kreuz.

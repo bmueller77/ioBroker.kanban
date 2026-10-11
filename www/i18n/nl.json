@@ -264,6 +264,7 @@
   "templates.import": "Importeren",
   "templates.importTitle": "Sjablonen importeren",
   "templates.chooseFile": "Bestand kiezen",
+  "templates.reading": "Bestand wordt ingelezen...",
   "templates.exportAll": "Alles exporteren",
   "templates.pickForExport": "Selecteren voor export",
   "templates.exportSelected": "Selectie exporteren ({n})",

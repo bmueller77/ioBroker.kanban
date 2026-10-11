@@ -264,6 +264,7 @@
   "templates.import": "Імпортувати",
   "templates.importTitle": "Імпорт шаблонів",
   "templates.chooseFile": "Вибрати файл",
+  "templates.reading": "Читання файлу...",
   "templates.exportAll": "Експортувати все",
   "templates.pickForExport": "Вибрати для експорту",
   "templates.exportSelected": "Експортувати вибране ({n})",

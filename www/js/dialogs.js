@@ -2193,8 +2193,8 @@ export function initDialogs(state, actions) {
             panel.appendChild(knoepfe);
 
             // Export und Import haben je einen eigenen Dialog. Das Ergebnis eines
-            // Imports steht danach hier im Reiter: Der Hinweisbalken der Seite
-            // laege hinter dem Einstellungsdialog und bliebe ungesehen.
+            // Imports steht danach hier im Reiter, neben der Liste, um die es geht,
+            // und bleibt stehen, bis gespeichert ist.
             const meldung = el('div', 'hint');
             meldung.hidden = true;
             panel.appendChild(meldung);
@@ -2309,8 +2309,7 @@ export function initDialogs(state, actions) {
          *  wird, und auf einem Tablet ohne Dateiauswahl bleibt das Einfuegen.
          * Zweiter Schritt: aus dem Paket waehlen, was uebernommen wird.
          *
-         * Fehler stehen im Dialog selbst. Der Hinweisbalken der Seite laege hinter
-         *  den beiden offenen Dialogen.
+         * Fehler stehen im Dialog selbst, unter dem Feld, um das es geht.
          *
          * @param meldung Hinweiszeile im Reiter fuer das Ergebnis
          */
@@ -2372,19 +2371,52 @@ export function initDialogs(state, actions) {
                 zeige(fehler1, '');
             };
             feld.addEventListener('input', pruefeLeer);
-            waehlen.addEventListener('click', () => datei.click());
+            // Zwischen der Wahl im Dateidialog und dem Moment, in dem die Seite
+            // die Datei bekommt, koennen unter Windows Sekunden vergehen. Der
+            // Code hier braucht fuer eine Vorlagendatei Millisekunden; die Zeit
+            // geht im Browser verloren. Deshalb steht die Meldung schon ab dem
+            // Klick da und ist sichtbar, sobald der Dateidialog zu ist.
+            let letzterName = '';
+            let wachhund = 0;
+            const liest = an => {
+                clearTimeout(wachhund);
+                dateiName.classList.toggle('tpl-reading', an);
+                dateiName.textContent = an ? t('templates.reading') : letzterName;
+                waehlen.disabled = an;
+                feld.readOnly = an;
+                weiter.disabled = an || !feld.value.trim();
+                if (an) {
+                    // Falls weder "change" noch "cancel" kommt (aeltere Browser
+                    // kennen "cancel" nicht), bleibt die Meldung nicht ewig stehen.
+                    wachhund = setTimeout(() => liest(false), 30000);
+                }
+            };
+            xdlg.addEventListener('close', () => clearTimeout(wachhund), { once: true });
+            waehlen.addEventListener('click', () => {
+                // Geleert, damit dieselbe Datei ein zweites Mal "change" ausloest.
+                datei.value = '';
+                liest(true);
+                datei.click();
+            });
+            datei.addEventListener('cancel', () => liest(false));
             datei.addEventListener('change', () => {
                 const f = datei.files && datei.files[0];
                 if (!f) {
+                    liest(false);
                     return;
                 }
-                dateiName.textContent = f.name;
+                liest(true);
                 const leser = new FileReader();
                 leser.onload = () => {
+                    letzterName = f.name;
                     feld.value = String(leser.result || '');
+                    liest(false);
                     pruefeLeer();
                 };
-                leser.onerror = () => zeige(fehler1, t('templates.badJson'));
+                leser.onerror = () => {
+                    liest(false);
+                    zeige(fehler1, t('templates.badJson'));
+                };
                 leser.readAsText(f);
             });
             weiter.addEventListener('click', () => {

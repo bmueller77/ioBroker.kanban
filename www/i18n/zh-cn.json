@@ -264,6 +264,7 @@
   "templates.import": "导入",
   "templates.importTitle": "导入模板",
   "templates.chooseFile": "选择文件",
+  "templates.reading": "正在读取文件...",
   "templates.exportAll": "全部导出",
   "templates.pickForExport": "选择以导出",
   "templates.exportSelected": "导出所选 ({n})",

@@ -264,6 +264,7 @@
   "templates.import": "Importieren",
   "templates.importTitle": "Vorlagen importieren",
   "templates.chooseFile": "Datei wählen",
+  "templates.reading": "Datei wird eingelesen...",
   "templates.exportAll": "Alle exportieren",
   "templates.pickForExport": "Für den Export auswählen",
   "templates.exportSelected": "Auswahl exportieren ({n})",

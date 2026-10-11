@@ -264,6 +264,7 @@
   "templates.import": "Importuj",
   "templates.importTitle": "Import szablonów",
   "templates.chooseFile": "Wybierz plik",
+  "templates.reading": "Wczytywanie pliku...",
   "templates.exportAll": "Eksportuj wszystko",
   "templates.pickForExport": "Wybierz do eksportu",
   "templates.exportSelected": "Eksportuj wybrane ({n})",
