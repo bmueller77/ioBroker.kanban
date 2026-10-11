@@ -845,6 +845,8 @@ dialog footer > button { overflow: hidden; text-overflow: ellipsis; white-space:
 /* Export-Dialog: das Textfeld soll den Platz bekommen, nicht der Rahmen. */
 #exportDialog { min-width: min(620px, 92vw); }
 #exportBody textarea { width: 100%; font-family: monospace; font-size: 12px; }
+/* Fehler im Import-Dialog: dort, wo man hinschaut, in der Warnfarbe. */
+.hint.tpl-import-error { color: var(--danger); }
 
 .hint { font-weight: 400; color: var(--muted); font-size: 13px; }
 

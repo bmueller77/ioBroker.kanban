@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { templateFromCard, templateFromImport } from '../www/js/dialogs.js';
+import { readTemplatePackage, templateFromCard, templateFromImport } from '../www/js/dialogs.js';
 
 /**
  * Die beiden Umrechnungen der Kartenvorlagen in der Oberflaeche: Karte zu
@@ -160,5 +160,50 @@ describe('Eingelesene Vorlage fuer dieses Board', () => {
         const ohne = templateFromImport({ name: 'B', recurrence: { interval: 3 } }, labelNachName, new Set(), ids());
         assert.equal(mit.tpl.recurrence.type, 'weekly');
         assert.equal(ohne.tpl.recurrence, null);
+    });
+});
+
+describe('Ausgabe einlesen', () => {
+    const PAKET = {
+        type: 'iobroker.kanban.templates',
+        version: 1,
+        board: 'familie',
+        templates: [{ name: 'Filterwechsel' }, { name: 'Muell' }],
+    };
+
+    it('nimmt ein gueltiges Paket mit Board und Vorlagen', () => {
+        const r = readTemplatePackage(JSON.stringify(PAKET));
+        assert.equal(r.fehler, undefined);
+        assert.equal(r.board, 'familie');
+        assert.deepEqual(r.templates.map(x => x.name), ['Filterwechsel', 'Muell']);
+    });
+
+    it('meldet kaputtes JSON', () => {
+        assert.deepEqual(readTemplatePackage('{ "type": '), { fehler: 'templates.badJson' });
+        assert.deepEqual(readTemplatePackage(''), { fehler: 'templates.badJson' });
+    });
+
+    it('lehnt fremdes JSON ab', () => {
+        assert.deepEqual(readTemplatePackage('{"a":1}'), { fehler: 'templates.badFile' });
+        assert.deepEqual(readTemplatePackage('null'), { fehler: 'templates.badFile' });
+        assert.deepEqual(readTemplatePackage('[]'), { fehler: 'templates.badFile' });
+    });
+
+    it('lehnt eine andere Version ab', () => {
+        const r = readTemplatePackage(JSON.stringify({ ...PAKET, version: 2 }));
+        assert.deepEqual(r, { fehler: 'templates.badFile' });
+    });
+
+    it('wirft Eintraege ohne Namen weg und lehnt ein leeres Paket ab', () => {
+        const r = readTemplatePackage(JSON.stringify({ ...PAKET, templates: [null, { title: 'x' }, { name: 'Gut' }] }));
+        assert.deepEqual(r.templates, [{ name: 'Gut' }]);
+        const leer = readTemplatePackage(JSON.stringify({ ...PAKET, templates: [{ title: 'x' }] }));
+        assert.deepEqual(leer, { fehler: 'templates.badFile' });
+    });
+
+    it('setzt ein Fragezeichen, wenn das Board fehlt', () => {
+        const { board, ...ohne } = PAKET;
+        assert.equal(board, 'familie');
+        assert.equal(readTemplatePackage(JSON.stringify(ohne)).board, '?');
     });
 });

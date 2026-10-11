@@ -257,6 +257,33 @@ export function templateFromImport(roh, labelNachName, vergeben, neueId) {
     };
 }
 
+/**
+ * Den Text einer Ausgabe pruefen, bevor etwas zur Auswahl steht.
+ *
+ * Eine fremde Datei soll nicht als Vorlagensammlung durchgehen, deshalb nennt
+ *  sich das Paket selbst. Passt es nicht, kommt ein Fehlerschluessel zurueck
+ *  statt eines halben Imports.
+ *
+ * @param text Inhalt der Datei oder des Textfelds
+ * @returns {{fehler: string} | {board: string, templates: object[]}}
+ */
+export function readTemplatePackage(text) {
+    let paket = null;
+    try {
+        paket = JSON.parse(String(text || ''));
+    } catch {
+        return { fehler: 'templates.badJson' };
+    }
+    if (!paket || paket.type !== 'iobroker.kanban.templates' || Number(paket.version) !== 1) {
+        return { fehler: 'templates.badFile' };
+    }
+    const templates = Array.isArray(paket.templates) ? paket.templates.filter(x => x && x.name) : [];
+    if (!templates.length) {
+        return { fehler: 'templates.badFile' };
+    }
+    return { board: String(paket.board || '?'), templates };
+}
+
 export function initDialogs(state, actions) {
     const dlg = document.getElementById('cardDialog');
     // Abzug des Formulars beim Oeffnen. Der Vergleich damit beantwortet die
@@ -2165,11 +2192,12 @@ export function initDialogs(state, actions) {
             knoepfe.append(tplExportBtn, importBtn);
             panel.appendChild(knoepfe);
 
-            // Arbeitsflaeche fuer Export und Import. Beides spielt hier im Reiter,
-            // nicht in einem weiteren Dialog: Ein Dialog auf dem Einstellungsdialog
-            // auf dem Karteneditor ist eine Ebene zu viel.
-            const flaeche = el('div');
-            panel.appendChild(flaeche);
+            // Export und Import haben je einen eigenen Dialog. Das Ergebnis eines
+            // Imports steht danach hier im Reiter: Der Hinweisbalken der Seite
+            // laege hinter dem Einstellungsdialog und bliebe ungesehen.
+            const meldung = el('div', 'hint');
+            meldung.hidden = true;
+            panel.appendChild(meldung);
 
             tplExportBtn.addEventListener('click', () => {
                 const alle = [...tplBox.children]
@@ -2185,7 +2213,7 @@ export function initDialogs(state, actions) {
                     .filter(Boolean);
                 tplExportDialog(alle);
             });
-            importBtn.addEventListener('click', () => tplImportFormular(flaeche));
+            importBtn.addEventListener('click', () => tplImportDialog(meldung));
             tplExportKnopf();
         }
 
@@ -2274,91 +2302,140 @@ export function initDialogs(state, actions) {
         }
 
         /**
-         * Formular zum Einlesen: Datei auswaehlen oder Text einfuegen.
+         * Vorlagen einlesen, in einem eigenen Dialog wie beim Export.
          *
-         * @param flaeche Zielelement unter den Knoepfen
+         * Erster Schritt: Datei auswaehlen oder den Text einer Ausgabe einfuegen.
+         *  Die Datei landet ebenfalls im Textfeld; so sieht man, was eingelesen
+         *  wird, und auf einem Tablet ohne Dateiauswahl bleibt das Einfuegen.
+         * Zweiter Schritt: aus dem Paket waehlen, was uebernommen wird.
+         *
+         * Fehler stehen im Dialog selbst. Der Hinweisbalken der Seite laege hinter
+         *  den beiden offenen Dialogen.
+         *
+         * @param meldung Hinweiszeile im Reiter fuer das Ergebnis
          */
-        function tplImportFormular(flaeche) {
-            flaeche.textContent = '';
-            flaeche.appendChild(el('div', 'hint', t('templates.importHint')));
+        function tplImportDialog(meldung) {
+            const xdlg = document.getElementById('exportDialog');
+            const body = document.getElementById('exportBody');
+
+            const kopf = () => {
+                body.textContent = '';
+                const h = el('h3', null, t('templates.importTitle'));
+                addCloseX(h, () => xdlg.close());
+                body.appendChild(h);
+            };
+            const fehlerZeile = () => {
+                const f = el('div', 'hint tpl-import-error');
+                f.setAttribute('role', 'alert');
+                f.hidden = true;
+                return f;
+            };
+            const zeige = (f, text) => {
+                f.textContent = text;
+                f.hidden = !text;
+            };
+            const abbrechen = () => {
+                const b = el('button', null, t('confirm.cancel'));
+                b.type = 'button';
+                b.addEventListener('click', () => xdlg.close());
+                return b;
+            };
+
+            // ---- Schritt 1: einlesen ----
+            kopf();
+            body.appendChild(el('div', 'hint', t('templates.importHint')));
+            const reihe = el('div', 'tpl-actions');
+            const waehlen = el('button', null, t('templates.chooseFile'));
+            waehlen.type = 'button';
+            const dateiName = el('span', 'hint');
             const datei = document.createElement('input');
             datei.type = 'file';
             datei.accept = 'application/json,.json';
-            flaeche.appendChild(datei);
+            datei.hidden = true;
+            reihe.append(waehlen, dateiName, datei);
+            body.appendChild(reihe);
             const feld = document.createElement('textarea');
-            feld.rows = 5;
+            feld.rows = 10;
             feld.placeholder = t('templates.importPaste');
-            flaeche.appendChild(feld);
-            const reihe = el('div', 'tpl-actions');
+            body.appendChild(feld);
+            const fehler1 = fehlerZeile();
+            body.appendChild(fehler1);
+            const foot = el('footer');
             const weiter = el('button', 'primary', t('templates.importRead'));
             weiter.type = 'button';
-            reihe.appendChild(weiter);
-            flaeche.appendChild(reihe);
+            weiter.disabled = true;
+            foot.append(abbrechen(), el('span', 'spacer'), weiter);
+            body.appendChild(foot);
 
+            const pruefeLeer = () => {
+                weiter.disabled = !feld.value.trim();
+                zeige(fehler1, '');
+            };
+            feld.addEventListener('input', pruefeLeer);
+            waehlen.addEventListener('click', () => datei.click());
             datei.addEventListener('change', () => {
                 const f = datei.files && datei.files[0];
                 if (!f) {
                     return;
                 }
+                dateiName.textContent = f.name;
                 const leser = new FileReader();
-                leser.onload = () => { feld.value = String(leser.result || ''); };
+                leser.onload = () => {
+                    feld.value = String(leser.result || '');
+                    pruefeLeer();
+                };
+                leser.onerror = () => zeige(fehler1, t('templates.badJson'));
                 leser.readAsText(f);
             });
-            weiter.addEventListener('click', () => tplImportPruefen(flaeche, feld.value));
-        }
-
-        /**
-         * Eingelesenes pruefen und zur Auswahl stellen.
-         *
-         * Eine fremde Datei soll nicht als Vorlagensammlung durchgehen, deshalb nennt
-         *  sich das Paket selbst. Passt es nicht, kommt eine klare Meldung statt eines
-         *  halben Imports.
-         *
-         * @param flaeche Zielelement
-         * @param text Inhalt der Datei oder des Textfelds
-         */
-        function tplImportPruefen(flaeche, text) {
-            let paket = null;
-            try {
-                paket = JSON.parse(String(text || ''));
-            } catch (e) {
-                showHint(t('templates.badJson'), 'error');
-                return;
-            }
-            if (!paket || paket.type !== 'iobroker.kanban.templates' || Number(paket.version) !== 1) {
-                showHint(t('templates.badFile'), 'error');
-                return;
-            }
-            const liste = Array.isArray(paket.templates) ? paket.templates.filter(x => x && x.name) : [];
-            if (!liste.length) {
-                showHint(t('templates.badFile'), 'error');
-                return;
-            }
-            flaeche.textContent = '';
-            flaeche.appendChild(el('div', 'hint', t('templates.importPick', { board: String(paket.board || '?') })));
-            const kasten = el('div');
-            kasten.style.cssText = 'display:flex;flex-direction:column;gap:4px';
-            for (const tpl of liste) {
-                const lab = el('label', 'inline');
-                const inp = document.createElement('input');
-                inp.type = 'checkbox';
-                inp.checked = true;
-                lab.append(inp, document.createTextNode(` ${tpl.name}`));
-                lab.dataset.idx = String(liste.indexOf(tpl));
-                kasten.appendChild(lab);
-            }
-            flaeche.appendChild(kasten);
-            const reihe = el('div', 'tpl-actions');
-            const ok = el('button', 'primary', t('templates.importApply'));
-            ok.type = 'button';
-            ok.addEventListener('click', () => {
-                const gewaehlt = [...kasten.children]
-                    .filter(l => l.querySelector('input').checked)
-                    .map(l => liste[Number(l.dataset.idx)]);
-                tplImportAnwenden(gewaehlt, flaeche);
+            weiter.addEventListener('click', () => {
+                const r = readTemplatePackage(feld.value);
+                if (r.fehler) {
+                    zeige(fehler1, t(r.fehler));
+                    return;
+                }
+                auswahl(r);
             });
-            reihe.appendChild(ok);
-            flaeche.appendChild(reihe);
+            xdlg.showModal();
+
+            // ---- Schritt 2: auswaehlen ----
+            function auswahl(paket) {
+                kopf();
+                body.appendChild(el('div', 'hint', t('templates.importPick', { board: paket.board })));
+                const kasten = el('div');
+                kasten.style.cssText = 'display:flex;flex-direction:column;gap:4px';
+                paket.templates.forEach((tpl, idx) => {
+                    const lab = el('label', 'inline');
+                    const inp = document.createElement('input');
+                    inp.type = 'checkbox';
+                    inp.checked = true;
+                    lab.append(inp, document.createTextNode(` ${tpl.name}`));
+                    lab.dataset.idx = String(idx);
+                    kasten.appendChild(lab);
+                });
+                body.appendChild(kasten);
+                const fehler2 = fehlerZeile();
+                body.appendChild(fehler2);
+                const fuss = el('footer');
+                const ok = el('button', 'primary', t('templates.importApply'));
+                ok.type = 'button';
+                const gewaehlt = () =>
+                    [...kasten.children]
+                        .filter(l => l.querySelector('input').checked)
+                        .map(l => paket.templates[Number(l.dataset.idx)]);
+                kasten.addEventListener('change', () => { ok.disabled = !gewaehlt().length; });
+                ok.addEventListener('click', () => {
+                    const r = tplImportAnwenden(gewaehlt());
+                    if (r.fehler) {
+                        zeige(fehler2, r.fehler);
+                        return;
+                    }
+                    xdlg.close();
+                    zeige(meldung, r.text);
+                });
+                fuss.append(abbrechen(), el('span', 'spacer'), ok);
+                body.appendChild(fuss);
+                ok.focus();
+            }
         }
 
         /**
@@ -2373,13 +2450,12 @@ export function initDialogs(state, actions) {
          *  Umbenennungen und Umsortierungen im Reiter verworfen.
          *
          * @param liste Eingelesene Vorlagen
-         * @param flaeche Zielelement, wird geleert
+         * @returns {{fehler: string} | {text: string}} Meldung fuer den Dialog oder den Reiter
          */
-        function tplImportAnwenden(liste, flaeche) {
+        function tplImportAnwenden(liste) {
             const platz = 50 - tplBox.children.length;
             if (platz <= 0) {
-                showHint(t('templates.limit', { n: 50 }), 'error');
-                return;
+                return { fehler: t('templates.limit', { n: 50 }) };
             }
             const nehmen = liste.slice(0, platz);
             const vorhandeneNamen = new Set(
@@ -2401,16 +2477,15 @@ export function initDialogs(state, actions) {
                 tplBox.appendChild(tplZeile(r.tpl));
             }
             dirty = true;
-            flaeche.textContent = '';
             tplExportKnopf();
-            showHint(
-                t('templates.imported', {
+            return {
+                text: t('templates.imported', {
                     n: nehmen.length,
                     umbenannt,
                     labels: labelsWeg,
                     uebrig: liste.length - nehmen.length,
                 }),
-            );
+            };
         }
 
         // ---- Tab: Board ----

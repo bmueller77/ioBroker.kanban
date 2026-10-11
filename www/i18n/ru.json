@@ -262,6 +262,8 @@
   "templates.editTitle": "Редактировать шаблон",
   "templates.editedLocal": "Шаблон \"{name}\" изменён. Пока не сохранено.",
   "templates.import": "Импортировать",
+  "templates.importTitle": "Импорт шаблонов",
+  "templates.chooseFile": "Выбрать файл",
   "templates.exportAll": "Экспортировать все",
   "templates.pickForExport": "Выбрать для экспорта",
   "templates.exportSelected": "Экспортировать выбранное ({n})",

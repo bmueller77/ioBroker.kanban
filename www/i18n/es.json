@@ -262,6 +262,8 @@
   "templates.editTitle": "Editar plantilla",
   "templates.editedLocal": "Plantilla \"{name}\" modificada. Aún sin guardar.",
   "templates.import": "Importar",
+  "templates.importTitle": "Importar plantillas",
+  "templates.chooseFile": "Elegir archivo",
   "templates.exportAll": "Exportar todo",
   "templates.pickForExport": "Seleccionar para la exportación",
   "templates.exportSelected": "Exportar selección ({n})",

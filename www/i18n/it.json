@@ -262,6 +262,8 @@
   "templates.editTitle": "Modifica modello",
   "templates.editedLocal": "Modello \"{name}\" modificato. Non ancora salvato.",
   "templates.import": "Importare",
+  "templates.importTitle": "Importare modelli",
+  "templates.chooseFile": "Scegli file",
   "templates.exportAll": "Esporta tutto",
   "templates.pickForExport": "Selezionare per l'esportazione",
   "templates.exportSelected": "Esporta selezione ({n})",

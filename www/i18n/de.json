@@ -262,6 +262,8 @@
   "templates.editTitle": "Vorlage bearbeiten",
   "templates.editedLocal": "Vorlage \"{name}\" geändert. Noch nicht gespeichert.",
   "templates.import": "Importieren",
+  "templates.importTitle": "Vorlagen importieren",
+  "templates.chooseFile": "Datei wählen",
   "templates.exportAll": "Alle exportieren",
   "templates.pickForExport": "Für den Export auswählen",
   "templates.exportSelected": "Auswahl exportieren ({n})",

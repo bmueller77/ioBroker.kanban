@@ -262,6 +262,8 @@
   "templates.editTitle": "Edytuj szablon",
   "templates.editedLocal": "Szablon \"{name}\" zmieniony. Jeszcze nie zapisano.",
   "templates.import": "Importuj",
+  "templates.importTitle": "Import szablonów",
+  "templates.chooseFile": "Wybierz plik",
   "templates.exportAll": "Eksportuj wszystko",
   "templates.pickForExport": "Wybierz do eksportu",
   "templates.exportSelected": "Eksportuj wybrane ({n})",

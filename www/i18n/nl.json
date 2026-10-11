@@ -262,6 +262,8 @@
   "templates.editTitle": "Sjabloon bewerken",
   "templates.editedLocal": "Sjabloon \"{name}\" gewijzigd. Nog niet opgeslagen.",
   "templates.import": "Importeren",
+  "templates.importTitle": "Sjablonen importeren",
+  "templates.chooseFile": "Bestand kiezen",
   "templates.exportAll": "Alles exporteren",
   "templates.pickForExport": "Selecteren voor export",
   "templates.exportSelected": "Selectie exporteren ({n})",
