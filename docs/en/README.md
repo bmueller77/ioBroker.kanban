@@ -286,7 +286,7 @@ The **header bar** contains, left to right: the **board selector**, the **user c
 
 ### Boards, columns & labels
 
-The button with the **gear icon** <img src="../icons/cog.svg" width="18" alt="gear"> opens the board manager. It has two tabs: **Board** and **Users** (colours and avatars, see [Users in the board](#users-in-the-board)). Changes are only applied on **Save**.
+The button with the **gear icon** <img src="../icons/cog.svg" width="18" alt="gear"> opens the board manager. It has three tabs: **Board**, **Templates** (see [Card templates](#card-templates)) and **Users** (colours and avatars, see [Users in the board](#users-in-the-board)). Changes are only applied on **Save**.
 
 At the very top of the Board tab sits a row with three elements. The fourth entry of the table, "Delete board", sits at the bottom of the tab:
 
@@ -419,7 +419,7 @@ The two required fields come first: **title**, and directly below it **assignees
 
 The right-hand end of each section header says what is inside: an excerpt of the description, the chosen labels with a colour marker, the location, the recurrence pattern, the state of the checklist. Which sections are open is **remembered per device** and applies to the next new card as well; on a fresh install only the description is open.
 
-The footer holds **Delete**, **Manage** (transfer/clone), **Cancel** and **Save**. A **×** in the top right closes the dialog, as in every dialog of the board.
+The footer holds **Delete**, **Manage** (transfer, clone, save as template), **Cancel** and **Save**. A **×** in the top right closes the dialog, as in every dialog of the board.
 
 **Unsaved changes** do not disappear. Escape, a click on the X and the **browser's back button** ask first as soon as something in the card was changed. On a tablet the back button matters most, because the back gesture is the usual way out of a dialog there. The prompt has three buttons: **Save**, **Discard** and **Cancel**.
 
@@ -456,10 +456,10 @@ Every card object of the **REST API** additionally carries the computed field **
 
 #### Transfer or clone a card (since 0.3.0)
 
-In the footer of the card editor, right next to **Delete**, sits the **Manage** button. It opens the dialog of the same name, which offers three buttons at the top: **Clone**, **Copy** and **Move**. The selects below adapt to the chosen button.
+In the footer of the card editor, right next to **Delete**, sits the **Manage** button. It opens the dialog of the same name, which lists four options one below the other, each with a line of explanation: **Clone**, **Copy**, **Move** and **Save as template**. The fields below and the label of the button at the bottom right follow the chosen option. What "Save as template" does is described under [Card templates](#card-templates).
 
-- **Clone** duplicates the card **within the same board**. Only the **target column** is shown, preselected with the column the card currently sits in. The clone carries over everything: checklist, labels, assignees, recurrence. Left on the preselected column it lands directly **below the original**; with a different column it is appended at the **bottom** of that one instead. Handy for recurring tasks kept around as a template.
-- **Copy** and **Move** additionally reveal the **target board**; its first column flagged "New" is preselected. Move takes the card with it (it leaves the current board), copy creates a new card on the target and leaves the original untouched. If there is no other board, both buttons are disabled.
+- **Clone** duplicates the card **within the same board**. Only the **target column** is shown, preselected with the column the card currently sits in. Done columns are not offered, since the clone is a new card; if the original sits in one, the first column with the "New" flag is preselected. The clone carries over everything: checklist, labels, assignees, recurrence. Left on the preselected column it lands directly **below the original**; with a different column it is appended at the **bottom** of that one instead.
+- **Copy** and **Move** additionally reveal the **target board**; its first column flagged "New" is preselected. Move takes the card with it (it leaves the current board), copy creates a new card on the target and leaves the original untouched. If there is no other board, both options are disabled and the dialog opens with "Save as template" selected.
 - **Labels** are matched by **name**. If the target board has a label with the same name it is kept; labels without a match are dropped. The target board is never silently extended with new labels.
 - **Assignees** are only kept if they are **members** of the target board. The dialog shows beforehand what will be dropped.
 - If **nobody** would be left, the dialog shows a picker of the target board's members and only allows the transfer once at least one person is selected. That way no card can end up without an assignee.
@@ -491,13 +491,17 @@ A template is a named set of card fields. It belongs to a board, sits next to th
 
 **Creating one.** On an existing card choose "Manage" and then "Save as template". The name field is prefilled with the card title; the name is also the title that later cards receive. If the name already exists, the adapter asks before replacing the contents of that template. This is also the way to change a template's contents without opening it in the tab.
 
+![Manage dialog with the Save as template option and the name field](img/card-manage.png)
+
 **Two things deliberately stay behind.** The due date is dropped, because a fixed date ages: a template saved in January would create cards dated the day before yesterday in March. And the checklist ticks are reset, because a template holds the items, not their state. The time of day does travel along, since 17:00 is a property of the task.
 
-**Using one.** While creating a card, a picker sits at the bottom left of the editor, in the place where "Delete" and "Manage" sit while editing. With no templates on the board the picker is absent. A choice sets **every** field anew, including those empty in the template; if the editor already holds something, a question comes first. The picker then returns to its placeholder.
+**Using one.** While creating a card, a picker sits at the bottom left of the editor, in the place where "Delete" and "Manage" sit while editing. With no templates on the board the picker is absent. A choice sets **every** field anew, including those empty in the template; if the editor already holds something, a question comes first. Labels the board no longer has and assignees who are not members of the board are left out. The picker then returns to its placeholder.
+
+![New card in the editor, filled from the template Prepare release, with the picker at the bottom left](img/card-template.png)
 
 If the template carries a recurrence and the due field is left empty, the adapter works out the next date itself and anchors the pattern to today. A template of "every 30 days" therefore creates a card that is due today and counts from there, not from a pattern set half a year ago.
 
-**Managing them.** Settings → "Templates" tab. Each template gets a row with a checkbox, a drag handle, a name field and three buttons:
+**Managing them.** Settings → "Templates" tab. Each template gets a row with a checkbox, a drag handle <img src="../icons/grip.svg" width="18" alt="drag handle">, a name field and three buttons:
 
 | Button | Effect |
 |---|---|
@@ -507,16 +511,22 @@ If the template carries a recurrence and the due field is left empty, the adapte
 
 The order of the rows is the order in the picker of the card editor. Renaming carries the title along that later cards receive. There is no button to create one here, because a template always comes from a card. Everything changed in this tab takes effect with the dialog's save button.
 
-**Exporting and importing.** Two buttons sit below the list. The left one reads "Export all" while every box is ticked, and "Export selection" with the count otherwise. Both open a dialog holding the text, a download button and a copy button. The text is not decoration: on a tablet in kiosk mode there is neither a file picker nor a download folder, and copying is the only way there.
+![Settings, Templates tab with four templates](img/settings-templates.png)
 
-"Import" takes a file or pasted text. After reading it, the list of templates found appears with ticks, so individual ones can be left out. The rules are:
+**Exporting and importing.** Two buttons sit below the list. The left one reads "Export all" while every box is ticked, and "Export selection" with the count otherwise; with nothing ticked it is disabled. Both open a dialog holding the text, a download button and a copy button. The text is not decoration: on a tablet in kiosk mode there is neither a file picker nor a download folder, and copying is the only way there.
+
+"Import" opens a dialog of its own with two steps.
+
+In the first step the text of an export goes into the field, either through the "Choose file" button or by pasting it. A chosen file ends up in the field as well, so it is visible what will be read. From choosing the file until it arrives, "Reading file..." is shown next to the button. "Read" stays disabled while the field is empty. If the text is not valid JSON or holds no Kanban templates, the error appears in the dialog below the field.
+
+In the second step the list of templates found appears with ticks, so individual ones can be left out. With nothing ticked, "Add" is disabled. The rules are:
 
 - **Appended, never replaced.** On import there is no telling what hides behind a name in the file, and a wrongly confirmed overwrite could not be undone. A name that already exists gets a counter, as in "Filter change (2)".
 - **Labels are matched by name**, compared in lower case. A label ID from another board means nothing on this one. Whatever does not match is dropped; an import does not add labels to the target board unasked.
-- **Assignees who are not members of the target board are dropped.** If none remain, the editor asks for a choice when the card is created.
-- At most 50 templates per board.
+- **Assignees who are not members of the target board are dropped when a card is created.** If none remain, the editor asks for a choice.
+- At most 50 templates per board. Whatever goes beyond that is left out; if the list is already full, the dialog shows an error.
 
-The notice after an import states the balance: added, renamed, labels dropped, did not fit.
+After "Add" the dialog closes and the new templates appear at the bottom of the list. Below the two buttons of the tab, a line states the balance: added, renamed, labels dropped, did not fit. It ends with "Not saved yet.", because an import, too, only takes effect with the dialog's save button.
 
 **From a script.** The `addCard` command takes a `template` field, matched against the ID first and the name second:
 

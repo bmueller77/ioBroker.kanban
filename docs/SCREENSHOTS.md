@@ -15,6 +15,9 @@ Systemsprache).
 | "settings.png" | derselbe Reiter, ein Stueck weiter unten | Zahnrad |
 | "settings-labels.png" | derselbe Reiter, ganz unten | Zahnrad |
 | "settings-users.png" | Board-Manager, Tab "Benutzer" (Avatare und Farben) | Zahnrad, Tab "Benutzer" |
+| "settings-templates.png" | Board-Manager, Tab "Vorlagen" mit den vier Demo-Vorlagen | Zahnrad, Tab "Vorlagen" |
+| "card-template.png" | Neue Karte nach Wahl der Vorlage "Release vorbereiten", Checkliste aufgeklappt | "+" unter "Backlog", Auswahlfeld links unten |
+| "card-manage.png" | Dialog "Verwalten", Art "Als Vorlage speichern" mit Namensfeld | Karte "Standup-Notizen" oeffnen, "Verwalten" |
 | "share.png" | Dialog "Ansichten" | Monitor-Symbol in der Kopfleiste |
 | "admin-general.png" | Instanzeinstellungen, Tab "Allgemein" | ioBroker-Admin |
 | "admin-users.png" | Instanzeinstellungen, Tab "Benutzer" | ioBroker-Admin |
@@ -42,8 +45,11 @@ Ansichten-Dialogs am Inhalt.
 |---|---|---|
 | "board.png" | 1868 x 890 | so gross wie das Fenster |
 | "card-editor.png" | 1403 x 1050 | 1122 x 1002 |
+| "card-template.png" | 1403 x 1050 | 1122 x 1002 |
 | "settings*.png" | 1403 x 1000 | 1122 x 952 |
+| "settings-templates.png" | 1403 x 1000 | 1122 x 952 |
 | "share.png" | 1403 x 1000 | 1122 x 661 |
+| "card-manage.png" | 1403 x 1000 | 841 x 283 |
 | "mobile*.png" | 360 x 780, Faktor 2 | 720 x 1560 |
 | die sechs Ausschnitte | 1868 breit | so gross wie der Ausschnitt |
 
@@ -113,3 +119,12 @@ der erzeugten Adresse bleibt unangetastet.
 Schirm allein, und die Bildunterschrift verspricht gestapelte Spalten, von
 denen keine zweite zu sehen ist. Geklappt wird ueber
 "kanban.collapsedCols" im localStorage.
+
+**Die drei Vorlagenbilder entstehen ueber "python mkjobs.py <de|en> vorlagen".**
+Der Dialog "Verwalten" ist nicht 80 vw breit wie die grossen Dialoge, sondern
+60 vw, daher die 841 px. Nach dem Klick auf "Als Vorlage speichern" kommt das
+Namensfeld dazu, der Dialog wird hoeher und rueckt nach oben. Unter dem Mauszeiger liegt dann die Zeile
+"Verschieben", und die ist im Bild hervorgehoben. Der Auftrag setzt den Zeiger
+deshalb danach auf die Ueberschrift. Die Vorlage im Karteneditor waehlt der
+Schritt "select" in "shot.js": Ein Klick in das Auswahlfeld oeffnet im
+kopflosen Chrome keine Liste.

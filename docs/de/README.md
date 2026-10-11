@@ -287,7 +287,7 @@ Die **Kopfleiste** enthält von links nach rechts: die **Board-Auswahl**, die **
 
 ### Boards, Spalten & Labels
 
-Der Button mit dem **Zahnrad-Symbol** <img src="../icons/cog.svg" width="18" alt="Zahnrad"> öffnet den Board-Manager. Er hat zwei Tabs: **Board** und **Benutzer** (Farben und Avatare, siehe [Benutzer im Board](#benutzer-im-board)). Änderungen werden erst mit **Speichern** übernommen.
+Der Button mit dem **Zahnrad-Symbol** <img src="../icons/cog.svg" width="18" alt="Zahnrad"> öffnet den Board-Manager. Er hat drei Tabs: **Board**, **Vorlagen** (siehe [Kartenvorlagen](#kartenvorlagen)) und **Benutzer** (Farben und Avatare, siehe [Benutzer im Board](#benutzer-im-board)). Änderungen werden erst mit **Speichern** übernommen.
 
 Ganz oben im Board-Tab steht eine Zeile mit drei Elementen. Der vierte Eintrag der Tabelle, "Board löschen", sitzt am unteren Ende des Tabs:
 
@@ -418,7 +418,7 @@ Oben stehen die beiden Pflichtfelder: **Titel**, direkt darunter **Zuständig**.
 
 Rechts in jeder Abschnittszeile steht, was darin steckt: ein Auszug der Beschreibung, die gewählten Labels samt Farbmarkierung, der Ort, das Wiederholungsmuster, der Stand der Checkliste. Welche Abschnitte offen sind, **merkt sich das Gerät** und gilt auch für die nächste neue Karte; frisch installiert ist nur die Beschreibung offen.
 
-In der Fußzeile stehen **Löschen**, **Verwalten** (übertragen/klonen), **Abbrechen** und **Speichern**. Oben rechts schließt ein **×** den Dialog, wie in allen Dialogen des Boards.
+In der Fußzeile stehen **Löschen**, **Verwalten** (übertragen, klonen, als Vorlage speichern), **Abbrechen** und **Speichern**. Oben rechts schließt ein **×** den Dialog, wie in allen Dialogen des Boards.
 
 **Ungespeicherte Änderungen** gehen nicht verloren. Escape, ein Klick auf das X und die **Zurück-Taste des Browsers** fragen nach, sobald am Inhalt etwas geändert wurde. Auf dem Tablet ist die Zurück-Taste die wichtigste der drei, denn dort ist die Zurück-Geste der übliche Weg aus einem Dialog heraus. Die Rückfrage hat drei Knöpfe: **Speichern**, **Verwerfen** und **Abbrechen**.
 
@@ -455,10 +455,10 @@ Jedes Kartenobjekt der **REST-API** enthält ab 0.3.0 außerdem das berechnete F
 
 #### Karte übertragen oder klonen (ab 0.3.0)
 
-In der Fußzeile des Karten-Editors sitzt rechts neben **Löschen** der Button **Verwalten**. Er öffnet den gleichnamigen Dialog, der oben drei Schaltflächen anbietet: **Klonen**, **Kopieren** und **Verschieben**. Die Auswahlfelder darunter richten sich nach der gewählten Schaltfläche.
+In der Fußzeile des Karten-Editors sitzt rechts neben **Löschen** der Button **Verwalten**. Er öffnet den gleichnamigen Dialog. Darin stehen vier Optionen untereinander, jede mit einer Zeile Erklärung: **Klonen**, **Kopieren**, **Verschieben** und **Als Vorlage speichern**. Die Felder darunter und die Beschriftung des Knopfs unten rechts richten sich nach der gewählten Option. Was "Als Vorlage speichern" tut, steht unter [Kartenvorlagen](#kartenvorlagen).
 
-- **Klonen** dupliziert die Karte **im selben Board**. Es erscheint nur die **Ziel-Spalte**, vorbelegt mit der Spalte, in der die Karte gerade liegt. Der Klon übernimmt alle Inhalte inklusive Checkliste, Labels, Zuständigen und Wiederholung. Bleibt die vorbelegte Spalte stehen, landet er direkt **unter dem Original**; bei einer anderen Spalte hängt er dort **unten** an. Praktisch für wiederkehrende Aufgaben, die man als Vorlage benutzt.
-- **Kopieren** und **Verschieben** blenden zusätzlich das **Ziel-Board** ein; vorbelegt ist dessen erste Spalte mit "Neu"-Häkchen. Verschieben nimmt die Karte mit (sie verlässt das aktuelle Board), Kopieren legt am Ziel eine neue Karte an und lässt das Original unangetastet. Existiert kein weiteres Board, sind beide Schaltflächen deaktiviert.
+- **Klonen** dupliziert die Karte **im selben Board**. Es erscheint nur die **Ziel-Spalte**, vorbelegt mit der Spalte, in der die Karte gerade liegt. Erledigt-Spalten stehen nicht zur Wahl, denn der Klon ist eine neue Karte; liegt das Original in einer, ist die erste Spalte mit "Neu"-Häkchen vorbelegt. Der Klon übernimmt alle Inhalte inklusive Checkliste, Labels, Zuständigen und Wiederholung. Bleibt die vorbelegte Spalte stehen, landet er direkt **unter dem Original**; bei einer anderen Spalte hängt er dort **unten** an.
+- **Kopieren** und **Verschieben** blenden zusätzlich das **Ziel-Board** ein; vorbelegt ist dessen erste Spalte mit "Neu"-Häkchen. Verschieben nimmt die Karte mit (sie verlässt das aktuelle Board), Kopieren legt am Ziel eine neue Karte an und lässt das Original unangetastet. Existiert kein weiteres Board, sind beide Optionen gesperrt, und der Dialog öffnet mit "Als Vorlage speichern".
 - **Labels** werden über den **Namen** abgeglichen. Gibt es im Ziel-Board ein gleichnamiges Label, wird es übernommen; Labels ohne Entsprechung fallen weg. Das Ziel-Board wird also nicht ungefragt um neue Labels ergänzt.
 - **Zuständige** bleiben nur erhalten, wenn sie im Ziel-Board **Mitglied** sind. Der Dialog zeigt vorher an, was wegfällt.
 - Bliebe **niemand** übrig, blendet der Dialog eine Auswahl der Ziel-Board-Mitglieder ein und lässt das Übertragen erst zu, wenn mindestens eine Person gewählt ist. So kann keine Karte ohne Zuständigen entstehen.
@@ -490,13 +490,17 @@ Eine Vorlage ist ein benannter Satz Kartenfelder. Sie gehört zu einem Board, st
 
 **Anlegen.** An einer bestehenden Karte auf "Verwalten" gehen und dort "Als Vorlage speichern" wählen. Das Namensfeld ist mit dem Kartentitel vorbelegt; der Name ist zugleich der Titel, den spätere Karten bekommen. Gibt es den Namen schon, fragt der Adapter nach und ersetzt den Inhalt der bestehenden Vorlage. Das ist zugleich der Weg, eine Vorlage inhaltlich zu ändern, ohne sie im Reiter zu öffnen.
 
+![Verwalten-Dialog mit der Option Als Vorlage speichern und dem Namensfeld](img/card-manage.png)
+
 **Zwei Dinge wandern bewusst nicht mit.** Das Fälligkeitsdatum bleibt weg, weil ein festes Datum altert: Eine im Januar gespeicherte Vorlage legte im März Karten mit einem Datum von vorgestern an. Und die Haken der Checkliste werden zurückgesetzt, weil eine Vorlage die Punkte festhält, nicht den Stand. Die Uhrzeit bleibt dagegen erhalten, denn 17:00 ist eine Eigenschaft der Aufgabe.
 
-**Benutzen.** Beim Anlegen einer Karte steht links unten im Editor ein Auswahlfeld mit den Vorlagen des Boards, an der Stelle, an der beim Bearbeiten "Löschen" und "Verwalten" stehen. Hat das Board keine Vorlagen, fehlt das Feld ganz. Eine Auswahl setzt **alle** Felder neu, auch die in der Vorlage leeren; steht im Editor schon etwas, kommt vorher eine Rückfrage. Danach springt das Feld auf seinen Platzhalter zurück.
+**Benutzen.** Beim Anlegen einer Karte steht links unten im Editor ein Auswahlfeld mit den Vorlagen des Boards, an der Stelle, an der beim Bearbeiten "Löschen" und "Verwalten" stehen. Hat das Board keine Vorlagen, fehlt das Feld ganz. Eine Auswahl setzt **alle** Felder neu, auch die in der Vorlage leeren; steht im Editor schon etwas, kommt vorher eine Rückfrage. Labels, die das Board nicht mehr kennt, und Zuständige, die kein Mitglied des Boards sind, fallen dabei weg. Danach springt das Feld auf seinen Platzhalter zurück.
+
+![Neue Karte im Editor, gefüllt aus der Vorlage Release vorbereiten, links unten das Auswahlfeld](img/card-template.png)
 
 Trägt die Vorlage eine Wiederholung und bleibt das Fälligkeitsfeld leer, rechnet der Adapter den nächsten Termin selbst aus und hängt das Raster an den heutigen Tag. Eine Vorlage "alle 30 Tage" erzeugt also eine Karte, die heute fällig ist und von dort an zählt, nicht nach einem Raster von vor einem halben Jahr.
 
-**Verwalten.** Einstellungen → Reiter "Vorlagen". Dort steht je Vorlage eine Zeile mit Auswahlkästchen, Griff zum Ziehen, Namensfeld und drei Knöpfen:
+**Verwalten.** Einstellungen → Reiter "Vorlagen". Dort steht je Vorlage eine Zeile mit Auswahlkästchen, Anfasser <img src="../icons/grip.svg" width="18" alt="Anfasser"> zum Ziehen, Namensfeld und drei Knöpfen:
 
 | Knopf | Wirkung |
 |---|---|
@@ -506,16 +510,22 @@ Trägt die Vorlage eine Wiederholung und bleibt das Fälligkeitsfeld leer, rechn
 
 Die Reihenfolge der Zeilen bestimmt die Reihenfolge im Auswahlfeld des Karteneditors. Umbenennen zieht den Titel mit, den spätere Karten bekommen. Einen Knopf zum Anlegen gibt es hier nicht, denn eine Vorlage entsteht immer aus einer Karte. Alle Änderungen in diesem Reiter werden erst mit dem Speichern-Knopf des Dialogs wirksam.
 
-**Ausgeben und einlesen.** Unter der Liste stehen zwei Knöpfe. Der linke heißt "Alle exportieren", solange alle Kästchen angehakt sind, und sonst "Auswahl exportieren" mit der Zahl der angehakten. Beides öffnet einen Dialog mit dem Text, einem Knopf zum Herunterladen und einem zum Kopieren. Der Text ist nicht nur Beiwerk: Auf einem Tablet im Kiosk-Modus gibt es weder Dateiauswahl noch Downloadordner, und dort ist das Kopieren der einzige Weg.
+![Einstellungen, Reiter Vorlagen mit vier Vorlagen](img/settings-templates.png)
 
-"Importieren" nimmt eine Datei oder eingefügten Text. Nach dem Einlesen erscheint die Liste der gefundenen Vorlagen mit Haken, aus der sich einzelne abwählen lassen. Dabei gilt:
+**Ausgeben und einlesen.** Unter der Liste stehen zwei Knöpfe. Der linke heißt "Alle exportieren", solange alle Kästchen angehakt sind, und sonst "Auswahl exportieren" mit der Zahl der angehakten; ohne Haken ist er gesperrt. Beides öffnet einen Dialog mit dem Text, einem Knopf zum Herunterladen und einem zum Kopieren. Der Text ist nicht nur Beiwerk: Auf einem Tablet im Kiosk-Modus gibt es weder Dateiauswahl noch Downloadordner, und dort ist das Kopieren der einzige Weg.
+
+"Importieren" öffnet einen eigenen Dialog in zwei Schritten.
+
+Im ersten Schritt kommt der Text einer Ausgabe in das Feld, entweder über den Knopf "Datei wählen" oder durch Einfügen. Eine gewählte Datei landet ebenfalls im Feld, so ist zu sehen, was eingelesen wird. Von der Wahl der Datei bis zu ihrem Eintreffen steht neben dem Knopf "Datei wird eingelesen...". "Einlesen" bleibt gesperrt, solange das Feld leer ist. Ist der Text kein gültiges JSON oder stecken darin keine Kanban-Vorlagen, steht der Fehler im Dialog unter dem Feld.
+
+Im zweiten Schritt erscheint die Liste der gefundenen Vorlagen mit Haken, aus der sich einzelne abwählen lassen. Ohne Haken ist "Übernehmen" gesperrt. Dabei gilt:
 
 - **Angehängt, nie ersetzt.** Beim Einlesen ist nicht erkennbar, was hinter einem Namen in der Datei steckt, und ein falsch bestätigtes Überschreiben wäre nicht zurückzuholen. Ein Name, den es schon gibt, bekommt einen Zähler, also "Filterwechsel (2)".
 - **Labels werden über den Namen zugeordnet**, kleingeschrieben verglichen. Eine Label-ID aus einem anderen Board bedeutet im Ziel nichts. Was sich nicht findet, fällt weg; ein Import erweitert das Zielboard nicht ungefragt um Labels.
-- **Zuständige, die auf dem Zielboard kein Mitglied sind, fallen weg.** Bleibt niemand übrig, verlangt der Editor beim Anlegen eine Auswahl.
-- Je Board sind höchstens 50 Vorlagen möglich.
+- **Zuständige, die auf dem Zielboard kein Mitglied sind, fallen beim Anlegen einer Karte weg.** Bleibt niemand übrig, verlangt der Editor eine Auswahl.
+- Je Board sind höchstens 50 Vorlagen möglich. Was darüber hinausgeht, bleibt draußen; ist die Liste schon voll, steht das als Fehler im Dialog.
 
-Der Hinweis nach dem Einlesen nennt die Bilanz: übernommen, umbenannt, weggefallene Labels, nicht mehr hineingepasst.
+Nach "Übernehmen" schließt der Dialog, und die neuen Vorlagen stehen unten in der Liste. Unter den beiden Knöpfen des Reiters nennt eine Zeile die Bilanz: übernommen, umbenannt, weggefallene Labels, nicht mehr hineingepasst. Sie endet mit "Noch nicht gespeichert.", denn auch der Import wird erst mit dem Speichern-Knopf des Dialogs wirksam.
 
 **Aus einem Skript.** Das Kommando `addCard` nimmt ein Feld `template`, gesucht wird erst über die ID, dann über den Namen:
 
