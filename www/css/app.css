@@ -1438,6 +1438,8 @@ dialog label.inline-num input { width: 80px; }
 .transfer-mode { display: flex; flex-direction: column; gap: 2px; }
 .transfer-mode-row {
     display: flex;
+    /* Die Zeile ist ein label, und "dialog label" stellt Labels auf Spalte. */
+    flex-direction: row;
     align-items: baseline;
     gap: 8px;
     padding: 4px 8px;
