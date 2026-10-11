@@ -276,7 +276,6 @@
   "templates.importHint": "Выберите файл или вставьте текст экспорта.",
   "templates.importPaste": "Вставьте текст здесь",
   "templates.importRead": "Прочитать",
-  "templates.importPick": "С доски \"{board}\". Снимите отметки с того, что не нужно переносить.",
   "templates.importApply": "Добавить",
   "templates.imported": "Добавлено: {n}, переименовано: {umbenannt}, отброшено меток: {labels}, не поместилось: {uebrig}. Пока не сохранено.",
   "templates.badJson": "Это не корректный JSON.",

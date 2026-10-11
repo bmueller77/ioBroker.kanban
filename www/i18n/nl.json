@@ -276,7 +276,6 @@
   "templates.importHint": "Kies een bestand of plak de tekst van een export.",
   "templates.importPaste": "Plak de tekst hier",
   "templates.importRead": "Inlezen",
-  "templates.importPick": "Van bord \"{board}\". Haal het vinkje weg bij wat niet mee moet.",
   "templates.importApply": "Toevoegen",
   "templates.imported": "{n} toegevoegd, {umbenannt} hernoemd, {labels} label(s) weggelaten, {uebrig} pasten niet. Nog niet opgeslagen.",
   "templates.badJson": "Dat is geen geldige JSON.",

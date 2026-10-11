@@ -276,7 +276,6 @@
   "templates.importHint": "Pick a file, or paste the text of an export.",
   "templates.importPaste": "Paste the text here",
   "templates.importRead": "Read",
-  "templates.importPick": "From board \"{board}\". Untick whatever should stay behind.",
   "templates.importApply": "Add",
   "templates.imported": "{n} added, {umbenannt} renamed, {labels} label(s) dropped, {uebrig} did not fit. Not saved yet.",
   "templates.badJson": "That is not valid JSON.",

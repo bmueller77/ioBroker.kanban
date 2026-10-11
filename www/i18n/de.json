@@ -276,7 +276,6 @@
   "templates.importHint": "Datei auswählen oder den Text einer Ausgabe einfügen.",
   "templates.importPaste": "Text hier einfügen",
   "templates.importRead": "Einlesen",
-  "templates.importPick": "Aus Board \"{board}\". Haken wegnehmen, was nicht mitkommen soll.",
   "templates.importApply": "Übernehmen",
   "templates.imported": "{n} übernommen, {umbenannt} umbenannt, {labels} Label(s) weggefallen, {uebrig} nicht mehr Platz. Noch nicht gespeichert.",
   "templates.badJson": "Das ist kein gültiges JSON.",

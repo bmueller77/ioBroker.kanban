@@ -276,7 +276,6 @@
   "templates.importHint": "Wybierz plik albo wklej tekst eksportu.",
   "templates.importPaste": "Wklej tekst tutaj",
   "templates.importRead": "Wczytaj",
-  "templates.importPick": "Z tablicy \"{board}\". Odznacz to, co nie ma zostać przeniesione.",
   "templates.importApply": "Dodaj",
   "templates.imported": "Dodano: {n}, zmieniono nazwy: {umbenannt}, pominięto etykiet: {labels}, nie zmieściło się: {uebrig}. Jeszcze nie zapisano.",
   "templates.badJson": "To nie jest poprawny JSON.",

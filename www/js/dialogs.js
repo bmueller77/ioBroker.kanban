@@ -2432,7 +2432,6 @@ export function initDialogs(state, actions) {
             // ---- Schritt 2: auswaehlen ----
             function auswahl(paket) {
                 kopf();
-                body.appendChild(el('div', 'hint', t('templates.importPick', { board: paket.board })));
                 const kasten = el('div');
                 kasten.style.cssText = 'display:flex;flex-direction:column;gap:4px';
                 paket.templates.forEach((tpl, idx) => {

@@ -276,7 +276,6 @@
   "templates.importHint": "Scegli un file, oppure incolla il testo di un'esportazione.",
   "templates.importPaste": "Incolla il testo qui",
   "templates.importRead": "Leggi",
-  "templates.importPick": "Dalla bacheca \"{board}\". Togli la spunta a ciò che non deve arrivare.",
   "templates.importApply": "Aggiungi",
   "templates.imported": "{n} aggiunti, {umbenannt} rinominati, {labels} etichetta/e scartata/e, {uebrig} non entrati. Non ancora salvato.",
   "templates.badJson": "Questo non è JSON valido.",

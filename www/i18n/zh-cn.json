@@ -276,7 +276,6 @@
   "templates.importHint": "选择文件，或粘贴导出的文本。",
   "templates.importPaste": "在此粘贴文本",
   "templates.importRead": "读取",
-  "templates.importPick": "来自看板 \"{board}\"。取消勾选不需要导入的项。",
   "templates.importApply": "添加",
   "templates.imported": "已添加 {n} 个，重命名 {umbenannt} 个，舍弃标签 {labels} 个，{uebrig} 个未能放入。尚未保存。",
   "templates.badJson": "这不是有效的 JSON。",

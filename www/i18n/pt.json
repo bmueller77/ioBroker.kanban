@@ -276,7 +276,6 @@
   "templates.importHint": "Escolha um ficheiro ou cole o texto de uma exportação.",
   "templates.importPaste": "Cole o texto aqui",
   "templates.importRead": "Ler",
-  "templates.importPick": "Do quadro \"{board}\". Desmarque o que não deve vir.",
   "templates.importApply": "Adicionar",
   "templates.imported": "{n} adicionados, {umbenannt} renomeados, {labels} etiqueta(s) descartada(s), {uebrig} não couberam. Ainda não guardado.",
   "templates.badJson": "Isto não é JSON válido.",
