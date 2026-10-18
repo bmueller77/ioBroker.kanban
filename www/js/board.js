@@ -501,15 +501,24 @@ function closeCountMenu() {
 }
 function onDocClickCount(e) { if (countMenuEl && !countMenuEl.contains(e.target)) closeCountMenu(); }
 /**
- * Offene Kopf- und Sortiermenues schliessen.
+ * Spaltenmenues beim Neuzeichnen des Boards schliessen.
  *
- * Sie haengen an body, nicht an der Spalte, und ueberstehen deshalb das
- * Neuzeichnen des Boards. Danach sind sie veraltet und liessen sich sonst
- * weiter bedienen, auch fuer eine geloeschte oder umbenannte Spalte.
+ * Sie haengen an body und ueberstehen das Neuzeichnen, waeren danach aber
+ * veraltet. Das Kopfzahlen-Menue bleibt offen, solange seine Spalte noch
+ * existiert: Jeder Haken darin zeichnet das Board neu.
+ *
+ * @param state Zustand, mit dem das Board gleich gezeichnet wird
  */
-export function closeColumnMenus() {
-    for (const m of document.querySelectorAll('.sort-menu')) {
-        m.remove();
+export function closeColumnMenus(state) {
+    closeSortMenu();
+    const board = state && state.board;
+    const spalteDa =
+        countMenuEl &&
+        board &&
+        board.id === countMenuEl.dataset.boardId &&
+        (board.columns || []).some(c => c.id === countMenuEl.dataset.colId);
+    if (!spalteDa) {
+        closeCountMenu();
     }
 }
 
@@ -567,6 +576,8 @@ function openCountMenu(btn, state, board, col, actions, tastatur) {
     menu.style.top = (r.bottom + 4) + 'px';
     menu.style.left = Math.max(4, Math.min(r.left, window.innerWidth - menu.offsetWidth - 4)) + 'px';
     countMenuEl = menu;
+    menu.dataset.boardId = board.id;
+    menu.dataset.colId = col.id;
     // Jeder Haken zeichnet das Board neu, der oeffnende Knopf von eben ist dann
     // ein toter Verweis. Beim Schliessen also den aktuellen heraussuchen.
     menuKeys(menu, () => {
@@ -1350,7 +1361,7 @@ const _widthWatcher = typeof ResizeObserver === 'function' ? new ResizeObserver(
 }) : null;
 
 export function renderBoard(container, state, actions) {
-    closeColumnMenus();
+    closeColumnMenus(state);
     initCtxGuard();
     // Scrollpositionen merken: das Board wird bei jeder Änderung komplett neu
     // aufgebaut (z. B. nach dem Abhaken eines Checklisten-Punkts), sonst springt
