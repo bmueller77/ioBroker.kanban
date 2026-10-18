@@ -3,7 +3,7 @@ const { parseCron, cronMatchesDate, validateCron } = require('../lib/cron');
 const { nextCronDates, recMatches } = require('../lib/store');
 const { buildRrule } = require('../lib/notify');
 
-/** Datum als lokale Mittagszeit — so rechnet auch der Store, damit keine
+/** Datum als lokale Mittagszeit wie im Store, damit keine
  *  Zeitzonenverschiebung den Tag kippt. */
 const day = iso => {
     const [y, m, d] = iso.split('-').map(Number);
@@ -98,8 +98,8 @@ describe('Cron: Anbindung an die Wiederholung', () => {
     });
 
     it('weist überlange Ausdrücke ab, statt den Event-Loop zu blockieren', () => {
-        // Regression: die token-freie Prüfroute nahm kilobytegroße Ausdrücke an und
-        // zerlegte sie für jeden Kandidatentag neu — 6 KB blockierten rund 300 ms.
+        // Die token-freie Pruefroute zerlegt den Ausdruck fuer jeden Kandidatentag
+        // neu; 6 KB blockierten den Event-Loop rund 300 ms.
         const riesig = `${Array.from({ length: 1200 }, (_, i) => i % 60).join(',')} 0 30 2 *`;
         assert.match(validateCron(riesig).error, /too long/);
         assert.equal(validateCron(riesig).ok, false);
@@ -111,8 +111,8 @@ describe('Cron: Anbindung an die Wiederholung', () => {
 
 describe('Cron: Kalender-Serientermin (RRULE)', () => {
     it('nimmt den Sonntag mit — als 0 und als 7', () => {
-        // Regression: ICS_DAYS ist mit 1..7 indiziert, v % 7 machte aus Cron-0 und
-        // Cron-7 die 0 und liess den Sonntag aus der Serie fallen.
+        // ICS_DAYS ist mit 1..7 indiziert. Mit v % 7 wuerden Cron-0 und Cron-7 zur 0,
+        // und der Sonntag fiele aus der Serie.
         assert.equal(buildRrule({ type: 'cron', cron: '0 9 * * 0' }), 'RRULE:FREQ=WEEKLY;BYDAY=SU');
         assert.equal(buildRrule({ type: 'cron', cron: '0 9 * * 7' }), 'RRULE:FREQ=WEEKLY;BYDAY=SU');
         assert.equal(buildRrule({ type: 'cron', cron: '0 9 * * 0,3' }), 'RRULE:FREQ=WEEKLY;BYDAY=SU,WE');

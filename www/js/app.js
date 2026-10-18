@@ -21,8 +21,8 @@ const state = {
     columnsFilter: qs.get('columns') ? qs.get('columns').split(',').filter(Boolean) : null,
     doneLimit: qs.has('doneLimit') ? Math.max(0, parseInt(qs.get('doneLimit'), 10) || 0) : null,   // null = alle, 0 = keine
     hideSettings: qs.get('hideSettings') === '1',
-    showDone: localStorage.getItem('kanban.showDone') !== '0',   // erledigte Spalten ein-/ausblenden
-    showTrash: localStorage.getItem('kanban.showTrash') === '1', // Papierkorb-Spalte ein-/ausblenden (pro Gerät, Default aus)
+    showDone: localStorage.getItem('kanban.showDone') !== '0',
+    showTrash: localStorage.getItem('kanban.showTrash') === '1',
     theme: qs.get('theme') || localStorage.getItem('kanban.theme') || '',
     accent: qs.get('accent') || '',
     embed: qs.get('embed') === '1',
@@ -50,11 +50,11 @@ function applyTheme(cfg) {
     document.documentElement.dataset.theme = resolved;
     const accent = state.accent || cfg.accentColor;
     if (accent) document.documentElement.style.setProperty('--accent', accent);
-    // Schriftfarbe auf Akzent-Buttons je nach Helligkeit (auch bei Custom-CSS-Akzent)
+    // Aus dem berechneten Stil gelesen, damit auch ein Akzent aus Custom-CSS die Schriftfarbe bestimmt.
     const effAccent = (getComputedStyle(document.documentElement).getPropertyValue('--accent') || accent || '#7E57C2').trim();
     document.documentElement.style.setProperty('--accent-text', contrastText(effAccent));
-    // Der Fokusring liegt auf ganz verschiedenen Flaechen. Die Akzentfarbe
-    // unveraendert zu nehmen, liess ihn im dunklen Theme verschwinden (G1).
+    // Der Fokusring liegt auf ganz verschiedenen Flaechen. Die unveraenderte
+    // Akzentfarbe verschwindet im dunklen Theme.
     const stil = getComputedStyle(document.documentElement);
     const flaeche = name => (stil.getPropertyValue(name) || '').trim();
     const flaechen = [flaeche('--bg'), flaeche('--surface'), flaeche('--surface2'),
@@ -75,8 +75,7 @@ matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
  * Warum sich gerade keine Karte anlegen laesst, oder '' wenn es geht.
  *
  * Ohne Benutzer laesst sich keine Karte speichern, weil die Zustaendigkeit ein
- * Pflichtfeld ist. Bis 0.3.2 ging der Editor trotzdem auf und das Speichern
- * scheiterte an einer Bedingung, die man dort gar nicht erfuellen kann (B18).
+ * Pflichtfeld ist. Der Editor soll dann gar nicht erst aufgehen.
  *
  * @returns {string} Begruendung fuer den Benutzer, leer wenn nichts im Weg ist
  */
@@ -87,9 +86,8 @@ function addCardBlocker() {
     if (!(state.users || []).length) {
         return t('topbar.addCardNoUsers');
     }
-    // Ohne Spalte gibt es keinen Ort fuer die Karte. Der Editor ging bisher auf,
-    // das Feld "Spalte" war leer, und das Speichern lief in eine Fehlermeldung
-    // (F5). Ein Board ohne Spalten ist mit drei Klicks erreichbar.
+    // Ohne Spalte gibt es keinen Ort fuer die Karte. Ein Board ohne Spalten
+    // ist mit drei Klicks erreichbar.
     const spalten = (state.board.columns || []).filter(c => !c.isTrash);
     if (!spalten.length) {
         return t('topbar.addCardNoColumns');
@@ -116,14 +114,10 @@ function renderHeader() {
     }
     if (state.board) sel.value = state.board.id;
 
-    // Ohne Board gibt es nichts anzulegen, ohne Benutzer niemanden, dem eine
-    // Karte gehoeren koennte. Der auffaelligste Knopf der Seite war vorher voll
-    // sichtbar und tat nichts (Befund 9).
-    //
     // Kein disabled: Chrome liefert an gesperrten Knoepfen keine
-    // Mausereignisse, der Tooltip erschien deshalb nie und die Begruendung kam
-    // nirgends an (B1). Mit aria-disabled bleibt der Knopf erreichbar, der
-    // Klick wird abgefangen und sagt, was fehlt.
+    // Mausereignisse, der Tooltip mit der Begruendung erschiene nie. Mit
+    // aria-disabled bleibt der Knopf erreichbar, der Klick wird abgefangen
+    // und sagt, was fehlt.
     const addBtn = document.getElementById('addCardBtn');
     if (addBtn) {
         const grund = addCardBlocker();
@@ -168,9 +162,9 @@ function saveUserFilter(boardId, arr) {
     try { localStorage.setItem('kanban.userFilter.' + boardId, JSON.stringify(arr)); } catch (e) { /* ignore */ }
 }
 
-// Aktuelles Board in der Adresszeile mitfuehren (?board=…), damit die URL
+// Aktuelles Board in der Adresszeile mitfuehren (?board=...), damit die URL
 // kopier- und teilbar ist. replaceState: keine zusaetzlichen History-Eintraege,
-// alle uebrigen Parameter (Filter, Theme, card=…) bleiben erhalten.
+// alle uebrigen Parameter (Filter, Theme, card=...) bleiben erhalten.
 function syncUrlBoard(id) {
     if (!window.history || !history.replaceState) return;
     try {
@@ -201,9 +195,9 @@ async function refreshCurrent() {
     const boardId = state.board.id;
     const seq = ++refreshSeq;
     const data = await api(`api/boards/${encodeURIComponent(boardId)}?rev=${state.board.rev}`);
-    // Antwort verwerfen, wenn inzwischen das Board gewechselt wurde oder ein
-    // neuerer Abruf laeuft. Sonst sprang die Ansicht auf das alte Board zurueck
-    // bzw. eine aeltere Revision ueberschrieb eine neuere.
+    // Antwort verwerfen, wenn waehrend des Abrufs das Board gewechselt wurde oder
+    // ein neuerer Abruf laeuft. Sonst springt die Ansicht auf das alte Board
+    // zurueck oder eine aeltere Revision ueberschreibt eine neuere.
     if (seq !== refreshSeq || !state.board || state.board.id !== boardId) return;
     if (!data.unchanged) {
         state.board = data;
@@ -214,9 +208,8 @@ async function refreshCurrent() {
 /**
  * Punkt am Zahnrad, solange Karten auf Benutzer zeigen, die es nicht mehr gibt.
  *
- * Frueher lief das nur einmal beim Laden, weil der Zustand angeblich nicht im
- * laufenden Betrieb entsteht. Er entsteht doch: Eine Karte, die aus dem
- * Papierkorb zurueckkommt, bringt ihre verwaiste Kennung mit (Befund 14).
+ * Nicht nur beim Laden noetig: Eine Karte, die aus dem Papierkorb
+ * zurueckkommt, bringt ihre verwaiste Kennung mit.
  * In eingebetteten Ansichten entfaellt der Punkt mit dem Zahnrad.
  */
 function refreshOrphanHint() {
@@ -245,15 +238,13 @@ actions = {
         render();
     },
 
-    // Sortiermodus je Board+Spalte (pro Gerät)
     setSortMode(colKey, mode) {
         state.sortModes[colKey] = mode;
         try { localStorage.setItem('kanban.sortModes', JSON.stringify(state.sortModes)); } catch (e) { /* ignore */ }
         render();
     },
 
-    // Anzeige-Limit einer Spalte auf- oder zuklappen (pro Gerät). Das Limit
-    // selbst bleibt am Board, hier wird nur fuer dieses Geraet abgewichen.
+    // Das Limit selbst bleibt am Board, aufgeklappt wird nur auf diesem Geraet.
     toggleExpandCol(colKey) {
         if (state.expandedCols.has(colKey)) {
             state.expandedCols.delete(colKey);
@@ -264,7 +255,7 @@ actions = {
         render();
     },
 
-    // Welche Zahlen im Spaltenkopf stehen, je Board+Spalte (pro Gerät)
+    // Welche Zahlen im Spaltenkopf stehen
     setCountModes(colKey, modes) {
         state.countModes[colKey] = modes;
         try { localStorage.setItem('kanban.countModes', JSON.stringify(state.countModes)); } catch (e) { /* ignore */ }
@@ -279,9 +270,7 @@ actions = {
     async restoreCard(cardId, columnId) {
         await api(`api/boards/${state.board.id}/cards/${cardId}/restore`, { method: 'POST', body: { columnId, by: '' } });
         await refreshCurrent();
-        // Eine wiederhergestellte Karte kann eine verwaiste Kennung tragen, dann
-        // gibt es den Zustand wieder. Er entsteht also doch im laufenden
-        // Betrieb, anders als frueher angenommen (Befund 14).
+        // Eine wiederhergestellte Karte kann eine verwaiste Kennung mitbringen.
         refreshOrphanHint();
     },
 
@@ -352,7 +341,6 @@ actions = {
 
     async createBoard(title) {
         const board = await api('api/boards', { method: 'POST', body: { title } });
-        // Neues Board: standardmaessig alle bekannten Benutzer als Mitglieder
         if ((state.users || []).length) {
             await api(`api/boards/${encodeURIComponent(board.id)}`, { method: 'PATCH', body: { members: state.users.map(u => u.name) } });
         }
@@ -366,10 +354,13 @@ actions = {
         if (state.board && state.board.id === id) await refreshCurrent();
         // In jedem Fall zeichnen: refreshCurrent haelt sich zurueck, wenn der
         // Server "unveraendert" meldet, und das tut er bei einer Aenderung, die
-        // keine Karte anfasst. Die Board-Auswahl in der Kopfleiste zeigte danach
-        // weiter den alten Namen, bis jemand die Seite neu lud (A23).
+        // keine Karte anfasst. Sonst zeigt die Board-Auswahl den alten Namen.
         render();
     },
+
+    // Damit der "+"-Knopf am Spaltenfuss denselben Riegel benutzt wie der in
+    // der Kopfleiste, statt einen zweiten zu bekommen.
+    addCardBlocker,
 
     /**
      * Den gemerkten aufgeklappten Zustand einzelner Spalten vergessen.
@@ -377,10 +368,6 @@ actions = {
      * @param boardId Board, zu dem die Spalten gehoeren
      * @param colIds Spalten, deren Anzeige-Limit sich geaendert hat
      */
-    // Damit der "+"-Knopf am Spaltenfuss denselben Riegel benutzt wie der in
-    // der Kopfleiste, statt einen zweiten zu bekommen (E11).
-    addCardBlocker,
-
     forgetExpanded(boardId, colIds) {
         let ab = false;
         for (const id of colIds || []) {
@@ -426,7 +413,7 @@ actions = {
 
 async function init() {
     // Stale-Cache-Schutz: fehlt ein erwartetes Formularfeld, ist ein veraltetes
-    // index.html gecacht (neues JS + altes HTML) → einmal frisch nachladen.
+    // index.html gecacht (neues JS + altes HTML), daher einmal frisch nachladen.
     const cf = document.getElementById('cardForm');
     if (cf && cf.elements && !cf.elements.recType) {
         if (!sessionStorage.getItem('kanban.reloaded')) {
@@ -435,7 +422,7 @@ async function init() {
             return;
         }
     } else {
-        sessionStorage.removeItem('kanban.reloaded');   // frisches HTML → Schutz zurücksetzen
+        sessionStorage.removeItem('kanban.reloaded');   // frisches HTML, daher Schutz zurücksetzen
     }
 
     if (state.embed) document.body.classList.add('embed');
@@ -468,12 +455,9 @@ async function init() {
             .catch(e => showHint(`${t('error.loadFailed')}: ${e.message}`, 'error'));
     });
     document.getElementById('shareBtn').addEventListener('click', () => dialogs.openShareDialog());
-    // Der fruehere "nur meine Karten"-Knopf ist seit 0.3.0 ohne Funktion; gefiltert
-    // wird ueber die Chips in der Kopfzeile. Seit 0.3.2 ist er ganz weg.
-    // Per URL ausblendbare Bedienelemente (geteilte Ansichten)
     if (state.hideSettings) document.getElementById('settingsBtn').hidden = true;
     document.getElementById('themeBtn').addEventListener('click', () => {
-        // Immer sichtbar umschalten: der Zwischenschritt 'auto' wirkte wie ein
+        // Immer sichtbar umschalten: ein Zwischenschritt 'auto' wirkt wie ein
         // wirkungsloser Klick, wenn das System ohnehin dasselbe Theme liefert.
         // 'auto' bleibt die Vorgabe, solange hier nie geklickt wurde.
         const resolved = document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light';
@@ -499,7 +483,7 @@ async function init() {
     const first = state.boards.find(b => b.id === wanted) || state.boards[0];
     await loadBoard(first && first.id, true);
 
-    // URL-Vorbelegung des User-Filters (?users= oder ?user=) fuer das Startboard
+    // ?users= bzw. ?user= gilt nur fuer das Startboard
     const urlUsers = (qs.get('users') || qs.get('user') || '').split(',').filter(Boolean);
     if (urlUsers.length && state.board) {
         // Nur fuer diesen Aufruf setzen, nicht speichern: ein geteilter Link soll die
@@ -541,7 +525,7 @@ async function init() {
 
     // Die Faelligkeitsfarbe wechselt auch ohne Aenderung am Board: um Mitternacht
     // und, bei Karten mit Uhrzeit, sobald diese verstreicht. Das Polling merkt
-    // das nicht, es bekommt bei unveraendertem Board „unveraendert“ zurueck.
+    // das nicht, es bekommt bei unveraendertem Board "unveraendert" zurueck.
     setInterval(() => { if (!document.hidden) refreshDueBadges(state.cfg); }, 60000);
     document.addEventListener('visibilitychange', () => { if (!document.hidden) refreshDueBadges(state.cfg); });
 
@@ -549,7 +533,7 @@ async function init() {
 }
 
 init().catch(e => {
-    // i18n ist evtl. noch nicht geladen → Fallback zweisprachig
+    // i18n ist evtl. noch nicht geladen, daher Fallback zweisprachig
     const label = t('error.loadFailed') === 'error.loadFailed' ? 'Fehler beim Laden / Loading failed' : t('error.loadFailed');
     const esc = String(e && e.message || e).replace(/[<>&]/g, c => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;' }[c]));
     boardEl.innerHTML = `<div class="empty">${label}: ${esc}</div>`;

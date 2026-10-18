@@ -1,5 +1,5 @@
 // Minimales i18n: lädt www/i18n/<lang>.json, mit Englisch als Basis-Fallback.
-// Sprache: ?lang=… (URL) überschreibt die vom Server gelieferte Vorgabe.
+// Sprache: ?lang=... (URL) überschreibt die vom Server gelieferte Vorgabe.
 
 let dict = {};
 let lang = 'en';
@@ -15,7 +15,7 @@ export async function initI18n(preferred) {
     lang = (qsLang || preferred || 'en').toLowerCase();
     const base = (await load('en')) || {};
     const target = lang === 'en' ? {} : ((await load(lang)) || {});
-    dict = { ...base, ...target };                 // fehlende Keys → Englisch
+    dict = { ...base, ...target };                 // fehlende Keys bleiben Englisch
     document.documentElement.lang = lang;
     return lang;
 }
@@ -30,7 +30,7 @@ export function t(key, params) {
 export function applyStatic(root = document) {
     for (const e of root.querySelectorAll('[data-i18n]')) {
         const txt = t(e.getAttribute('data-i18n'));
-        // Nur den Text ersetzen – Kind-Elemente (z.B. <input>/<select> im Label) behalten!
+        // Nur den Text ersetzen: Kind-Elemente (z.B. <input>/<select> im Label) behalten!
         const textNode = [...e.childNodes].find(n => n.nodeType === 3 && n.nodeValue.trim().length);
         if (textNode) textNode.nodeValue = txt;
         else if (!e.children.length) e.textContent = txt;

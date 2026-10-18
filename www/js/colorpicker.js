@@ -1,4 +1,4 @@
-// Eigener eingebetteter Colorpicker – überall identisch, voller Farbraum,
+// Eigener eingebetteter Colorpicker, überall identisch, voller Farbraum,
 // touch-tauglich (der native <input type=color> zeigt auf Mobilgeräten oft
 // nur eine kleine Palette). SV-Feld + Hue-Slider + Hex-Eingabe + Presets.
 
@@ -48,7 +48,7 @@ let openPop = null;   // aktuell offenes Popover (nur eins gleichzeitig)
 /**
  * @param anchorEl  Element, an dem das Popover ausgerichtet wird
  * @param current   aktuelle Farbe ('' = keine)
- * @param onPick    (color) => void  – live bei jeder Änderung
+ * @param onPick    (color) => void, live bei jeder Änderung
  * @param opts      { presets?: string[], allowNone?: bool }
  */
 export function openColorPicker(anchorEl, current, onPick, opts = {}) {
@@ -130,11 +130,10 @@ export function openColorPicker(anchorEl, current, onPick, opts = {}) {
         if (rgb) { hsv = rgbToHsv(rgb.r, rgb.g, rgb.b); render(); emit(rgbToHex(rgb.r, rgb.g, rgb.b)); }
     });
 
-    // In einen offenen modalen <dialog> hängen (top-layer), sonst an den body –
-    // sonst läge das fixed-Popover hinter dem Dialog-Backdrop.
+    // In einen offenen modalen <dialog> haengen (top-layer): Am body laege das
+    // fixed-Popover hinter dem Dialog-Backdrop.
     const host = anchorEl.closest('dialog[open]') || document.body;
     host.appendChild(pop);
-    // Positionierung nahe des Ankers, im Viewport gehalten
     const a = anchorEl.getBoundingClientRect();
     const pw = pop.offsetWidth, ph = pop.offsetHeight;
     let left = clamp(a.left, 6, window.innerWidth - pw - 6);
@@ -144,7 +143,6 @@ export function openColorPicker(anchorEl, current, onPick, opts = {}) {
     pop.style.top = top + 'px';
     render();
 
-    // Schließen bei Klick/Touch außerhalb
     const onDown = e => { if (!pop.contains(e.target) && e.target !== anchorEl) closeColorPicker(); };
     setTimeout(() => document.addEventListener('pointerdown', onDown, true), 0);
     openPop = { pop, onDown };

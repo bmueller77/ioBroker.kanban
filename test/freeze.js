@@ -2,10 +2,9 @@ const assert = require('node:assert/strict');
 const { freezePlan, prunePlan } = require('../lib/freeze');
 
 /**
- * Befund 22 aus dem Abnahmetest: Die Bremse gegen Neustartschleifen gab schon
- * nach einem einzigen verlorenen Merkmal endgueltig auf. Damit blieben die
- * Benutzer-IDs dauerhaft editierbar, also genau der Zustand, gegen den das
- * Einfrieren gebaut ist.
+ * Die Bremse gegen Neustartschleifen darf nicht schon nach einem verlorenen
+ * Merkmal aufgeben. Sonst bleiben die Benutzer-IDs dauerhaft editierbar, also
+ * genau der Zustand, gegen den das Einfrieren gebaut ist.
  */
 describe('Einfrieren der Benutzer-IDs: was zu tun ist', () => {
     const MAX = 3;
@@ -22,8 +21,8 @@ describe('Einfrieren der Benutzer-IDs: was zu tun ist', () => {
     });
 
     it('schreibt nach einem verlorenen Merkmal erneut', () => {
-        // Das ist der Fall, der frueher scheiterte: Der Benutzer hat die
-        // Instanzeinstellungen gespeichert, waehrend der Adapter schrieb.
+        // Typischer Fall: Der Benutzer hat die Instanzeinstellungen gespeichert,
+        // waehrend der Adapter schrieb.
         assert.equal(freezePlan(offen, 1, MAX).tun, 'schreiben');
         assert.equal(freezePlan(offen, 2, MAX).tun, 'schreiben');
     });
@@ -54,8 +53,7 @@ describe('Einfrieren der Benutzer-IDs: was zu tun ist', () => {
     });
 
     it('tut ohne Benutzer nichts', () => {
-        // Genau der Zustand von kanban.4 im Abnahmetest: Dort waren alle
-        // Benutzer geloescht, das fehlende Merkmal war also kein Fehler.
+        // Sind alle Benutzer geloescht, ist das fehlende Merkmal kein Fehler.
         assert.equal(freezePlan([], 0, MAX).tun, 'nichts');
         assert.equal(freezePlan(undefined, 0, MAX).tun, 'nichts');
         assert.equal(freezePlan([{ name: '' }, null], 0, MAX).tun, 'nichts');
@@ -63,9 +61,8 @@ describe('Einfrieren der Benutzer-IDs: was zu tun ist', () => {
 });
 
 describe('Festgeschriebene Kennungen aufraeumen', () => {
-    // B16: Die Liste wuchs nur. Nach dem Loeschen eines Benutzers blieb seine
-    // Kennung darin stehen, und ein spaeter angelegter Benutzer mit derselben
-    // Kennung waere von Anfang an gesperrt gewesen.
+    // Bliebe die Kennung eines geloeschten Benutzers stehen, waere ein spaeter
+    // angelegter Benutzer mit derselben Kennung von Anfang an gesperrt.
     it('traegt aus, was es als Benutzer nicht mehr gibt', () => {
         const { bleibt, faellt } = prunePlan(['anna', 'ben', 'tom'], [{ name: 'anna' }, { name: 'tom' }]);
         assert.deepEqual(bleibt, ['anna', 'tom']);
@@ -90,7 +87,6 @@ describe('Festgeschriebene Kennungen aufraeumen', () => {
     });
 
     it('raeumt alles ab, wenn der letzte Benutzer geht', () => {
-        // Genau der Zustand, in dem der Tester kanban.4 hinterlassen hat.
         const { bleibt, faellt } = prunePlan(['user1', 'user2'], []);
         assert.deepEqual(bleibt, []);
         assert.deepEqual(faellt, ['user1', 'user2']);
@@ -98,8 +94,8 @@ describe('Festgeschriebene Kennungen aufraeumen', () => {
 });
 
 describe('Einfrieren nur, woran etwas haengt', () => {
-    // A15: Der Rueckschreibvorgang kostet einen Neustart, und in dessen Fenster
-    // ging das Speichern im Admin verloren. Er faellt jetzt weg, solange keine
+    // Der Rueckschreibvorgang kostet einen Neustart, in dessen Fenster ein
+    // Speichern im Admin verloren gehen kann. Er entfaellt, solange keine
     // Karte und kein Avatar auf die Kennung zeigt.
     const users = [{ name: 'anna' }, { name: 'ben' }];
 

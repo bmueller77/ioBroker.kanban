@@ -5,8 +5,8 @@ const { Notifier } = require('../lib/notify');
  * Hinweise, wenn der E-Mail-Versand nicht funktionieren kann.
  *
  * "sendTo" ist ohne Rueckruf ein Schuss ins Dunkle: Fehlt die Instanz oder ist
- * sie gestoppt, verschwindet die Nachricht lautlos. Genau das ist im August
- * passiert - Erinnerungen kamen nicht an, und im Protokoll stand nichts.
+ * sie gestoppt, verschwindet die Nachricht lautlos: Erinnerungen kommen nicht an,
+ * und im Protokoll steht nichts.
  */
 
 /**

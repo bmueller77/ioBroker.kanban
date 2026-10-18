@@ -39,9 +39,8 @@ describe('Papierkorb: Systemspalte lässt sich nicht aushebeln', () => {
     beforeEach(() => { warnings.length = 0; });
 
     it('vergibt die ID der Papierkorb-Spalte nicht an eine normale Spalte', async () => {
-        // Regression: Eine mitgeschickte Spalte {"id":"trash"} erzeugte eine zweite
-        // Spalte gleicher ID. Wiederherstellen lief danach ins Leere, während der
-        // Aufräumlauf die Karten nach der Frist endgültig entfernte.
+        // Eine zweite Spalte mit der ID "trash" liesse das Wiederherstellen ins Leere
+        // laufen, waehrend der Aufraeumlauf die Karten nach der Frist endgueltig entfernt.
         const { store } = await boardWithCard();
         store.updateBoard('b', {
             columns: [
@@ -77,7 +76,7 @@ describe('Papierkorb: Systemspalte lässt sich nicht aushebeln', () => {
         const { store } = await boardWithCard();
         const b = store.getBoard('b');
         const trashId = b.columns.find(c => c.isTrash).id;
-        // Altbestand nachstellen, wie ihn die frühere Fassung erzeugen konnte
+        // Gespeicherte Boards koennen noch eine zweite Spalte mit dieser ID enthalten
         b.columns.unshift({ id: trashId, title: 'Untergeschoben' });
         store._ensureTrashColumn(b);
 
@@ -99,8 +98,8 @@ describe('Papierkorb: Systemspalte lässt sich nicht aushebeln', () => {
 
 describe('Papierkorb: endgültiges Löschen', () => {
     it('entfernt nur Karten, die wirklich im Papierkorb liegen', async () => {
-        // Regression: purgeCard prüfte die Spalte nicht und entfernte jede aktive
-        // Karte sofort unwiderruflich, an der 30-Tage-Frist vorbei.
+        // Ohne Pruefung der Spalte entfernte purgeCard jede aktive Karte sofort
+        // unwiderruflich, an der 30-Tage-Frist vorbei.
         const { store, card } = await boardWithCard();
         assert.throws(() => store.purgeCard('b', card.id, 'test'), /not in the trash/);
         assert.equal(store.getBoard('b').cards.length, 1);
@@ -120,8 +119,8 @@ describe('Papierkorb: endgültiges Löschen', () => {
     });
 
     it('lässt Karten mit unlesbarem Zeitstempel liegen, statt sie zu löschen', async () => {
-        // Regression: `Date.parse(...) || 0` machte aus einem unlesbaren Wert die
-        // Epoche — die Karte galt damit als uralt und war beim nächsten Lauf weg.
+        // `Date.parse(...) || 0` macht aus einem unlesbaren Wert die Epoche. Die
+        // Karte gaelte als uralt und waere beim naechsten Lauf weg.
         const { store, card } = await boardWithCard();
         store.deleteCard('b', card.id, 'test');
         const b = store.getBoard('b');
