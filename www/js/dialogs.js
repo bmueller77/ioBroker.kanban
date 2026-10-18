@@ -14,12 +14,9 @@ const WEEKDAYS = [['Mo', 1], ['Di', 2], ['Mi', 3], ['Do', 4], ['Fr', 5], ['Sa', 
 /**
  * Eine Chip- oder Farbgruppe mit der Tastatur bedienbar machen.
  *
- * Die Elemente sind <span> und damit von sich aus nicht fokussierbar: Tab
- * sprang bisher ueber Zustaendige und Labels hinweg, und beim Farbwaehler war
- * nur das letzte Feld erreichbar, weil allein das eigene Farbrad ein tabIndex
- * trug. Umgesetzt als "roving tabindex" - die Gruppe ist ein einziger
- * Tab-Halt, innerhalb bewegen die Pfeiltasten den Fokus, Leertaste und Enter
- * loesen aus, Pos1 und Ende springen an die Raender.
+ * Die Elemente sind <span> und damit von sich aus nicht fokussierbar, Tab
+ * wuerde ueber sie hinwegspringen. Daher "roving tabindex": Die Gruppe ist ein
+ * einziger Tab-Halt, innerhalb bewegen die Pfeiltasten den Fokus.
  *
  * @param box Container der Gruppe
  * @param auswahl CSS-Auswahl der bedienbaren Elemente darin
@@ -83,11 +80,10 @@ function makeRoving(box, auswahl) {
     });
 }
 
-// Die neun Linkarten in der Reihenfolge der Leiste - die haeufigsten zuerst.
-// Das ist eine Anzeigereihenfolge; erkannt wird weiterhin in der Reihenfolge,
-// die linkIcon() vorgibt. `vorlage` wird als Platzhalter ins Feld gesetzt: PDF
-// und Bild erkennt der Adapter an der Dateiendung, dort steht deshalb ein
-// vollstaendiges Beispiel statt eines Praefixes.
+// Reihenfolge der Leiste, die haeufigsten zuerst. Erkannt wird dagegen in der
+// Reihenfolge, die linkIcon() vorgibt. `vorlage` wird als Platzhalter ins Feld
+// gesetzt: PDF und Bild erkennt der Adapter an der Dateiendung, dort steht
+// deshalb ein vollstaendiges Beispiel statt eines Praefixes.
 const LINK_TYPES = [
     { art: 'web', text: 'link.web', vorlage: 'https://github.com/bmueller77/ioBroker.kanban' },
     { art: 'link', text: 'link.lan', vorlage: 'http://127.0.0.1:8095/' },
@@ -125,7 +121,6 @@ function initials(name) {
     return String(name || '?').split(/[\s_-]+/).map(p => p[0] || '').join('').slice(0, 2).toUpperCase();
 }
 
-// Bilddatei quadratisch zuschneiden + auf `size` px verkleinern → PNG-Data-URL
 function fileToSquareDataUrl(file, size) {
     return loadImageSource(file).then(src => {
         const c = document.createElement('canvas');
@@ -138,8 +133,7 @@ function fileToSquareDataUrl(file, size) {
     });
 }
 
-// Laedt eine Bilddatei OHNE blob:-URL (CSP-konform): bevorzugt createImageBitmap,
-// Fallback ueber eine data:-URL (von der CSP erlaubt), da img-src kein blob: zulaesst.
+// Ohne blob:-URL, weil die CSP bei img-src kein blob: zulaesst, data: aber schon.
 function loadImageSource(file) {
     if (window.createImageBitmap) return createImageBitmap(file);
     return new Promise(function (resolve, reject) {
@@ -164,15 +158,14 @@ function slugify(text) {
 /**
  * Eine Karte in eine Vorlage uebersetzen.
  *
- * Zwei Dinge fehlen bewusst. Das Faelligkeitsdatum altert: Eine im Januar
- *  gespeicherte Vorlage legte im Maerz Karten mit einem Datum von vorgestern an.
- *  Und die Haken der Checkliste fallen weg, weil eine Vorlage die Punkte
- *  festhaelt, nicht den Stand. Die Uhrzeit bleibt, 17:00 ist eine Eigenschaft
- *  der Aufgabe und altert nicht.
+ * Das Faelligkeitsdatum fehlt bewusst, weil es altert: Eine im Januar
+ * gespeicherte Vorlage wuerde im Maerz Karten mit vergangenem Datum anlegen.
+ * Die Uhrzeit bleibt, sie altert nicht. Die Haken der Checkliste fallen weg,
+ * weil eine Vorlage die Punkte festhaelt, nicht den Stand.
  *
- * Der Server baut die Vorlage ohnehin aus den erlaubten Feldern neu auf; hier
- *  wird sie sauber geschickt, damit im Board-Zustand nichts Fremdes steht, bevor
- *  die Antwort da ist.
+ * Der Server baut die Vorlage ohnehin aus den erlaubten Feldern neu auf. Hier
+ * wird sie trotzdem bereinigt, damit im Board-Zustand nichts Fremdes steht,
+ * bevor die Antwort da ist.
  *
  * @param card Karte, aus der die Vorlage entsteht
  * @param name Name der Vorlage, zugleich Titel spaeterer Karten
@@ -286,18 +279,17 @@ export function readTemplatePackage(text) {
 
 export function initDialogs(state, actions) {
     const dlg = document.getElementById('cardDialog');
-    // Abzug des Formulars beim Oeffnen. Der Vergleich damit beantwortet die
-    // Frage "gibt es ungespeicherte Aenderungen?", ohne dass jedes einzelne
-    // Bedienelement ein Flag setzen muesste (Befund 2).
+    // Abzug des Formulars beim Oeffnen. Der Vergleich damit erkennt ungespeicherte
+    // Aenderungen, ohne dass jedes Bedienelement ein Flag setzen muss.
     let cardStand = '';
     const form = document.getElementById('cardForm');
-    // Monats-Select einmalig lokalisiert befüllen (defensiv: bricht nicht die
-    // ganze App ab, falls veraltetes HTML gecacht wurde und das Feld fehlt)
+    // Defensiv: Veraltetes HTML aus dem Cache hat das Feld eventuell nicht, das
+    // darf nicht die ganze App abbrechen.
     const recMonthSel = form && form.elements ? form.elements.recMonth : null;
     if (recMonthSel && !recMonthSel.options.length) {
         for (let m = 1; m <= 12; m++) recMonthSel.appendChild(new Option(t('month.' + m), String(m)));
     }
-    // Listener nur setzen, wenn das Feld existiert (robust gegen veraltetes HTML)
+    // Robust gegen veraltetes HTML, dem Felder fehlen
     const on = (name, ev, fn) => { const e = form.elements[name]; if (e) e.addEventListener(ev, fn); };
     let editingCardId = null;
     // Spalte, in der eine neu angelegte Karte landen soll. Wird beim Oeffnen
@@ -307,8 +299,7 @@ export function initDialogs(state, actions) {
     // Wird der Karteneditor gerade fuer eine Vorlage benutzt? Dann traegt das
     // Feld die ID und die Rueckgabe, und der Submit schreibt keine Karte.
     let editingTemplate = null;
-    // Stand der bearbeiteten Karte beim Oeffnen, fuer den Abgleich beim
-    // Speichern (F3)
+    // Stand der bearbeiteten Karte beim Oeffnen, fuer den Abgleich beim Speichern
     let cardBasis = '';
     // Vergabe reihum fuer neue Labels. Gut unterscheidbar und dunkel genug,
     // dass die automatische Kontrastschrift darauf weiss bleibt.
@@ -320,17 +311,6 @@ export function initDialogs(state, actions) {
 
     // ---------------------------------------------------------- Karten-Dialog
 
-    /**
-     * Schliesskreuz oben rechts in eine Dialog-Ueberschrift setzen.
-     *
-     * Die Dialoge hatten bisher nur ihre Knoepfe unten. Auf einem grossen
-     * Schirm ist das weit weg vom Blick, und bei einem hohen Dialog muss man
-     * dafuer scrollen.
-     *
-     * @param h3 Ueberschrift des Dialogs
-     * @param zu Was beim Klick geschehen soll
-     * @returns der Knopf
-     */
     /**
      * Nach dem Oeffnen sinnvoll fokussieren.
      *
@@ -348,6 +328,16 @@ export function initDialogs(state, actions) {
         }
     }
 
+    /**
+     * Schliesskreuz oben rechts in eine Dialog-Ueberschrift setzen.
+     *
+     * Die Knoepfe unten sind auf einem grossen Schirm weit weg vom Blick, und
+     * bei einem hohen Dialog muss man fuer sie scrollen.
+     *
+     * @param h3 Ueberschrift des Dialogs
+     * @param zu Was beim Klick geschehen soll
+     * @returns der Knopf
+     */
     function addCloseX(h3, zu) {
         const x = el('button', 'dlg-x');
         x.type = 'button';
@@ -453,7 +443,7 @@ export function initDialogs(state, actions) {
      * Kopfzeilen der Abschnitte beschriften.
      *
      * Ohne das verbirgt ein zugeklappter Abschnitt seinen Inhalt. Rechts steht
-     * deshalb, was darin steckt, oder "leer".
+     * deshalb, was darin steckt.
      */
     function updateFoldInfo() {
         const feld = name => document.querySelector(`#cardForm details.fold[data-fold="${name}"] .fold-info`);
@@ -468,7 +458,7 @@ export function initDialogs(state, actions) {
         const f = form.elements;
 
         // Klartext statt Quelltext: Wer zuklappt, will die erste Zeile seines
-        // Textes sehen und nicht Rauten und Sternchen (B3).
+        // Textes sehen und nicht Rauten und Sternchen.
         const beschr = plainText(f.description.value);
         setz('desc', beschr.length > 40 ? `${beschr.slice(0, 40)}...` : beschr);
 
@@ -478,9 +468,8 @@ export function initDialogs(state, actions) {
         const labelText = gewaehlt.length > 3
             ? `${gewaehlt.slice(0, 3).map(l => l.title).join(', ')} +${gewaehlt.length - 3}`
             : gewaehlt.map(l => l.title).join(', ');
-        // Mit Farbtupfer, so wie das Handbuch es beschreibt. Ab drei Labels wird
-        // auf "+2" gekuerzt, dann waere die Farbe die einzige verbliebene
-        // Information gewesen - und die fehlte (B4).
+        // Mit Farbtupfern, wie das Handbuch es beschreibt. Ab drei Labels wird der
+        // Text auf "+n" gekuerzt, dann traegt die Farbe einen Teil der Information.
         const labelInfo = feld('labels');
         if (labelInfo) {
             labelInfo.textContent = '';
@@ -568,17 +557,10 @@ export function initDialogs(state, actions) {
     }
 
     /**
-     * Die Art hervorheben, die zur eingetragenen Adresse passt.
-     *
-     * Dieselbe Erkennung wie auf der Karte, damit die Leiste nicht etwas
-     * anderes behauptet als das Board spaeter anzeigt.
-     */
-    /**
      * Das Link-Feld genauso pruefen, wie der Adapter es spaeter darstellt.
      *
-     * Frueher war das Feld ein type="url" und verlangte damit ein Schema -
-     * `example.com` oder ein relativer Pfad wurden abgewiesen, obwohl
-     * safeHref() beides annimmt. Jetzt entscheidet dieselbe Funktion.
+     * Kein type="url": Das verlangt ein Schema und wiese `example.com` oder
+     * einen relativen Pfad ab, obwohl safeHref() beides annimmt.
      */
     function updateLinkValidity() {
         const f = form.elements.link;
@@ -586,6 +568,12 @@ export function initDialogs(state, actions) {
         f.setCustomValidity(!wert || safeHref(wert) ? '' : t('card.linkInvalid'));
     }
 
+    /**
+     * Die Art hervorheben, die zur eingetragenen Adresse passt.
+     *
+     * Dieselbe Erkennung wie auf der Karte, damit die Leiste nicht etwas
+     * anderes behauptet als das Board spaeter anzeigt.
+     */
     function syncLinkType() {
         const box = document.getElementById('linkTypes');
         if (!box) {
@@ -620,7 +608,7 @@ export function initDialogs(state, actions) {
         const list = boardUsers(state).slice();
         for (const u of (state.users || [])) if (selAssignees.has(u.name) && !list.some(x => x.name === u.name)) list.push(u);
         // Kennungen, die es als Benutzer gar nicht mehr gibt. Ohne sie sieht das
-        // Pflichtfeld leer aus, obwohl die Karte jemandem gehoert (Befund 16).
+        // Pflichtfeld leer aus, obwohl die Karte jemandem gehoert.
         for (const n of selAssignees) {
             if (!list.some(x => x.name === n)) {
                 list.push({ name: n, displayName: t('card.assigneeGone', { name: n }), verwaist: true });
@@ -687,13 +675,11 @@ export function initDialogs(state, actions) {
         makeRoving(box, '.pick-chip');
     }
 
-    // Inline-Mini-Form zum Anlegen eines Labels (Name + echter Colorpicker)
     function showLabelCreator(box) {
         if (box.querySelector('.label-new')) return;
         const form = el('span', 'label-new');
-        // Reihum aus der Palette, genau wie im Board-Manager. Vorher stand hier
-        // fest Gruen, und zwei ueber "+ Neu" angelegte Labels sahen gleich aus -
-        // der Zustand, den Befund 11 abstellen sollte (B6).
+        // Reihum aus der Palette wie im Board-Manager, damit neu angelegte Labels
+        // sich unterscheiden.
         const vorhanden = ((state.board && state.board.labels) || []).length;
         const color = makeColorTrigger(LABEL_FARBEN[vorhanden % LABEL_FARBEN.length]);
         const name = document.createElement('input');
@@ -737,14 +723,13 @@ export function initDialogs(state, actions) {
             box.appendChild(sw);
             swatches.push(sw);
         }
-        // Freie Farbwahl (voller Farbraum) über den eigenen Colorpicker
         const custom = el('span', 'color-swatch custom');
         custom.title = t('color.own');
         custom.setAttribute('role', 'button');
         const openCustom = () => openColorPicker(custom, selColor, col => { selColor = col; updateSelection(); }, { presets: CARD_COLORS });
         custom.addEventListener('click', openCustom);
         box.appendChild(custom);
-        // Kein eigenes tabIndex mehr: die Gruppe vergibt den Tab-Halt, sonst
+        // Kein eigenes tabIndex: Die Gruppe vergibt den Tab-Halt, sonst
         // waere ausgerechnet das letzte Feld der einzige Einstieg.
         makeRoving(box, '.color-swatch');
 
@@ -763,12 +748,11 @@ export function initDialogs(state, actions) {
         updateSelection();
     }
 
-    // Checklisten-Punkte lassen sich per Anfasser umsortieren (ab 2 Punkten sichtbar).
     function ensureChecklistSortable(box) {
         if (!box || box._sortable || typeof Sortable === 'undefined') return;
-        // Gleiche Konfiguration wie die Spaltenliste im Board-Dialog: natives
-        // Drag & Drop. (forceFallback hängt den Drag-Klon in den Container und
-        // verschiebt damit die Trefferberechnung – der Punkt landete immer unten.)
+        // Natives Drag & Drop wie die Spaltenliste im Board-Dialog. forceFallback
+        // haengt den Drag-Klon in den Container und verschiebt damit die
+        // Trefferberechnung, der Punkt landet dann immer unten.
         box._sortable = Sortable.create(box, {
             handle: '.ck-grip',
             draggable: '.check-item',
@@ -800,9 +784,8 @@ export function initDialogs(state, actions) {
         txt.type = 'text';
         txt.value = (item && item.text) || '';
         txt.placeholder = t('card.checkPlaceholder');
-        // In jeder Checkliste legt Enter den naechsten Punkt an. Hier speicherte
-        // es bisher die ganze Karte und schloss den Dialog (Befund 3).
-        // Gespeichert wird von hier aus mit Strg und Enter.
+        // Enter legt wie in jeder Checkliste den naechsten Punkt an, statt die
+        // Karte zu speichern. Gespeichert wird von hier aus mit Strg und Enter.
         txt.addEventListener('keydown', ev => {
             if (ev.key !== 'Enter') {
                 return;
@@ -869,25 +852,22 @@ export function initDialogs(state, actions) {
     }
 
     /**
-     * Markdown rendern und sicher einfuegen. Links oeffnen immer in einem neuen
-     * Tab (target=_blank + rel), damit das Board nicht verlassen wird.
-     */
-    /**
-     * Markdown gesaeubert einsetzen.
+     * Markdown gesaeubert einsetzen. Links oeffnen in einem neuen Tab, damit
+     * das Board nicht verlassen wird.
      *
      * @param target Zielelement
      * @param text Markdown-Quelltext
      * @param ausTabfolge Links aus der Tab-Reihenfolge nehmen. Fuer die Vorschau
-     *        im Editor: Sie ist reine Anzeige, wer dort mehrere Links stehen
-     *        hat, musste sich sonst durch alle tabben, bevor er zum naechsten
-     *        Feld kam (B13). Im Lesedialog bleiben sie erreichbar.
+     *        im Editor: Sie ist reine Anzeige, und mit mehreren Links muesste man
+     *        sich sonst durch alle tabben, bevor man zum naechsten Feld kommt.
+     *        Im Lesedialog bleiben sie erreichbar.
      */
     function renderMarkdownInto(target, text, ausTabfolge) {
         const txt = String(text || '').trim();
         if (!txt) { target.textContent = ''; return; }
         // eslint-disable-next-line no-undef
         const html = marked.parse(txt);
-        // Markdown darf rohes HTML enthalten → vor dem Einfügen säubern (verhindert gespeichertes XSS).
+        // Markdown darf rohes HTML enthalten, daher vor dem Einfuegen saeubern (gegen gespeichertes XSS).
         // eslint-disable-next-line no-undef
         if (window.DOMPurify) target.innerHTML = DOMPurify.sanitize(html);
         else { target.textContent = txt; return; }   // Fallback ohne Sanitizer: nur Text
@@ -927,7 +907,7 @@ export function initDialogs(state, actions) {
         dd.showModal();
     }
 
-    // Feature 3: erledigte Karte kopieren → Editor als NEUE Karte mit gleichen Inhalten.
+    // Speichert nichts, sondern oeffnet den Editor fuer eine neue Karte mit den Inhalten der alten.
     function copyCard(cardId) {
         const src = state.board && state.board.cards.find(c => c.id === cardId);
         if (!src) return;
@@ -937,7 +917,7 @@ export function initDialogs(state, actions) {
         document.getElementById('transferCardBtn').hidden = true;
         form.elements.title.value = src.title || '';
         form.elements.description.value = src.description || '';
-        // Fälligkeit: heutiges Datum, wenn das Original eins hatte (Uhrzeit behalten), sonst leer
+        // Das alte Datum laege meist in der Vergangenheit, die Kopie wird heute faellig.
         const hadDue = !!src.due;
         form.elements.due.value = hadDue ? isoTodayStr() : '';
         form.elements.dueTime.value = (hadDue && src.dueTime) ? src.dueTime : '';
@@ -949,7 +929,6 @@ export function initDialogs(state, actions) {
         form.elements.calendarInvite.checked = !!src.calendarInvite;
         form.elements.calendarDuration.value = src.calendarDuration || '01:00';
         updateCalDurUI();
-        // Zielspalte: erste „Neu"-Spalte, sonst erste normale Spalte.
         // Erledigt-Spalten scheiden aus, die Kopie ist eine neue Karte.
         const cols = (state.board.columns || []).filter(c => !c.isTrash && !c.isDone);
         const target = cols.find(c => c.allowAdd) || cols[0];
@@ -974,14 +953,14 @@ export function initDialogs(state, actions) {
         dlg.showModal();
     }
 
-    // Die Kopfzeilen der Abschnitte muessen mitlaufen, sonst behauptet ein
-    // zugeklappter Abschnitt "leer", obwohl gerade etwas eingetippt wurde.
     window.matchMedia('(max-width: 600px)').addEventListener('change', () => {
         if (document.getElementById('cardDialog').open) {
             holdCarrier();
         }
     });
 
+    // Die Kopfzeilen der Abschnitte muessen mitlaufen, sonst wirkt ein
+    // zugeklappter Abschnitt leer, obwohl gerade etwas eingetippt wurde.
     form.addEventListener('input', () => {
         updateFoldInfo();
         syncLinkType();
@@ -992,10 +971,8 @@ export function initDialogs(state, actions) {
     /**
      * Kartendaten in die Felder des Editors schreiben.
      *
-     * Herausgezogen aus "openCard", weil eine Vorlage denselben Weg nimmt. Gaebe es
-     *  zwei, wuerde das dreizehnte Feld, das irgendwann dazukommt, in einem von
-     *  beiden vergessen - und das faellt erst auf, wenn eine Karte aus einer
-     *  Vorlage etwas nicht mitbringt.
+     * Eigene Funktion, weil eine Vorlage denselben Weg nimmt wie "openCard".
+     * Bei zwei Wegen wuerde ein neues Feld leicht in einem davon vergessen.
      *
      * @param card Karte oder Vorlage; null leert alle Felder
      * @param defaultColumnId Spalte fuer eine neue Karte
@@ -1050,7 +1027,7 @@ export function initDialogs(state, actions) {
         fillForm(card, defaultColumnId, !card);
         fillTemplatePick(!card);
         // Stand der Karte beim Oeffnen. Damit laesst sich beim Speichern
-        // erkennen, ob sie inzwischen woanders geaendert wurde (F3).
+        // erkennen, ob sie waehrenddessen woanders geaendert wurde.
         cardBasis = card ? kartenKern(card) : '';
         cardStand = JSON.stringify(readCard());
         dlg.showModal();
@@ -1097,7 +1074,7 @@ export function initDialogs(state, actions) {
      * Gesetzt wird vollstaendig, auch die in der Vorlage leeren Felder. Ein Mischen
      *  aus Vorlage und schon Eingetipptem ergibt Karten, die niemand so gewollt
      *  hat, und man sieht ihnen hinterher nicht an, woher welcher Teil kam. Steht
-     *  im Editor schon etwas, kommt deshalb vorher eine Rueckfrage.
+     *  im Editor schon etwas, kommt deshalb zuerst eine Rueckfrage.
      *
      * Das Feld springt danach auf seinen Platzhalter zurueck. Bliebe die Vorlage
      *  stehen, laese sich das wie eine Bindung, die es nicht gibt: Die Karte ist
@@ -1162,7 +1139,6 @@ export function initDialogs(state, actions) {
     function renderWeekdayPick() {
         const box = document.getElementById('recWeekdayWrap');
         box.textContent = '';
-        // Bei "Monatlich (Wochentag)" nur EIN Wochentag, sonst Mehrfachauswahl.
         const single = form.elements.recType.value === 'monthly_weekday';
         for (const [, iso] of WEEKDAYS) {
             const chip = el('span', 'pick-chip' + (selWeekdays.has(iso) ? ' selected' : ''), t('weekday.' + iso));
@@ -1181,8 +1157,8 @@ export function initDialogs(state, actions) {
         rec = rec || {};
         // Vorbelegung aus der Faelligkeit der Karte, nicht aus dem heutigen
         // Datum: Wer eine Karte auf den 12.09. legt und "Jaehrlich" waehlt,
-        // meint den 12. September und nicht den Tag, an dem er das einstellt
-        // (A11). Ohne Faelligkeit bleibt es beim heutigen Datum.
+        // meint den 12. September und nicht den Tag, an dem er das einstellt.
+        // Ohne Faelligkeit bleibt es beim heutigen Datum.
         const faellig = parseFaellig(form.elements.due.value);
         form.elements.recType.value = rec.type || 'none';
         form.elements.recInterval.value = rec.interval || 2;
@@ -1223,7 +1199,7 @@ export function initDialogs(state, actions) {
         document.getElementById('recWorkdayNWrap').hidden = !(type === 'workday' && (pos === 'nth' || pos === 'nth_last'));
         document.getElementById('recCronWrap').hidden = type !== 'cron';
         document.getElementById('recCronInfo').hidden = type !== 'cron';
-        // Bei Cron gibt das Muster die Uhrzeit vor — ein frei editierbares Feld
+        // Bei Cron gibt das Muster die Uhrzeit vor, ein frei editierbares Feld
         // wuerde etwas anderes anzeigen als die Karte spaeter bekommt.
         form.elements.dueTimeEnabled.disabled = type === 'cron';
         form.elements.dueTime.readOnly = type === 'cron';
@@ -1248,7 +1224,7 @@ export function initDialogs(state, actions) {
     const CRON_FIELDS = ['cron.minute', 'cron.hour', 'cron.day', 'cron.month', 'cron.weekday'];
     const CRON_DOW = ['cron.sun', 'cron.mon', 'cron.tue', 'cron.wed', 'cron.thu', 'cron.fri', 'cron.sat'];
 
-    /** Muster in Worte fassen. Gaengige Faelle als Satz, alles Weitere feldweise —
+    /** Muster in Worte fassen. Gaengige Faelle als Satz, alles Weitere feldweise:
      *  eine erzwungene Satzform waere bei '1-5/2' irrefuehrender als die Aufzaehlung. */
     function cronText(expr) {
         const p = expr.trim().split(/\s+/);
@@ -1285,7 +1261,6 @@ export function initDialogs(state, actions) {
         if (res.next && res.next.length) {
             box.appendChild(el('div', 'cron-next', t('cron.next', { dates: res.next.map(fmtDateShort).join(' · ') })));
         }
-        // Uhrzeit der Karte an das Muster angleichen
         if (res.time) {
             form.elements.dueTime.value = res.time;
             form.elements.dueTimeEnabled.checked = true;
@@ -1329,7 +1304,6 @@ export function initDialogs(state, actions) {
     function updateDueTimeUI() {
         document.getElementById('dueTimeWrap').hidden = !form.elements.dueTimeEnabled.checked;
     }
-    // Termindauer nur zeigen, wenn eine Kalender-Einladung angehängt wird
     function updateCalDurUI() {
         const wrap = document.getElementById('calDurWrap');
         if (wrap) wrap.hidden = !form.elements.calendarInvite.checked;
@@ -1343,7 +1317,7 @@ export function initDialogs(state, actions) {
     on('dueTimeEnabled', 'change', () => {
         updateDueTimeUI();
         if (form.elements.dueTimeEnabled.checked && !form.elements.dueTime.value) {
-            form.elements.dueTime.value = '09:00';   // sinnvoller Default
+            form.elements.dueTime.value = '09:00';
         }
     });
 
@@ -1360,15 +1334,6 @@ export function initDialogs(state, actions) {
         addCheckRow().querySelector('input[type=text]').focus();
     });
     document.getElementById('cancelCardBtn').addEventListener('click', () => dlg.close());
-    /**
-     * Vor dem Schliessen nachfragen, wenn etwas geaendert wurde.
-     *
-     * "Abbrechen" fragt bewusst nicht: Wer auf einen Knopf mit diesem Namen
-     * drueckt, meint es auch. Escape und das Kreuz dagegen drueckt man
-     * reflexhaft, und dort war eine lange Beschreibung bisher weg.
-     *
-     * @returns true, wenn geschlossen werden darf
-     */
     /**
      * Die Felder einer Karte, die der Editor bearbeitet, als Vergleichstext.
      *
@@ -1394,10 +1359,10 @@ export function initDialogs(state, actions) {
     }
 
     /**
-     * Hat jemand die Karte inzwischen woanders geaendert?
+     * Hat jemand die Karte waehrenddessen woanders geaendert?
      *
      * Das Board bekommt eine fremde Aenderung sofort mit, der offene Editor
-     * nicht. Wer dann speicherte, ueberschrieb sie stillschweigend (F3). Statt
+     * nicht. Speichern wuerde sie stillschweigend ueberschreiben. Statt
      * zu sperren wird gefragt: Der eigene Stand ist oft der gewollte, aber man
      * soll es wissen.
      *
@@ -1418,6 +1383,15 @@ export function initDialogs(state, actions) {
         }) === true;
     }
 
+    /**
+     * Vor dem Schliessen nachfragen, wenn etwas geaendert wurde.
+     *
+     * "Abbrechen" fragt bewusst nicht: Wer auf einen Knopf mit diesem Namen
+     * drueckt, meint es auch. Escape und das Kreuz dagegen drueckt man
+     * reflexhaft, und dabei ginge eine lange Beschreibung verloren.
+     *
+     * @returns true, wenn geschlossen werden darf
+     */
     async function guardCard() {
         let geaendert = false;
         try { geaendert = JSON.stringify(readCard()) !== cardStand; } catch { geaendert = false; }
@@ -1449,10 +1423,9 @@ export function initDialogs(state, actions) {
         if (await guardCard()) dlg.close();
     });
 
-    // Die Zurueck-Taste des Browsers schloss den Editor kommentarlos, waehrend
-    // Escape und das Schliesskreuz nachfragen - das Getippte war weg (F4). Der
-    // offene Dialog legt deshalb einen Eintrag im Verlauf an; die Zurueck-Taste
-    // holt ihn wieder weg, und hier faellt dieselbe Rueckfrage an.
+    // Die Zurueck-Taste des Browsers wuerde den Editor ohne Rueckfrage schliessen.
+    // Der offene Dialog legt deshalb einen Eintrag im Verlauf an; die Zurueck-Taste
+    // holt ihn wieder weg, und hier faellt dieselbe Rueckfrage an wie bei Escape.
     let verlaufMarke = false;
     function verlaufAn() {
         if (verlaufMarke) {
@@ -1523,12 +1496,10 @@ export function initDialogs(state, actions) {
     /**
      * Sagen, wenn die gespeicherte Karte gerade nicht zu sehen ist.
      *
-     * Ein Tester hat sechs Karten angelegt und das Speichern fuer kaputt
-     * gehalten: Der Server antwortete jedes Mal mit 201, aber der aktive
-     * Personenfilter blendete sie sofort wieder aus, und die Oberflaeche sagte
-     * dazu nichts (A9). Geprueft wird am gezeichneten Board statt an einer
-     * zweiten Umsetzung der Filterregeln - was dort nicht steht, sieht der
-     * Benutzer nicht, gleich aus welchem Grund.
+     * Ein aktiver Personenfilter kann eine gerade gespeicherte Karte sofort
+     * ausblenden, dann wirkt das Speichern kaputt. Geprueft wird am gezeichneten
+     * Board statt an einer zweiten Umsetzung der Filterregeln: Was dort nicht
+     * steht, sieht der Benutzer nicht, gleich aus welchem Grund.
      *
      * @param id Kennung der gespeicherten Karte
      */
@@ -1578,8 +1549,7 @@ export function initDialogs(state, actions) {
             dlg.close();
         } catch (e) {
             // Kein alert(): Die modale Box des Browsers haelt die ganze Seite an,
-            // bis jemand sie wegklickt, und ist fuer keine Pruefung lesbar. Genau
-            // daran blieb die Fernsteuerung bei F5 und bei Befund 25 haengen.
+            // bis jemand sie wegklickt, und blockiert damit auch automatische Tests.
             showHint(t('error.saveFailed', { msg: e.message }), 'error');
         }
     });
@@ -1643,7 +1613,6 @@ export function initDialogs(state, actions) {
             } catch (e) { editBoard = null; }
         }
 
-        // Aenderungen des bearbeiteten Boards einsammeln und speichern
         async function saveEdit() {
             if (!editBoard) return true;
             const members = memberWrap ? [...memberWrap.querySelectorAll('input:checked')].map(i => i.dataset.val) : undefined;
@@ -1651,8 +1620,8 @@ export function initDialogs(state, actions) {
                 await confirmDialog({ title: t('boards.members'), message: t('boards.membersRequiredShort'), ok: t('confirm.ok') });
                 return false;
             }
-            // Wer aus der Mitgliederliste fliegt, bleibt auf seinen Karten stehen —
-            // die tauchen dann aber nicht mehr im Personenfilter auf. Vorher fragen.
+            // Wer aus der Mitgliederliste fliegt, bleibt auf seinen Karten stehen,
+            // die tauchen dann aber nicht mehr im Personenfilter auf. Daher erst fragen.
             if (members) {
                 const dropped = (editBoard.members || []).filter(n => !members.includes(n));
                 if (dropped.length) {
@@ -1663,9 +1632,8 @@ export function initDialogs(state, actions) {
                         && (c.assignees || []).every(a => dropped.includes(a)));
                     if (orphans.length) {
                         // Nur die Personen nennen, die auf den gezaehlten Karten
-                        // wirklich stehen. Vorher standen dort alle kuenftigen
-                        // Nichtmitglieder, und wer die Meldung las, suchte auf der
-                        // Karte nach jemandem, der dort nie stand (D6).
+                        // wirklich stehen. Sonst sucht man auf der Karte nach
+                        // jemandem, der dort nie stand.
                         const betroffen = [...new Set(orphans.flatMap(c => c.assignees || []))]
                             .filter(a => dropped.includes(a));
                         const names = betroffen.map(n => {
@@ -1702,10 +1670,8 @@ export function initDialogs(state, actions) {
                 };
             }).filter(Boolean);
             // Wer das Anzeige-Limit aendert, meint es auch. Der pro Geraet
-            // gemerkte aufgeklappte Zustand stammt von vorher und ueberstimmte
-            // die neue Einstellung stillschweigend: Man setzte "Max 3", sah
-            // weiterhin sieben Karten und hielt die Einstellung fuer wirkungslos
-            // (A19).
+            // gemerkte aufgeklappte Zustand wuerde die neue Einstellung sonst
+            // stillschweigend ueberstimmen, und sie schiene wirkungslos.
             const limitNeu = columns
                 .filter(c => c.id)
                 .filter(c => {
@@ -1716,9 +1682,9 @@ export function initDialogs(state, actions) {
             if (limitNeu.length) {
                 actions.forgetExpanded(editBoard.id, limitNeu);
             }
-            // Nur Name und Reihenfolge kommen aus dem Reiter; der Inhalt einer
-            // Vorlage bleibt, wie er ist. Geaendert wird er ueber Verwalten an
-            // einer Karte, unter demselben Namen.
+            // Name und Reihenfolge kommen aus den Zeilen des Reiters, der Inhalt
+            // ueber tplInhalt(), damit lokal bearbeitete und eingelesene Fassungen
+            // mitgehen.
             const templates = tplBox
                 ? [...tplBox.children]
                       .map(row => {
@@ -1728,10 +1694,10 @@ export function initDialogs(state, actions) {
                               return null;
                           }
                           // Beim Umbenennen wandert der Titel mit: Name und Titel
-                          // sind nach der Absprache dasselbe, und im Auswahlfeld
-                          // stand sonst der neue Name, waehrend die Karte den
-                          // alten Titel bekam. Bleibt der Name, bleibt auch ein
-                          // ueber die Schnittstelle abweichend gesetzter Titel.
+                          // sind dasselbe, sonst stuende im Auswahlfeld der neue
+                          // Name, waehrend die Karte den alten Titel bekaeme. Bleibt
+                          // der Name, bleibt auch ein ueber die Schnittstelle
+                          // abweichend gesetzter Titel.
                           return { ...alt, name, title: name !== alt.name ? name : alt.title };
                       })
                       .filter(Boolean)
@@ -1748,7 +1714,6 @@ export function initDialogs(state, actions) {
             return true;
         }
 
-        // Beim Wechsel des bearbeiteten Boards nach ungespeicherten Aenderungen fragen
         async function guardUnsaved() {
             if (!dirty) return true;
             const r = await confirmDialog({
@@ -1778,7 +1743,7 @@ export function initDialogs(state, actions) {
             cleanupModeSel = cleanupDaysInp = cleanupCountInp = memberWrap = null;
 
             // ---- Kopfzeile: Board-Auswahl | Anzeigen | neues Board | Anlegen ----
-            // Wird auch ohne Board gebaut — sonst gaebe es keinen Weg, das erste anzulegen.
+            // Wird auch ohne Board gebaut, sonst gaebe es keinen Weg, das erste anzulegen.
             const topRow = el('div', 'row board-toprow');
             boardSel = document.createElement('select');
             for (const b of state.boards) {
@@ -1827,8 +1792,6 @@ export function initDialogs(state, actions) {
             topRow.append(boardSel, showBtn, newInput, newBtn);
             panel.appendChild(topRow);
 
-            // Noch kein Board: nur die Kopfzeile zum Anlegen zeigen, alles Weitere
-            // braucht ein Board.
             if (!editBoard) { panel.appendChild(el('div', 'hint', t('boards.noneYet'))); return; }
 
             // ---- Board-Titel ----
@@ -1917,16 +1880,15 @@ export function initDialogs(state, actions) {
             // eslint-disable-next-line no-undef
             Sortable.create(colBox, { handle: '.drag', animation: 150, onEnd: () => { dirty = true; } });
             const addCol = el('button', 'linkbtn', t('boards.addColumn'));
-            // Fokus in die neue Zeile: Wer vier Spalten hintereinander anlegt,
-            // musste sonst jedes Mal erst hineinklicken (B11).
+            // Fokus in die neue Zeile: Wer mehrere Spalten hintereinander anlegt,
+            // muesste sonst jedes Mal erst hineinklicken.
             addCol.addEventListener('click', () => {
                 const zeile = mkColRow({ title: '', maxVisible: 0, wipLimit: 0, isDone: false, allowAdd: false });
                 colBox.appendChild(zeile);
                 const feld = zeile.querySelector('input[type="text"]');
                 if (feld) feld.focus();
-                // Ab der sechsten Spalte stand der Link auf der Kante des
-                // Rollbereichs, halb abgeschnitten und ohne Wirkung; die
-                // anschliessende Eingabe war verloren (A7).
+                // Bei vielen Spalten stuende der Link sonst auf der Kante des
+                // Rollbereichs, halb abgeschnitten und ohne Wirkung.
                 addCol.scrollIntoView({ block: 'nearest' });
                 dirty = true;
             });
@@ -1959,9 +1921,8 @@ export function initDialogs(state, actions) {
             // eslint-disable-next-line no-undef
             Sortable.create(labelBox, { handle: '.drag', animation: 150, onEnd: () => { dirty = true; } });
             const addLabel = el('button', 'linkbtn', t('boards.addLabel'));
-            // Reihum aus der Palette statt immer gruen: Drei neue Labels sahen
-            // sonst gleich aus und trugen keine Information ausser ihrem Text
-            // (Befund 11).
+            // Reihum aus der Palette, sonst saehen neue Labels gleich aus und
+            // truegen keine Information ausser ihrem Text.
             addLabel.addEventListener('click', () => {
                 const naechste = LABEL_FARBEN[labelBox.children.length % LABEL_FARBEN.length];
                 const zeile = mkLabelRow({ color: naechste });
@@ -2061,18 +2022,6 @@ export function initDialogs(state, actions) {
         }
 
         /**
-         * Reiter "Vorlagen": umbenennen, loeschen, Reihenfolge.
-         *
-         * Kein Knopf zum Anlegen, denn eine Vorlage entsteht immer aus einer Karte,
-         *  ueber "Verwalten". Die Reihenfolge kommt wie bei den Labels aus dem DOM
-         *  und bestimmt, in welcher Folge die Vorlagen im Auswahlfeld des
-         *  Karteneditors stehen: Wer seine meistbenutzte oben haben will, zieht sie
-         *  nach oben. Sonst muesste ich zwischen alphabetisch und "zuletzt
-         *  angelegt" entscheiden, und beides waere fuer jemanden falsch.
-         *
-         * @param panel Zielelement des Reiters
-         */
-        /**
          * Inhalt einer Vorlage zu einer Zeile im Reiter.
          *
          * Eine eingelesene Vorlage steht noch nicht am Board, deshalb erst dort
@@ -2082,9 +2031,9 @@ export function initDialogs(state, actions) {
          * @returns Vorlagenobjekt oder null
          */
         function tplInhalt(id) {
-            // Die lokale Fassung zuerst. Andersherum gewann beim Bearbeiten einer
-            // bestehenden Vorlage der Stand vom Board, und die Aenderung ging beim
-            // Speichern verloren, ohne dass irgendwo etwas zu sehen war.
+            // Die lokale Fassung zuerst. Sonst gewinnt beim Bearbeiten einer
+            // bestehenden Vorlage der Stand vom Board, und die Aenderung geht beim
+            // Speichern unbemerkt verloren.
             return tplLokal.get(id) || ((editBoard && editBoard.templates) || []).find(x => x.id === id) || null;
         }
 
@@ -2163,6 +2112,16 @@ export function initDialogs(state, actions) {
                 n === zeilen.length ? t('templates.exportAll') : t('templates.exportSelected', { n });
         }
 
+        /**
+         * Reiter "Vorlagen": umbenennen, loeschen, Reihenfolge.
+         *
+         * Kein Knopf zum Anlegen, denn eine Vorlage entsteht immer aus einer Karte,
+         * ueber "Verwalten". Die Reihenfolge kommt wie bei den Labels aus dem DOM
+         * und bestimmt die Folge im Auswahlfeld des Karteneditors. Eine feste
+         * Sortierung, alphabetisch oder "zuletzt angelegt", waere fuer jemanden falsch.
+         *
+         * @param panel Zielelement des Reiters
+         */
         function buildTemplatePanel(panel) {
             panel.textContent = '';
             const liste = (editBoard && editBoard.templates) || [];
@@ -2182,9 +2141,8 @@ export function initDialogs(state, actions) {
             Sortable.create(tplBox, { handle: '.drag', animation: 150, onEnd: () => { dirty = true; } });
 
             const knoepfe = el('div', 'tpl-actions');
-            // Richtige Knoepfe, keine Textlinks: Bjoern hat sie als "linkbtn" nicht
-            // gefunden, und zwei Funktionen, die man sucht, duerfen nicht aussehen
-            // wie ein Satz im Hinweistext.
+            // Richtige Knoepfe, keine Textlinks: Zwei Funktionen, die man sucht,
+            // duerfen nicht aussehen wie ein Satz im Hinweistext.
             tplExportBtn = el('button', null, t('templates.exportAll'));
             tplExportBtn.type = 'button';
             const importBtn = el('button', null, t('templates.import'));
@@ -2372,9 +2330,8 @@ export function initDialogs(state, actions) {
             };
             feld.addEventListener('input', pruefeLeer);
             // Zwischen der Wahl im Dateidialog und dem Moment, in dem die Seite
-            // die Datei bekommt, koennen unter Windows Sekunden vergehen. Der
-            // Code hier braucht fuer eine Vorlagendatei Millisekunden; die Zeit
-            // geht im Browser verloren. Deshalb steht die Meldung schon ab dem
+            // die Datei bekommt, koennen unter Windows Sekunden vergehen, die im
+            // Browser verloren gehen. Deshalb steht die Meldung schon ab dem
             // Klick da und ist sichtbar, sobald der Dateidialog zu ist.
             let letzterName = '';
             let wachhund = 0;
@@ -2639,7 +2596,7 @@ export function initDialogs(state, actions) {
             const boards = (eintrag.boards || [])
                 .map(id => { const b = (state.boards || []).find(x => x.id === id); return (b && b.title) || id; })
                 .join(', ');
-            // Einzahl statt "1 Karten" (Befund 20)
+            // Einzahl statt "1 Karten"
             const zaehlText = eintrag.cards === 1 ? 'orphan.count1' : 'orphan.count';
             auf.append(pfeil, el('span', null, t(zaehlText, { n: eintrag.cards, boards })));
             links.appendChild(auf);
@@ -2786,7 +2743,7 @@ export function initDialogs(state, actions) {
 
         activate('board');
         // Escape: erst den Farbwaehler schliessen, danach nur mit Rueckfrage den
-        // ganzen Dialog verwerfen — sonst sind ungespeicherte Spalten und Labels weg.
+        // ganzen Dialog verwerfen, sonst sind ungespeicherte Spalten und Labels weg.
         // Der Handler haengt an der Closure dieses Aufrufs und wird darum jedes Mal
         // ausgetauscht.
         if (bdlgCancel) bdlg.removeEventListener('cancel', bdlgCancel);
@@ -2832,7 +2789,7 @@ export function initDialogs(state, actions) {
             return { lab, sel };
         })();
 
-        // Benutzer (Mehrfachauswahl, board-abhängig) – keine angehakt = alle
+        // Benutzer (Mehrfachauswahl, board-abhaengig), keine angehakt = alle
         const usersLabel = el('label', null, t('share.users'));
         const usersWrap = el('div', 'share-cols');
         // Bei genau einem Benutzer filtert ein users=-Link nichts. Der Block
@@ -2842,10 +2799,9 @@ export function initDialogs(state, actions) {
             usersWrap.hidden = true;
         }
         const updateUsers = () => { opt.users = [...usersWrap.querySelectorAll('input:checked')].map(i => i.dataset.val); };
-        /** Beim Board-Wechsel mitziehen: Die Liste blieb früher auf den Mitgliedern
-         *  des angezeigten Boards stehen. Ein damit erzeugter `users=`-Link nannte
-         *  dann Personen, die im Zielboard niemandem gehören — und filterte beim
-         *  Öffnen stillschweigend gar nicht. */
+        /** Beim Board-Wechsel mitziehen: Sonst nennt ein `users=`-Link Personen,
+         *  die im Zielboard niemandem gehoeren, und filtert beim Oeffnen
+         *  stillschweigend gar nicht. */
         async function fillUsers(boardId) {
             usersWrap.textContent = '';
             opt.users = [];
@@ -2860,7 +2816,7 @@ export function initDialogs(state, actions) {
             }
         }
 
-        // Labels (Mehrfachauswahl, board-abhängig) – keine angehakt = alle.
+        // Labels (Mehrfachauswahl, board-abhaengig), keine angehakt = alle.
         // Modus: ausblenden (Blacklist, ?label=) oder nur diese zeigen (Whitelist, ?onlyLabel=)
         const labelsLabel = el('label', null, t('share.labels'));
         const labelModeSel = document.createElement('select');
@@ -2891,7 +2847,7 @@ export function initDialogs(state, actions) {
         const cEmbed = mkCheck(t('share.embed'));
         const cZones = mkCheck(t('share.zones'));
 
-        // Sichtbare Spalten (des gewählten Boards) – alle an = kein Filter
+        // Sichtbare Spalten des gewaehlten Boards, alle an = kein Filter
         let curColumns = [];
         const colsLabel = el('label', null, t('share.visibleColumns'));
         const colsWrap = el('div', 'share-cols');
@@ -2969,7 +2925,7 @@ export function initDialogs(state, actions) {
         focusFirst(sdlg);
     }
 
-    // ---------------------------------------------------------- In-App-Bestätigung (Feature 61)
+    // ---------------------------------------------------------- In-App-Bestaetigung
     function confirmDialog(opts = {}) {
         const cdlg = document.getElementById('confirmDialog');
         const body = document.getElementById('confirmBody');
@@ -2979,7 +2935,7 @@ export function initDialogs(state, actions) {
         const foot = el('footer');
         const cancel = el('button', null, opts.cancel || t('confirm.cancel')); cancel.type = 'button';
         const ok = el('button', opts.danger ? 'danger' : 'primary', opts.ok || t('confirm.ok')); ok.type = 'button';
-        // Optionaler dritter Knopf (z.B. „Verwerfen") → löst mit 'extra' auf
+        // Optionaler dritter Knopf (z.B. "Verwerfen"), loest mit 'extra' auf
         let extraBtn = null;
         if (opts.extra) { extraBtn = el('button', null, opts.extra); extraBtn.type = 'button'; }
         foot.append(el('span', 'spacer'), cancel);
@@ -2997,18 +2953,17 @@ export function initDialogs(state, actions) {
         });
     }
 
-    // ---------------------------------------------------------- Karte übertragen (Feature 6)
+    // ---------------------------------------------------------- Karte uebertragen
 
     /**
      * Eine Vorlage im Karteneditor bearbeiten.
      *
-     * Eine Vorlage ist ein Satz Kartenfelder, also ist der Karteneditor das
-     *  richtige Werkzeug dafuer. Ein zweiter, eigener Editor waere dieselbe Maske
-     *  ein zweites Mal, und das dreizehnte Feld wuerde darin fehlen.
+     * Eine Vorlage ist ein Satz Kartenfelder. Ein eigener Editor waere dieselbe
+     * Maske ein zweites Mal, und ein neues Feld wuerde darin leicht fehlen.
      *
      * Was anders ist: kein Loeschen, kein Verwalten, keine Vorlagenauswahl, keine
-     *  Spalte (eine Vorlage landet nirgends), und der Speichern-Knopf gibt die
-     *  Fassung zurueck, statt eine Karte zu schreiben.
+     * Spalte (eine Vorlage landet nirgends), und der Speichern-Knopf gibt die
+     * Fassung zurueck, statt eine Karte zu schreiben.
      *
      * @param tpl Vorlage
      * @param zurueck Rueckgabe der geaenderten Fassung
@@ -3058,9 +3013,7 @@ export function initDialogs(state, actions) {
 
         // Echte Radioknoepfe untereinander statt Schaltflaechen nebeneinander:
         // Die Pfeiltasten laufen dadurch durch die Auswahl, die Vorlesehilfe sagt
-        // "eins von vier", und es ist Platz fuer eine Erklaerzeile je Art. Neben-
-        // einander war dafuer keiner - die vier Beschriftungen wurden schon
-        // abgeschnitten.
+        // "eins von vier", und es ist Platz fuer eine Erklaerzeile je Art.
         const modeWrap = el('div', 'transfer-mode');
         const MODI = [
             { val: 'clone', label: t('transfer.clone'), hint: t('transfer.cloneHint'), brauchtBoard: false },
@@ -3172,9 +3125,9 @@ export function initDialogs(state, actions) {
             const fromById = new Map((state.board.labels || []).map(l => [l.id, l]));
             const toNames = new Set((targetBoard.labels || []).map(labelName));
             const droppedLabels = (card.labels || []).filter(id => { const n = labelName(fromById.get(id)); return !(n && toNames.has(n)); });
-            // Wirksame Mitglieder wie auf dem Server: eine Liste, die auf keinen
-            // bekannten Benutzer zeigt, bedeutet "alle". Die rohe Liste ergab hier
-            // sonst eine Sackgasse — Zustaendiger war Pflicht, aber die Auswahl leer.
+            // Wirksame Mitglieder wie auf dem Server: Eine Liste, die auf keinen
+            // bekannten Benutzer zeigt, bedeutet "alle". Mit der rohen Liste waere
+            // ein Zustaendiger Pflicht, aber die Auswahl leer.
             const members = new Set(boardMembers(targetBoard, state.users));
             const keptAssignees = (card.assignees || []).filter(a => members.has(a));
             const droppedAssignees = (card.assignees || []).filter(a => !members.has(a));
@@ -3224,11 +3177,9 @@ export function initDialogs(state, actions) {
         /**
          * Die Karte als Vorlage ablegen.
          *
-         * Ein schon vergebener Name ueberschreibt nach Rueckfrage. Das ist zugleich
-         *  der Weg, den Inhalt einer Vorlage zu aendern: Karte anpassen, unter
-         *  demselben Namen speichern, bestaetigen. Ein zweiter vollstaendiger
-         *  Editor nur fuer Vorlagen waere der Aufwand, der diese Sache von klein
-         *  nach gross kippt.
+         * Ein schon vergebener Name ueberschreibt nach Rueckfrage. So laesst sich
+         * eine Vorlage auch aus einer Karte heraus aendern: Karte anpassen, unter
+         * demselben Namen speichern, bestaetigen.
          */
         async function saveAsTemplate() {
             const name = nameInput.value.trim();

@@ -2,9 +2,9 @@ const assert = require('node:assert/strict');
 const { Server } = require('../lib/server');
 
 /**
- * Prüft die Token-Guards der REST-API ohne laufenden ioBroker:
- * Board-Bindung der Agenten-Tokens (ab 0.3.0 auch auf /api) und die
- * zulässigen Übergabewege für Tokens.
+ * Prueft die Token-Guards der REST-API ohne laufenden ioBroker:
+ * Board-Bindung der Agenten-Tokens (auch auf /api) und die
+ * zulaessigen Uebergabewege fuer Tokens.
  */
 
 const SPA = 'spa-secret-xyz';
@@ -13,7 +13,7 @@ const TOKENS = [
     { name: 'agent-fam', token: 'tok-fam', allowedBoards: 'familie', enabled: true },
     { name: 'agent-two', token: 'tok-two', allowedBoards: 'familie, agenten', enabled: true },
     { name: 'agent-off', token: 'tok-off', allowedBoards: '*', enabled: false },
-    // Von Hand angelegte, nicht ausgefüllte Zeilen — beide waren Löcher:
+    // Von Hand angelegte, nicht ausgefuellte Zeilen. Keine darf Zugang gewaehren:
     { name: 'leer', token: '', allowedBoards: '*', enabled: true },
     { name: 'ohne-boards', token: 'tok-leer-boards', allowedBoards: '', enabled: true },
 ];
@@ -92,8 +92,8 @@ describe('REST-API: Schreibschutz und Board-Bindung', () => {
     });
 
     it('lässt sich nicht mit einem erlaubten Board im Body aushebeln', () => {
-        // Regression: createBoard liest `board` gar nicht, der Guard akzeptierte es
-        // aber als Nachweis — ein begrenzter Token legte so fremde Boards an.
+        // createBoard liest `board` gar nicht. Naehme der Guard es als Nachweis,
+        // legte ein begrenzter Token fremde Boards an.
         assert.equal(call({ token: 'tok-fam', path: '/boards', body: { title: 'X', board: 'familie' } }), 403);
         assert.equal(call({ token: 'tok-fam', path: '/boards', body: { title: 'X', boardId: 'familie' } }), 403);
         assert.equal(call({ token: 'tok-fam', method: 'PATCH', path: '/users/bjoern', body: { color: '#fff', board: 'familie' } }), 403);
@@ -108,8 +108,8 @@ describe('REST-API: Schreibschutz und Board-Bindung', () => {
     });
 
     it('lässt sich nicht über eine leere Token-Zeile aushebeln', () => {
-        // Regression: ohne Header fiel der Wert auf '' zurück und traf genau die
-        // leer gelassene Tabellenzeile — die schreibende API stand damit offen.
+        // Faellt der Wert ohne Header auf '' zurueck, trifft er die leer gelassene
+        // Tabellenzeile, und die schreibende API steht offen.
         assert.equal(call({ token: undefined }), 401);
         assert.equal(call({ token: '' }), 401);
         assert.equal(call({ token: '   ' }), 401);
@@ -117,8 +117,8 @@ describe('REST-API: Schreibschutz und Board-Bindung', () => {
     });
 
     it('behandelt leere „Erlaubte Boards" als kein Board, nicht als alle', () => {
-        // Regression: '' wurde zu '*' — wer die Liste leerte, um Rechte zu
-        // entziehen, vergab sie damit für jedes Board.
+        // Wuerde '' zu '*', vergaebe, wer die Liste leert, um Rechte zu entziehen,
+        // sie fuer jedes Board.
         assert.equal(call({ token: 'tok-leer-boards', path: '/boards/familie/cards' }), 403);
         assert.equal(call({ token: 'tok-leer-boards', path: '/boards/agenten/cards' }), 403);
         assert.equal(call({ token: 'tok-leer-boards', path: '/boards' }), 403);
@@ -160,14 +160,14 @@ describe('Webhook-Kommandos: Board-Bindung', () => {
     });
 
     it('verwehrt begrenzten Tokens schreibende Kommandos ohne Board-Angabe', () => {
-        // Regression: addBoard nennt kein Board und lief deshalb am Guard vorbei
+        // addBoard nennt kein Board und darf deshalb nicht am Guard vorbeilaufen
         assert.equal(check(scoped, { cmd: 'addBoard', title: 'Verbotenes Board' }), 403);
         assert.equal(check(scoped, { cmd: 'irgendwasNeues' }), 403);
     });
 
     it('lässt sich nicht mit einem erlaubten Board im Body aushebeln', () => {
-        // Regression: addBoard ignoriert `board`, der Guard nahm es trotzdem als
-        // Nachweis — ein auf 'familie' begrenzter Token legte so Boards an.
+        // addBoard ignoriert `board`. Naehme der Guard es als Nachweis, legte ein
+        // auf 'familie' begrenzter Token Boards an.
         assert.equal(check(scoped, { cmd: 'addBoard', title: 'Neu', board: 'familie' }), 403);
         assert.equal(check(scoped, { cmd: 'addBoard', title: 'Neu', boardId: 'familie' }), 403);
         assert.equal(check(scoped, { cmd: 'addBoard', title: 'Neu', toBoard: 'familie' }), 403);

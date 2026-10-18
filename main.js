@@ -57,8 +57,8 @@ class Kanban extends utils.Adapter {
         await this.store.load();
         // Namen aus alten Installationen nachziehen (siehe migrateStateNames).
         await this.store.migrateStateNames();
-        // Und die Kanaele unter users.*, deren Pfad bis 0.3.7 den Anzeigenamen
-        // enthielt (siehe migrateUserStates).
+        // Ebenso die Kanaele unter users.*, deren Pfad in alten Installationen den
+        // Anzeigenamen enthielt (siehe migrateUserStates).
         await this.store.migrateUserStates();
         // Erst nach dem Laden: Ob eine Kennung festgeschrieben werden muss,
         // haengt daran, ob Karten auf sie zeigen, und die kennt der Store
@@ -98,21 +98,9 @@ class Kanban extends utils.Adapter {
     }
 
     /**
-     * Bereits vergebene Benutzer-IDs festschreiben.
-     *
-     * Karten, Avatar-Dateien und geteilte Ansichten haengen an der Benutzer-ID.
-     * Wird sie in den Einstellungen geaendert, zeigen sie alle ins Leere, und
-     * eine Umbenennung laesst sich nicht von "geloescht und neu angelegt"
-     * unterscheiden - der Adapter koennte also nicht einmal automatisch
-     * aufraeumen. Deshalb sperrt die Tabelle das Feld, sobald `fixed` gesetzt
-     * ist. Gesetzt wird es hier, beim ersten Start nach dem Anlegen.
-     *
-     * @returns {Promise<boolean>} true, wenn die Konfiguration geschrieben wurde
-     */
-    /**
      * Ein Datumsformat ohne Tag, Monat und Jahr ist keines. Statt es auf jede
      * Karte zu drucken, wird es verworfen und der Adapter faellt auf das
-     * Systemformat zurueck (Befund 17).
+     * Systemformat zurueck.
      */
     _checkDateFormat() {
         const f = this.config.dateFormat;
@@ -125,9 +113,21 @@ class Kanban extends utils.Adapter {
         }
     }
 
+    /**
+     * Bereits vergebene Benutzer-IDs festschreiben.
+     *
+     * Karten, Avatar-Dateien und geteilte Ansichten haengen an der Benutzer-ID.
+     * Wird sie in den Einstellungen geaendert, zeigen sie alle ins Leere, und
+     * eine Umbenennung laesst sich nicht von "geloescht und neu angelegt"
+     * unterscheiden - der Adapter koennte also nicht einmal automatisch
+     * aufraeumen. Deshalb sperrt die Tabelle das Feld, sobald `fixed` gesetzt
+     * ist. Gesetzt wird es hier, beim ersten Start nach dem Anlegen.
+     *
+     * @returns {Promise<boolean>} true, wenn die Konfiguration geschrieben wurde
+     */
     async _freezeUserIds() {
         // Die Entscheidung steht in lib/freeze.js, damit sie ohne laufenden
-        // ioBroker pruefbar ist - an ihr hing Befund 22 aus dem Abnahmetest.
+        // ioBroker pruefbar ist.
         await this.setObjectNotExistsAsync('info.freezeRetries', {
             type: 'state',
             common: {
@@ -199,9 +199,9 @@ class Kanban extends utils.Adapter {
     /**
      * Kennungen austragen, die es als Benutzer nicht mehr gibt.
      *
-     * Die Liste wuchs bisher nur. Wer einen Benutzer loeschte und spaeter einen
-     * neuen mit derselben Kennung anlegte, haette dessen ID-Feld von Anfang an
-     * gesperrt vorgefunden, obwohl an der Kennung nichts mehr haengt (B16).
+     * Sonst waechst die Liste nur: Wer einen Benutzer loescht und spaeter einen
+     * neuen mit derselben Kennung anlegt, faende dessen ID-Feld von Anfang an
+     * gesperrt vor, obwohl an der Kennung nichts mehr haengt.
      */
     async _pruneFrozenUserIds() {
         const { bleibt, faellt } = prunePlan(await this._frozenUserIds(), this.config.users);
@@ -212,7 +212,6 @@ class Kanban extends utils.Adapter {
         this.log.debug(`Frozen user IDs pruned: ${faellt.join(', ')} no longer exist.`);
     }
 
-    /** Liste der bereits festgeschriebenen IDs aus dem State lesen. */
     /** Bisherige Versuche, das Merkmal zurueckzuschreiben. */
     async _freezeRetries() {
         try {
@@ -224,6 +223,7 @@ class Kanban extends utils.Adapter {
         }
     }
 
+    /** Liste der bereits festgeschriebenen IDs aus dem State lesen. */
     async _frozenUserIds() {
         try {
             const st = await this.getStateAsync('info.frozenUserIds');
@@ -244,7 +244,7 @@ class Kanban extends utils.Adapter {
      */
     async _reportOrphanedAssignees() {
         // Den State schreibt der Store in updateMirrors, damit er auch einer
-        // Reparatur im laufenden Betrieb folgt (B14). Hier bleibt die Warnung:
+        // Reparatur im laufenden Betrieb folgt. Hier bleibt die Warnung:
         // Sie gehoert an den Start und nicht hinter jede Kartenaenderung.
         const verwaist = this.store.findOrphanedAssignees();
         if (!verwaist.length) {
@@ -277,9 +277,9 @@ class Kanban extends utils.Adapter {
     }
 
     /**
-     * Zeitzone ermitteln (für Kalender-Anhänge). ioBroker führt keine eigene
-     *  Zeitzone → System-Zeitzone des Prozesses; falls ioBroker künftig eine
-     *  in system.config.common pflegt, hat diese Vorrang.
+     * Zeitzone ermitteln (fuer Kalender-Anhaenge). ioBroker fuehrt keine eigene
+     *  Zeitzone, daher gilt die System-Zeitzone des Prozesses; pflegt ioBroker
+     *  kuenftig eine in system.config.common, hat diese Vorrang.
      */
     async _resolveTimezone() {
         let tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -297,8 +297,8 @@ class Kanban extends utils.Adapter {
     }
 
     /**
-     * Feiertage für die Arbeitstag-Wiederholungen einrichten. Nutzt – falls
-     *  installiert – die Bundesland-Konfiguration des feiertage-Adapters,
+     * Feiertage fuer die Arbeitstag-Wiederholungen einrichten. Nutzt die
+     *  Bundesland-Konfiguration des feiertage-Adapters, falls installiert,
      *  sonst die bundesweit einheitlichen gesetzlichen Feiertage.
      */
     async _initHolidays() {
@@ -319,19 +319,18 @@ class Kanban extends utils.Adapter {
      * Secret für den Schreibschutz der /api-Routen. Wird in index.html als
      *  <meta name="kanban-token"> an die eigene SPA ausgeliefert.
      *
-     *  Ab 0.3.0 liegt das Secret im Dateispeicher des Adapters (apisecret.json) statt
-     *  im lesbaren State info.apiSecret: Objektzugriff soll nicht automatisch
-     *  Schreibzugriff auf die API bedeuten. Der State bleibt aus Kompatibilitätsgründen
-     *  bestehen, wird aber leer geführt; ein dort noch vorhandener Wert wird einmalig
-     *  übernommen und danach entfernt. Für Skripte sind die Agenten-Tokens der Weg.
+     *  Das Secret liegt im Dateispeicher des Adapters (apisecret.json), nicht im
+     *  lesbaren State info.apiSecret: Objektzugriff soll nicht automatisch
+     *  Schreibzugriff auf die API bedeuten. Wo der State noch existiert, bleibt er
+     *  aus Kompatibilitaetsgruenden bestehen, wird aber leer gefuehrt; ein dort noch
+     *  vorhandener Wert wird einmalig uebernommen. Fuer Skripte sind die Agenten-Tokens der Weg.
      */
     async _initApiSecret() {
         const newSecret = () => require('node:crypto').randomBytes(24).toString('hex');
         try {
-            // Der State wird hier nicht mehr angelegt. Auf einer frisch
-            // angelegten Instanz gibt es nichts zu uebernehmen, und ein leerer
-            // Zustand, der nie gefuellt wird, ist nur Ballast - das Handbuch
-            // sagt seit 0.3.0, dass es ihn dort gar nicht gibt (B17).
+            // Den State nicht anlegen: Auf einer frischen Instanz gibt es nichts
+            // zu uebernehmen, und ein leerer State, der nie gefuellt wird, ist nur
+            // Ballast. Laut Handbuch gibt es ihn auch nicht.
             let secret = '';
             try {
                 const data = await this.readFileAsync(this.namespace, 'apisecret.json');
@@ -399,7 +398,7 @@ class Kanban extends utils.Adapter {
     }
 
     /**
-     * Gemeinsamer Kommando-Kern — bedient REST (indirekt), eingehende Webhooks,
+     * Gemeinsamer Kommando-Kern fuer REST (indirekt), eingehende Webhooks,
      * sendTo('kanban.0', <cmd>, {...}) und den action-State.
      *
      * @param cmd
@@ -513,8 +512,8 @@ class Kanban extends utils.Adapter {
             return;
         }
 
-        // Admin-Button „Token generieren": hängt einen neuen Zufallstoken an die
-        // aktuelle Tokens-Tabelle an und gibt sie zurück (Admin schreibt sie ins Feld).
+        // Admin-Button "Token generieren": Admin schreibt die zurueckgegebene
+        // Tokens-Tabelle samt neuem Token ins Feld.
         if (obj.command === 'generateToken') {
             const native = obj.message || {};
             const tokens = Array.isArray(native.inboundTokens) ? native.inboundTokens.slice() : [];
@@ -525,7 +524,7 @@ class Kanban extends utils.Adapter {
             }
             tokens.push({ name, token, allowedBoards: '*', enabled: true });
             // jsonConfig übernimmt bei useNative nur ein Feld namens `native` in die
-            // Konfiguration; ohne diese Hülle blieb der Button wirkungslos.
+            // Konfiguration; ohne diese Huelle bliebe der Button wirkungslos.
             if (obj.callback) {
                 this.sendTo(
                     obj.from,
@@ -555,7 +554,7 @@ class Kanban extends utils.Adapter {
      * Beim Speichern der Einstellungen beendet der Host die Instanz mitten im
      * Start. Der Start laeuft daneben weiter und legt Timer an, die niemand
      * mehr bekommt - im Protokoll steht dann "setInterval called, but adapter
-     * is shutting down" (B9). "terminated" setzt der Adapter-Kern selbst, und
+     * is shutting down". "terminated" setzt der Adapter-Kern selbst, und
      * an genau dem Feld haengt auch die Warnung. Die eigene Marke deckt den
      * Fall ab, dass das Feld einmal anders heisst.
      *
@@ -573,7 +572,7 @@ class Kanban extends utils.Adapter {
             }
             // Erst schreiben, dann den Server schliessen. Andersherum gingen bei
             // einem haengenden close die letzten Aenderungen verloren, weil der
-            // Host nach einer Sekunde hart beendet (Befund 18).
+            // Host nach einer Sekunde hart beendet.
             if (this.store) {
                 await this.store.flush();
             }
@@ -582,7 +581,7 @@ class Kanban extends utils.Adapter {
             }
             await this.setStateAsync('info.connection', false, true);
         } catch {
-            // ignorieren — wir fahren ohnehin herunter
+            // ignorieren, wir fahren ohnehin herunter
         } finally {
             callback();
         }

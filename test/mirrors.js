@@ -55,9 +55,8 @@ function tag(n) {
 
 describe('Spiegel-States: Board-Zaehler', () => {
     it('zaehlt eine ueberfaellige Karte, ohne dass das Board geaendert wurde', async () => {
-        // Regression: updateMirrors() frischte nur die Benutzer-States auf. Die
-        // Board-Zaehler schrieb allein _persist(), also nur bei einer Aenderung.
-        // Auf einem unberuehrten Board blieb overdueCount deshalb stehen.
+        // Schriebe allein _persist() die Board-Zaehler, also nur bei einer
+        // Aenderung, bliebe overdueCount auf einem unberuehrten Board stehen.
         const { store, states } = newStore();
         await store.createBoard({ id: 'b', title: 'B' });
         store.addCard('b', { title: 'Gestern faellig', columnId: 'todo', assignees: ['anna'], due: tag(-1) }, 'test');
@@ -95,7 +94,7 @@ describe('Spiegel-States: Board-Zaehler', () => {
 
 describe('Verwaiste Zuständige', () => {
     it('findet Zuständige, die es als Benutzer nicht mehr gibt', async () => {
-        // Regression: Wird eine Benutzer-ID umbenannt, zeigen die Karten ins
+        // Wird eine Benutzer-ID umbenannt, zeigen die Karten ins
         // Leere - sie speichern die ID, nicht den Anzeigenamen.
         const { store, entferne } = newStore();
         await store.createBoard({ id: 'b', title: 'B' });
@@ -343,9 +342,9 @@ describe('API-Pruefung: Zustaendige und Labels', () => {
 });
 
 describe('Ueberfaelligkeit: Datum und Uhrzeit', () => {
-    // #31: Der Zaehler rechnete nur mit dem Datum, die Oberflaeche schon mit der
-    // Uhrzeit. Eine Karte war um 17:01 rot, waehrend overdueCount bis
-    // Mitternacht auf dem alten Stand blieb.
+    // #31: Zaehler und Oberflaeche muessen beide mit der Uhrzeit rechnen. Sonst
+    // ist eine Karte um 17:01 rot, waehrend overdueCount bis Mitternacht auf
+    // dem alten Stand bleibt.
     const karte = (due, dueTime = '') => ({ due, dueTime });
     const heute = '2026-08-28';
     const jetzt = '17:01';
@@ -428,8 +427,8 @@ describe('Ein einziger Benutzer', () => {
 });
 
 describe('Datumsformat: traegt es ueberhaupt ein Datum?', () => {
-    // Befund 17: Ein Vertipper stand danach wortwoertlich auf jeder Karte, und
-    // das Board war fuer alle unbrauchbar, bis jemand die Einstellung wiederfand.
+    // Sonst stuende ein Vertipper wortwoertlich auf jeder Karte, und das Board
+    // waere fuer alle unbrauchbar, bis jemand die Einstellung wiederfindet.
     it('nimmt uebliche Formate an', () => {
         for (const f of ['DD.MM.', 'DD.MM.YYYY', 'ddd D. MMM YY', 'YYYY-MM-DD', 'D. MMMM']) {
             assert.equal(hasDateToken(f), true, f);
@@ -450,11 +449,10 @@ describe('Datumsformat: traegt es ueberhaupt ein Datum?', () => {
 });
 
 describe('Verwaiste Zustaendige im State', () => {
-    // B14: Der State wurde nur beim Adapterstart geschrieben. Eine Reparatur
-    // ueber die Oberflaeche und eine Wiederherstellung aus dem Papierkorb
-    // aenderten den Zustand sofort, der State blieb aber stehen - wer die
-    // Reparatur per Skript ueberwachte, bekam bis zum naechsten Start ein
-    // falsches Bild.
+    // Eine Reparatur ueber die Oberflaeche und eine Wiederherstellung aus dem
+    // Papierkorb aendern den Zustand sofort. Schriebe der Adapter den State nur
+    // beim Start, saehe ein Skript, das die Reparatur ueberwacht, bis zum
+    // naechsten Start ein falsches Bild.
     const lies = states => JSON.parse(states['info.orphanedAssignees'] || '[]');
 
     it('meldet die verwaiste Kennung, sobald der Benutzer weg ist', async () => {
@@ -504,9 +502,9 @@ describe('Verwaiste Zustaendige im State', () => {
 });
 
 describe('Erledigt-Spalte: anlegen, loeschen, wiederherstellen', () => {
-    // D2/E12: Eine dort angelegte Karte trug kein doneAt und fiel damit aus der
-    // Sortierung nach Alter in Spalte, aus dem Anzeige-Limit und aus dem
-    // Aufraeumen heraus. Sie blieb fuer immer liegen.
+    // Eine dort angelegte Karte truege kein doneAt und fiele aus der Sortierung
+    // nach Alter in Spalte, aus dem Anzeige-Limit und aus dem Aufraeumen heraus.
+    // Sie bliebe fuer immer liegen.
     it('weist das Anlegen in einer Erledigt-Spalte ab', async () => {
         const { store } = newStore();
         await store.createBoard({ id: 'b', title: 'B' });
@@ -524,8 +522,8 @@ describe('Erledigt-Spalte: anlegen, loeschen, wiederherstellen', () => {
         assert.equal(k.doneAt, null);
     });
 
-    // E13: Beim Verschieben in den Papierkorb wurde doneAt geloescht. Nach dem
-    // Wiederherstellen war der urspruengliche Zeitpunkt weg.
+    // Ginge doneAt beim Verschieben in den Papierkorb verloren, waere nach dem
+    // Wiederherstellen der urspruengliche Zeitpunkt weg.
     it('behaelt den Erledigungszeitpunkt ueber Papierkorb und Rueckweg', async () => {
         const { store } = newStore();
         await store.createBoard({ id: 'b', title: 'B' });
@@ -551,7 +549,7 @@ describe('Erledigt-Spalte: anlegen, loeschen, wiederherstellen', () => {
         assert.equal(store.getBoard('b').cards.find(c => c.id === k.id).doneAt, null);
     });
 
-    // E14: Ueber die Schnittstelle entstandene Labels waren alle gruen.
+    // Labels aus der Schnittstelle sollen sich auf der Karte unterscheiden.
     it('vergibt neuen Labels aus der Schnittstelle Farben reihum', async () => {
         const { store } = newStore();
         await store.createBoard({ id: 'b', title: 'B' });

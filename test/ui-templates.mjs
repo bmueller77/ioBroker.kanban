@@ -4,8 +4,7 @@ import { readTemplatePackage, templateFromCard, templateFromImport } from '../ww
 /**
  * Die beiden Umrechnungen der Kartenvorlagen in der Oberflaeche: Karte zu
  * Vorlage und eingelesene Vorlage zu Vorlage dieses Boards. Beide sind rein und
- * damit ohne Browser pruefbar; in ihnen stecken die Regeln, die beim Benutzen
- * zaehlen.
+ * damit ohne Browser pruefbar.
  */
 
 const KARTE = {

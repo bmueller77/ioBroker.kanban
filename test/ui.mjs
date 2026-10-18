@@ -5,8 +5,7 @@ import {
 } from '../www/js/board.js';
 
 /**
- * Reine Hilfsfunktionen der Oberfläche — ohne Browser prüfbar.
- * Beide gehören zu Befunden, die nur unter Filtern bzw. bei fremden Boards auftraten.
+ * Reine Hilfsfunktionen der Oberflaeche, ohne Browser pruefbar.
  */
 
 /** Karte im Board-State */
@@ -68,9 +67,8 @@ describe('Wirksame Board-Mitglieder', () => {
     });
 
     it('behandelt eine ins Leere zeigende Liste als alle', () => {
-        // Regression: Der Übertragen-Dialog las die Liste roh — ein per API
-        // angelegtes Board galt damit als „niemand zuweisbar" und der Dialog
-        // ließ sich nicht mehr bestätigen.
+        // Liest der Uebertragen-Dialog die Liste roh, gilt ein per API angelegtes
+        // Board als "niemand zuweisbar", und der Dialog laesst sich nicht bestaetigen.
         assert.deepEqual(boardMembers({ members: ['umbenannt'] }, users), ['anna', 'ben', 'carla']);
     });
 
@@ -100,7 +98,6 @@ describe('Fälligkeit: dreistufige Einfärbung', () => {
     });
 
     it('trennt heute von morgen', () => {
-        // Genau der Punkt aus dem Forum: beides war vorher orange
         assert.equal(dueState(tag(0), '', cfg), 'today');
         assert.equal(dueState(tag(1), '', cfg), 'soon');
     });
@@ -110,10 +107,10 @@ describe('Fälligkeit: dreistufige Einfärbung', () => {
     });
 
     it('lässt sich von der Vorlaufzeit nicht mehr verschieben', () => {
-        // C12: Gelb heisst der nächste Kalendertag, sonst nichts. Vorher zog
-        // die Vorlaufzeit die Farbe mit, und bei 3 war alles bis übermorgen
-        // gelb, während die Zahl darüber "Morgen" hiess. Die Vorlaufzeit
-        // steuert seither nur noch die Erinnerungsmail.
+        // Gelb heisst der naechste Kalendertag, sonst nichts. Zoege die
+        // Vorlaufzeit die Farbe mit, waere bei 3 alles bis uebermorgen gelb,
+        // waehrend die Zahl darueber "Morgen" heisst. Die Vorlaufzeit steuert
+        // nur die Erinnerungsmail.
         for (const vorlauf of [0, 1, 3, 7]) {
             assert.equal(dueState(tag(1), '', { reminderDaysBefore: vorlauf }), 'soon');
             assert.equal(dueState(tag(2), '', { reminderDaysBefore: vorlauf }), '');
@@ -157,7 +154,7 @@ describe('Kopfzahlen der Spalten', () => {
     });
 
     it('zählt unter "Morgen" nur den nächsten Kalendertag', () => {
-        // Gegenprobe zu C12, diesmal an der Kopfzahl.
+        // Gegenprobe zur Gelb-Regel, diesmal an der Kopfzahl.
         const liste = [`${tag(1)}|`, `${tag(2)}|`, `${tag(3)}|`];
         assert.equal(countDues(liste, { reminderDaysBefore: 3 }).soon, 1);
         assert.equal(countDues(liste, cfg).soon, 1);
@@ -199,7 +196,7 @@ describe('Kopfzahlen der Spalten', () => {
 
 describe('Gesamtzahl im Spaltenkopf', () => {
     // Die Regel: Die Zahl vor dem Schraegstrich muss zu der Farbe passen, in
-    // der sie steht. Zweimal falsch gewesen, deshalb hier festgehalten.
+    // der sie steht.
     it('zeigt ohne Limit nur die Zahl', () => {
         assert.equal(totalLabel(7, 7, false, 0), '7');
         assert.equal(totalLabel(7, 2, true, 0), '2');
@@ -216,7 +213,7 @@ describe('Gesamtzahl im Spaltenkopf', () => {
     });
 
     it('nennt bei Ueberschreitung die Spalte, nicht die gefilterte Zahl', () => {
-        // A20: Die Warnfarbe kommt von allInCol. Eine rote "2/5" erklaert sich
+        // Die Warnfarbe kommt von allInCol. Eine rote "2/5" erklaert sich
         // niemandem, "7/5" schon.
         assert.equal(totalLabel(7, 2, true, 5), '7/5');
         assert.equal(totalLabel(7, 7, false, 5), '7/5');
@@ -231,7 +228,7 @@ describe('Gesamtzahl im Spaltenkopf', () => {
 });
 
 describe('Zusammenfassung der zugeklappten Abschnitte', () => {
-    // B3: Dort stand der rohe Markdown-Quelltext, also Rauten und Sternchen
+    // Sonst stuende dort der rohe Markdown-Quelltext, also Rauten und Sternchen
     // statt der ersten Zeile des Textes.
     it('nimmt die Auszeichnung aus dem Text', () => {
         assert.equal(plainText('## Ueberschrift'), 'Ueberschrift');
@@ -260,7 +257,7 @@ describe('Zusammenfassung der zugeklappten Abschnitte', () => {
     });
 
     it('kuerzt Adressen auf Host und letzten Pfadteil', () => {
-        // Nur der Host reichte nicht: zwei Dateien auf demselben Server sahen
+        // Nur der Host reicht nicht: Zwei Dateien auf demselben Server saehen
         // zugeklappt gleich aus.
         assert.equal(shortUrl('https://example.com/doc/anleitung.pdf'), 'example.com/anleitung.pdf');
         assert.equal(shortUrl('https://example.com/'), 'example.com');
@@ -277,9 +274,8 @@ describe('Zusammenfassung der zugeklappten Abschnitte', () => {
 });
 
 describe('Farbe des Fokusrings', () => {
-    // G1: Der Ring nahm die Akzentfarbe unveraendert. Im dunklen Theme stand
-    // damit ein dunkler Ton gegen dunkle Flaechen, gemessen bis herunter auf
-    // 1,52:1. Gefordert sind 3:1.
+    // Die Akzentfarbe unveraendert als Ring stuende im dunklen Theme als dunkler
+    // Ton gegen dunkle Flaechen, bis herunter auf 1,52:1. Gefordert sind 3:1.
     const dunkel = ['#16161a', '#232329', '#2d2d35', '#53535c'];
     const hell = ['#f4f4f7', '#ffffff', '#e9e9ee', '#676770'];
 
@@ -316,7 +312,7 @@ describe('Farbe des Fokusrings', () => {
 });
 
 describe('Schrift auf einer Farbflaeche', () => {
-    // G5: Eine feste Helligkeitsschwelle von 0,31 traf die Wahl zwischen
+    // Eine feste Helligkeitsschwelle von 0,31 trifft die Wahl zwischen
     // Schwarz und Weiss systematisch falsch. Der Umschlagpunkt liegt bei 0,179.
     const paare = [
         ['#26A69A', '#000'],   // Tuerkis: Schwarz 7,0:1 gegen Weiss 3,0:1

@@ -5,10 +5,8 @@ const { buildRrule, buildIcsCancel } = require('../lib/notify');
 /**
  * Wiederholungen beim Erledigen.
  *
- * Fuer nextDue, firstDue und _spawnRecurrence gab es bis 0.3.2 keinen einzigen
- * Test; abgedeckt war nur der Typ cron in test/cron.js. Diese Datei holt das
- * fuer den Teil nach, an dem gerechnet wird: welches Datum die Folgekarte
- * bekommt.
+ * Geprueft wird, welches Datum die Folgekarte bekommt (nextDue, firstDue,
+ * _spawnRecurrence). Der Typ cron steht in test/cron.js.
  */
 
 /** Tag relativ zu heute als JJJJ-MM-TT. */
@@ -69,7 +67,7 @@ describe('Wiederholung: alle X Tage, Raster gegen Erledigung', () => {
             faellig,
         );
         // Naechster Rasterpunkt nach der alten Faelligkeit, also 20 Tage nach
-        // dem Wechsel statt 30. Genau die Beschwerde aus dem Issue.
+        // dem Wechsel statt 30.
         assert.equal(folge.due, tag(20));
     });
 
@@ -130,9 +128,9 @@ describe('Wiederholung: alle X Tage, Raster gegen Erledigung', () => {
 });
 
 describe('Wiederholung: spaet erledigt, Folgekarte trotzdem in der Zukunft', () => {
-    // Befund B7 aus dem zweiten Abnahmetest: Faellig war Tag -10, erledigt wird
-    // heute, Intervall 7. Der naechste Rasterpunkt nach der alten Faelligkeit
-    // waere Tag -3 gewesen, die Folgekarte also von Geburt an ueberfaellig.
+    // Faellig war Tag -10, erledigt wird heute, Intervall 7. Der naechste
+    // Rasterpunkt nach der alten Faelligkeit waere Tag -3, die Folgekarte also
+    // von Geburt an ueberfaellig.
     it('nimmt den naechsten Rasterpunkt nach heute, nicht nach der alten Faelligkeit', async () => {
         const { folge } = await erledige({ type: 'every_n_days', interval: 7, startDate: tag(-24) }, tag(-10));
         assert.equal(folge.due, tag(4));
@@ -140,7 +138,7 @@ describe('Wiederholung: spaet erledigt, Folgekarte trotzdem in der Zukunft', () 
     });
 
     it('betrifft auch die kalendergebundenen Arten', async () => {
-        // Taeglich, zehn Tage liegengeblieben: vorher entstand Tag -9.
+        // Taeglich, zehn Tage liegengeblieben: morgen, nicht Tag -9.
         const taeglich = await erledige({ type: 'daily' }, tag(-10));
         assert.equal(taeglich.folge.due, tag(1));
 
@@ -217,7 +215,7 @@ describe('Wiederholung: die neue Art im Rest des Systems', () => {
         // Wann der naechste Termin faellt, entscheidet erst der Haken. Eine
         // feste Regel im Kalender waere eine Behauptung, die niemand einhaelt.
         assert.equal(buildRrule({ type: 'every_n_days_done', interval: 30 }), '');
-        // Zum Vergleich: die alte Art hat eine feste Schrittweite.
+        // Zum Vergleich: every_n_days hat eine feste Schrittweite.
         assert.equal(buildRrule({ type: 'every_n_days', interval: 30 }), 'RRULE:FREQ=DAILY;INTERVAL=30');
     });
 });
@@ -241,8 +239,8 @@ describe('Kalendertag aus einem Zeitstempel', () => {
 });
 
 describe('Kalender-Absage beim Loeschen', () => {
-    // E6: Beim Loeschen ging keine Absage raus, der Termin blieb im Kalender
-    // aller Zustaendigen stehen.
+    // Ohne Absage beim Loeschen bliebe der Termin im Kalender aller
+    // Zustaendigen stehen.
     const karte = { id: 'c_1', icsUid: 'c_1', icsSeq: 2, title: 'Zahnarzt; 14 Uhr' };
 
     it('traegt METHOD:CANCEL und STATUS:CANCELLED', () => {

@@ -3,13 +3,13 @@
 import { t } from './i18n.js';
 
 // Zeitgrenze fuer einen Aufruf. Ohne sie wartet fetch beliebig lange, wenn der
-// Adapter mitten im Speichern verschwindet - der Dialog haengt dann, und die
-// Fehlermeldung, die es laengst gibt, kommt nie (Befund 25 aus dem Abnahmetest).
+// Adapter mitten im Speichern verschwindet. Der Dialog haengt dann, und die
+// Fehlermeldung kommt nie.
 const TIMEOUT_MS = 15000;
 
 // Schreib-Token: vom Server in index.html injiziert (<meta name="kanban-token">).
 // Die Abfrage ist gegen ein fehlendes document abgesichert, damit sich das Modul
-// auch ausserhalb des Browsers laden laesst — board.js importiert es, und board.js
+// auch ausserhalb des Browsers laden laesst: board.js importiert es, und board.js
 // wird in den Tests geladen.
 const WRITE_TOKEN = typeof document !== 'undefined'
     ? ((document.querySelector('meta[name="kanban-token"]') || {}).content || '')
@@ -23,8 +23,8 @@ export async function api(path, opts = {}) {
     }
     if (init.method !== 'GET' && WRITE_TOKEN) init.headers['X-Kanban-Token'] = WRITE_TOKEN;
 
-    // AbortController fehlt nur in sehr alten Umgebungen; dort laeuft es wie
-    // bisher weiter, statt am fehlenden Konstruktor zu scheitern.
+    // AbortController fehlt nur in sehr alten Umgebungen; dort laeuft der Aufruf
+    // ohne Zeitgrenze, statt am fehlenden Konstruktor zu scheitern.
     const ctl = typeof AbortController !== 'undefined' ? new AbortController() : null;
     let frist = null;
     if (ctl) {
@@ -79,7 +79,7 @@ export function liveSync(onDirty, onPoll) {
                 if (msg.type === 'dirty') onDirty(msg.boardId, msg.rev);
             } catch { /* ignorieren */ }
         };
-        // Nur der aktuelle Socket darf einen Reconnect auslösen — ein verspätetes
+        // Nur der aktuelle Socket darf einen Reconnect auslösen: Ein verspätetes
         // close eines abgelösten Sockets würde sonst die Kette durcheinanderbringen.
         sock.onclose = () => { if (ws === sock) scheduleReconnect(); };
         sock.onerror = () => { try { sock.close(); } catch { /* leer */ } };
@@ -91,7 +91,7 @@ export function liveSync(onDirty, onPoll) {
         retryMs = Math.min(retryMs * 2, 15000);
     }
 
-    /** Sofort neu verbinden und abgleichen — nach Tabwechsel, Netzwechsel oder
+    /** Sofort neu verbinden und abgleichen: nach Tabwechsel, Netzwechsel oder
      *  wenn der Wachhund merkt, dass die Verbindung weg ist. */
     function revive() {
         retryMs = 1000;
@@ -105,7 +105,7 @@ export function liveSync(onDirty, onPoll) {
     connect();
 
     // Sicherheitsnetz 1: Wachhund. Verlässt sich nicht auf close-Events, sondern
-    // schaut selbst nach dem Zustand — nach einem Adapter-Neustart bleibt sonst
+    // schaut selbst nach dem Zustand. Nach einem Adapter-Neustart bleibt sonst
     // eine tote Verbindung unbemerkt stehen.
     setInterval(() => {
         if (document.hidden) return;

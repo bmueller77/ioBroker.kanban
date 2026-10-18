@@ -4,11 +4,10 @@ const { Store, userKey } = require('../lib/store');
 /**
  * Benutzerkennungen im Zustandsbaum.
  *
- * Bis 0.3.7 stand der Anzeigename unveraendert im Pfad, also "users.Bjoern
- * Mueller" mit Leerzeichen und Umlaut. Bei der Pruefung zur Aufnahme ins
- * Repository beanstandet. Ab 0.3.8 wird der Name bereinigt, der Anzeigename
- * bleibt im Kanalnamen stehen, und bestehende Instanzen werden beim Start
- * geradegezogen.
+ * Der Anzeigename gehoert nicht in den Pfad ("users.Bjoern Mueller" mit
+ * Leerzeichen und Umlaut), das beanstandet die Pruefung zur Aufnahme ins
+ * Repository. Der Name wird bereinigt, der Anzeigename bleibt im Kanalnamen
+ * stehen, und bestehende Instanzen werden beim Start geradegezogen.
  */
 
 /**
@@ -60,7 +59,7 @@ function newStore(namen, vorhanden) {
     return { store, adapter, states, objekte, geloescht, protokoll };
 }
 
-/** Kanal eines Benutzers, wie er auf einer Instanz vor 0.3.8 aussah. */
+/** Kanal eines Benutzers mit dem Anzeigenamen im Pfad, wie ihn bestehende Instanzen haben. */
 function alterKanal(name) {
     return {
         [`kanban.9.users.${name}`]: { type: 'channel', common: { name } },
@@ -78,8 +77,8 @@ describe('Benutzerkennungen: userKey()', () => {
     });
 
     it('laesst eine schon saubere Kennung unveraendert', () => {
-        // Wichtig fuer die Migration: Wer bisher einen sauberen Namen hatte,
-        // behaelt seinen Pfad, und nichts wird geloescht.
+        // Fuer die Migration: Wer schon einen sauberen Namen hat, behaelt
+        // seinen Pfad, und nichts wird geloescht.
         assert.equal(userKey('anna'), 'anna');
         assert.equal(userKey('team-nord'), 'team-nord');
         assert.equal(userKey('user2'), 'user2');

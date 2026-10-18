@@ -1,4 +1,4 @@
-/* ioBroker Kanban — Theming über CSS-Custom-Properties, data-theme am <html> */
+/* ioBroker Kanban: Theming über CSS-Custom-Properties, data-theme am <html> */
 
 :root {
     --accent: #7E57C2;
@@ -12,7 +12,8 @@
     /* Rot als Schriftfarbe auf der Flaeche. Als Hintergrund taugt --danger in
        beiden Themes, als Schrift erreicht es im dunklen nur 3,14:1. */
     --danger-fg: #d32f2f;
-    /* Fruehere #ef6c00 erreichte mit weisser Schrift nur 3,08:1. */
+    /* Dunkler als ueblich, damit weisse Schrift genug Kontrast hat (#ef6c00
+       kaeme nur auf 3,08:1). */
     --warn: #bf5700;
     /* Dritte Stufe der Faelligkeit: im Vorlauf, standardmaessig morgen. Sattes
        Sonnengelb, damit es sich klar vom Orange absetzt - es liegt 24 Grad
@@ -52,7 +53,6 @@ html[data-theme="dark"] {
 
 * { box-sizing: border-box; }
 
-/* Schlanke, themenkonforme Scrollbalken */
 * { scrollbar-width: thin; scrollbar-color: var(--border) transparent; }
 /* Native Bedienelemente (Datums-/Zeit-Picker, Dropdowns, Scrollbars) folgen dem Theme */
 :root[data-theme="dark"] { color-scheme: dark; }
@@ -140,8 +140,8 @@ button.linkbtn {
 
 /* Benutzer-Chips */
 
-/* Umbrechen statt die Seite in die Breite ziehen: Bei fuenfzehn Benutzern war
-   die Zeile 1750 px lang und schob den ganzen Seiteninhalt hinaus (F8). */
+/* Umbrechen statt die Seite in die Breite ziehen: Bei vielen Benutzern schoebe
+   die Zeile sonst den ganzen Seiteninhalt hinaus. */
 #userChips { display: flex; gap: 4px; align-items: center; flex-wrap: wrap; min-width: 0; }
 #topbar button { box-shadow: var(--ui-shadow); }
 
@@ -180,12 +180,10 @@ button.linkbtn {
 }
 img.avatar, .avatar img { object-fit: cover; width: 100%; height: 100%; border-radius: 50%; }
 
-/* Avatar-Verwaltung im Einstellungen-Dialog */
 .avatar-edit { display: flex; align-items: center; gap: 8px; padding: 4px 0; }
 .avatar-edit .avatar-prev { width: 32px; height: 32px; font-size: 13px; }
 .avatar-edit .avatar-name { flex: 1; font-size: 14px; }
 
-/* Zahnrad mit Punkt, solange im Einstellungsdialog etwas zu tun ist */
 .has-todo { position: relative; }
 .has-todo::after {
     content: '';
@@ -199,7 +197,6 @@ img.avatar, .avatar img { object-fit: cover; width: 100%; height: 100%; border-r
     box-shadow: 0 0 0 2px var(--surface);
 }
 
-/* Verwaiste Zustaendige: erscheint nur, wenn es welche gibt */
 .orphan-section { border-top: 1px solid var(--border); margin-top: 12px; padding-top: 12px; }
 .orphan-head { display: flex; align-items: center; gap: 6px; font-weight: 600; font-size: 14px; }
 .orphan-head svg { width: 18px; height: 18px; color: var(--warn); }
@@ -260,7 +257,6 @@ button.linkbtn.orphan-count { display: flex; align-items: center; gap: 2px; font
    mehrfach verteilt und z. B. das Auge landete in der Kopfmitte). */
 .column-head > button:first-of-type { margin-left: auto; }
 
-/* Mehrere Zahlen nebeneinander: Gesamt und die gewaehlten Faelligkeitsstufen */
 .column-head .col-counts { display: inline-flex; align-items: center; gap: 4px; }
 
 .column-head .count {
@@ -270,9 +266,8 @@ button.linkbtn.orphan-count { display: flex; align-items: center; gap: 2px; font
     background: var(--surface);
     border-radius: 999px;
     padding: 1px 8px;
-    /* 24 px hoch nach WCAG 2.5.8, auch wenn die Zahl darin kleiner ist. Die
-       Kopfzahl ist seit 0.3.2 ein Bedienelement und wird auf dem Telefon
-       angetippt (B6). */
+    /* 24 px hoch nach WCAG 2.5.8, auch wenn die Zahl darin kleiner ist: Die
+       Kopfzahl ist ein Bedienelement und wird auf dem Telefon angetippt. */
     min-height: 24px;
     box-sizing: border-box;
     box-shadow: var(--count-emboss);
@@ -287,14 +282,14 @@ button.count:hover { background: var(--surface2); }
 button.count:focus-visible { outline: 2px solid var(--focus, var(--accent, #7E57C2)); outline-offset: 2px; }
 /* Verraet, dass die Zahl ein Bedienelement ist. Nur an der ersten. */
 .count-caret { width: 11px; height: 11px; margin-right: -3px; opacity: .55; }
-/* Auf einem farbigen Abzeichen ging das Dreieck bei .55 unter. Wer die
-   Gesamtzahl abschaltet, sah dann nur noch eine farbige Zahl und fand den Weg
-   ins Menue nicht mehr zurueck (C8). */
+/* Auf einem farbigen Abzeichen geht das Dreieck bei .55 unter. Wer die
+   Gesamtzahl abschaltet, saehe nur noch eine farbige Zahl und faende den Weg
+   ins Menue nicht zurueck. */
 .count-due .count-caret { opacity: .9; }
 /* Der letzte gesetzte Haken laesst sich nicht entfernen. Sichtbar gesperrt,
    damit es nicht wie ein Knopf ohne Wirkung aussieht. */
 /* Mit .sort-item zusammen, sonst gewinnt dessen spaetere Regel und der
-   gesperrte Eintrag behaelt den Zeigefinger (C7). */
+   gesperrte Eintrag behaelt den Zeigefinger. */
 .sort-item.count-item-locked { opacity: .5; cursor: default; }
 .sort-item.count-item-locked:hover { background: none; }
 
@@ -319,15 +314,13 @@ button.count:focus-visible { outline: 2px solid var(--focus, var(--accent, #7E57
 }
 
 .column-foot { padding: 0 8px 10px; }
-/* Karte anlegen: derselbe Stil wie "+ Karte" in der Kopfzeile, nur mit Plus.
-   Haengt in der Kartenliste (gleiche Breite wie die Karten) und bleibt beim
-   Scrollen unten sichtbar. */
+/* Derselbe Stil wie "+ Karte" in der Kopfzeile. */
 .add-card-btn {
     position: sticky;
     /* Beim Scrollen schwebt der Knopf ueber den Karten. Der Ring in der
        Spaltenfarbe legt einen schmalen, undurchsichtigen Sockel darunter,
-       sonst steht der Knopf unmittelbar auf Kartentiteln und Labels
-       (Befund 26). Ringbreite und dieser Abstand gehoeren zusammen: Der Ring
+       sonst steht der Knopf unmittelbar auf Kartentiteln und Labels.
+       Ringbreite und dieser Abstand gehoeren zusammen: Der Ring
        fuellt genau die Luecke zwischen Knopf und unterem Rand der Liste. Waere
        er schmaler, schiene dort ein Streifen der durchlaufenden Karte hervor. */
     bottom: 1px;
@@ -336,9 +329,8 @@ button.count:focus-visible { outline: 2px solid var(--focus, var(--accent, #7E57
     align-items: center;
     justify-content: center;
     /* Schmal statt ein Viertel der Spalte: Der Knopf klebt unten und deckt
-       damit alles ab, was unter ihm durchlaeuft. Bei 25 Prozent waren das 111
-       von 423 px und zwei Zeilen einer aufgeklappten Checkliste, deren Klicks
-       er abfing (F1). Ein "+" braucht diese Breite nicht. */
+       alles ab, was unter ihm durchlaeuft, auch Zeilen einer aufgeklappten
+       Checkliste, deren Klicks er abfinge. */
     width: auto;
     min-width: 72px;
     margin: 0 auto;
@@ -367,15 +359,13 @@ button.count:focus-visible { outline: 2px solid var(--focus, var(--accent, #7E57
     /* Beruehrung, die auf einer Karte beginnt, darf nur senkrecht scrollen.
        Ohne diese Angabe uebernimmt der Browser eine Seitwaertsbewegung als
        waagerechtes Scrollen von #board, bricht den laufenden Zug ab und die
-       Karte springt zurueck — auf dem Tablet liess sich deshalb nichts in eine
-       andere Spalte ziehen. Senkrechtes Scrollen der Spalte bleibt erhalten. */
+       Karte springt zurueck. Senkrechtes Scrollen der Spalte bleibt erhalten. */
     touch-action: pan-y;
     /* Ziehen heisst auf dem Touchscreen: aufliegen und halten. Genau das ist
-       fuer den Browser auch ein langer Druck — nach etwa einer Sekunde beginnt
+       fuer den Browser auch ein langer Druck: Nach etwa einer Sekunde beginnt
        er, Text zu markieren bzw. das Kontextmenue zu oeffnen, schickt
-       touchcancel und der Zug bricht ab. Die Karte fiel dadurch mitten in der
-       Bewegung zurueck. Markieren wird hier nicht gebraucht: Text bearbeitet
-       man im Karten-Dialog, und der ist davon nicht betroffen. */
+       touchcancel und der Zug bricht ab. Markieren wird hier nicht gebraucht:
+       Text bearbeitet man im Karten-Dialog, und der ist davon nicht betroffen. */
     user-select: none;
     -webkit-user-select: none;
     -webkit-touch-callout: none;
@@ -403,8 +393,7 @@ button.count:focus-visible { outline: 2px solid var(--focus, var(--accent, #7E57
 }
 
 /* Kartenfuss: Checklisten-Zaehler links, Aufklapp-Chevron mittig, Icons fuer
-   Beschreibung, Link und Wiederholung rechts. Nur der Chevron darf tiefer
-   ruecken, Zaehler und Icons halten den normalen Abstand zum Kartenrand. */
+   Beschreibung, Link und Wiederholung rechts. */
 .card-foot {
     display: grid;
     grid-template-columns: 1fr auto 1fr;
@@ -464,8 +453,7 @@ button.count:focus-visible { outline: 2px solid var(--focus, var(--accent, #7E57
    25 px, nach oben 13 px. Das laeuft ueber ein absolut positioniertes ::after,
    damit weder das Grid der Fusszeile noch die Lage des Chevrons sich veraendern.
    Nach oben statt nach unten, weil die Flaeche sonst ueber den Kartenrand in die
-   naechste Karte reichte. 11 + 13 = 24 px, die Mindestgroesse aus WCAG 2.5.8
-   (Befund 12). */
+   naechste Karte reichte. 11 + 13 = 24 px, die Mindestgroesse aus WCAG 2.5.8. */
 .card-check-toggle::after {
     content: '';
     position: absolute;
@@ -479,7 +467,6 @@ button.count:focus-visible { outline: 2px solid var(--focus, var(--accent, #7E57
 .card-check-toggle:hover { opacity: 1; color: var(--accent); }
 .card-check-toggle:hover::after { background: var(--surface2); }
 
-/* Ausgeklappte Checkliste, ueber der Fusszeile */
 .card-checklist { display: flex; flex-direction: column; gap: 2px; margin-top: 8px; }
 .card-checklist[hidden] { display: none; }   /* [hidden] muss das display:flex schlagen */
 .card-check-item {
@@ -521,8 +508,8 @@ button.count:focus-visible { outline: 2px solid var(--focus, var(--accent, #7E57
     color: var(--muted);
     white-space: nowrap;
 }
-/* Ein Abzeichen ohne Warnfarbe hob sich im hellen Theme mit 1,21:1 kaum vom
-   weissen Kartengrund ab (C6). Eine Haarlinie reicht, um es als eigenes Feld
+/* Ein Abzeichen ohne Warnfarbe hebt sich im hellen Theme mit 1,21:1 kaum vom
+   weissen Kartengrund ab. Eine Haarlinie reicht, um es als eigenes Feld
    erkennbar zu machen, ohne ihm die Zurueckhaltung zu nehmen. Die farbigen
    Zustaende brauchen sie nicht, sie tragen ihre eigene Flaeche. */
 .card .badge { border: 1px solid var(--border); }
@@ -549,10 +536,10 @@ a.link-badge {
 a.link-badge:hover { color: var(--accent, #7E57C2); }
 /* Heute faellig, Uhrzeit noch nicht erreicht */
 .badge.due-today { background: var(--warn); color: #fff; }
-/* Im Vorlauf. Der Rueckfallwert haelt eigene Themes am Leben, die die neue
-   Variable nicht kennen. */
+/* Im Vorlauf. Der Rueckfallwert haelt eigene Themes am Leben, die
+   --due-upcoming nicht kennen. */
 .badge.due-soon { background: var(--due-upcoming, #ffd800); color: var(--due-upcoming-text, #1c1a17); }
-.badge.due-done { background: #2e7d32; color: #fff; }   /* erledigt → grün */
+.badge.due-done { background: #2e7d32; color: #fff; }
 .badge.prio-1 { background: var(--warn); color: #fff; font-weight: 700; }
 .badge.prio-2 { background: var(--danger); color: #fff; font-weight: 700; }
 
@@ -579,7 +566,6 @@ a.link-badge:hover { color: var(--accent, #7E57C2); }
 .card .title .avatars.open { z-index: 6; }
 .card .title .avatars.open .avatar { transform: translateX(calc((var(--n) - 1 - var(--i)) * -11px)); }
 
-/* Beschreibung nur lesend (Klick auf das Notiz-Icon der Karte) */
 #descDialog .desc-title { margin: 0 0 10px; font-size: 15px; }
 #descDialog .desc-body { max-height: 60vh; overflow: auto; }
 #descDialog .desc-foot { display: flex; justify-content: flex-end; margin-top: 12px; }
@@ -593,7 +579,6 @@ dialog {
     color: var(--text);
     box-shadow: 0 8px 40px rgba(0, 0, 0, .35);
     padding: 18px;
-    /* auf großen Bildschirmen 60vw, aber nie zu schmal/überbreit */
     width: min(calc(100vw - 32px), max(600px, 60vw));
     max-height: calc(100vh - 48px);
 }
@@ -666,7 +651,6 @@ dialog > form > h3,
     margin-top: 10px;
 }
 
-/* Schliesskreuz oben rechts */
 dialog h3.has-x { display: flex; align-items: center; gap: 8px; }
 .dlg-x {
     margin-left: auto;
@@ -695,11 +679,11 @@ dialog label { display: flex; flex-direction: column; gap: 10px; font-size: 13px
 dialog .row > label { flex: 1; }
 /* Ein Feld fuer "01:00" braucht keine 850 px. Ohne diese Regel nimmt es den
    ganzen Platz neben dem Haken daneben ein und laesst die Zeile unfertig
-   aussehen (B2). */
+   aussehen. */
 #calDurWrap { flex: 0 0 auto; }
 
-/* Markdown-Tabellen in Beschreibung und Lesefenster. Ohne diese Regeln standen
-   die Zellen ohne Rahmen und ohne Innenabstand aneinander (F2). */
+/* Markdown-Tabellen in Beschreibung und Lesefenster. Ohne diese Regeln stehen
+   die Zellen ohne Rahmen und ohne Innenabstand aneinander. */
 .md-preview table,
 #descDialogBody table {
     border-collapse: collapse;
@@ -717,13 +701,11 @@ dialog .row > label { flex: 1; }
 /* [hidden] muss das display:flex der Labels schlagen, sonst bleiben nicht
    relevante Wiederholungs-Felder sichtbar */
 dialog [hidden] { display: none !important; }
-/* Inline-Label (z.B. Checkbox + Text nebeneinander statt gestapelt) */
 dialog label.inline { flex-direction: row; align-items: center; gap: 6px; flex: 0 0 auto; white-space: nowrap; font-weight: 400; color: var(--muted); }
 dialog button { font-size: 13px; }
 #shareBody { display: flex; flex-direction: column; gap: 10px; }
 #checklistEdit:empty { display: none; }
 
-/* Ansicht-teilen: URL-Feld + Kopieren nebeneinander */
 .share-url { display: flex; gap: 8px; align-items: stretch; }
 .share-url-input { flex: 1; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12px; }
 .share-url button { flex: 0 0 auto; }
@@ -742,11 +724,11 @@ dialog input, dialog textarea, dialog select {
 }
 
 dialog input:focus, dialog textarea:focus, dialog select:focus { outline: 2px solid var(--focus, var(--accent)); border-color: transparent; }
-/* Chips und Farbfelder sind per Pfeiltaste erreichbar - ohne sichtbaren Fokus
+/* Chips und Farbfelder sind per Pfeiltaste erreichbar, ohne sichtbaren Fokus
    waere nicht zu erkennen, wo man gerade steht.
    Gestrichelt, weil die Auswahl selbst ebenfalls ein farbiger Ring ist: Traegt
-   der Benutzer die Akzentfarbe, sahen ausgewaehlt und fokussiert vorher gleich
-   aus (Befund 6). Ein gestrichelter Ring ist nie eine Auswahl. */
+   der Benutzer die Akzentfarbe, saehen ausgewaehlt und fokussiert sonst gleich
+   aus. Ein gestrichelter Ring ist nie eine Auswahl. */
 .pick-chip:focus-visible,
 .color-swatch:focus-visible { outline: 2px dashed var(--focus, var(--accent)); outline-offset: 3px; }
 
@@ -832,12 +814,11 @@ dialog .row { display: flex; gap: 10px; flex-wrap: wrap; }
 .fold-inner { border-top: 0; }
 
 dialog footer { display: flex; gap: 8px; margin-top: 8px; align-items: center; }
-/* Beschriftungen werden bei wenig Platz mit … gekuerzt statt umzubrechen */
+/* Beschriftungen werden bei wenig Platz mit ... gekuerzt statt umzubrechen */
 dialog footer > button { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 /* Vorlagenauswahl in der Fusszeile des Karteneditors: nimmt nur den Platz, den
    sie braucht, und laesst dem Titel der laengsten Vorlage Raum. */
 #templatePick { max-width: 45%; }
-/* Reiter "Vorlagen": Zeile mit Auswahlkaestchen, Griff, Namensfeld und "x" */
 .tpl-edit { display: flex; align-items: center; gap: 6px; }
 .tpl-actions { display: flex; gap: 8px; align-items: center; margin-top: 6px; flex-wrap: wrap; }
 /* Der Stift traegt dieselbe Groesse wie das "x" daneben, aber nicht dessen
@@ -849,7 +830,6 @@ dialog footer > button { overflow: hidden; text-overflow: ellipsis; white-space:
 #exportBody textarea { width: 100%; font-family: monospace; font-size: 12px; }
 /* Fehler im Import-Dialog: dort, wo man hinschaut, in der Warnfarbe. */
 .hint.tpl-import-error { color: var(--danger); }
-/* "Datei wird eingelesen ...": kleiner Kreisel vor dem Text */
 .tpl-reading::before {
     content: '';
     display: inline-block;
@@ -881,7 +861,7 @@ dialog footer > button { overflow: hidden; text-overflow: ellipsis; white-space:
 
 .pick-chip.selected { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent) inset; }
 /* Kennung ohne Benutzer: sichtbar anders als eine gewoehnliche Person, damit
-   niemand sie fuer eine haelt (Befund 16). */
+   niemand sie fuer eine haelt. */
 .pick-chip-gone { border-style: dashed; color: var(--muted); font-style: italic; }
 .req-star { color: var(--danger-fg); margin-left: 2px; font-weight: 700; }
 .cap,
@@ -906,13 +886,11 @@ dialog footer > button { overflow: hidden; text-overflow: ellipsis; white-space:
 .color-swatch.none { background: var(--surface2); position: relative; }
 .color-swatch.none::after { content: "×"; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: var(--muted); }
 
-/* Freie Farbwahl: Swatch mit Regenbogen (öffnet den eigenen Colorpicker) */
 .color-swatch.custom {
     background: conic-gradient(red, #ff0, lime, cyan, blue, magenta, red);
     cursor: pointer;
 }
 
-/* Klickbarer Farb-Swatch (Labels) – öffnet den Colorpicker */
 .cp-trigger {
     width: 26px;
     height: 26px;
@@ -997,7 +975,7 @@ dialog footer > button { overflow: hidden; text-overflow: ellipsis; white-space:
 .check-item { display: flex; gap: 6px; align-items: center; }
 .check-item input[type="text"] { flex: 1; }
 .check-item .rm { border: none; background: none; color: var(--muted); font-size: 16px; padding: 2px 6px; }
-/* Anfasser zum Umsortieren – erst ab zwei Punkten sichtbar, Platz bleibt reserviert */
+/* Anfasser zum Umsortieren: erst ab zwei Punkten sichtbar, Platz bleibt reserviert */
 .check-item .ck-grip { display: flex; align-items: center; color: var(--muted); cursor: grab; opacity: 0; pointer-events: none; }
 #checklistEdit.multi .check-item .ck-grip { opacity: 0.75; pointer-events: auto; }
 .check-item .ck-grip:hover { opacity: 1; color: var(--accent); }
@@ -1019,7 +997,6 @@ dialog footer > button { overflow: hidden; text-overflow: ellipsis; white-space:
 
 #boardDialogBody { display: flex; flex-direction: column; gap: 10px; }
 
-/* Tab-Layout im Einstellungen-Dialog: Kopf + Tabs fest, Inhalt scrollt, Footer fest */
 .tabbar { display: flex; gap: 2px; border-bottom: 1px solid var(--border); flex: none; }
 .tab-btn {
     background: none;
@@ -1033,7 +1010,7 @@ dialog footer > button { overflow: hidden; text-overflow: ellipsis; white-space:
 }
 .tab-btn:hover { background: none; color: var(--text); }
 .tab-btn.active { color: var(--text); border-bottom-color: var(--accent); }
-/* Hoehe kommt jetzt vom Dialog, nicht mehr als fester Deckel von 380 px */
+/* Keine eigene Hoehe: Die gibt der Dialog vor. */
 .tab-panel { display: flex; flex-direction: column; gap: 10px; }
 
 
@@ -1047,8 +1024,7 @@ dialog footer > button { overflow: hidden; text-overflow: ellipsis; white-space:
     padding: 6px;
 }
 
-/* Der Anfasser ist die Hilfe fuer den Finger und war mit 18 x 18 px selbst zu
-   klein dafuer (C3). */
+/* Der Anfasser ist die Hilfe fuer den Finger und braucht deshalb 24 px. */
 .col-edit .drag,
 .label-edit .drag {
     cursor: grab;
@@ -1079,7 +1055,7 @@ dialog footer > button { overflow: hidden; text-overflow: ellipsis; white-space:
 .col-more {
     font-size: 12px;
     color: var(--muted);
-    /* 24 px hoch, der Knopf mass 20 (C10) */
+    /* 24 px hoch als Touch-Ziel */
     min-height: 24px;
     /* Sitzt in der Kartenliste und teilt damit deren linke Kante mit den
        Karten. Der negative obere Rand nimmt einen Teil des Listenabstands
@@ -1097,7 +1073,6 @@ dialog footer > button { overflow: hidden; text-overflow: ellipsis; white-space:
 .col-more:hover { color: var(--accent); background: var(--surface); }
 .col-more:focus-visible { outline: 2px solid var(--focus, var(--accent)); outline-offset: -2px; }
 
-/* Label-Verwaltung (Board-Einstellungen) */
 .label-edit {
     display: flex;
     gap: 6px;
@@ -1110,7 +1085,6 @@ dialog footer > button { overflow: hidden; text-overflow: ellipsis; white-space:
 
 .label-edit input[type="text"] { flex: 1; min-width: 80px; }
 
-/* nativer Colorpicker – kompakt und konsistent */
 input[type="color"] {
     width: 34px;
     min-width: 34px;
@@ -1122,7 +1096,6 @@ input[type="color"] {
     cursor: pointer;
 }
 
-/* Inline-Label-Anlegen im Karten-Dialog */
 .label-new {
     display: inline-flex;
     gap: 4px;
@@ -1152,22 +1125,16 @@ button.mini {
     .column.collapsed .cards, .column.collapsed .column-foot { display: none; }
     html, body { overflow-x: hidden; max-width: 100%; }
     #boardSelect { max-width: 40vw; }
-    /* Benutzer-Chips umbrechen statt horizontal ueberlaufen */
     #userChips { flex-wrap: wrap; }
 
-    /* Dialoge vollfl\u00e4chig, Felder gestapelt, Footer sticky */
-    /* Dialoge als bodennahes Vollflaechen-Sheet: volle Breite, Hoehe = Inhalt (max. Schirm),
-       nur der Inhalt scrollt, Footer klebt unten, Buttons gleich gross nebeneinander */
     /* Mit den IDs zusammen: Die Regeln fuer Karteneditor, Board-Manager und
-       Ansichten stehen weiter oben auf ihren IDs und schlagen sonst diese hier.
-       Der Dialog blieb dadurch 32 px schmaler und 48 px kuerzer als der Schirm
-       und sass oben links fest (G2). */
+       Ansichten stehen weiter oben auf ihren IDs und schlagen sonst diese hier. */
     dialog[open],
     #cardDialog[open],
     #boardDialog[open],
     #shareDialog[open] {
         width: 100%; max-width: 100%;
-        height: 100dvh; max-height: 100dvh;           /* immer gleiche, volle Hoehe */
+        height: 100dvh; max-height: 100dvh;
         margin: 0; inset: 0;
         padding: 0; border: none; border-radius: 0;
         display: flex; flex-direction: column;
@@ -1189,15 +1156,14 @@ button.mini {
     .fold-inner:not([open]) > .fold-body { display: none; }
     .fold-inner > .fold-body { padding: 0 0 12px; }
     .share-url { flex-direction: column; }
-    /* Nicht zusammendruecken lassen: Als Flex-Kind schrumpfte der Kasten,
-       waehrend sein Inhalt sichtbar herauslief. Der Rollbereich darueber
-       rechnete die ueberlaufenden Pixel nicht mit, und die klebende Fussleiste
-       verliess ihren Bereich zu frueh - bei kurzem Fenster scrollte
-       "Speichern" ganz aus dem Bild (G3). */
+    /* Nicht zusammendruecken lassen: Als Flex-Kind schrumpft der Kasten,
+       waehrend sein Inhalt sichtbar herauslaeuft. Der Rollbereich darueber
+       rechnet die ueberlaufenden Pixel nicht mit, die klebende Fussleiste
+       verlaesst ihren Bereich zu frueh, und bei kurzem Fenster scrollt
+       "Speichern" ganz aus dem Bild. */
     .tab-panels { height: auto; max-height: none; overflow: visible; flex: none; }
     .tabbar { position: sticky; top: 0; background: var(--surface); z-index: 3; }
 
-    /* Footer klebt unten, volle Breite, gleich grosse Buttons nebeneinander */
     dialog footer {
         position: sticky; bottom: 0; z-index: 2;
         margin: auto -12px 0; padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
@@ -1212,10 +1178,10 @@ button.mini {
     .col-chevron { display: inline !important; }      /* schlaegt die spaetere Basisregel */
 }
 
-/* Einklapp-Chevron im Spaltenkopf – nur auf schmalen Screens sichtbar */
+/* Einklapp-Chevron im Spaltenkopf, nur auf schmalen Screens sichtbar */
 .col-chevron { display: none; font-size: 12px; color: var(--muted); }
 
-/* Hervorgehobene Karte (Benachrichtigungs-Link-Ziel \u201eBoard\u201c) */
+/* Hervorgehobene Karte (Benachrichtigungs-Link-Ziel "Board") */
 .card-focus { outline: 2px solid var(--focus, var(--accent)); }
 .card-focus { animation: card-pulse 1s ease-in-out 2; }
 @keyframes card-pulse { 0%, 100% { box-shadow: var(--shadow); } 50% { box-shadow: 0 0 0 4px var(--accent); } }
@@ -1223,9 +1189,8 @@ button.mini {
 .col-toggle {
     background: none;
     border: none;
-    /* 24 px in beide Richtungen nach WCAG 2.5.8. Auge und Besen massen 22 x 18,
-       und hinter dem Besen steht eine Aktion, die sich nicht ruecknehmen laesst
-       (C1, C2). */
+    /* 24 px in beide Richtungen nach WCAG 2.5.8, zumal hinter dem Besen eine
+       Aktion steht, die sich nicht ruecknehmen laesst. */
     min-width: 24px;
     min-height: 24px;
     display: inline-flex;
@@ -1244,10 +1209,9 @@ button.mini {
 .col-toggle svg { display: block; }
 
 /* Schnellablage-Ziele beim Ziehen einer Karte (unter der aufgenommenen Karte) */
-/* Leiste quer ueber die volle Breite statt einer Spalte am rechten Rand: Dort
-   war der Weg vom aufgenommenen Kaertchen im ungenstigsten Fall die gesamte
-   Bildschirmbreite. Waagerecht verteilt liegt jedes Ziel hoechstens eine halbe
-   Breite entfernt, und die Reihenfolge entspricht der der Spalten. */
+/* Leiste quer ueber die volle Breite statt einer Spalte am rechten Rand: So
+   liegt jedes Ziel hoechstens eine halbe Bildschirmbreite von der
+   aufgenommenen Karte entfernt, und die Reihenfolge entspricht der der Spalten. */
 .quick-move {
     position: fixed;
     z-index: 900;
@@ -1290,7 +1254,6 @@ button.mini {
 }
 /* Die hineingezogene Karte tritt zurueck und wird flach gehalten, behaelt aber
    ihre Box: SortableJS misst sie, ohne Geometrie faellt die Zone als Ziel aus. */
-/* Falls SortableJS doch eine Karte in die Zone legt: flach und zurueckhaltend */
 .quick-target > .card { opacity: 0.2; max-height: 36px; overflow: hidden; pointer-events: none; }
 
 .quick-target.sortable-over,
@@ -1301,12 +1264,12 @@ button.mini {
 }
 .quick-target.quick-trash { border-color: var(--muted); }
 
-/* ---- 0.3.0: Sortier-Umschalter je Spalte (Feature 1) ---- */
+/* ---- Sortier-Umschalter je Spalte ---- */
 .col-sort {
     background: none;
     border: none;
     /* Wie bei der Kopfzahl: 24 px in beide Richtungen, das Symbol darin bleibt
-       klein (B6). */
+       klein. */
     min-width: 24px;
     min-height: 24px;
     display: inline-flex;
@@ -1375,7 +1338,7 @@ button.mini {
 .count-dot.due-today { background: var(--warn); }
 .count-dot.due-soon { background: var(--due-upcoming, #ffd800); }
 
-/* ---- 0.3.0: Grid-Sortiermodus - Anfasser links an der Karte ---- */
+/* ---- Grid-Sortiermodus: Anfasser links an der Karte ---- */
 .card.has-grip { padding-left: 28px; }
 .card-grip {
     position: absolute;
@@ -1390,29 +1353,28 @@ button.mini {
 }
 .card-grip:hover { opacity: 1; color: var(--accent); }
 .card-grip:active { cursor: grabbing; }
-/* Nur der Anfasser zeigt die Greifhand. Im Anfasser-Modus trug sie die ganze
-   Karte und versprach damit ein Ziehen, das dort gar nicht beginnt (C15). */
+/* Nur der Anfasser zeigt die Greifhand. Auf der ganzen Karte verspraeche sie
+   ein Ziehen, das dort gar nicht beginnt. */
 .card.has-grip { cursor: default; }
 
-/* ---- 0.3.0: erledigte Karten (Feature 3+4) ---- */
+/* ---- Erledigte Karten ---- */
 /* Erledigte Karten treten zurueck: gedaempfter Titel (hell -> heller, dunkel -> dunkler) */
 .card .title.title-done .title-text { text-decoration: line-through; color: var(--muted); }
 .card .done-stamp { font-size: 13px; font-weight: 400; color: var(--muted); margin: 2px 0 0; }
 .card-action { position: relative; background: none; border: none; cursor: pointer; color: var(--muted); padding: 2px; opacity: 0.8; }
-/* Der Stift ist der einzige Weg in den Karteneditor und war 16 x 16 px gross.
-   Ein Pseudoelement vergroessert die Trefferflaeche auf 24 x 24, ohne dass sich
-   die Lage des Symbols im Titel aendert (Befund 5). */
+/* Der Stift ist der einzige Weg in den Karteneditor. Ein Pseudoelement
+   vergroessert die Trefferflaeche auf 24 x 24 px, ohne dass sich die Lage des
+   Symbols im Titel aendert. */
 .card-action::after { content: ''; position: absolute; inset: -4px; border-radius: 5px; }
 .card-action:hover { opacity: 1; color: var(--accent); }
 .card-action svg { display: block; }
-/* Kopier-Icon sitzt direkt hinter dem Kartentitel */
 .card-copy { flex: 0 0 auto; padding: 0; line-height: 1; align-self: center; margin-left: 5px; }
 .card-copy svg { width: 15px; height: 15px; }
 /* Editor-Icon direkt hinter dem Titelende - nur hierueber oeffnet sich der Editor */
 .card-edit { flex: 0 0 auto; padding: 0; line-height: 1; align-self: center; margin-left: 5px; }
 .card-edit svg { width: 16px; height: 16px; }
 
-/* ---- 0.3.0: Papierkorb-Spalte (Feature 5), feste graue Optik ---- */
+/* ---- Papierkorb-Spalte, feste graue Optik ---- */
 .column.trash-col { --trash-bg: #56565e; --trash-card: #676770; --trash-fg: #f0f0f3; background: var(--trash-bg); }
 [data-theme="dark"] .column.trash-col { --trash-bg: #43434b; --trash-card: #53535c; --trash-fg: #e8e8ee; }
 .column.trash-col .column-head, .column.trash-col .col-toggle { color: var(--trash-fg); }
@@ -1424,7 +1386,7 @@ button.mini {
 .card.card-trash .card-action { color: var(--trash-fg); }
 .card.card-trash .card-action:hover { color: var(--accent); }
 
-/* ---- 0.3.0: gepaarte Editor-Felder (Feature 62) ---- */
+/* ---- Gepaarte Editor-Felder ---- */
 dialog .field { display: flex; flex-direction: column; gap: 8px; }
 dialog .row .field { flex: 1; min-width: 0; }
 dialog .icon-btn { padding: 5px 8px; line-height: 1; }
@@ -1432,9 +1394,9 @@ dialog .icon-btn svg { display: block; }
 dialog label.inline-num { flex-direction: row; align-items: center; gap: 6px; }
 dialog label.inline-num input { width: 80px; }
 
-/* ---- 0.3.0: Übertragen-Dialog (Feature 6) ---- */
-/* Vier Arten untereinander, jede mit einer Erklaerzeile. Nebeneinander war der
-   Text schon bei drei Schaltflaechen abgeschnitten. */
+/* ---- Uebertragen-Dialog ---- */
+/* Vier Arten untereinander, jede mit einer Erklaerzeile: Nebeneinander waere
+   der Text schon bei drei Schaltflaechen abgeschnitten. */
 .transfer-mode { display: flex; flex-direction: column; gap: 2px; }
 .transfer-mode-row {
     display: flex;
@@ -1450,9 +1412,8 @@ dialog label.inline-num input { width: 80px; }
 .transfer-mode-row.disabled { opacity: .45; cursor: default; }
 .transfer-mode-row.disabled:hover { background: none; }
 .transfer-mode-row > input[type="radio"] { margin: 0; flex: none; }
-/* Beschriftung und Erklaerung in einer Zeile, die Erklaerung hinter dem Namen.
-   Untereinander brauchte jede Art zwei Zeilen und der Dialog wurde unnoetig
-   hoch. Bei wenig Platz bricht nur die Erklaerung um, der Name bleibt am
+/* Beschriftung und Erklaerung in einer Zeile, damit der Dialog nicht unnoetig
+   hoch wird. Bei wenig Platz bricht nur die Erklaerung um, der Name bleibt am
    Radioknopf. */
 .transfer-mode-text {
     display: flex;
@@ -1508,13 +1469,13 @@ dialog button:disabled { opacity: 0.45; cursor: default; filter: grayscale(0.6);
 /* Fehler bleiben stehen und tragen die Warnfarbe. */
 .app-hint-error { border-color: var(--danger); }
 
-/* Gesperrt, aber anklickbar: Der Klick erklaert, was fehlt (B1, B18). Ohne
-   diese Regel sah der Knopf genauso einladend aus wie im Normalzustand. */
+/* Gesperrt, aber anklickbar: Der Klick erklaert, was fehlt. Ohne diese Regel
+   saehe der Knopf genauso einladend aus wie im Normalzustand. */
 #addCardBtn[aria-disabled="true"],
 .add-card-btn[aria-disabled="true"] { opacity: 0.45; filter: grayscale(0.6); cursor: default; }
 .transfer-note { font-size: 12px; color: var(--muted); background: var(--surface2); border-radius: 6px; padding: 8px 10px; }
 
-/* ---- 0.3.0: Kopfzeile der Board-Einstellungen (Feature 64) ---- */
+/* ---- Kopfzeile der Board-Einstellungen ---- */
 .board-toprow { align-items: center; gap: 8px; flex-wrap: wrap; }
 .board-toprow select { flex: 1 1 140px; min-width: 0; }
 .board-toprow .board-new-name { flex: 1 1 140px; min-width: 0; }
@@ -1522,9 +1483,8 @@ dialog button:disabled { opacity: 0.45; cursor: default; filter: grayscale(0.6);
 .board-toprow .icon-btn:disabled { opacity: 0.4; cursor: default; }
 @media (max-width: 600px) {
     /* Die Ausnahme braucht dieselbe Gewichtung wie "dialog .row", sonst gewinnt
-       dort die Spaltenrichtung. Und in einer Spalte ist die Hauptachse
-       senkrecht: Aus dem "flex-basis: 140px" der Auswahl wurde dann eine Hoehe,
-       Auswahl und Eingabefeld standen 140 px hoch da (Befund 27). */
+       dort die Spaltenrichtung. In einer Spalte ist die Hauptachse senkrecht,
+       und aus dem "flex-basis: 140px" der Auswahl wuerde eine Hoehe. */
     dialog .board-toprow { flex-direction: row; }
 }
 
