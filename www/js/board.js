@@ -92,6 +92,13 @@ function initCtxGuard() {
     }, true);
 }
 
+// Touchscreen vorhanden. Bewusst nicht ueber "pointer: coarse": Das beantwortet
+// eine WebView nicht verlaesslich, ein Desktop mit Touchscreen zaehlt mit.
+const IST_TOUCH =
+    typeof window !== 'undefined' &&
+    typeof navigator !== 'undefined' &&
+    (navigator.maxTouchPoints > 0 || 'ontouchstart' in window);
+
 // ---- Schnellablage-Ziele beim Ziehen (v.a. schmale Screens) --------------
 // Beim Aufnehmen einer Karte erscheinen die uebrigen Spalten als Landezonen,
 // damit man ohne Quer-Scrollen ablegen kann.
@@ -1671,6 +1678,12 @@ export function renderBoard(container, state, actions) {
             // Touch-Ereignissen tritt das nicht auf, weil Sortable dort selbst
             // preventDefault ruft.
             supportPointer: false,
+            // Auf Touch-Geraeten die eigene Nachbildung statt des nativen Ziehens.
+            // Sonst setzt Sortable draggable an der Karte, und ein Android-WebView
+            // beginnt nach gut einer halben Sekunde ruhigen Haltens sein eigenes
+            // Ziehen, schickt touchcancel, und der Zug startet nie.
+            forceFallback: IST_TOUCH,
+            fallbackOnBody: true,
             // Mitscrollen am Rand. Sortable entscheidet sonst selbst zwischen
             // seiner eigenen Scroll-Schleife und dem Weiterreichen an den
             // Browser; in einer Android-WebView kann das Board dabei stehen
