@@ -50,10 +50,11 @@ export async function api(path, opts = {}) {
 }
 
 /**
- * Live-Sync: WebSocket auf /ws; bei 'dirty' wird onDirty(boardId, rev) gerufen.
+ * Live-Sync: WebSocket auf /ws; bei 'dirty' wird onDirty(boardId, rev) gerufen,
+ * bei 'hello' onHello(build) mit der Kennung des Oberflaechen-Stands auf dem Server.
  * Fällt der WS aus, greift alle 10 s ein Polling-Callback (onPoll).
  */
-export function liveSync(onDirty, onPoll) {
+export function liveSync(onDirty, onPoll, onHello) {
     let ws = null;
     let retryMs = 1000;
     let timer = null;      // genau eine Reconnect-Kette, egal wie viele Events kommen
@@ -77,6 +78,7 @@ export function liveSync(onDirty, onPoll) {
             try {
                 const msg = JSON.parse(ev.data);
                 if (msg.type === 'dirty') onDirty(msg.boardId, msg.rev);
+                else if (msg.type === 'hello' && onHello) onHello(msg.build);
             } catch { /* ignorieren */ }
         };
         // Nur der aktuelle Socket darf einen Reconnect auslösen: Ein verspätetes

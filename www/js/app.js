@@ -411,6 +411,36 @@ actions = {
 
 // ------------------------------------------------------------ Init
 
+const SEITEN_BUILD = (document.querySelector('meta[name="kanban-build"]') || {}).content || '';
+let neuLadenGeplant = false;
+
+/**
+ * Neu laden, wenn der Server einen anderen Oberflaechen-Stand ausliefert.
+ *
+ * Eine Kiosk-Seite bleibt tagelang offen und liefe nach einem Update sonst mit
+ * dem alten Code weiter. Ein offener Dialog wird abgewartet, damit keine
+ * ungespeicherte Eingabe verloren geht. Je Stand wird nur einmal neu geladen:
+ * Kommt danach doch wieder die alte Seite, waere es sonst eine Schleife.
+ *
+ * @param build Kennung vom Server
+ */
+function neuerStandAufDemServer(build) {
+    if (!build || !SEITEN_BUILD || build === SEITEN_BUILD || neuLadenGeplant) return;
+    try {
+        if (sessionStorage.getItem('kanban.buildReload') === build) return;
+    } catch { /* ohne sessionStorage trotzdem laden */ }
+    neuLadenGeplant = true;
+    const laden = () => {
+        if (document.querySelector('dialog[open]')) {
+            setTimeout(laden, 5000);
+            return;
+        }
+        try { sessionStorage.setItem('kanban.buildReload', build); } catch { /* leer */ }
+        location.reload();
+    };
+    laden();
+}
+
 async function init() {
     // Stale-Cache-Schutz: fehlt ein erwartetes Formularfeld, ist ein veraltetes
     // index.html gecacht (neues JS + altes HTML), daher einmal frisch nachladen.
@@ -521,6 +551,7 @@ async function init() {
         // Waehrend eines Adapter-Neustarts schlaegt der Abgleich fehl; das ist normal
         // und darf den naechsten Versuch nicht verhindern.
         () => refreshCurrent().catch(() => {}),
+        neuerStandAufDemServer,
     );
 
     // Die Faelligkeitsfarbe wechselt auch ohne Aenderung am Board: um Mitternacht
