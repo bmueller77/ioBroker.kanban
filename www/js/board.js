@@ -178,8 +178,61 @@ function wantsQuickMove(immer) {
     return spaltenPassenNicht();
 }
 
-// DIAGNOSE Landezonen auf dem Tablet: schickt beim Ziehen die Werte, aus denen
-// die Entscheidung entsteht, an den Adapter. Wird nach der Auswertung ausgebaut.
+// DIAGNOSE Landezonen auf dem Tablet, Stufe 2: meldet Laden, Antippen,
+// Auswaehlen, Start und Fehler an den Adapter, hoechstens 60 Meldungen je
+// Seitenaufruf. Wird nach der Auswertung ausgebaut.
+let diagZahl = 0;
+function diag(art, daten) {
+    if (diagZahl++ >= 60) return;
+    try {
+        api('api/debug/zones', { method: 'POST', body: { art, ms: Math.round(performance.now()), ...daten } }).catch(() => {});
+    } catch {
+        /* nie stoeren */
+    }
+}
+function diagSpeicher() {
+    const aus = {};
+    try {
+        for (let i = 0; i < localStorage.length; i++) {
+            const k = localStorage.key(i);
+            if (k && k.startsWith('kanban.')) aus[k] = String(localStorage.getItem(k)).slice(0, 300);
+        }
+    } catch {
+        aus.fehler = 'localStorage nicht lesbar';
+    }
+    return aus;
+}
+if (typeof window !== 'undefined' && typeof document !== 'undefined') {
+    window.addEventListener('error', e => diag('fehler', { text: String(e.message), datei: String(e.filename || '').split('/').pop(), zeile: e.lineno }));
+    window.addEventListener('unhandledrejection', e => diag('fehler', { text: String(e.reason && (e.reason.message || e.reason)) }));
+    let touches = 0;
+    document.addEventListener('touchstart', e => {
+        const karte = e.target && e.target.closest && e.target.closest('.card');
+        if (!karte || touches++ >= 6) return;
+        diag('touch', {
+            ziel: String(e.target.className || e.target.nodeName).slice(0, 80),
+            spalte: (karte.closest('.column') || {}).dataset ? karte.closest('.column').dataset.colId : null,
+            griff: !!karte.querySelector('.card-grip'),
+            finger: e.touches ? e.touches.length : null,
+        });
+    }, { capture: true, passive: true });
+    let abbrueche = 0;
+    for (const typ of ['touchcancel', 'pointercancel']) {
+        document.addEventListener(typ, e => {
+            if (abbrueche++ >= 6) return;
+            diag('abbruch', { typ, ziel: String((e.target && e.target.className) || '').slice(0, 80) });
+        }, { capture: true, passive: true });
+    }
+    window.addEventListener('load', () => diag('laden', {
+        build: (document.querySelector('meta[name="kanban-build"]') || {}).content || null,
+        innerWidth: window.innerWidth,
+        ua: navigator.userAgent,
+        iframe: window.top !== window,
+        url: location.pathname + location.search,
+        speicher: diagSpeicher(),
+    }));
+}
+
 function messeZiehen(evt, zonen, state) {
     try {
         const brett = document.getElementById('board');
@@ -217,9 +270,9 @@ function messeZiehen(evt, zonen, state) {
                 .filter(e => /\.(js|css)$/.test(e.name))
                 .map(e => `${e.name.split('/').pop()}:${e.transferSize}`),
         };
-        api('api/debug/zones', { method: 'POST', body }).catch(() => {});
-    } catch {
-        /* Die Messung darf das Ziehen nie stoeren */
+        diag('start', body);
+    } catch (e) {
+        diag('fehler', { text: 'messeZiehen: ' + String(e && e.message) });
     }
 }
 
@@ -1736,6 +1789,9 @@ export function renderBoard(container, state, actions) {
             filter: '.link-badge, .card-check-toggle, .card-checklist, .card-action, .card-foot-icons, .title .avatars',   // lösen kein Ziehen aus
             preventOnFilter: false,              // damit deren Klick normal durchkommt
 
+            onChoose: () => diag('gewaehlt', { spalte: col.id, sortMode, griff: withGrip }),
+            onUnchoose: () => diag('abgewaehlt', { spalte: col.id }),
+            onFilter: evt => diag('gefiltert', { ziel: String((evt.target && evt.target.className) || '').slice(0, 80) }),
             onStart: evt => {
                 dragActive = true;
                 const zonen = wantsQuickMove(!!state.zonesAlways);
