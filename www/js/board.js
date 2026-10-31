@@ -178,6 +178,51 @@ function wantsQuickMove(immer) {
     return spaltenPassenNicht();
 }
 
+// DIAGNOSE Landezonen auf dem Tablet: schickt beim Ziehen die Werte, aus denen
+// die Entscheidung entsteht, an den Adapter. Wird nach der Auswertung ausgebaut.
+function messeZiehen(evt, zonen, state) {
+    try {
+        const brett = document.getElementById('board');
+        const spalten = brett ? brett.querySelectorAll('.column') : [];
+        const r = brett ? brett.getBoundingClientRect() : null;
+        const letzte = spalten.length ? spalten[spalten.length - 1].getBoundingClientRect() : null;
+        const vv = window.visualViewport;
+        const oe = (evt && evt.originalEvent) || {};
+        const nav = performance.getEntriesByType('navigation')[0];
+        const body = {
+            zonen,
+            zonenParam: !!state.zonesAlways,
+            leisteDa: !!document.querySelector('.quick-move'),
+            build: (document.querySelector('meta[name="kanban-build"]') || {}).content || null,
+            innerWidth: window.innerWidth,
+            innerHeight: window.innerHeight,
+            dpr: window.devicePixelRatio,
+            vvWidth: vv ? Math.round(vv.width) : null,
+            vvScale: vv ? vv.scale : null,
+            schmal: window.matchMedia('(max-width: 820px)').matches,
+            scrollWidth: brett ? brett.scrollWidth : null,
+            clientWidth: brett ? brett.clientWidth : null,
+            brettRechts: r ? Math.round(r.right) : null,
+            letzteRechts: letzte ? Math.round(letzte.right) : null,
+            spalten: spalten.length,
+            iframe: window.top !== window,
+            ua: navigator.userAgent,
+            touchPunkte: navigator.maxTouchPoints,
+            zeiger: oe.pointerType || oe.type || null,
+            url: location.pathname + location.search,
+            seitAufrufMs: Math.round(performance.now()),
+            seiteAusCache: nav ? nav.transferSize === 0 : null,
+            dateienAusCache: performance
+                .getEntriesByType('resource')
+                .filter(e => /\.(js|css)$/.test(e.name))
+                .map(e => `${e.name.split('/').pop()}:${e.transferSize}`),
+        };
+        api('api/debug/zones', { method: 'POST', body }).catch(() => {});
+    } catch {
+        /* Die Messung darf das Ziehen nie stoeren */
+    }
+}
+
 function buildQuickMove(evt, sourceCol, board, showTrash) {
     removeQuickMove();
     // Der Papierkorb bekommt nur eine Zone, wenn er auf diesem Geraet auch als
@@ -1693,7 +1738,9 @@ export function renderBoard(container, state, actions) {
 
             onStart: evt => {
                 dragActive = true;
-                if (wantsQuickMove(!!state.zonesAlways)) buildQuickMove(evt, col, board, !!state.showTrash);
+                const zonen = wantsQuickMove(!!state.zonesAlways);
+                if (zonen) buildQuickMove(evt, col, board, !!state.showTrash);
+                messeZiehen(evt, zonen, state);
             },
             onEnd: evt => {
                 dragActive = false;
