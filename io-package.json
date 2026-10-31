@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "kanban",
-    "version": "0.4.0",
+    "version": "0.4.1",
     "titleLang": {
       "en": "Kanban Board",
       "de": "Kanban Board",
@@ -74,6 +74,19 @@
       "license": "MIT"
     },
     "news": {
+      "0.4.1": {
+        "de": "- Die Startseite ist englisch, bis die Übersetzung greift\n- Das Menü der Kopfzahlen bleibt beim Umschalten offen\n- Der Hinweis im Reiter \"Vorlagen\" nennt den Stift zum Bearbeiten",
+        "en": "- The start page is English until the translation takes over\n- The header counts menu stays open while ticking\n- The hint in the \"Templates\" tab mentions the pencil for editing",
+        "ru": "- Стартовая страница на английском, пока не загрузится перевод\n- Меню счётчиков в заголовке остаётся открытым при переключении\n- Подсказка во вкладке \"Шаблоны\" называет карандаш для редактирования",
+        "pt": "- A página inicial está em inglês até a tradução ser aplicada\n- O menu de contadores do cabeçalho fica aberto ao marcar\n- A dica no separador \"Modelos\" indica o lápis para editar",
+        "nl": "- De startpagina is Engels tot de vertaling is geladen\n- Het menu met tellers in de kolomkop blijft open bij het aanvinken\n- De hint op het tabblad \"Sjablonen\" noemt het potlood om te bewerken",
+        "fr": "- La page de démarrage est en anglais jusqu'à ce que la traduction soit appliquée\n- Le menu des compteurs d'en-tête reste ouvert pendant les coches\n- L'indication de l'onglet \"Modèles\" mentionne le crayon pour modifier",
+        "it": "- La pagina iniziale è in inglese finché non si applica la traduzione\n- Il menu dei contatori nell'intestazione resta aperto mentre si spunta\n- Il suggerimento nella scheda \"Modelli\" indica la matita per modificare",
+        "es": "- La página de inicio está en inglés hasta que se aplica la traducción\n- El menú de contadores de la cabecera sigue abierto al marcar\n- La indicación de la pestaña \"Plantillas\" menciona el lápiz para editar",
+        "pl": "- Strona startowa jest po angielsku, dopóki nie zadziała tłumaczenie\n- Menu liczników w nagłówku pozostaje otwarte podczas zaznaczania\n- Wskazówka w zakładce \"Szablony\" wskazuje ołówek do edycji",
+        "uk": "- Стартова сторінка англійською, доки не завантажиться переклад\n- Меню лічильників у заголовку лишається відкритим під час перемикання\n- Підказка на вкладці \"Шаблони\" називає олівець для редагування",
+        "zh-cn": "- 在翻译生效之前，起始页显示英文\n- 列头计数菜单在勾选时保持打开\n- \"模板\"选项卡中的提示提到用铅笔编辑"
+      },
       "0.4.0": {
         "de": "- Kartenvorlagen: eine Karte über \"Verwalten\" als Vorlage speichern und neue Karten daraus füllen\n- Vorlagen in den Board-Einstellungen sortieren, umbenennen, bearbeiten, löschen und als Datei zwischen Boards und Instanzen austauschen\n- Skripte und Webhooks: \"addCard\" nimmt eine Vorlage\n- Meldungen aus offenen Dialogen sind jetzt sichtbar und lassen sich schließen",
         "en": "- Card templates: save a card as a template via \"Manage\" and fill new cards from it\n- Sort, rename, edit and delete templates in the board settings, exchange them as a file between boards and instances\n- Scripts and webhooks: \"addCard\" takes a template\n- Messages from open dialogs are now visible and can be closed",
@@ -151,19 +164,6 @@
         "pl": "- Wiersz praw autorskich w LICENSE oraz wpis autora w io-package.json zawierają teraz adres e-mail",
         "uk": "- Рядок авторського права в LICENSE та запис автора в io-package.json тепер містять адресу електронної пошти",
         "zh-cn": "- LICENSE 中的版权行和 io-package.json 中的作者条目现在都带有电子邮件地址"
-      },
-      "0.3.3": {
-        "de": "- Alle Meldungen des Adapters sind jetzt auf Englisch\n- Fünf Zustandsnamen waren deutsch und heißen jetzt \"Card count\", \"Overdue cards\", \"Overdue cards (list)\" und \"Assigned open cards\"; bestehende Installationen werden beim Start umbenannt\n- Der HTTP-Statuscode der REST-Schnittstelle hängt nicht mehr am Wortlaut der Fehlermeldung\n- \"reminderDaysBefore\" wird auch im Code auf 0 bis 30 begrenzt",
-        "en": "- Every message the adapter produces is in English now\n- Five state names were German and are now \"Card count\", \"Overdue cards\", \"Overdue cards (list)\" and \"Assigned open cards\"; existing installations are renamed at startup\n- The HTTP status code of the REST API no longer depends on the wording of the error message\n- \"reminderDaysBefore\" is held to the range 0 to 30 in the code as well",
-        "ru": "- Все сообщения адаптера теперь на английском языке\n- Пять имён состояний были на немецком, теперь это \"Card count\", \"Overdue cards\", \"Overdue cards (list)\" и \"Assigned open cards\"; существующие установки переименовываются при запуске\n- Код состояния HTTP в REST-интерфейсе больше не зависит от формулировки сообщения об ошибке\n- \"reminderDaysBefore\" ограничивается диапазоном от 0 до 30 и в коде",
-        "pt": "- Todas as mensagens do adaptador estão agora em inglês\n- Cinco nomes de estados estavam em alemão e são agora \"Card count\", \"Overdue cards\", \"Overdue cards (list)\" e \"Assigned open cards\"; as instalações existentes são renomeadas no arranque\n- O código de estado HTTP da API REST já não depende da redação da mensagem de erro\n- \"reminderDaysBefore\" é limitado ao intervalo de 0 a 30 também no código",
-        "nl": "- Alle meldingen van de adapter zijn nu in het Engels\n- Vijf toestandsnamen waren Duits en heten nu \"Card count\", \"Overdue cards\", \"Overdue cards (list)\" en \"Assigned open cards\"; bestaande installaties worden bij het starten hernoemd\n- De HTTP-statuscode van de REST-API hangt niet meer af van de formulering van de foutmelding\n- \"reminderDaysBefore\" wordt ook in de code begrensd op 0 tot 30",
-        "fr": "- Tous les messages de l'adaptateur sont désormais en anglais\n- Cinq noms d'états étaient en allemand et s'appellent maintenant \"Card count\", \"Overdue cards\", \"Overdue cards (list)\" et \"Assigned open cards\" ; les installations existantes sont renommées au démarrage\n- Le code de statut HTTP de l'API REST ne dépend plus de la formulation du message d'erreur\n- \"reminderDaysBefore\" est limité à la plage de 0 à 30 également dans le code",
-        "it": "- Tutti i messaggi dell'adattatore sono ora in inglese\n- Cinque nomi di stato erano in tedesco e ora sono \"Card count\", \"Overdue cards\", \"Overdue cards (list)\" e \"Assigned open cards\"; le installazioni esistenti vengono rinominate all'avvio\n- Il codice di stato HTTP dell'API REST non dipende più dal testo del messaggio di errore\n- \"reminderDaysBefore\" è limitato all'intervallo da 0 a 30 anche nel codice",
-        "es": "- Todos los mensajes del adaptador están ahora en inglés\n- Cinco nombres de estados estaban en alemán y ahora son \"Card count\", \"Overdue cards\", \"Overdue cards (list)\" y \"Assigned open cards\"; las instalaciones existentes se renombran al iniciar\n- El código de estado HTTP de la API REST ya no depende de la redacción del mensaje de error\n- \"reminderDaysBefore\" se limita al rango de 0 a 30 también en el código",
-        "pl": "- Wszystkie komunikaty adaptera są teraz w języku angielskim\n- Pięć nazw stanów było po niemiecku, teraz to \"Card count\", \"Overdue cards\", \"Overdue cards (list)\" i \"Assigned open cards\"; istniejące instalacje są zmieniane przy starcie\n- Kod stanu HTTP interfejsu REST nie zależy już od treści komunikatu o błędzie\n- \"reminderDaysBefore\" jest ograniczany do zakresu od 0 do 30 również w kodzie",
-        "uk": "- Усі повідомлення адаптера тепер англійською мовою\n- П'ять імен станів були німецькими, тепер це \"Card count\", \"Overdue cards\", \"Overdue cards (list)\" та \"Assigned open cards\"; наявні встановлення перейменовуються під час запуску\n- Код стану HTTP інтерфейсу REST більше не залежить від формулювання повідомлення про помилку\n- \"reminderDaysBefore\" обмежується діапазоном від 0 до 30 і в коді",
-        "zh-cn": "- 适配器的所有消息现在均为英文\n- 五个状态名称原为德语，现为 \"Card count\"、\"Overdue cards\"、\"Overdue cards (list)\" 和 \"Assigned open cards\"；现有安装在启动时会被重命名\n- REST 接口的 HTTP 状态码不再取决于错误消息的措辞\n- \"reminderDaysBefore\" 在代码中同样被限制在 0 到 30 之间"
       }
     },
     "globalDependencies": [

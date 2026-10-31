@@ -125,6 +125,11 @@ Details: [Security & access control](docs/en/README.md#security--access-control)
 
 <!-- Der Platzhalter bleibt stehen. release-script trägt hier die
      nächste Version ein und ersetzt die Überschrift. -->
+### 0.4.1 (2026-10-31)
+* (bmueller77) **The start page is English until the translation takes over.** It declared itself German, and every label visible before the web interface loads its language was German as well. Both are English now, so English also remains if a translation does not load. Requested in the review for the ioBroker repository
+* (bmueller77) **The header counts menu stays open while ticking.** Every tick redraws the board, and the redraw closed the menu after each click, although it is meant for setting several ticks in a row
+* (bmueller77) The hint in the "Templates" tab mentions the pencil for editing a template's content
+
 ### 0.4.0 (2026-10-11)
 * (bmueller77) **Card templates.** A template is a named set of card fields that belongs to a board. It is created from an existing card through "Manage", it fills the editor when a new card is made, and it can travel to another board or another instance as a file
   * Two things deliberately stay behind: the **due date**, because a fixed date ages and a template saved in January would otherwise create cards dated the day before yesterday in March, and the **checklist ticks**, because a template holds the items rather than their state. The time of day stays, since 17:00 is a property of the task
