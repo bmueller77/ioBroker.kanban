@@ -1,6 +1,6 @@
 {
   "name": "iobroker.kanban",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "Kanban board for ioBroker with webhooks, multi-user support and email notifications",
   "author": {
     "name": "Björn Müller",
@@ -49,8 +49,9 @@
     "test:userkeys": "mocha test/userkeys --exit",
     "test:ui": "mocha test/ui.mjs --exit",
     "test:ui-templates": "mocha test/ui-templates.mjs --exit",
+    "test:indexhtml": "mocha test/indexhtml --exit",
     "test:integration": "mocha test/integration --exit",
-    "test": "npm run test:package && npm run test:guards && npm run test:cron && npm run test:trash && npm run test:mirrors && npm run test:freeze && npm run test:recurrence && npm run test:templates && npm run test:notify && npm run test:userkeys && npm run test:ui && npm run test:ui-templates",
+    "test": "npm run test:package && npm run test:guards && npm run test:cron && npm run test:trash && npm run test:mirrors && npm run test:freeze && npm run test:recurrence && npm run test:templates && npm run test:notify && npm run test:userkeys && npm run test:ui && npm run test:ui-templates && npm run test:indexhtml",
     "lint": "eslint .",
     "release": "release-script",
     "test:mirrors": "mocha test/mirrors --exit",

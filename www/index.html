@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="de">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -19,64 +19,64 @@
     <select id="boardSelect" data-i18n-title="topbar.selectBoard"></select>
     <div id="userChips" data-i18n-title="topbar.activeUser"></div>
     <span class="spacer"></span>
-    <button id="addCardBtn" class="primary" data-i18n="topbar.addCard">+ Karte</button>
+    <button id="addCardBtn" class="primary" data-i18n="topbar.addCard">+ Card</button>
     <button id="themeBtn" class="iconbtn" data-i18n-title="topbar.theme">&#9681;</button>
     <button id="shareBtn" class="iconbtn" data-i18n-title="topbar.share">&#128279;</button>
     <button id="settingsBtn" class="iconbtn" data-i18n-title="topbar.settings">&#9881;</button>
 </header>
-<main id="board"><div class="empty" data-i18n="board.loading">Lade&hellip;</div></main>
+<main id="board"><div class="empty" data-i18n="board.loading">Loading...</div></main>
 
 <dialog id="cardDialog">
     <form method="dialog" id="cardForm">
-        <h3 id="cardDialogTitle"><span id="cardDialogTitleText">Karte</span></h3>
+        <h3 id="cardDialogTitle"><span id="cardDialogTitleText">Card</span></h3>
         <div class="dlg-scroll">
         <label>
-            <span class="req-cap"><span data-i18n="card.title">Titel</span><span class="req-star" aria-hidden="true">*</span></span>
+            <span class="req-cap"><span data-i18n="card.title">Title</span><span class="req-star" aria-hidden="true">*</span></span>
             <input type="text" name="title" required autocomplete="off" autofocus>
         </label>
         <div class="field">
-            <label><span class="req-cap"><span data-i18n="card.assignees">Zuständig</span><span class="req-star" aria-hidden="true">*</span></span></label>
+            <label><span class="req-cap"><span data-i18n="card.assignees">Assignees</span><span class="req-star" aria-hidden="true">*</span></span></label>
             <div id="assigneePick" class="chip-pick"></div>
             <input id="assigneeValidity" class="req-proxy" tabindex="-1" aria-hidden="true">
         </div>
         <details class="fold" data-fold="desc">
-            <summary><span class="cap"><span id="capDesc" data-i18n="card.description">Beschreibung</span> <span class="hint" data-i18n="card.markdown">(Markdown)</span></span><span class="fold-info"></span></summary>
+            <summary><span class="cap"><span id="capDesc" data-i18n="card.description">Description</span> <span class="hint" data-i18n="card.markdown">(Markdown)</span></span><span class="fold-info"></span></summary>
             <div class="fold-body">
                 <textarea name="description" rows="4" aria-labelledby="capDesc"></textarea>
                 <div id="descPreview" class="md-preview" hidden></div>
             </div>
         </details>
         <div class="row">
-            <label data-i18n="card.dueDate">Fällig am
+            <label data-i18n="card.dueDate">Due date
                 <input type="date" name="due">
             </label>
             <label class="inline" id="dueTimeToggleWrap" data-i18n-title="card.timeToggleTitle">
-                <input type="checkbox" name="dueTimeEnabled"> <span data-i18n="card.time">Uhrzeit</span>
+                <input type="checkbox" name="dueTimeEnabled"> <span data-i18n="card.time">Time</span>
             </label>
-            <label id="dueTimeWrap" hidden data-i18n="card.time">Uhrzeit
+            <label id="dueTimeWrap" hidden data-i18n="card.time">Time
                 <input type="time" name="dueTime">
             </label>
-            <label data-i18n="card.priority">Priorität
+            <label data-i18n="card.priority">Priority
                 <select name="priority">
                     <option value="0" data-i18n="prio.normal">Normal</option>
-                    <option value="1" data-i18n="prio.high">Hoch</option>
-                    <option value="2" data-i18n="prio.urgent">Dringend</option>
+                    <option value="1" data-i18n="prio.high">High</option>
+                    <option value="2" data-i18n="prio.urgent">Urgent</option>
                 </select>
             </label>
-            <label data-i18n="card.column">Spalte
+            <label data-i18n="card.column">Column
                 <select name="columnId"></select>
             </label>
         </div>
         <div class="row">
             <label class="inline" data-i18n-title="card.calendarInviteTitle">
-                <input type="checkbox" name="calendarInvite"> <span data-i18n="card.calendarInvite">Kalender-Einladung (.ics) an Benachrichtigung anhängen</span>
+                <input type="checkbox" name="calendarInvite"> <span data-i18n="card.calendarInvite">Attach calendar invite (.ics) to notification</span>
             </label>
-            <label id="calDurWrap" hidden data-i18n="card.calendarDuration" data-i18n-title="card.calendarDurationTitle">Dauer
+            <label id="calDurWrap" hidden data-i18n="card.calendarDuration" data-i18n-title="card.calendarDurationTitle">Duration
                 <input type="time" name="calendarDuration" step="60" value="01:00">
             </label>
         </div>
         <details class="fold fold-outer" data-fold="class">
-            <summary><span data-i18n="card.classification">Labels und Kartenfarbe</span><span class="fold-info"></span></summary>
+            <summary><span data-i18n="card.classification">Labels and card color</span><span class="fold-info"></span></summary>
             <div class="fold-body fold-pair">
                 <details class="fold fold-inner" data-fold="labels">
                     <summary><span data-i18n="card.labels">Labels</span><span class="fold-info"></span></summary>
@@ -85,7 +85,7 @@
                     </div>
                 </details>
                 <details class="fold fold-inner" data-fold="color">
-                    <summary><span data-i18n="card.color">Kartenfarbe</span><span class="fold-info"></span></summary>
+                    <summary><span data-i18n="card.color">Card color</span><span class="fold-info"></span></summary>
                     <div class="fold-body">
                         <div id="colorPick" class="color-pick"></div>
                     </div>
@@ -100,54 +100,54 @@
             </div>
         </details>
         <details class="fold" data-fold="loc">
-            <summary><span id="capLoc" data-i18n="card.location">Ort</span><span class="fold-info"></span></summary>
+            <summary><span id="capLoc" data-i18n="card.location">Location</span><span class="fold-info"></span></summary>
             <div class="fold-body">
-                <input type="text" name="location" data-i18n-ph="card.locationPlaceholder" placeholder="z.B. Rathaus, Musterstr. 1" aria-labelledby="capLoc">
+                <input type="text" name="location" data-i18n-ph="card.locationPlaceholder" placeholder="e.g. Town hall, Main St. 1" aria-labelledby="capLoc">
             </div>
         </details>
         <details class="fold" data-fold="rec">
-            <summary><span id="capRec" data-i18n="card.recurrence">Wiederholung</span><span class="fold-info"></span></summary>
+            <summary><span id="capRec" data-i18n="card.recurrence">Recurrence</span><span class="fold-info"></span></summary>
             <div class="fold-body">
         <div class="row">
             <label>
                 <select name="recType" id="recType" aria-labelledby="capRec">
-                    <option value="none" data-i18n="rec.none">Keine</option>
-                    <option value="daily" data-i18n="rec.daily">Täglich</option>
-                    <option value="weekly" data-i18n="rec.weekly">Wöchentlich</option>
-                    <option value="monthly" data-i18n="rec.monthly">Monatlich (Tag im Monat)</option>
-                    <option value="monthly_weekday" data-i18n="rec.monthlyWeekday">Monatlich (Wochentag)</option>
-                    <option value="workday" data-i18n="rec.workday">Arbeitstag im Monat</option>
-                    <option value="yearly" data-i18n="rec.yearly">Jährlich</option>
-                    <option value="every_n_days" data-i18n="rec.everyNDays">Alle X Tage</option>
-                    <option value="every_n_days_done" data-i18n="rec.everyNDaysDone">Alle X Tage (nach Erledigung des Vorgängers)</option>
-                    <option value="cron" data-i18n="rec.cron">Cron-Ausdruck</option>
+                    <option value="none" data-i18n="rec.none">None</option>
+                    <option value="daily" data-i18n="rec.daily">Daily</option>
+                    <option value="weekly" data-i18n="rec.weekly">Weekly</option>
+                    <option value="monthly" data-i18n="rec.monthly">Monthly (day of month)</option>
+                    <option value="monthly_weekday" data-i18n="rec.monthlyWeekday">Monthly (weekday)</option>
+                    <option value="workday" data-i18n="rec.workday">Working day of month</option>
+                    <option value="yearly" data-i18n="rec.yearly">Yearly</option>
+                    <option value="every_n_days" data-i18n="rec.everyNDays">Every X days</option>
+                    <option value="every_n_days_done" data-i18n="rec.everyNDaysDone">Every X days (after the previous one is done)</option>
+                    <option value="cron" data-i18n="rec.cron">Cron expression</option>
                 </select>
             </label>
-            <label id="recCronWrap" hidden data-i18n="rec.cronExpr">Muster
+            <label id="recCronWrap" hidden data-i18n="rec.cronExpr">Pattern
                 <input type="text" name="recCron" placeholder="0 8 * * 1-5" spellcheck="false" autocapitalize="off" autocomplete="off">
             </label>
-            <label id="recIntervalWrap" hidden data-i18n="rec.interval">Intervall (Tage)
+            <label id="recIntervalWrap" hidden data-i18n="rec.interval">Interval (days)
                 <input type="number" name="recInterval" min="1" value="2">
             </label>
-            <label id="recDomWrap" hidden data-i18n="rec.dayOfMonth">Tag im Monat
+            <label id="recDomWrap" hidden data-i18n="rec.dayOfMonth">Day of month
                 <input type="number" name="recDom" min="1" max="31" value="1">
             </label>
-            <label id="recMonthWrap" hidden data-i18n="rec.month">Monat
+            <label id="recMonthWrap" hidden data-i18n="rec.month">Month
                 <select name="recMonth"></select>
             </label>
-            <label id="recOrdinalWrap" hidden data-i18n="rec.which">Welcher
+            <label id="recOrdinalWrap" hidden data-i18n="rec.which">Which
                 <select name="recOrdinal">
                     <option value="1">1.</option><option value="2">2.</option>
                     <option value="3">3.</option><option value="4">4.</option>
-                    <option value="-1" data-i18n="rec.ordinalLast">letzter</option>
+                    <option value="-1" data-i18n="rec.ordinalLast">last</option>
                 </select>
             </label>
             <label id="recWorkdayPosWrap" hidden data-i18n="rec.position">Position
                 <select name="recWorkdayPos">
-                    <option value="first" data-i18n="wd.first">erster</option>
-                    <option value="last" data-i18n="wd.last">letzter</option>
-                    <option value="nth" data-i18n="wd.nth">n-ter (von vorn)</option>
-                    <option value="nth_last" data-i18n="wd.nthLast">n-ter (von hinten)</option>
+                    <option value="first" data-i18n="wd.first">first</option>
+                    <option value="last" data-i18n="wd.last">last</option>
+                    <option value="nth" data-i18n="wd.nth">nth (from start)</option>
+                    <option value="nth_last" data-i18n="wd.nthLast">nth (from end)</option>
                 </select>
             </label>
             <label id="recWorkdayNWrap" hidden data-i18n="rec.n">n
@@ -161,24 +161,24 @@
         </details>
 
         <details class="fold" data-fold="check">
-            <summary><span data-i18n="card.checklist">Checkliste</span><span class="fold-info"></span></summary>
+            <summary><span data-i18n="card.checklist">Checklist</span><span class="fold-info"></span></summary>
             <div class="fold-body">
                 <div id="checklistEdit"></div>
-                <button type="button" id="addCheckItem" class="linkbtn" data-i18n="card.addCheckItem">+ Punkt hinzufügen</button>
+                <button type="button" id="addCheckItem" class="linkbtn" data-i18n="card.addCheckItem">+ Add item</button>
             </div>
         </details>
-        <p class="req-legend"><span class="req-star" aria-hidden="true">*</span> <span data-i18n="card.requiredLegend">Pflichtfeld</span></p>
+        <p class="req-legend"><span class="req-star" aria-hidden="true">*</span> <span data-i18n="card.requiredLegend">Required</span></p>
         </div>
         <footer>
-            <button type="button" id="deleteCardBtn" class="danger" hidden data-i18n="card.delete">Löschen</button>
-            <button type="button" id="transferCardBtn" hidden data-i18n="card.manage" data-i18n-title="card.manageTitle">Verwalten</button>
+            <button type="button" id="deleteCardBtn" class="danger" hidden data-i18n="card.delete">Delete</button>
+            <button type="button" id="transferCardBtn" hidden data-i18n="card.manage" data-i18n-title="card.manageTitle">Manage</button>
             <!-- Steht beim Anlegen an der Stelle, an der beim Bearbeiten
                  "Löschen" und "Verwalten" liegen. Ohne Vorlagen am Board ganz
                  ausgeblendet, nicht ausgegraut. -->
             <select id="templatePick" hidden data-i18n-title="templates.pickTitle"></select>
             <span class="spacer"></span>
-            <button type="button" value="cancel" id="cancelCardBtn" data-i18n="card.cancel">Abbrechen</button>
-            <button type="submit" class="primary" id="saveCardBtn" data-i18n="card.save">Speichern</button>
+            <button type="button" value="cancel" id="cancelCardBtn" data-i18n="card.cancel">Cancel</button>
+            <button type="submit" class="primary" id="saveCardBtn" data-i18n="card.save">Save</button>
         </footer>
     </form>
 </dialog>
