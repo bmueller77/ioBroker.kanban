@@ -475,7 +475,7 @@ A template is a named set of card fields. It belongs to a board, sits next to th
 
 ![Manage dialog with the Save as template option and the name field](img/card-manage.png)
 
-**Two things deliberately stay behind.** The due date is dropped, because a fixed date ages: a template saved in January would create cards dated the day before yesterday in March. And the checklist ticks are reset, because a template holds the items, not their state. The time of day does travel along, since 17:00 is a property of the task.
+**Two things stay behind.** The due date is dropped, because a fixed date ages: a template saved in January would create cards dated the day before yesterday in March. And the checklist ticks are reset, because a template holds the items, not their state. The time of day does travel along, since 17:00 is a property of the task.
 
 **Using one.** While creating a card, a picker sits at the bottom left of the editor, in the place where "Delete" and "Manage" sit while editing. With no templates on the board the picker is absent. A choice sets **every** field anew, including those empty in the template; if the editor already holds something, a question comes first. Labels the board no longer has and assignees who are not members of the board are left out. The picker then returns to its placeholder.
 

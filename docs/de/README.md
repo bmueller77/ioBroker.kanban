@@ -475,7 +475,7 @@ Eine Vorlage ist ein benannter Satz Kartenfelder. Sie gehört zu einem Board, st
 
 ![Verwalten-Dialog mit der Option Als Vorlage speichern und dem Namensfeld](img/card-manage.png)
 
-**Zwei Dinge wandern bewusst nicht mit.** Das Fälligkeitsdatum bleibt weg, weil ein festes Datum altert: Eine im Januar gespeicherte Vorlage legte im März Karten mit einem Datum von vorgestern an. Und die Haken der Checkliste werden zurückgesetzt, weil eine Vorlage die Punkte festhält, nicht den Stand. Die Uhrzeit bleibt dagegen erhalten, denn 17:00 ist eine Eigenschaft der Aufgabe.
+**Zwei Dinge wandern nicht mit.** Das Fälligkeitsdatum bleibt weg, weil ein festes Datum altert: Eine im Januar gespeicherte Vorlage legte im März Karten mit einem Datum von vorgestern an. Und die Haken der Checkliste werden zurückgesetzt, weil eine Vorlage die Punkte festhält, nicht den Stand. Die Uhrzeit bleibt dagegen erhalten, denn 17:00 ist eine Eigenschaft der Aufgabe.
 
 **Benutzen.** Beim Anlegen einer Karte steht links unten im Editor ein Auswahlfeld mit den Vorlagen des Boards, an der Stelle, an der beim Bearbeiten "Löschen" und "Verwalten" stehen. Hat das Board keine Vorlagen, fehlt das Feld ganz. Eine Auswahl setzt **alle** Felder neu, auch die in der Vorlage leeren; steht im Editor schon etwas, kommt vorher eine Rückfrage. Labels, die das Board nicht mehr kennt, und Zuständige, die kein Mitglied des Boards sind, fallen dabei weg. Danach springt das Feld auf seinen Platzhalter zurück.
 
